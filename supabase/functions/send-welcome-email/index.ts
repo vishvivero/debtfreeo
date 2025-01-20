@@ -60,9 +60,9 @@ const handler = async (req: Request): Promise<Response> => {
             </p>
 
             <div style="text-align: center; margin: 40px 0;">
-              <a href="https://debtfreeo.com/overview" 
+              <a href="https://debtfreeo.com" 
                  style="background-color: #34D399; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-                Go to Dashboard
+                Go to Debtfreeo
               </a>
             </div>
 
