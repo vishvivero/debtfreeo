@@ -6,12 +6,13 @@ import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
+import { OneTimeFunding } from "@/lib/types/payment";
 
 interface ResultsDialogProps {
   debts: Debt[];
   monthlyPayment: number;
   extraPayment: number;
-  oneTimeFundings: { amount: number; payment_date: Date }[];
+  oneTimeFundings: OneTimeFunding[];
   selectedStrategy: Strategy;
   currencySymbol?: string;
 }

@@ -23,4 +23,6 @@ export interface OneTimeFunding {
   notes?: string | null;
   is_applied?: boolean;
   currency_symbol?: string;
+  id?: string;
+  user_id?: string;
 }
