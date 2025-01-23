@@ -8,6 +8,8 @@ import { OneTimeFundingSection } from "./OneTimeFundingSection";
 import { ScoreInsightsSection } from "./sections/ScoreInsightsSection";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
+import { ResultsDialog } from "./ResultsDialog";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -30,6 +32,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
 }) => {
   const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
+  const { oneTimeFundings } = useOneTimeFunding();
 
   console.log('StrategyContent render:', {
     debts,
@@ -48,16 +51,27 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
-          <PaymentOverviewSection
-            totalMinimumPayments={minimumPayment}
-            extraPayment={extraPayment}
-            onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
-            onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
-            currencySymbol={preferredCurrency}
-            totalDebtValue={totalDebtValue}
-          />
-          
-          <OneTimeFundingSection />
+          <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 space-y-6 border shadow-sm">
+            <PaymentOverviewSection
+              totalMinimumPayments={minimumPayment}
+              extraPayment={extraPayment}
+              onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
+              onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
+              currencySymbol={preferredCurrency}
+              totalDebtValue={totalDebtValue}
+            />
+            
+            <OneTimeFundingSection />
+            
+            <ResultsDialog
+              debts={debts}
+              monthlyPayment={currentPayment}
+              extraPayment={extraPayment}
+              oneTimeFundings={oneTimeFundings}
+              selectedStrategy={selectedStrategy}
+              currencySymbol={preferredCurrency}
+            />
+          </div>
         </motion.div>
 
         <motion.div
