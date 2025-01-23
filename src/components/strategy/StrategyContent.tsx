@@ -12,6 +12,8 @@ import { ResultsDialog } from "./ResultsDialog";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { StrategySelector } from "@/components/StrategySelector";
 import { strategies } from "@/lib/strategies";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -35,14 +37,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
-
-  console.log('StrategyContent render:', {
-    debts,
-    minimumPayment,
-    currentPayment,
-    selectedStrategy,
-    totalDebtValue
-  });
+  const [showExtraPayment, setShowExtraPayment] = useState(false);
+  const [showOneTimeFunding, setShowOneTimeFunding] = useState(false);
+  const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -54,26 +51,79 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           className="space-y-6"
         >
           <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 space-y-6 border shadow-sm">
-            <PaymentOverviewSection
-              totalMinimumPayments={minimumPayment}
-              extraPayment={extraPayment}
-              onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
-              onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
-              currencySymbol={preferredCurrency}
-              totalDebtValue={totalDebtValue}
-            />
-            
-            <OneTimeFundingSection />
-
+            {/* Payment Overview Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Choose Your Strategy</h3>
-              <StrategySelector
-                strategies={strategies}
-                selectedStrategy={selectedStrategy}
-                onSelectStrategy={onSelectStrategy}
-              />
+              <h3 className="text-lg font-semibold">Want to pay off debt faster?</h3>
+              <div className="flex gap-4">
+                <Button
+                  variant={showExtraPayment ? "default" : "outline"}
+                  onClick={() => setShowExtraPayment(true)}
+                >
+                  Yes
+                </Button>
+                <Button
+                  variant={!showExtraPayment ? "default" : "outline"}
+                  onClick={() => setShowExtraPayment(false)}
+                >
+                  No
+                </Button>
+              </div>
+              {showExtraPayment && (
+                <PaymentOverviewSection
+                  totalMinimumPayments={minimumPayment}
+                  extraPayment={extraPayment}
+                  onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
+                  onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
+                  currencySymbol={preferredCurrency}
+                  totalDebtValue={totalDebtValue}
+                />
+              )}
             </div>
-            
+
+            {/* One-time Funding Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Expecting any lump sum payments?</h3>
+              <div className="flex gap-4">
+                <Button
+                  variant={showOneTimeFunding ? "default" : "outline"}
+                  onClick={() => setShowOneTimeFunding(true)}
+                >
+                  Yes
+                </Button>
+                <Button
+                  variant={!showOneTimeFunding ? "default" : "outline"}
+                  onClick={() => setShowOneTimeFunding(false)}
+                >
+                  No
+                </Button>
+              </div>
+              {showOneTimeFunding && <OneTimeFundingSection />}
+            </div>
+
+            {/* Strategy Selection */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Current Strategy</h3>
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsStrategyDialogOpen(true)}
+                >
+                  Change Strategy
+                </Button>
+              </div>
+              <div className="p-4 border rounded-lg bg-white">
+                <div className="flex items-center gap-4">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Target className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{selectedStrategy.name}</h4>
+                    <p className="text-sm text-muted-foreground">{selectedStrategy.description}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <ResultsDialog
               debts={debts}
               monthlyPayment={currentPayment}
@@ -107,6 +157,23 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           />
         </motion.div>
       )}
+
+      {/* Strategy Selection Dialog */}
+      <Dialog open={isStrategyDialogOpen} onOpenChange={setIsStrategyDialogOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Choose Your Strategy</h2>
+            <StrategySelector
+              strategies={strategies}
+              selectedStrategy={selectedStrategy}
+              onSelectStrategy={(strategy) => {
+                onSelectStrategy(strategy);
+                setIsStrategyDialogOpen(false);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
