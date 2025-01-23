@@ -10,6 +10,8 @@ import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { ResultsDialog } from "./ResultsDialog";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
+import { StrategySelector } from "@/components/StrategySelector";
+import { strategies } from "@/lib/strategies";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -62,6 +64,15 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             />
             
             <OneTimeFundingSection />
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Choose Your Strategy</h3>
+              <StrategySelector
+                strategies={strategies}
+                selectedStrategy={selectedStrategy}
+                onSelectStrategy={onSelectStrategy}
+              />
+            </div>
             
             <ResultsDialog
               debts={debts}
