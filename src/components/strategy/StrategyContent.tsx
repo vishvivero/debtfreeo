@@ -42,9 +42,11 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [showOneTimeFunding, setShowOneTimeFunding] = useState(false);
   const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
   const [hasViewedResults, setHasViewedResults] = useState(false);
+  const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
 
   const handleResultsClick = () => {
     setHasViewedResults(true);
+    setIsResultsDialogOpen(true);
   };
 
   return (
@@ -63,6 +65,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <DecimalToggle
                 showDecimals={showExtraPayment}
                 onToggle={setShowExtraPayment}
+                label="Want to see exact amounts?"
               />
             </div>
             
@@ -85,6 +88,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <DecimalToggle
                 showDecimals={showOneTimeFunding}
                 onToggle={setShowOneTimeFunding}
+                label="Want to add one-time payments?"
               />
             </div>
             
@@ -109,7 +113,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
                 </div>
                 <div>
                   <h4 className="font-semibold">{selectedStrategy.name}</h4>
-                  <p className="text-sm text-muted-foreground">{selectedStrategy.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Add extra monthly payments to accelerate your debt payoff
+                  </p>
                 </div>
               </div>
             </div>
@@ -167,6 +173,18 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Results Dialog */}
+      <ResultsDialog
+        isOpen={isResultsDialogOpen}
+        onClose={() => setIsResultsDialogOpen(false)}
+        debts={debts}
+        monthlyPayment={currentPayment}
+        extraPayment={extraPayment}
+        oneTimeFundings={oneTimeFundings}
+        selectedStrategy={selectedStrategy}
+        currencySymbol={preferredCurrency}
+      />
     </div>
   );
 };

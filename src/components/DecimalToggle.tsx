@@ -4,9 +4,10 @@ import { Label } from "@/components/ui/label";
 interface DecimalToggleProps {
   showDecimals: boolean;
   onToggle: (value: boolean) => void;
+  label?: string;
 }
 
-export const DecimalToggle = ({ showDecimals, onToggle }: DecimalToggleProps) => {
+export const DecimalToggle = ({ showDecimals, onToggle, label = "Show decimals" }: DecimalToggleProps) => {
   return (
     <div className="flex items-center justify-end space-x-2">
       <Switch
@@ -14,7 +15,7 @@ export const DecimalToggle = ({ showDecimals, onToggle }: DecimalToggleProps) =>
         checked={showDecimals}
         onCheckedChange={onToggle}
       />
-      <Label htmlFor="show-decimals">Show decimals</Label>
+      <Label htmlFor="show-decimals">{label}</Label>
     </div>
   );
 };
