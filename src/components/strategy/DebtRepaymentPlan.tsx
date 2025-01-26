@@ -120,7 +120,7 @@ export const DebtRepaymentPlan = ({
     try {
       const baseMonths = timelineData.length;
       const optimizedMonths = timelineData.length;
-      const baseTotalInterest = timelineData.reduce((sum, data) => sum + data.baseInterest, 0);
+      const baseTotalInterest = timelineData.reduce((sum, data) => sum + data.baselineInterest, 0);
       const optimizedTotalInterest = timelineData.reduce((sum, data) => sum + data.acceleratedInterest, 0);
       
       const doc = generateDebtOverviewPDF(
@@ -151,20 +151,6 @@ export const DebtRepaymentPlan = ({
     }
   };
 
-  const scrollLeft = () => {
-    const container = document.querySelector('.debt-cards-container');
-    if (container) {
-      container.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    const container = document.querySelector('.debt-cards-container');
-    if (container) {
-      container.scrollBy({ left: 300, behavior: 'smooth' });
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -175,41 +161,18 @@ export const DebtRepaymentPlan = ({
       <Card className="bg-white/95">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                Debt Repayment Plan
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                View your personalized debt payoff schedule using accelerated payments
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={scrollLeft}
-                className="hidden md:flex"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                onClick={handleDownload}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download Report
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={scrollRight}
-                className="hidden md:flex"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Debt Repayment Plan
+            </CardTitle>
+            <Button
+              variant="outline"
+              onClick={handleDownload}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download Report
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
