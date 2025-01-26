@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
-import { formatDate } from './formatters';
+import { formatDate } from './pdf/formatters';
 import { 
   generateDebtSummaryTable, 
   generatePaymentDetailsTable,
@@ -114,3 +114,5 @@ export const generateDebtOverviewPDF = (
 
 // For backward compatibility
 export const generatePayoffStrategyPDF = generateDebtOverviewPDF;
+export const generateAmortizationPDF = generateDebtOverviewPDF;
+export const generatePaymentTrendsPDF = generateDebtOverviewPDF;
