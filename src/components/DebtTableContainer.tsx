@@ -146,7 +146,7 @@ export const DebtTableContainer = ({
         0, // baseTotalInterest
         0, // optimizedTotalInterest
         strategy,
-        oneTimeFundings,
+        formattedFundings, // Now passing the formatted fundings with string dates
         currencySymbol
       );
       doc.save('debt-overview.pdf');
