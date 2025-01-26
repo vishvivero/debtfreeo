@@ -58,7 +58,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         className="space-y-6"
       >
         <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 space-y-6 border shadow-sm">
-          {/* Payment Overview Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Want to pay off debt faster?</h3>
@@ -81,21 +80,19 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             )}
           </div>
 
-          {/* One-time Funding Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Expecting any lump sum payments?</h3>
               <DecimalToggle
                 showDecimals={showOneTimeFunding}
                 onToggle={setShowOneTimeFunding}
-                label="Want to add one-time payments?"
+                label="Yes/No?"
               />
             </div>
             
             {showOneTimeFunding && <OneTimeFundingSection />}
           </div>
 
-          {/* Strategy Selection */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Current Strategy</h3>
@@ -130,7 +127,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         </div>
       </motion.div>
 
-      {/* Results Sections - Only visible after clicking Get My Results */}
       {hasViewedResults && (
         <>
           <motion.div
@@ -157,7 +153,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         </>
       )}
 
-      {/* Strategy Selection Dialog */}
       <Dialog open={isStrategyDialogOpen} onOpenChange={setIsStrategyDialogOpen}>
         <DialogContent className="sm:max-w-xl">
           <div className="space-y-4">
@@ -174,7 +169,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Results Dialog */}
       <ResultsDialog
         isOpen={isResultsDialogOpen}
         onClose={() => setIsResultsDialogOpen(false)}

@@ -5,9 +5,10 @@ import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { Calendar, Target, TrendingUp, ArrowRight, Download } from "lucide-react";
+import { Calendar, Target, TrendingUp, Download, DollarSign } from "lucide-react";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import confetti from 'canvas-confetti';
+import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -49,6 +50,9 @@ export const ResultsDialog = ({
   const payoffDate = new Date();
   payoffDate.setMonth(payoffDate.getMonth() + optimizedMonths);
 
+  // Calculate total one-time payments
+  const totalOneTimePayments = oneTimeFundings.reduce((sum, funding) => sum + Number(funding.amount), 0);
+
   // Trigger confetti on dialog open
   if (isOpen && interestSaved > 0) {
     confetti({
@@ -58,6 +62,17 @@ export const ResultsDialog = ({
     });
   }
 
+  const handleDownload = async () => {
+    const doc = generateDebtOverviewPDF(
+      debts,
+      new Map(debts.map(debt => [debt.id, monthlyPayment / debts.length])),
+      optimizedPayoff,
+      monthlyPayment,
+      selectedStrategy
+    );
+    doc.save('debt-payoff-plan.pdf');
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl">
@@ -66,6 +81,38 @@ export const ResultsDialog = ({
         </DialogHeader>
         
         <div className="space-y-8 py-4">
+          {/* Payment Comparison */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-gray-50">
+              <h3 className="font-semibold mb-2">Without DebtFreeo</h3>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">
+                  Monthly Payment: {currencySymbol}{totalMinPayment.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Total Interest: {currencySymbol}{baseTotalInterest.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Months to Pay Off: {baseMonths}
+                </p>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-emerald-50">
+              <h3 className="font-semibold mb-2">With DebtFreeo</h3>
+              <div className="space-y-2">
+                <p className="text-sm text-emerald-600">
+                  Monthly Payment: {currencySymbol}{monthlyPayment.toLocaleString()}
+                </p>
+                <p className="text-sm text-emerald-600">
+                  Total Interest: {currencySymbol}{optimizedTotalInterest.toLocaleString()}
+                </p>
+                <p className="text-sm text-emerald-600">
+                  Months to Pay Off: {optimizedMonths}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Savings Overview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <motion.div
@@ -114,63 +161,55 @@ export const ResultsDialog = ({
             </motion.div>
           </div>
 
-          {/* Next Steps */}
+          {/* Payment Details */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Next Steps</h3>
+            <h3 className="text-xl font-semibold">Payment Details</h3>
             <div className="space-y-3">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">1</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Monthly Payment</p>
+                    <p className="text-sm text-gray-600">
+                      Minimum: {currencySymbol}{totalMinPayment.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-grow">
-                  <p className="font-medium">Set up your extra payment</p>
-                  <p className="text-sm text-gray-600">
-                    Add {formatCurrency(extraPayment, currencySymbol)} to your monthly payment
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-gray-400" />
+                <p className="font-semibold text-emerald-600">
+                  {currencySymbol}{monthlyPayment.toLocaleString()}
+                </p>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">2</span>
-                </div>
-                <div className="flex-grow">
-                  <p className="font-medium">Schedule one-time payments</p>
-                  <p className="text-sm text-gray-600">
-                    Add any expected lump sum payments
+              {totalOneTimePayments > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">One-time Payments</p>
+                      <p className="text-sm text-gray-600">
+                        {oneTimeFundings.length} scheduled payment{oneTimeFundings.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-semibold text-purple-600">
+                    {currencySymbol}{totalOneTimePayments.toLocaleString()}
                   </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-gray-400" />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">3</span>
-                </div>
-                <div className="flex-grow">
-                  <p className="font-medium">Track your progress</p>
-                  <p className="text-sm text-gray-600">
-                    Monitor your debt payoff journey monthly
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-gray-400" />
-              </motion.div>
+                </motion.div>
+              )}
             </div>
           </div>
 
@@ -178,7 +217,7 @@ export const ResultsDialog = ({
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={handleDownload}>
               <Download className="h-4 w-4" />
               Download Plan
             </Button>
