@@ -7,7 +7,7 @@ interface DecimalToggleProps {
   label?: string;
 }
 
-export const DecimalToggle = ({ showDecimals, onToggle, label = "Show decimals" }: DecimalToggleProps) => {
+export const DecimalToggle = ({ showDecimals, onToggle, label = "Add Extra Payments" }: DecimalToggleProps) => {
   return (
     <div className="flex items-center justify-end space-x-2">
       <Switch
