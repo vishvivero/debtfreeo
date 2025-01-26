@@ -1,7 +1,8 @@
-import { Debt } from '@/lib/types';
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { Debt } from '@/lib/types';
 import { formatCurrency, formatDate, formatPercentage, formatMonths } from './formatters';
+import { OneTimeFunding } from '@/lib/types/payment';
+import autoTable from 'jspdf-autotable';
 
 export const generateDebtSummaryTable = (doc: jsPDF, debts: Debt[], startY: number) => {
   const tableData = debts.map(debt => [
@@ -26,23 +27,16 @@ export const generateDebtSummaryTable = (doc: jsPDF, debts: Debt[], startY: numb
 };
 
 export const generatePaymentDetailsTable = (
-  doc: jsPDF, 
-  debts: Debt[], 
-  startY: number,
+  doc: jsPDF,
   monthlyPayment: number,
   extraPayment: number,
+  startY: number,
   currencySymbol: string
 ) => {
-  const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
-  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
-
   const tableData = [
-    ['💰 Total Debt Balance', formatCurrency(totalBalance, currencySymbol)],
-    ['📅 Monthly Payment', formatCurrency(monthlyPayment, currencySymbol)],
+    ['📅 Monthly Payment', formatCurrency(monthlyPayment - extraPayment, currencySymbol)],
     ['⭐ Extra Payment', formatCurrency(extraPayment, currencySymbol)],
-    ['📊 Average Interest Rate', formatPercentage(avgInterestRate)],
-    ['📈 Number of Debts', debts.length.toString()]
+    ['💰 Total Monthly', formatCurrency(monthlyPayment, currencySymbol)]
   ];
 
   autoTable(doc, {
@@ -102,7 +96,7 @@ export const generateNextStepsTable = (
   doc: jsPDF,
   monthlyPayment: number,
   extraPayment: number,
-  oneTimeFundings: { payment_date: string; amount: number }[],
+  oneTimeFundings: OneTimeFunding[],
   startY: number,
   currencySymbol: string
 ) => {
