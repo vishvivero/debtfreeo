@@ -60,15 +60,20 @@ export const ResultsDialog = ({
     });
   }
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     const doc = generateDebtOverviewPDF(
       debts,
-      new Map(debts.map(debt => [debt.id, monthlyPayment / debts.length])),
-      optimizedPayoff,
       monthlyPayment,
-      selectedStrategy
+      extraPayment,
+      baseMonths,
+      optimizedMonths,
+      baseTotalInterest,
+      optimizedTotalInterest,
+      selectedStrategy,
+      oneTimeFundings,
+      currencySymbol
     );
-    doc.save('debt-payoff-plan.pdf');
+    doc.save('debt-freedom-plan.pdf');
   };
 
   return (
@@ -76,7 +81,7 @@ export const ResultsDialog = ({
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Your Personalized Debt Payoff Plan
+            Your Path to Debt Freedom
           </DialogTitle>
         </DialogHeader>
         
@@ -110,9 +115,12 @@ export const ResultsDialog = ({
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
-            <Button className="gap-2" onClick={handleDownload}>
+            <Button 
+              className="gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
+              onClick={handleDownload}
+            >
               <Download className="h-4 w-4" />
-              Download Plan
+              Download Your Plan
             </Button>
           </div>
         </div>
