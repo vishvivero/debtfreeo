@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { generateAmortizationPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { calculatePayoffDetails } from "@/lib/utils/debtCalculations";
+import { strategies } from "@/lib/strategies";
 
 interface AmortizationTabProps {
   debts: Debt[];
@@ -16,7 +17,18 @@ export const AmortizationTab = ({ debts }: AmortizationTabProps) => {
   const handleDownloadReport = (debt: Debt) => {
     try {
       const payoffDetails = calculatePayoffDetails([debt], debt.minimum_payment)[debt.id];
-      const doc = generateAmortizationPDF(debt, payoffDetails);
+      const doc = generateAmortizationPDF(
+        [debt],
+        debt.minimum_payment,
+        0,
+        0,
+        0,
+        0,
+        0,
+        strategies[0],
+        [],
+        debt.currency_symbol
+      );
       doc.save(`amortization-schedule-${debt.name}.pdf`);
       
       toast({

@@ -12,14 +12,14 @@ import { OneTimeFunding } from '@/lib/types/payment';
 
 export const generateDebtOverviewPDF = (
   debts: Debt[],
-  monthlyPayment: number,
-  extraPayment: number,
-  baseMonths: number,
-  optimizedMonths: number,
-  baseTotalInterest: number,
-  optimizedTotalInterest: number,
+  monthlyPayment: number = 0,
+  extraPayment: number = 0,
+  baseMonths: number = 0,
+  optimizedMonths: number = 0,
+  baseTotalInterest: number = 0,
+  optimizedTotalInterest: number = 0,
   selectedStrategy: Strategy,
-  oneTimeFundings: OneTimeFunding[],
+  oneTimeFundings: OneTimeFunding[] = [],
   currencySymbol: string = '£'
 ) => {
   console.log('Generating enhanced PDF report with:', {

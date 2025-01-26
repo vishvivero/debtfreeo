@@ -28,10 +28,15 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
       
       const doc = generateDebtOverviewPDF(
         debts,
-        allocations,
-        payoffDetails,
         totalMinimumPayments,
-        strategies[0]
+        0, // extraPayment
+        0, // baseMonths
+        0, // optimizedMonths
+        0, // baseTotalInterest
+        0, // optimizedTotalInterest
+        strategies[0],
+        [], // oneTimeFundings
+        debts[0]?.currency_symbol || '£'
       );
       
       doc.save('debt-overview-report.pdf');

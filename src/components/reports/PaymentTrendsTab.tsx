@@ -20,7 +20,18 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
 
   const handleDownloadReport = () => {
     try {
-      const doc = generatePaymentTrendsPDF(payments);
+      const doc = generatePaymentTrendsPDF(
+        debts || [],
+        profile?.monthly_payment || 0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        strategies[0],
+        [],
+        profile?.preferred_currency || '£'
+      );
       doc.save('payment-trends-report.pdf');
       
       toast({
