@@ -65,7 +65,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <DecimalToggle
                 showDecimals={showExtraPayment}
                 onToggle={setShowExtraPayment}
-                label="Want to see exact amounts?"
+                label="Add Extra Payments?"
               />
             </div>
             
