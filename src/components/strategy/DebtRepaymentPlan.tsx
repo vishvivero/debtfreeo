@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
+import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
 import { Badge } from "@/components/ui/badge";
@@ -118,12 +118,22 @@ export const DebtRepaymentPlan = ({
 
   const handleDownload = () => {
     try {
-      const doc = generatePayoffStrategyPDF(
+      const baseMonths = timelineData.length;
+      const optimizedMonths = timelineData.length;
+      const baseTotalInterest = timelineData.reduce((sum, data) => sum + data.baseInterest, 0);
+      const optimizedTotalInterest = timelineData.reduce((sum, data) => sum + data.acceleratedInterest, 0);
+      
+      const doc = generateDebtOverviewPDF(
         sortedDebts,
-        allocations,
-        payoffDetails,
         totalMonthlyPayment,
-        selectedStrategy
+        extraPayment,
+        baseMonths,
+        optimizedMonths,
+        baseTotalInterest,
+        optimizedTotalInterest,
+        selectedStrategy,
+        [], // empty array for oneTimeFundings since we don't have them in this context
+        debts[0]?.currency_symbol || '£'
       );
       doc.save('debt-payoff-strategy.pdf');
       

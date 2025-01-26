@@ -19,7 +19,7 @@ export const generateDebtOverviewPDF = (
   baseTotalInterest: number,
   optimizedTotalInterest: number,
   selectedStrategy: Strategy,
-  oneTimeFundings: OneTimeFunding[],
+  oneTimeFundings: OneTimeFunding[] = [],
   currencySymbol: string = '£'
 ) => {
   console.log('Generating enhanced PDF report with:', {
