@@ -59,7 +59,7 @@ export const generateDebtOverviewPDF = (
   doc.setFontSize(16);
   doc.text('Payment Strategy', 14, currentY);
   currentY += 10;
-  currentY = generatePaymentDetailsTable(doc, debts, currentY, monthlyPayment, extraPayment, currencySymbol);
+  currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol);
 
   // Add savings summary
   currentY += 15;
