@@ -8,8 +8,8 @@ import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations"
 import confetti from 'canvas-confetti';
 import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 import { PaymentComparison } from "./results/PaymentComparison";
+import { ResultsSummary } from "./results/ResultsSummary";
 import { NextStepsLayout } from "./results/NextStepsLayout";
-import { TimelineMetrics } from "@/components/debt/timeline/TimelineMetrics";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -96,12 +96,10 @@ export const ResultsDialog = ({
             currencySymbol={currencySymbol}
           />
 
-          <TimelineMetrics
-            baselineMonths={baseMonths}
-            acceleratedMonths={optimizedMonths}
-            monthsSaved={monthsSaved}
-            baselineLatestDate={payoffDate}
+          <ResultsSummary
             interestSaved={interestSaved}
+            monthsSaved={monthsSaved}
+            payoffDate={payoffDate}
             currencySymbol={currencySymbol}
           />
 
