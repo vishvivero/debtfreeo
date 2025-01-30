@@ -15,6 +15,9 @@ import { strategies } from "@/lib/strategies";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DecimalToggle } from "@/components/DecimalToggle";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -43,10 +46,39 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleResultsClick = () => {
     setHasViewedResults(true);
     setIsResultsDialogOpen(true);
+  };
+
+  const handleOneTimeFundingToggle = async (checked: boolean) => {
+    if (!checked && user) {
+      try {
+        const { error } = await supabase
+          .from('one_time_funding')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('is_applied', false);
+
+        if (error) throw error;
+
+        toast({
+          title: "One-time fundings deleted",
+          description: "All pending one-time fundings have been removed",
+        });
+      } catch (error) {
+        console.error('Error deleting one-time fundings:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete one-time fundings",
+          variant: "destructive",
+        });
+      }
+    }
+    setShowOneTimeFunding(checked);
   };
 
   return (
@@ -65,6 +97,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
                 showDecimals={showExtraPayment}
                 onToggle={setShowExtraPayment}
                 label="Add Extra Payments"
+                resetOnDisable={true}
               />
             </div>
             
@@ -85,7 +118,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <h3 className="text-lg font-semibold">Expecting any lump sum payments?</h3>
               <DecimalToggle
                 showDecimals={showOneTimeFunding}
-                onToggle={setShowOneTimeFunding}
+                onToggle={handleOneTimeFundingToggle}
                 label="Add Lump Sum Payments"
               />
             </div>
