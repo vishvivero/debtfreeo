@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { TrendingUp, Calendar, Target, PiggyBank, Plus, Gift } from "lucide-react";
+import { TrendingUp, Calendar, Target, PiggyBank } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -16,6 +16,13 @@ export const ResultsSummary = ({
   payoffDate,
   currencySymbol = '£'
 }: ResultsSummaryProps) => {
+  console.log('ResultsSummary rendered with:', {
+    interestSaved,
+    monthsSaved,
+    payoffDate,
+    currencySymbol
+  });
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Interest Savings Breakdown</h3>
