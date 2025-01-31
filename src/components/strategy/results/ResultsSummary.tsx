@@ -2,26 +2,40 @@ import { motion } from "framer-motion";
 import { TrendingUp, Calendar, Target, PiggyBank } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { UnifiedPayoffCalculator } from "@/lib/services/calculations/UnifiedPayoffCalculator";
+import { Debt } from "@/lib/types";
+import { Strategy } from "@/lib/strategies";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface ResultsSummaryProps {
-  interestSaved: number;
-  monthsSaved: number;
-  payoffDate: Date;
+  debts: Debt[];
+  monthlyPayment: number;
+  strategy: Strategy;
+  oneTimeFundings: OneTimeFunding[];
   currencySymbol?: string;
 }
 
 export const ResultsSummary = ({
-  interestSaved,
-  monthsSaved,
-  payoffDate,
+  debts,
+  monthlyPayment,
+  strategy,
+  oneTimeFundings,
   currencySymbol = '£'
 }: ResultsSummaryProps) => {
   console.log('ResultsSummary rendered with:', {
-    interestSaved,
-    monthsSaved,
-    payoffDate,
+    totalDebts: debts.length,
+    monthlyPayment,
+    strategy: strategy.name,
+    oneTimeFundings: oneTimeFundings.length,
     currencySymbol
   });
+
+  const calculation = UnifiedPayoffCalculator.calculatePayoff(
+    debts,
+    monthlyPayment,
+    strategy,
+    oneTimeFundings
+  );
 
   return (
     <div className="space-y-6">
@@ -48,7 +62,7 @@ export const ResultsSummary = ({
             </Tooltip>
           </TooltipProvider>
           <p className="text-2xl font-bold text-green-600">
-            {formatCurrency(interestSaved, currencySymbol)}
+            {formatCurrency(calculation.interestSaved, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
         </motion.div>
@@ -73,7 +87,7 @@ export const ResultsSummary = ({
             </Tooltip>
           </TooltipProvider>
           <p className="text-2xl font-bold text-blue-600">
-            {monthsSaved} months
+            {calculation.monthsSaved} months
           </p>
           <p className="text-sm text-blue-700">Faster debt freedom</p>
         </motion.div>
@@ -98,7 +112,7 @@ export const ResultsSummary = ({
             </Tooltip>
           </TooltipProvider>
           <p className="text-2xl font-bold text-purple-600">
-            {payoffDate.toLocaleDateString('en-US', { 
+            {calculation.payoffDate.toLocaleDateString('en-US', { 
               month: 'long',
               year: 'numeric'
             })}
@@ -114,7 +128,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-gray-800">Total Interest Saved</h3>
           </div>
           <p className="text-2xl font-bold text-gray-800">
-            {formatCurrency(interestSaved, currencySymbol)}
+            {formatCurrency(calculation.interestSaved, currencySymbol)}
           </p>
         </div>
       </div>
