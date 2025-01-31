@@ -15,9 +15,7 @@ import { strategies } from "@/lib/strategies";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DecimalToggle } from "@/components/DecimalToggle";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
 
 interface StrategyContentProps {
@@ -49,21 +47,21 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
 
-  // Initialize strategy from profile
+  // Initialize strategy from profile only once when component mounts
   useEffect(() => {
     if (profile?.selected_strategy) {
       const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
-      if (savedStrategy) {
+      if (savedStrategy && savedStrategy.id !== selectedStrategy.id) {
         console.log('Initializing strategy from profile:', savedStrategy.id);
         setSelectedStrategy(savedStrategy);
         parentOnSelectStrategy(savedStrategy);
       }
     }
-  }, [profile, parentOnSelectStrategy]);
+  }, [profile?.selected_strategy]); // Only depend on profile.selected_strategy
 
+  // Initialize UI preferences from profile
   useEffect(() => {
     if (profile) {
       setShowExtraPayment(profile.show_extra_payments || false);
@@ -78,6 +76,12 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
 
   const handleStrategyChange = async (strategy: Strategy) => {
     console.log('Changing strategy to:', strategy.id);
+    
+    if (strategy.id === selectedStrategy.id) {
+      setIsStrategyDialogOpen(false);
+      return; // Don't update if it's the same strategy
+    }
+
     setSelectedStrategy(strategy);
     parentOnSelectStrategy(strategy);
     
