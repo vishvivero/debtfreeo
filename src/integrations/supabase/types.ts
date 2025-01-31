@@ -290,6 +290,8 @@ export type Database = {
           monthly_payment: number | null
           preferred_currency: string | null
           selected_strategy: string | null
+          show_extra_payments: boolean | null
+          show_lump_sum_payments: boolean | null
           stripe_customer_id: string | null
           subscription_end_date: string | null
           subscription_start_date: string | null
@@ -308,6 +310,8 @@ export type Database = {
           monthly_payment?: number | null
           preferred_currency?: string | null
           selected_strategy?: string | null
+          show_extra_payments?: boolean | null
+          show_lump_sum_payments?: boolean | null
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
           subscription_start_date?: string | null
@@ -326,6 +330,8 @@ export type Database = {
           monthly_payment?: number | null
           preferred_currency?: string | null
           selected_strategy?: string | null
+          show_extra_payments?: boolean | null
+          show_lump_sum_payments?: boolean | null
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
           subscription_start_date?: string | null

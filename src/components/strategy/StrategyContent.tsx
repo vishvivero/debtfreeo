@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
 import { Strategy } from "@/lib/strategies";
@@ -18,6 +18,7 @@ import { DecimalToggle } from "@/components/DecimalToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
+import { useProfile } from "@/hooks/use-profile";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -41,20 +42,49 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
-  const [showExtraPayment, setShowExtraPayment] = useState(false);
-  const [showOneTimeFunding, setShowOneTimeFunding] = useState(false);
+  const { profile, updateProfile } = useProfile();
+  const [showExtraPayment, setShowExtraPayment] = useState(profile?.show_extra_payments || false);
+  const [showOneTimeFunding, setShowOneTimeFunding] = useState(profile?.show_lump_sum_payments || false);
   const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
+  useEffect(() => {
+    if (profile) {
+      setShowExtraPayment(profile.show_extra_payments || false);
+      setShowOneTimeFunding(profile.show_lump_sum_payments || false);
+    }
+  }, [profile]);
+
   const handleResultsClick = () => {
     setHasViewedResults(true);
     setIsResultsDialogOpen(true);
   };
 
+  const handleExtraPaymentToggle = async (checked: boolean) => {
+    console.log('Toggling extra payments:', checked);
+    setShowExtraPayment(checked);
+    if (profile) {
+      try {
+        await updateProfile.mutateAsync({
+          show_extra_payments: checked
+        });
+      } catch (error) {
+        console.error('Error updating extra payments preference:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save your preference",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const handleOneTimeFundingToggle = async (checked: boolean) => {
+    console.log('Toggling lump sum payments:', checked);
+    setShowOneTimeFunding(checked);
     if (!checked && user) {
       try {
         const { error } = await supabase
@@ -78,7 +108,21 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         });
       }
     }
-    setShowOneTimeFunding(checked);
+    
+    if (profile) {
+      try {
+        await updateProfile.mutateAsync({
+          show_lump_sum_payments: checked
+        });
+      } catch (error) {
+        console.error('Error updating lump sum payments preference:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save your preference",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
@@ -95,7 +139,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <h3 className="text-lg font-semibold">Want to pay off debt faster?</h3>
               <DecimalToggle
                 showDecimals={showExtraPayment}
-                onToggle={setShowExtraPayment}
+                onToggle={handleExtraPaymentToggle}
                 label="Add Extra Payments"
                 resetOnDisable={true}
               />
