@@ -1,6 +1,7 @@
 import { UnifiedPayoffCalculator } from '../UnifiedPayoffCalculator';
 import { Debt } from '@/lib/types';
 import { strategies } from '@/lib/strategies';
+import { OneTimeFunding } from '@/hooks/use-one-time-funding';
 
 describe('UnifiedPayoffCalculator', () => {
   const mockDebts: Debt[] = [
@@ -41,16 +42,22 @@ describe('UnifiedPayoffCalculator', () => {
   });
 
   it('should handle one-time fundings correctly', () => {
-    const oneTimeFundings = [{
+    const mockOneTimeFundings: OneTimeFunding[] = [{
+      id: '1',
+      user_id: '123',
+      amount: 500,
       payment_date: new Date().toISOString(),
-      amount: 500
+      notes: 'Test funding',
+      is_applied: false,
+      currency_symbol: '£',
+      created_at: new Date().toISOString()
     }];
 
     const resultWithFunding = UnifiedPayoffCalculator.calculatePayoff(
       mockDebts,
       200,
       strategies[0],
-      oneTimeFundings
+      mockOneTimeFundings
     );
 
     const resultWithoutFunding = UnifiedPayoffCalculator.calculatePayoff(

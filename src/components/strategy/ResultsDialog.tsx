@@ -4,7 +4,6 @@ import { Download } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import confetti from 'canvas-confetti';
 import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 import { PaymentComparison } from "./results/PaymentComparison";
@@ -33,26 +32,9 @@ export const ResultsDialog = ({
   currencySymbol = '£'
 }: ResultsDialogProps) => {
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  
-  // Calculate payoff details with and without extra payments
-  const basePayoff = calculatePayoffDetails(debts, totalMinPayment, selectedStrategy, []);
-  const optimizedPayoff = calculatePayoffDetails(debts, monthlyPayment, selectedStrategy, oneTimeFundings);
-
-  // Calculate savings
-  const baseMonths = Math.max(...Object.values(basePayoff).map(d => d.months));
-  const optimizedMonths = Math.max(...Object.values(optimizedPayoff).map(d => d.months));
-  const monthsSaved = Math.max(0, baseMonths - optimizedMonths);
-
-  const baseTotalInterest = Object.values(basePayoff).reduce((sum, detail) => sum + detail.totalInterest, 0);
-  const optimizedTotalInterest = Object.values(optimizedPayoff).reduce((sum, detail) => sum + detail.totalInterest, 0);
-  const interestSaved = Math.max(0, baseTotalInterest - optimizedTotalInterest);
-
-  // Get projected payoff date
-  const payoffDate = new Date();
-  payoffDate.setMonth(payoffDate.getMonth() + optimizedMonths);
 
   // Trigger confetti on dialog open
-  if (isOpen && interestSaved > 0) {
+  if (isOpen) {
     confetti({
       particleCount: 100,
       spread: 70,
@@ -65,10 +47,10 @@ export const ResultsDialog = ({
       debts,
       monthlyPayment,
       extraPayment,
-      baseMonths,
-      optimizedMonths,
-      baseTotalInterest,
-      optimizedTotalInterest,
+      0, // baseMonths - will be calculated in PDF generator
+      0, // optimizedMonths - will be calculated in PDF generator
+      0, // baseTotalInterest - will be calculated in PDF generator
+      0, // optimizedTotalInterest - will be calculated in PDF generator
       selectedStrategy,
       oneTimeFundings,
       currencySymbol
@@ -89,17 +71,16 @@ export const ResultsDialog = ({
           <PaymentComparison
             debts={debts}
             monthlyPayment={monthlyPayment}
-            basePayoffMonths={baseMonths}
-            optimizedPayoffMonths={optimizedMonths}
-            baseTotalInterest={baseTotalInterest}
-            optimizedTotalInterest={optimizedTotalInterest}
+            strategy={selectedStrategy}
+            oneTimeFundings={oneTimeFundings}
             currencySymbol={currencySymbol}
           />
 
           <ResultsSummary
-            interestSaved={interestSaved}
-            monthsSaved={monthsSaved}
-            payoffDate={payoffDate}
+            debts={debts}
+            monthlyPayment={monthlyPayment}
+            strategy={selectedStrategy}
+            oneTimeFundings={oneTimeFundings}
             currencySymbol={currencySymbol}
           />
 

@@ -120,18 +120,6 @@ export const ResultsSummary = ({
           <p className="text-sm text-purple-700">Target completion date</p>
         </motion.div>
       </div>
-
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <PiggyBank className="h-5 w-5 text-gray-600" />
-            <h3 className="font-semibold text-gray-800">Total Interest Saved</h3>
-          </div>
-          <p className="text-2xl font-bold text-gray-800">
-            {formatCurrency(calculation.interestSaved, currencySymbol)}
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
