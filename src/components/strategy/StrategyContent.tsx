@@ -87,7 +87,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     
     if (profile) {
       try {
-        await updateProfile.mutateAsync({
+        await updateProfile.mutate({
           selected_strategy: strategy.id
         });
         toast({
@@ -111,7 +111,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     setShowExtraPayment(checked);
     if (profile) {
       try {
-        await updateProfile.mutateAsync({
+        await updateProfile.mutate({
           show_extra_payments: checked
         });
       } catch (error) {
@@ -128,33 +128,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const handleOneTimeFundingToggle = async (checked: boolean) => {
     console.log('Toggling lump sum payments:', checked);
     setShowOneTimeFunding(checked);
-    if (!checked && user) {
-      try {
-        const { error } = await supabase
-          .from('one_time_funding')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('is_applied', false);
-
-        if (error) throw error;
-
-        toast({
-          title: "One-time fundings deleted",
-          description: "All pending one-time fundings have been removed",
-        });
-      } catch (error) {
-        console.error('Error deleting one-time fundings:', error);
-        toast({
-          title: "Error",
-          description: "Failed to delete one-time fundings",
-          variant: "destructive",
-        });
-      }
-    }
-    
     if (profile) {
       try {
-        await updateProfile.mutateAsync({
+        await updateProfile.mutate({
           show_lump_sum_payments: checked
         });
       } catch (error) {
