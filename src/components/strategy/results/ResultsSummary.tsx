@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { TrendingUp, Calendar, Target } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { OneTimeFunding } from "@/lib/types/payment";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { formatCurrency } from "@/lib/strategies";
 
@@ -65,9 +65,9 @@ export const ResultsSummary = ({
         >
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="h-5 w-5 text-green-600" />
-            <h3 className="font-semibold text-green-800">Strategy Impact</h3>
+            <h3 className="font-semibold text-green-800">Interest Saved</h3>
           </div>
-          <p className="text-2xl font-bold text-green-600">
+          <p className="text-2xl font-bold text-emerald-600">
             {formatCurrency(timelineResults.interestSaved, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
