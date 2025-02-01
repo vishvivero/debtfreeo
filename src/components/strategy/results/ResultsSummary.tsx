@@ -68,7 +68,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-green-800">Interest Saved</h3>
           </div>
           <p className="text-2xl font-bold text-emerald-600">
-            {formatCurrency(timelineResults.interestSaved, currencySymbol)}
+            {formatCurrency(timelineResults.baselineInterest - timelineResults.acceleratedInterest, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
         </motion.div>
