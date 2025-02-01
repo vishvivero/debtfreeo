@@ -38,7 +38,7 @@ export const PaymentComparison = ({
     oneTimeFundings
   );
 
-  console.log('Timeline calculation results:', timelineResults);
+  console.log('Timeline calculation results in PaymentComparison:', timelineResults);
 
   return (
     <div className="grid grid-cols-2 gap-4">

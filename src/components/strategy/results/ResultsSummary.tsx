@@ -37,7 +37,7 @@ export const ResultsSummary = ({
     oneTimeFundings
   );
 
-  console.log('Timeline calculation results:', timelineResults);
+  console.log('Timeline calculation results in ResultsSummary:', timelineResults);
 
   return (
     <div className="space-y-6">
