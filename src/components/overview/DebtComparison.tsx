@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export const DebtComparison = () => {
+  const navigate = useNavigate();
+  const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
   const { debts, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
   const currencySymbol = profile?.preferred_currency || "£";
@@ -251,7 +253,7 @@ export const DebtComparison = () => {
                 </Button>
                 {isDebtListExpanded && (
                   <div className="mt-2 space-y-2">
-                    {debts?.map((debt, index) => (
+                    {debts?.map((debt) => (
                       <div key={debt.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                         <span>{debt.name}</span>
                         <span>{currencySymbol}{debt.balance.toLocaleString()}</span>
