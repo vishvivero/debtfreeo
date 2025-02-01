@@ -6,27 +6,30 @@ import { DangerZoneCard } from "@/components/profile/DangerZoneCard";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 export default function Profile() {
   const { profile, isLoading: isProfileLoading } = useProfile();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleLumpSumToggle = async (enabled: boolean) => {
-    if (!enabled) {
+    if (!enabled && user?.id) {
       try {
-        console.log('Attempting to delete all one-time funding entries');
-        const { error } = await supabase
+        console.log('Attempting to delete one-time funding entries for user:', user.id);
+        const { error, count } = await supabase
           .from('one_time_funding')
           .delete()
-          .eq('user_id', profile?.id)
-          .eq('is_applied', false);
+          .eq('user_id', user.id)
+          .eq('is_applied', false)
+          .select('count');
 
         if (error) {
           console.error('Error deleting one-time funding entries:', error);
           throw error;
         }
 
-        console.log('Successfully deleted one-time funding entries');
+        console.log('Successfully deleted one-time funding entries, count:', count);
         toast({
           title: "Success",
           description: "All lump sum payments have been deleted",
