@@ -2,21 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
 import { OneTimeFunding } from '@/lib/types/payment';
-import { DebtTimelineCalculator } from '@/lib/services/calculations/DebtTimelineCalculator';
-
-interface TimelineResults {
-  baselineMonths: number;
-  acceleratedMonths: number;
-  baselineInterest: number;
-  acceleratedInterest: number;
-  monthsSaved: number;
-  interestSaved: number;
-  payoffDate: Date;
-  monthlyPayments: {
-    debtId: string;
-    amount: number;
-  }[];
-}
+import { useDebtCalculation } from '@/contexts/DebtCalculationContext';
 
 export const useDebtTimeline = (
   debts: Debt[],
@@ -24,14 +10,9 @@ export const useDebtTimeline = (
   strategy: Strategy,
   oneTimeFundings: OneTimeFunding[] = []
 ) => {
-  console.log('useDebtTimeline: Initializing with:', {
-    debtsCount: debts.length,
-    monthlyPayment,
-    strategyName: strategy.name,
-    oneTimeFundingsCount: oneTimeFundings.length
-  });
+  const { calculateTimeline } = useDebtCalculation();
 
-  const calculateTimeline = useCallback(() => {
+  const timelineResults = useMemo(() => {
     if (!debts.length) {
       console.log('useDebtTimeline: No debts provided, skipping calculation');
       return null;
@@ -43,12 +24,7 @@ export const useDebtTimeline = (
       strategy: strategy.name
     });
 
-    const results = DebtTimelineCalculator.calculateTimeline(
-      debts,
-      monthlyPayment,
-      strategy,
-      oneTimeFundings
-    );
+    const results = calculateTimeline(debts, monthlyPayment, strategy, oneTimeFundings);
 
     console.log('useDebtTimeline: Calculation complete:', {
       baselineInterest: results.baselineInterest,
@@ -58,11 +34,7 @@ export const useDebtTimeline = (
     });
 
     return results;
-  }, [debts, monthlyPayment, strategy, oneTimeFundings]);
-
-  const timelineResults = useMemo<TimelineResults | null>(() => {
-    return calculateTimeline();
-  }, [calculateTimeline]);
+  }, [debts, monthlyPayment, strategy, oneTimeFundings, calculateTimeline]);
 
   return {
     timelineResults,

@@ -11,6 +11,7 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import { useState } from "react";
+import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
@@ -84,15 +85,17 @@ export default function Strategy() {
         <div className="container max-w-7xl py-8 space-y-8">
           <StrategyHeader />
           
-          <StrategyContent
-            debts={debts}
-            selectedStrategy={selectedStrategy}
-            onUpdateDebt={handleDebtUpdate}
-            onDeleteDebt={handleDebtDelete}
-            onSelectStrategy={handleStrategyChange}
-            preferredCurrency={profile?.preferred_currency}
-            totalDebtValue={totalDebtValue}
-          />
+          <DebtCalculationProvider>
+            <StrategyContent
+              debts={debts}
+              selectedStrategy={selectedStrategy}
+              onUpdateDebt={handleDebtUpdate}
+              onDeleteDebt={handleDebtDelete}
+              onSelectStrategy={handleStrategyChange}
+              preferredCurrency={profile?.preferred_currency}
+              totalDebtValue={totalDebtValue}
+            />
+          </DebtCalculationProvider>
         </div>
       </div>
     </MainLayout>
