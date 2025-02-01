@@ -10,6 +10,8 @@ import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
 import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 import { motion } from "framer-motion";
+import { useProfile } from "@/hooks/use-profile";
+import { strategies } from "@/lib/strategies";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -33,6 +35,12 @@ export const ResultsDialog = ({
   currencySymbol = '£'
 }: ResultsDialogProps) => {
   const { toast } = useToast();
+  const { profile } = useProfile();
+
+  // Get strategy from profile or use passed strategy as fallback
+  const activeStrategy = profile?.selected_strategy 
+    ? strategies.find(s => s.id === profile.selected_strategy) || selectedStrategy
+    : selectedStrategy;
 
   // Trigger confetti on dialog open
   if (isOpen) {
@@ -51,7 +59,7 @@ export const ResultsDialog = ({
   const timelineData = calculateTimelineData(
     debts,
     totalMonthlyPayment,
-    selectedStrategy,
+    activeStrategy,
     oneTimeFundings
   );
 
@@ -80,7 +88,8 @@ export const ResultsDialog = ({
     payoffDate: acceleratedLatestDate,
     timelineDataPoints: timelineData.length,
     totalMinimumPayment,
-    totalMonthlyPayment
+    totalMonthlyPayment,
+    activeStrategy: activeStrategy.name
   });
 
   const handleDownload = () => {
@@ -93,7 +102,7 @@ export const ResultsDialog = ({
         acceleratedMonths,
         lastDataPoint.baselineInterest,
         lastDataPoint.acceleratedInterest,
-        selectedStrategy,
+        activeStrategy,
         oneTimeFundings,
         currencySymbol
       );
@@ -191,7 +200,7 @@ export const ResultsDialog = ({
             <PaymentComparison
               debts={debts}
               monthlyPayment={totalMonthlyPayment}
-              strategy={selectedStrategy}
+              strategy={activeStrategy}
               oneTimeFundings={oneTimeFundings}
               currencySymbol={currencySymbol}
             />
