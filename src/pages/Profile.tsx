@@ -61,7 +61,7 @@ export default function Profile() {
             profile={profile} 
             onLumpSumToggle={handleLumpSumToggle}
           />
-          <DangerZoneCard />
+          <DangerZoneCard showNotifications={true} />
         </div>
       </div>
     </MainLayout>

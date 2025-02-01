@@ -35,4 +35,6 @@ export interface Profile {
   preferred_currency: string | null;
   is_admin: boolean | null;
   selected_strategy?: string;
+  show_extra_payments: boolean | null;
+  show_lump_sum_payments: boolean | null;
 }
