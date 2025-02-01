@@ -3,7 +3,7 @@ import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { OneTimeFunding } from "@/hooks/types";
+import { OneTimeFunding } from "@/lib/types/payment";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -41,15 +41,15 @@ export const PaymentComparison = ({
   }
 
   const {
+    baselineInterest: totalBaselineInterest,
+    acceleratedInterest: totalAcceleratedInterest,
     baselineMonths,
-    acceleratedMonths,
-    totalBaselineInterest,
-    totalAcceleratedInterest
+    acceleratedMonths
   } = timelineResults;
 
   const monthsSaved = Math.max(0, baselineMonths - acceleratedMonths);
   const interestSaved = Math.max(0, totalBaselineInterest - totalAcceleratedInterest);
-  const percentageSaved = (interestSaved / totalBaselineInterest) * 100;
+  const percentageSaved = totalBaselineInterest > 0 ? (interestSaved / totalBaselineInterest) * 100 : 0;
 
   console.log('Timeline calculation results:', {
     baselineMonths,
