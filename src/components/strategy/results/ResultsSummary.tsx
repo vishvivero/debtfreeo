@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { TrendingUp, Calendar, Target, PiggyBank } from "lucide-react";
+import { TrendingUp, Calendar, Target } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { UnifiedPayoffCalculator } from "@/lib/services/calculations/UnifiedPayoffCalculator";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { OneTimeFunding } from "@/lib/types/payment";
+import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 
 interface ResultsSummaryProps {
   debts: Debt[];
@@ -30,7 +30,7 @@ export const ResultsSummary = ({
     currencySymbol
   });
 
-  const calculation = UnifiedPayoffCalculator.calculatePayoff(
+  const timelineResults = DebtTimelineCalculator.calculateTimeline(
     debts,
     monthlyPayment,
     strategy,
@@ -62,7 +62,7 @@ export const ResultsSummary = ({
             </Tooltip>
           </TooltipProvider>
           <p className="text-2xl font-bold text-green-600">
-            {formatCurrency(calculation.interestSaved, currencySymbol)}
+            {formatCurrency(timelineResults.interestSaved, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
         </motion.div>
@@ -87,7 +87,7 @@ export const ResultsSummary = ({
             </Tooltip>
           </TooltipProvider>
           <p className="text-2xl font-bold text-blue-600">
-            {calculation.monthsSaved} months
+            {timelineResults.monthsSaved} months
           </p>
           <p className="text-sm text-blue-700">Faster debt freedom</p>
         </motion.div>
@@ -112,7 +112,7 @@ export const ResultsSummary = ({
             </Tooltip>
           </TooltipProvider>
           <p className="text-2xl font-bold text-purple-600">
-            {calculation.payoffDate.toLocaleDateString('en-US', { 
+            {timelineResults.payoffDate.toLocaleDateString('en-US', { 
               month: 'long',
               year: 'numeric'
             })}

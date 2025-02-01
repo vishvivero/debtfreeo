@@ -9,7 +9,8 @@ import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 import { PaymentComparison } from "./results/PaymentComparison";
 import { ResultsSummary } from "./results/ResultsSummary";
 import { NextStepsLayout } from "./results/NextStepsLayout";
-import { UnifiedPayoffCalculator } from "@/lib/services/calculations/UnifiedPayoffCalculator";
+import { useToast } from "@/hooks/use-toast";
+import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -32,15 +33,8 @@ export const ResultsDialog = ({
   selectedStrategy,
   currencySymbol = '£'
 }: ResultsDialogProps) => {
+  const { toast } = useToast();
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-
-  // Calculate payoff details using UnifiedPayoffCalculator
-  const payoffDetails = UnifiedPayoffCalculator.calculatePayoff(
-    debts,
-    monthlyPayment,
-    selectedStrategy,
-    oneTimeFundings
-  );
 
   // Trigger confetti on dialog open
   if (isOpen) {
@@ -51,20 +45,41 @@ export const ResultsDialog = ({
     });
   }
 
+  const timelineResults = DebtTimelineCalculator.calculateTimeline(
+    debts,
+    monthlyPayment,
+    selectedStrategy,
+    oneTimeFundings
+  );
+
   const handleDownload = () => {
-    const doc = generateDebtOverviewPDF(
-      debts,
-      monthlyPayment,
-      extraPayment,
-      payoffDetails.baselineMonths,
-      payoffDetails.acceleratedMonths,
-      payoffDetails.baselineInterest,
-      payoffDetails.acceleratedInterest,
-      selectedStrategy,
-      oneTimeFundings,
-      currencySymbol
-    );
-    doc.save('debt-freedom-plan.pdf');
+    try {
+      const doc = generateDebtOverviewPDF(
+        debts,
+        monthlyPayment,
+        extraPayment,
+        timelineResults.baselineMonths,
+        timelineResults.acceleratedMonths,
+        timelineResults.baselineInterest,
+        timelineResults.acceleratedInterest,
+        selectedStrategy,
+        oneTimeFundings,
+        currencySymbol
+      );
+      doc.save('debt-freedom-plan.pdf');
+      
+      toast({
+        title: "Success",
+        description: "Your payoff strategy report has been downloaded",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate the payoff strategy report",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

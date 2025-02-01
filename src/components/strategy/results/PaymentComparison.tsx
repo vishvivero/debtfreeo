@@ -3,7 +3,7 @@ import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { UnifiedPayoffCalculator } from "@/lib/services/calculations/UnifiedPayoffCalculator";
+import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -31,7 +31,7 @@ export const PaymentComparison = ({
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
 
-  const payoffDetails = UnifiedPayoffCalculator.calculatePayoff(
+  const timelineResults = DebtTimelineCalculator.calculateTimeline(
     debts,
     monthlyPayment,
     strategy,
@@ -53,7 +53,7 @@ export const PaymentComparison = ({
             Avg Interest Rate: {avgInterestRate.toFixed(2)}%
           </p>
           <p className="text-sm text-gray-600">
-            Total Interest: {formatCurrency(payoffDetails.baselineInterest, currencySymbol)}
+            Total Interest: {formatCurrency(timelineResults.baselineInterest, currencySymbol)}
           </p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export const PaymentComparison = ({
             Extra Payment: {formatCurrency(monthlyPayment - totalMinPayment, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
-            Total Interest: {formatCurrency(payoffDetails.acceleratedInterest, currencySymbol)}
+            Total Interest: {formatCurrency(timelineResults.acceleratedInterest, currencySymbol)}
           </p>
         </div>
       </div>
