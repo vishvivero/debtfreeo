@@ -6,9 +6,9 @@ import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import confetti from 'canvas-confetti';
 import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
-import { PaymentComparison } from "./results/PaymentComparison";
+import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
-import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
+import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 import { motion } from "framer-motion";
 
 interface ResultsDialogProps {
@@ -43,30 +43,14 @@ export const ResultsDialog = ({
     });
   }
 
-  // Calculate timeline data using the same method as TimelineCalculator
-  const timelineData = calculateTimelineData(
+  const timelineResults = DebtTimelineCalculator.calculateTimeline(
     debts,
     monthlyPayment,
     selectedStrategy,
     oneTimeFundings
   );
 
-  // Calculate savings from timeline data
-  const baselineInterest = timelineData[timelineData.length - 1].baselineInterest;
-  const acceleratedInterest = timelineData[timelineData.length - 1].acceleratedInterest;
-  const interestSaved = baselineInterest - acceleratedInterest;
-  const monthsSaved = Math.max(0, timelineData.length - timelineData.findIndex(d => d.acceleratedBalance === 0));
-  const payoffDate = new Date();
-  payoffDate.setMonth(payoffDate.getMonth() + timelineData.findIndex(d => d.acceleratedBalance === 0));
-
-  console.log('ResultsDialog: Calculation details:', {
-    baselineInterest,
-    acceleratedInterest,
-    interestSaved,
-    monthsSaved,
-    payoffDate: payoffDate.toISOString(),
-    timelineDataPoints: timelineData.length
-  });
+  console.log('Timeline calculation results in ResultsDialog:', timelineResults);
 
   const handleDownload = () => {
     try {
@@ -74,10 +58,10 @@ export const ResultsDialog = ({
         debts,
         monthlyPayment,
         extraPayment,
-        timelineData.length,
-        timelineData.findIndex(d => d.acceleratedBalance === 0),
-        baselineInterest,
-        acceleratedInterest,
+        timelineResults.baselineMonths,
+        timelineResults.acceleratedMonths,
+        timelineResults.baselineInterest,
+        timelineResults.acceleratedInterest,
         selectedStrategy,
         oneTimeFundings,
         currencySymbol
@@ -137,7 +121,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-emerald-800">Interest Saved</h3>
               </div>
               <p className="text-2xl font-bold text-emerald-600">
-                {currencySymbol}{interestSaved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {currencySymbol}{timelineResults.interestSaved.toLocaleString()}
               </p>
               <p className="text-sm text-emerald-700">Total savings on interest</p>
             </div>
@@ -148,7 +132,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-blue-800">Time Saved</h3>
               </div>
               <p className="text-2xl font-bold text-blue-600">
-                {monthsSaved} months
+                {timelineResults.monthsSaved} months
               </p>
               <p className="text-sm text-blue-700">Faster debt freedom</p>
             </div>
@@ -159,7 +143,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
               </div>
               <p className="text-2xl font-bold text-purple-600">
-                {payoffDate.toLocaleDateString('en-US', { 
+                {timelineResults.payoffDate.toLocaleDateString('en-US', { 
                   month: 'long',
                   year: 'numeric'
                 })}
