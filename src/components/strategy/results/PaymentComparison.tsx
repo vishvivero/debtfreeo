@@ -20,12 +20,20 @@ export const PaymentComparison = ({
   oneTimeFundings,
   currencySymbol = '£'
 }: PaymentComparisonProps) => {
-  console.log('PaymentComparison: Rendering with:', {
+  console.log('PaymentComparison: Starting comparison calculation:', {
     totalDebts: debts.length,
-    monthlyPayment,
+    debtDetails: debts.map(d => ({
+      name: d.name,
+      balance: formatCurrency(d.balance, currencySymbol),
+      interestRate: `${d.interest_rate}%`,
+      minimumPayment: formatCurrency(d.minimum_payment, currencySymbol)
+    })),
+    monthlyPayment: formatCurrency(monthlyPayment, currencySymbol),
     strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.length,
-    currencySymbol
+    oneTimeFundings: oneTimeFundings.map(f => ({
+      amount: formatCurrency(f.amount, currencySymbol),
+      date: f.payment_date
+    }))
   });
 
   const { timelineResults } = useDebtTimeline(
@@ -44,17 +52,32 @@ export const PaymentComparison = ({
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
 
-  console.log('PaymentComparison: Timeline calculation details:', {
-    totalDebt,
-    totalMinPayment,
-    avgInterestRate,
-    baselineInterest: timelineResults.baselineInterest,
-    acceleratedInterest: timelineResults.acceleratedInterest,
-    interestSaved: timelineResults.interestSaved,
-    monthsSaved: timelineResults.monthsSaved,
-    baselineMonths: timelineResults.baselineMonths,
-    acceleratedMonths: timelineResults.acceleratedMonths,
-    payoffDate: timelineResults.payoffDate.toISOString()
+  console.log('PaymentComparison: Detailed comparison results:', {
+    baseline: {
+      totalDebt: formatCurrency(totalDebt, currencySymbol),
+      monthlyPayment: formatCurrency(totalMinPayment, currencySymbol),
+      totalInterest: formatCurrency(timelineResults.baselineInterest, currencySymbol),
+      monthsToPayoff: timelineResults.baselineMonths,
+      totalCost: formatCurrency(totalDebt + timelineResults.baselineInterest, currencySymbol),
+      avgInterestRate: `${avgInterestRate.toFixed(2)}%`
+    },
+    accelerated: {
+      totalDebt: formatCurrency(totalDebt, currencySymbol),
+      monthlyPayment: formatCurrency(monthlyPayment, currencySymbol),
+      extraPayment: formatCurrency(monthlyPayment - totalMinPayment, currencySymbol),
+      totalInterest: formatCurrency(timelineResults.acceleratedInterest, currencySymbol),
+      monthsToPayoff: timelineResults.acceleratedMonths,
+      totalCost: formatCurrency(totalDebt + timelineResults.acceleratedInterest, currencySymbol),
+      payoffDate: timelineResults.payoffDate.toLocaleDateString()
+    },
+    savings: {
+      interestSaved: formatCurrency(timelineResults.interestSaved, currencySymbol),
+      monthsSaved: timelineResults.monthsSaved,
+      totalSaved: formatCurrency(
+        timelineResults.interestSaved + (timelineResults.monthsSaved * monthlyPayment),
+        currencySymbol
+      )
+    }
   });
 
   return (
