@@ -24,7 +24,8 @@ export const PaymentComparison = ({
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.length
+    oneTimeFundings: oneTimeFundings.length,
+    currencySymbol
   });
 
   const { timelineResults } = useDebtTimeline(
@@ -43,10 +44,16 @@ export const PaymentComparison = ({
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
 
-  console.log('PaymentComparison: Using timeline results:', {
+  console.log('PaymentComparison: Calculation details:', {
+    totalDebt,
+    totalMinPayment,
+    avgInterestRate,
     baselineInterest: timelineResults.baselineInterest,
     acceleratedInterest: timelineResults.acceleratedInterest,
-    interestSaved: timelineResults.interestSaved
+    interestSaved: timelineResults.interestSaved,
+    monthsSaved: timelineResults.monthsSaved,
+    baselineMonths: timelineResults.baselineMonths,
+    acceleratedMonths: timelineResults.acceleratedMonths
   });
 
   return (
@@ -66,6 +73,9 @@ export const PaymentComparison = ({
           <p className="text-sm text-gray-600">
             Total Interest: {formatCurrency(timelineResults.baselineInterest, currencySymbol)}
           </p>
+          <p className="text-sm text-gray-600">
+            Months to Pay Off: {timelineResults.baselineMonths}
+          </p>
         </div>
       </div>
       <div className="p-4 rounded-lg bg-emerald-50">
@@ -82,6 +92,9 @@ export const PaymentComparison = ({
           </p>
           <p className="text-sm text-emerald-600">
             Total Interest: {formatCurrency(timelineResults.acceleratedInterest, currencySymbol)}
+          </p>
+          <p className="text-sm text-emerald-600">
+            Months to Pay Off: {timelineResults.acceleratedMonths}
           </p>
         </div>
       </div>

@@ -26,7 +26,8 @@ export const ResultsSummary = ({
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.length
+    oneTimeFundings: oneTimeFundings.length,
+    currencySymbol
   });
 
   const { timelineResults } = useDebtTimeline(
@@ -41,10 +42,15 @@ export const ResultsSummary = ({
     return null;
   }
 
-  console.log('ResultsSummary: Using timeline results:', {
+  console.log('ResultsSummary: Timeline calculation details:', {
+    baselineInterest: timelineResults.baselineInterest,
+    acceleratedInterest: timelineResults.acceleratedInterest,
     interestSaved: timelineResults.interestSaved,
     monthsSaved: timelineResults.monthsSaved,
-    payoffDate: timelineResults.payoffDate
+    payoffDate: timelineResults.payoffDate.toISOString(),
+    baselineMonths: timelineResults.baselineMonths,
+    acceleratedMonths: timelineResults.acceleratedMonths,
+    totalSavings: timelineResults.interestSaved + (timelineResults.monthsSaved * monthlyPayment)
   });
 
   return (
