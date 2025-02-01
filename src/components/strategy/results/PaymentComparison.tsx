@@ -1,9 +1,9 @@
-import { motion } from "framer-motion";
-import { formatCurrency } from "@/lib/strategies";
-import { Debt } from "@/lib/types";
-import { Strategy } from "@/lib/strategies";
-import { OneTimeFunding } from "@/lib/types/payment";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
+import { Strategy } from "@/lib/strategies";
+import { Debt } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { OneTimeFunding } from "@/hooks/types";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -28,92 +28,97 @@ export const PaymentComparison = ({
     oneTimeFundings
   });
 
-  const { timelineResults } = useDebtTimeline(
+  const { timelineResults } = useDebtTimeline({
     debts,
     monthlyPayment,
     strategy,
     oneTimeFundings
-  );
+  });
 
   if (!timelineResults) {
-    console.log('PaymentComparison: No timeline results available');
+    console.log('No timeline results available');
     return null;
   }
 
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
+  const {
+    baselineMonths,
+    acceleratedMonths,
+    totalBaselineInterest,
+    totalAcceleratedInterest
+  } = timelineResults;
 
-  console.log('PaymentComparison: Detailed comparison results:', {
-    baseline: {
-      totalDebt: formatCurrency(totalDebt, currencySymbol),
-      monthlyPayment: formatCurrency(totalMinPayment, currencySymbol),
-      totalInterest: formatCurrency(timelineResults.baselineInterest, currencySymbol),
-      monthsToPayoff: timelineResults.baselineMonths,
-      totalCost: formatCurrency(totalDebt + timelineResults.baselineInterest, currencySymbol),
-      avgInterestRate: `${avgInterestRate.toFixed(2)}%`
-    },
-    accelerated: {
-      totalDebt: formatCurrency(totalDebt, currencySymbol),
-      monthlyPayment: formatCurrency(monthlyPayment, currencySymbol),
-      extraPayment: formatCurrency(monthlyPayment - totalMinPayment, currencySymbol),
-      totalInterest: formatCurrency(timelineResults.acceleratedInterest, currencySymbol),
-      monthsToPayoff: timelineResults.acceleratedMonths,
-      totalCost: formatCurrency(totalDebt + timelineResults.acceleratedInterest, currencySymbol),
-      payoffDate: timelineResults.payoffDate.toLocaleDateString()
-    },
-    savings: {
-      interestSaved: formatCurrency(timelineResults.interestSaved, currencySymbol),
-      monthsSaved: timelineResults.monthsSaved,
-      totalSaved: formatCurrency(
-        timelineResults.interestSaved + (timelineResults.monthsSaved * monthlyPayment),
-        currencySymbol
-      )
-    }
+  const monthsSaved = Math.max(0, baselineMonths - acceleratedMonths);
+  const interestSaved = Math.max(0, totalBaselineInterest - totalAcceleratedInterest);
+  const percentageSaved = (interestSaved / totalBaselineInterest) * 100;
+
+  console.log('Timeline calculation results:', {
+    baselineMonths,
+    acceleratedMonths,
+    monthsSaved,
+    totalBaselineInterest,
+    totalAcceleratedInterest,
+    interestSaved,
+    percentageSaved
   });
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="p-4 rounded-lg bg-gray-50">
-        <h3 className="font-semibold mb-2">Without DebtFreeo</h3>
-        <div className="space-y-2">
-          <p className="text-sm text-gray-600">
-            Total Debt: {formatCurrency(totalDebt, currencySymbol)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Monthly Payment: {formatCurrency(totalMinPayment, currencySymbol)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Avg Interest Rate: {avgInterestRate.toFixed(2)}%
-          </p>
-          <p className="text-sm text-gray-600">
-            Total Interest: {formatCurrency(timelineResults.baselineInterest, currencySymbol)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Months to Pay Off: {timelineResults.baselineMonths}
-          </p>
-        </div>
-      </div>
-      <div className="p-4 rounded-lg bg-emerald-50">
-        <h3 className="font-semibold mb-2">With DebtFreeo</h3>
-        <div className="space-y-2">
-          <p className="text-sm text-emerald-600">
-            Total Debt: {formatCurrency(totalDebt, currencySymbol)}
-          </p>
-          <p className="text-sm text-emerald-600">
-            Monthly Payment: {formatCurrency(monthlyPayment, currencySymbol)}
-          </p>
-          <p className="text-sm text-emerald-600">
-            Extra Payment: {formatCurrency(monthlyPayment - totalMinPayment, currencySymbol)}
-          </p>
-          <p className="text-sm text-emerald-600">
-            Total Interest: {formatCurrency(timelineResults.acceleratedInterest, currencySymbol)}
-          </p>
-          <p className="text-sm text-emerald-600">
-            Months to Pay Off: {timelineResults.acceleratedMonths}
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h4 className="text-sm font-medium">Without DebtFreeo</h4>
+                <p className="text-2xl font-bold">
+                  {currencySymbol}{totalBaselineInterest.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Total Interest ({baselineMonths} months)
+                </p>
+              </div>
+              <Progress value={100} className="w-[60px]" />
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <h4 className="text-sm font-medium">With DebtFreeo</h4>
+                <p className="text-2xl font-bold text-primary">
+                  {currencySymbol}{totalAcceleratedInterest.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Total Interest ({acceleratedMonths} months)
+                </p>
+              </div>
+              <Progress 
+                value={Math.min(100, (totalAcceleratedInterest / totalBaselineInterest) * 100)} 
+                className="w-[60px]" 
+              />
+            </div>
+
+            <div className="pt-4 border-t">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Interest Saved</span>
+                <span className="font-medium">
+                  {currencySymbol}{interestSaved.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-muted-foreground">Time Saved</span>
+                <span className="font-medium">{monthsSaved} months</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
