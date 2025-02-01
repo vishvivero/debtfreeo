@@ -37,6 +37,8 @@ export const ResultsSummary = ({
     oneTimeFundings
   );
 
+  console.log('Timeline calculation results:', timelineResults);
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Interest Savings Breakdown</h3>

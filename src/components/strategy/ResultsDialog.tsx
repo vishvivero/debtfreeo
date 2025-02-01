@@ -52,6 +52,8 @@ export const ResultsDialog = ({
     oneTimeFundings
   );
 
+  console.log('Timeline calculation results in ResultsDialog:', timelineResults);
+
   const handleDownload = () => {
     try {
       const doc = generateDebtOverviewPDF(
