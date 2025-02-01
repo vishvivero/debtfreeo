@@ -1,11 +1,10 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Calendar, Target } from "lucide-react";
-import { formatCurrency } from "@/lib/strategies";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { OneTimeFunding } from "@/lib/types/payment";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
+import { formatCurrency } from "@/lib/strategies";
 
 interface ResultsSummaryProps {
   debts: Debt[];
@@ -64,19 +63,10 @@ export const ResultsSummary = ({
           transition={{ delay: 0.1 }}
           className="bg-green-50 p-4 rounded-lg"
         >
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <h3 className="font-semibold text-green-800">Strategy Impact</h3>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Savings from using the debt payoff strategy</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="h-5 w-5 text-green-600" />
+            <h3 className="font-semibold text-green-800">Strategy Impact</h3>
+          </div>
           <p className="text-2xl font-bold text-green-600">
             {formatCurrency(timelineResults.interestSaved, currencySymbol)}
           </p>
@@ -89,19 +79,10 @@ export const ResultsSummary = ({
           transition={{ delay: 0.2 }}
           className="bg-blue-50 p-4 rounded-lg"
         >
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-blue-800">Time Saved</h3>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Months saved on your debt-free journey</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold text-blue-800">Time Saved</h3>
+          </div>
           <p className="text-2xl font-bold text-blue-600">
             {timelineResults.monthsSaved} months
           </p>
@@ -114,19 +95,10 @@ export const ResultsSummary = ({
           transition={{ delay: 0.3 }}
           className="bg-purple-50 p-4 rounded-lg"
         >
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="h-5 w-5 text-purple-600" />
-                  <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Your projected debt-free date</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="h-5 w-5 text-purple-600" />
+            <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
+          </div>
           <p className="text-2xl font-bold text-purple-600">
             {timelineResults.payoffDate.toLocaleDateString('en-US', { 
               month: 'long',
