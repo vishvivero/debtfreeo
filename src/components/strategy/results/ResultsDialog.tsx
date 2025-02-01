@@ -43,34 +43,42 @@ export const ResultsDialog = ({
     });
   }
 
-  // Calculate timeline data using the same method as TimelineMetrics
+  // Calculate total minimum payment required
+  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+
+  // Calculate timeline data using the same method as PayoffTimelineContainer
   const timelineData = calculateTimelineData(
     debts,
-    monthlyPayment,
+    totalMonthlyPayment,
     selectedStrategy,
     oneTimeFundings
   );
 
-  // Calculate metrics from timeline data
-  const baselineInterest = timelineData[timelineData.length - 1].baselineInterest;
-  const acceleratedInterest = timelineData[timelineData.length - 1].acceleratedInterest;
-  const interestSaved = Number((baselineInterest - acceleratedInterest).toFixed(2));
+  // Calculate months between start and end dates
+  const startDate = new Date();
+  const baselineLatestDate = new Date(timelineData[timelineData.length - 1].date);
+  const baselineMonths = Math.ceil((baselineLatestDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
   
-  const baselineMonths = timelineData.length;
-  const acceleratedMonths = timelineData.findIndex(d => d.acceleratedBalance === 0) + 1;
+  const acceleratedLatestDate = timelineData.find(d => d.acceleratedBalance <= 0)?.date;
+  const acceleratedMonths = acceleratedLatestDate 
+    ? Math.ceil((new Date(acceleratedLatestDate).getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
+    : baselineMonths;
+  
   const monthsSaved = Math.max(0, baselineMonths - acceleratedMonths);
-  
-  const payoffDate = new Date();
-  payoffDate.setMonth(payoffDate.getMonth() + acceleratedMonths);
+
+  // Calculate interest saved
+  const lastDataPoint = timelineData[timelineData.length - 1];
+  const interestSaved = Number((lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest).toFixed(2));
 
   console.log('ResultsDialog: Timeline calculation details:', {
-    baselineInterest,
-    acceleratedInterest,
+    baselineInterest: lastDataPoint.baselineInterest,
+    acceleratedInterest: lastDataPoint.acceleratedInterest,
     interestSaved,
     baselineMonths,
     acceleratedMonths,
     monthsSaved,
-    payoffDate: payoffDate.toISOString(),
+    payoffDate: acceleratedLatestDate,
     timelineDataPoints: timelineData.length
   });
 
@@ -82,8 +90,8 @@ export const ResultsDialog = ({
         extraPayment,
         baselineMonths,
         acceleratedMonths,
-        baselineInterest,
-        acceleratedInterest,
+        lastDataPoint.baselineInterest,
+        lastDataPoint.acceleratedInterest,
         selectedStrategy,
         oneTimeFundings,
         currencySymbol
@@ -165,7 +173,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
               </div>
               <p className="text-2xl font-bold text-purple-600">
-                {payoffDate.toLocaleDateString('en-US', { 
+                {new Date(acceleratedLatestDate || baselineLatestDate).toLocaleDateString('en-US', { 
                   month: 'long',
                   year: 'numeric'
                 })}
