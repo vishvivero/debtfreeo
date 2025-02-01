@@ -23,6 +23,7 @@ export interface OneTimeFunding {
   amount: number;
   payment_date: string;
   notes: string | null;
-  is_applied?: boolean;
-  currency_symbol?: string;
+  is_applied: boolean;
+  currency_symbol: string;
+  created_at?: string;
 }
