@@ -20,21 +20,7 @@ export const PaymentComparison = ({
   oneTimeFundings,
   currencySymbol = '£'
 }: PaymentComparisonProps) => {
-  console.log('PaymentComparison: Starting comparison calculation:', {
-    totalDebts: debts.length,
-    debtDetails: debts.map(d => ({
-      name: d.name,
-      balance: formatCurrency(d.balance, currencySymbol),
-      interestRate: `${d.interest_rate}%`,
-      minimumPayment: formatCurrency(d.minimum_payment, currencySymbol)
-    })),
-    monthlyPayment: formatCurrency(monthlyPayment, currencySymbol),
-    strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.map(f => ({
-      amount: formatCurrency(f.amount, currencySymbol),
-      date: f.payment_date
-    }))
-  });
+  console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
 
   const { timelineResults } = useDebtTimeline(
     debts,
