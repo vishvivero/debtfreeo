@@ -7,8 +7,6 @@ import { OneTimeFunding } from "@/lib/types/payment";
 import confetti from 'canvas-confetti';
 import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 import { PaymentComparison } from "./results/PaymentComparison";
-import { ResultsSummary } from "./results/ResultsSummary";
-import { NextStepsLayout } from "./results/NextStepsLayout";
 import { useToast } from "@/hooks/use-toast";
 import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 
@@ -34,7 +32,6 @@ export const ResultsDialog = ({
   currencySymbol = '£'
 }: ResultsDialogProps) => {
   const { toast } = useToast();
-  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
 
   // Trigger confetti on dialog open
   if (isOpen) {
@@ -98,22 +95,6 @@ export const ResultsDialog = ({
             debts={debts}
             monthlyPayment={monthlyPayment}
             strategy={selectedStrategy}
-            oneTimeFundings={oneTimeFundings}
-            currencySymbol={currencySymbol}
-          />
-
-          <ResultsSummary
-            debts={debts}
-            monthlyPayment={monthlyPayment}
-            strategy={selectedStrategy}
-            oneTimeFundings={oneTimeFundings}
-            currencySymbol={currencySymbol}
-          />
-
-          <NextStepsLayout
-            monthlyPayment={monthlyPayment}
-            minimumPayment={totalMinPayment}
-            extraPayment={extraPayment}
             oneTimeFundings={oneTimeFundings}
             currencySymbol={currencySymbol}
           />
