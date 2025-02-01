@@ -20,7 +20,13 @@ export const PaymentComparison = ({
   oneTimeFundings,
   currencySymbol = '£'
 }: PaymentComparisonProps) => {
-  console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
+  console.log('🔄 Starting payment comparison calculation:', {
+    debtsCount: debts.length,
+    totalDebt: debts.reduce((sum, debt) => sum + debt.balance, 0),
+    monthlyPayment,
+    strategy: strategy.name,
+    oneTimeFundings
+  });
 
   const { timelineResults } = useDebtTimeline(
     debts,
