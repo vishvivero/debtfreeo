@@ -60,14 +60,13 @@ export const ResultsDialog = ({
   const baselineLatestDate = new Date(timelineData[timelineData.length - 1].date);
   const baselineMonths = Math.ceil((baselineLatestDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
   
-  const acceleratedLatestDate = timelineData.find(d => d.acceleratedBalance <= 0)?.date;
-  const acceleratedMonths = acceleratedLatestDate 
-    ? Math.ceil((new Date(acceleratedLatestDate).getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
-    : baselineMonths;
+  const acceleratedDataPoint = timelineData.find(d => d.acceleratedBalance <= 0);
+  const acceleratedLatestDate = acceleratedDataPoint ? new Date(acceleratedDataPoint.date) : baselineLatestDate;
+  const acceleratedMonths = Math.ceil((acceleratedLatestDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
   
   const monthsSaved = Math.max(0, baselineMonths - acceleratedMonths);
 
-  // Calculate interest saved
+  // Calculate interest saved from the last data point
   const lastDataPoint = timelineData[timelineData.length - 1];
   const interestSaved = Number((lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest).toFixed(2));
 
@@ -79,7 +78,9 @@ export const ResultsDialog = ({
     acceleratedMonths,
     monthsSaved,
     payoffDate: acceleratedLatestDate,
-    timelineDataPoints: timelineData.length
+    timelineDataPoints: timelineData.length,
+    totalMinimumPayment,
+    totalMonthlyPayment
   });
 
   const handleDownload = () => {
@@ -173,7 +174,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
               </div>
               <p className="text-2xl font-bold text-purple-600">
-                {new Date(acceleratedLatestDate || baselineLatestDate).toLocaleDateString('en-US', { 
+                {acceleratedLatestDate.toLocaleDateString('en-US', { 
                   month: 'long',
                   year: 'numeric'
                 })}
@@ -189,7 +190,7 @@ export const ResultsDialog = ({
           >
             <PaymentComparison
               debts={debts}
-              monthlyPayment={monthlyPayment}
+              monthlyPayment={totalMonthlyPayment}
               strategy={selectedStrategy}
               oneTimeFundings={oneTimeFundings}
               currencySymbol={currencySymbol}
