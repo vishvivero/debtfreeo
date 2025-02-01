@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { OneTimeFunding } from "@/lib/types/payment";
+import { UnifiedPayoffCalculator } from "@/lib/services/calculations/UnifiedPayoffCalculator";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -30,6 +31,13 @@ export const PaymentComparison = ({
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
 
+  const payoffDetails = UnifiedPayoffCalculator.calculatePayoff(
+    debts,
+    monthlyPayment,
+    strategy,
+    oneTimeFundings
+  );
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="p-4 rounded-lg bg-gray-50">
@@ -44,6 +52,9 @@ export const PaymentComparison = ({
           <p className="text-sm text-gray-600">
             Avg Interest Rate: {avgInterestRate.toFixed(2)}%
           </p>
+          <p className="text-sm text-gray-600">
+            Total Interest: {formatCurrency(payoffDetails.baselineInterest, currencySymbol)}
+          </p>
         </div>
       </div>
       <div className="p-4 rounded-lg bg-emerald-50">
@@ -57,6 +68,9 @@ export const PaymentComparison = ({
           </p>
           <p className="text-sm text-emerald-600">
             Extra Payment: {formatCurrency(monthlyPayment - totalMinPayment, currencySymbol)}
+          </p>
+          <p className="text-sm text-emerald-600">
+            Total Interest: {formatCurrency(payoffDetails.acceleratedInterest, currencySymbol)}
           </p>
         </div>
       </div>

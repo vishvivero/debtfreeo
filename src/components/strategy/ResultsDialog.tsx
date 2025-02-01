@@ -9,6 +9,7 @@ import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 import { PaymentComparison } from "./results/PaymentComparison";
 import { ResultsSummary } from "./results/ResultsSummary";
 import { NextStepsLayout } from "./results/NextStepsLayout";
+import { UnifiedPayoffCalculator } from "@/lib/services/calculations/UnifiedPayoffCalculator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -33,6 +34,14 @@ export const ResultsDialog = ({
 }: ResultsDialogProps) => {
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
 
+  // Calculate payoff details using UnifiedPayoffCalculator
+  const payoffDetails = UnifiedPayoffCalculator.calculatePayoff(
+    debts,
+    monthlyPayment,
+    selectedStrategy,
+    oneTimeFundings
+  );
+
   // Trigger confetti on dialog open
   if (isOpen) {
     confetti({
@@ -47,10 +56,10 @@ export const ResultsDialog = ({
       debts,
       monthlyPayment,
       extraPayment,
-      0, // baseMonths - will be calculated in PDF generator
-      0, // optimizedMonths - will be calculated in PDF generator
-      0, // baseTotalInterest - will be calculated in PDF generator
-      0, // optimizedTotalInterest - will be calculated in PDF generator
+      payoffDetails.baselineMonths,
+      payoffDetails.acceleratedMonths,
+      payoffDetails.baselineInterest,
+      payoffDetails.acceleratedInterest,
       selectedStrategy,
       oneTimeFundings,
       currencySymbol
