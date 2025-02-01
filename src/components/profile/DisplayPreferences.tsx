@@ -15,6 +15,7 @@ export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferen
   const handleExtraPaymentsToggle = async (checked: boolean) => {
     if (!profile) return;
 
+    console.log('Toggling extra payments:', checked);
     try {
       await updateProfile.mutateAsync({
         ...profile,
@@ -28,14 +29,19 @@ export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferen
   const handleLumpSumToggle = async (checked: boolean) => {
     if (!profile) return;
 
+    console.log('Toggling lump sum payments:', checked);
     try {
+      // First update the profile preference
       await updateProfile.mutateAsync({
         ...profile,
         show_lump_sum_payments: checked,
       });
       
-      // Call the callback to handle one-time funding deletion
-      onLumpSumToggle?.(checked);
+      // Then call the callback to handle one-time funding deletion if toggle is turned off
+      if (!checked) {
+        console.log('Lump sum payments disabled, calling deletion callback');
+        onLumpSumToggle?.(checked);
+      }
     } catch (error) {
       console.error('Error updating lump sum payments preference:', error);
     }

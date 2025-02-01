@@ -14,7 +14,7 @@ export default function Profile() {
   const handleLumpSumToggle = async (enabled: boolean) => {
     if (!enabled) {
       try {
-        console.log('Deleting all one-time funding entries');
+        console.log('Attempting to delete all one-time funding entries');
         const { error } = await supabase
           .from('one_time_funding')
           .delete()
@@ -26,6 +26,7 @@ export default function Profile() {
           throw error;
         }
 
+        console.log('Successfully deleted one-time funding entries');
         toast({
           title: "Success",
           description: "All lump sum payments have been deleted",
