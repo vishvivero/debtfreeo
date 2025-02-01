@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useProfile } from "@/hooks/use-profile";
 
 interface FundingEntry {
   id: string;
@@ -21,8 +22,16 @@ export const OneTimeFundingSection = () => {
   const [fundingEntries, setFundingEntries] = useState<FundingEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { profile } = useProfile();
 
   const fetchFundingEntries = async () => {
+    // Don't fetch if lump sum payments are disabled
+    if (!profile?.show_lump_sum_payments) {
+      setFundingEntries([]);
+      setIsLoading(false);
+      return;
+    }
+
     console.log('Fetching one-time funding entries');
     try {
       const { data, error } = await supabase
@@ -73,10 +82,29 @@ export const OneTimeFundingSection = () => {
       )
       .subscribe();
 
+    // Also listen for profile changes to handle toggle updates
+    const profileChannel = supabase
+      .channel('profile_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${profile?.id}`
+        },
+        (payload) => {
+          console.log('Profile updated:', payload);
+          fetchFundingEntries();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(profileChannel);
     };
-  }, []);
+  }, [profile?.id, profile?.show_lump_sum_payments]);
 
   const handleDelete = async (id: string) => {
     console.log('Deleting funding entry:', id);
@@ -102,6 +130,11 @@ export const OneTimeFundingSection = () => {
       });
     }
   };
+
+  // If lump sum payments are disabled, don't show the section
+  if (!profile?.show_lump_sum_payments) {
+    return null;
+  }
 
   const totalFunding = fundingEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
