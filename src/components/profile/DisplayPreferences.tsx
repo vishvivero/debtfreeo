@@ -1,104 +1,78 @@
-import { Bell, CreditCard, Settings, Shield } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CurrencySelector } from "./CurrencySelector";
-import { Badge } from "@/components/ui/badge";
-import { countryCurrencies } from "@/lib/utils/currency-data";
+import { Label } from "@/components/ui/label";
+import { useProfile } from "@/hooks/use-profile";
+import { Profile } from "@/lib/types";
 
 interface DisplayPreferencesProps {
-  preferredCurrency: string;
-  onCurrencyChange: (currency: string) => void;
-  onToggleChange: (key: string, value: boolean) => void;
-  isUpdating: boolean;
+  profile: Profile | null;
+  onLumpSumToggle?: (enabled: boolean) => void;
 }
 
-export function DisplayPreferences({
-  preferredCurrency,
-  onCurrencyChange,
-  onToggleChange,
-  isUpdating
-}: DisplayPreferencesProps) {
-  console.log('DisplayPreferences - Current preferred currency:', preferredCurrency);
+export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferencesProps) => {
+  const { updateProfile } = useProfile();
 
-  // Handler to convert currency code to symbol before saving
-  const handleCurrencyChange = (currencyCode: string) => {
-    console.log('Currency code selected:', currencyCode);
-    const currency = countryCurrencies.find(c => c.code === currencyCode);
-    if (currency) {
-      console.log('Converting currency code to symbol:', currency.symbol);
-      onCurrencyChange(currency.symbol);
+  const handleExtraPaymentsToggle = async (checked: boolean) => {
+    if (!profile) return;
+
+    try {
+      await updateProfile.mutateAsync({
+        ...profile,
+        show_extra_payments: checked,
+      });
+    } catch (error) {
+      console.error('Error updating extra payments preference:', error);
     }
   };
 
-  // Convert stored symbol back to code for the selector
-  const currentCurrencyCode = (() => {
-    const currency = countryCurrencies.find(c => c.symbol === preferredCurrency);
-    console.log('Converting symbol to currency code:', {
-      symbol: preferredCurrency,
-      foundCode: currency?.code
-    });
-    return currency?.code || 'GBP';
-  })();
+  const handleLumpSumToggle = async (checked: boolean) => {
+    if (!profile) return;
+
+    try {
+      await updateProfile.mutateAsync({
+        ...profile,
+        show_lump_sum_payments: checked,
+      });
+      
+      // Call the callback to handle one-time funding deletion
+      onLumpSumToggle?.(checked);
+    } catch (error) {
+      console.error('Error updating lump sum payments preference:', error);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5 text-primary" />
-          Display Preferences
-        </CardTitle>
+        <CardTitle>Display Preferences</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <CurrencySelector
-            value={currentCurrencyCode}
-            onValueChange={handleCurrencyChange}
-            disabled={isUpdating}
-          />
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-                <span>Show Notifications</span>
-              </div>
-              <Switch 
-                defaultChecked 
-                onCheckedChange={(checked) => onToggleChange('notifications', checked)}
-                disabled={isUpdating}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <div className="flex items-center gap-2">
-                  <span>Show Payment Balance</span>
-                  <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
-                </div>
-              </div>
-              <Switch 
-                disabled={true}
-                checked={false}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <div className="flex items-center gap-2">
-                  <span>Show Debt Balance</span>
-                  <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
-                </div>
-              </div>
-              <Switch 
-                disabled={true}
-                checked={false}
-              />
-            </div>
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label>Show Extra Payments</Label>
+            <p className="text-sm text-muted-foreground">
+              Display extra payment options in debt management
+            </p>
           </div>
+          <Switch
+            checked={profile?.show_extra_payments}
+            onCheckedChange={handleExtraPaymentsToggle}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label>Add Lump Sum Payments</Label>
+            <p className="text-sm text-muted-foreground">
+              Enable one-time funding options for faster debt payoff
+            </p>
+          </div>
+          <Switch
+            checked={profile?.show_lump_sum_payments}
+            onCheckedChange={handleLumpSumToggle}
+          />
         </div>
       </CardContent>
     </Card>
   );
-}
+};

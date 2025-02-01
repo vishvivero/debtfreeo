@@ -1,75 +1,67 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useProfile } from "@/hooks/use-profile";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
 import { AccountInfoCard } from "@/components/profile/AccountInfoCard";
 import { DisplayPreferences } from "@/components/profile/DisplayPreferences";
 import { DangerZoneCard } from "@/components/profile/DangerZoneCard";
+import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
-  const { profile, updateProfile } = useProfile();
+  const { profile, isLoading: isProfileLoading } = useProfile();
   const { toast } = useToast();
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(true);
 
-  const handleCurrencyChange = async (currency: string) => {
-    try {
-      setIsUpdating(true);
-      await updateProfile.mutateAsync({
-        preferred_currency: currency
-      });
-      if (showNotifications) {
+  const handleLumpSumToggle = async (enabled: boolean) => {
+    if (!enabled) {
+      try {
+        console.log('Deleting all one-time funding entries');
+        const { error } = await supabase
+          .from('one_time_funding')
+          .delete()
+          .eq('user_id', profile?.id)
+          .eq('is_applied', false);
+
+        if (error) {
+          console.error('Error deleting one-time funding entries:', error);
+          throw error;
+        }
+
         toast({
-          title: "Currency Updated",
-          description: "Your preferred currency has been updated successfully."
+          title: "Success",
+          description: "All lump sum payments have been deleted",
         });
-      }
-    } catch (error) {
-      console.error("Error updating currency:", error);
-      if (showNotifications) {
+      } catch (error) {
+        console.error('Failed to delete one-time funding entries:', error);
         toast({
           title: "Error",
-          description: "Failed to update currency preference",
-          variant: "destructive"
+          description: "Failed to delete lump sum payments",
+          variant: "destructive",
         });
       }
-    } finally {
-      setIsUpdating(false);
     }
   };
 
-  const handleToggleChange = async (key: string, value: boolean) => {
-    console.log(`Toggle ${key} changed to:`, value);
-    if (key === 'notifications') {
-      setShowNotifications(value);
-    }
-    if (showNotifications) {
-      toast({
-        title: "Preference Updated",
-        description: `${key} preference has been updated.`
-      });
-    }
-  };
+  if (isProfileLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="container py-8">
-        <h1 className="text-3xl font-bold mb-6">Profile Settings</h1>
-        <p className="text-muted-foreground mb-8">
-          Manage your account settings and preferences
-        </p>
-
-        <div className="grid gap-6">
-          <AccountInfoCard />
-          
-          <DisplayPreferences
-            preferredCurrency={profile?.preferred_currency || "GBP"}
-            onCurrencyChange={handleCurrencyChange}
-            onToggleChange={handleToggleChange}
-            isUpdating={isUpdating}
+      <div className="container max-w-4xl py-8 space-y-8">
+        <h1 className="text-3xl font-bold">Profile Settings</h1>
+        <div className="space-y-6">
+          <AccountInfoCard profile={profile} />
+          <DisplayPreferences 
+            profile={profile} 
+            onLumpSumToggle={handleLumpSumToggle}
           />
-
-          <DangerZoneCard showNotifications={showNotifications} />
+          <DangerZoneCard />
         </div>
       </div>
     </MainLayout>
