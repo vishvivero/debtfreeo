@@ -43,11 +43,10 @@ export const PaymentComparison = ({
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
 
-  console.log('PaymentComparison: Calculated values:', {
-    totalDebt,
-    totalMinPayment,
+  console.log('PaymentComparison: Using timeline results:', {
     baselineInterest: timelineResults.baselineInterest,
-    acceleratedInterest: timelineResults.acceleratedInterest
+    acceleratedInterest: timelineResults.acceleratedInterest,
+    interestSaved: timelineResults.interestSaved
   });
 
   return (
