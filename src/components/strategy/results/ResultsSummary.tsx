@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
+import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 
 interface ResultsSummaryProps {
   debts: Debt[];
@@ -22,22 +22,30 @@ export const ResultsSummary = ({
   oneTimeFundings,
   currencySymbol = '£'
 }: ResultsSummaryProps) => {
-  console.log('ResultsSummary rendered with:', {
+  console.log('ResultsSummary: Rendering with:', {
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.length,
-    currencySymbol
+    oneTimeFundings: oneTimeFundings.length
   });
 
-  const timelineResults = DebtTimelineCalculator.calculateTimeline(
+  const { timelineResults } = useDebtTimeline(
     debts,
     monthlyPayment,
     strategy,
     oneTimeFundings
   );
 
-  console.log('Timeline calculation results in ResultsSummary:', timelineResults);
+  if (!timelineResults) {
+    console.log('ResultsSummary: No timeline results available');
+    return null;
+  }
+
+  console.log('ResultsSummary: Using timeline results:', {
+    interestSaved: timelineResults.interestSaved,
+    monthsSaved: timelineResults.monthsSaved,
+    payoffDate: timelineResults.payoffDate
+  });
 
   return (
     <div className="space-y-6">

@@ -3,7 +3,7 @@ import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
+import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -20,25 +20,35 @@ export const PaymentComparison = ({
   oneTimeFundings,
   currencySymbol = '£'
 }: PaymentComparisonProps) => {
-  console.log('Rendering PaymentComparison with:', {
+  console.log('PaymentComparison: Rendering with:', {
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
     oneTimeFundings: oneTimeFundings.length
   });
 
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
-
-  const timelineResults = DebtTimelineCalculator.calculateTimeline(
+  const { timelineResults } = useDebtTimeline(
     debts,
     monthlyPayment,
     strategy,
     oneTimeFundings
   );
 
-  console.log('Timeline calculation results in PaymentComparison:', timelineResults);
+  if (!timelineResults) {
+    console.log('PaymentComparison: No timeline results available');
+    return null;
+  }
+
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
+
+  console.log('PaymentComparison: Calculated values:', {
+    totalDebt,
+    totalMinPayment,
+    baselineInterest: timelineResults.baselineInterest,
+    acceleratedInterest: timelineResults.acceleratedInterest
+  });
 
   return (
     <div className="grid grid-cols-2 gap-4">
