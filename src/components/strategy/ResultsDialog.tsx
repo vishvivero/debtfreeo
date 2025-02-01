@@ -6,7 +6,7 @@ import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import confetti from 'canvas-confetti';
 import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
-import { PaymentComparison } from "./results/PaymentComparison";
+import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
 import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 import { motion } from "framer-motion";
