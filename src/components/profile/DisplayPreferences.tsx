@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useProfile } from "@/hooks/use-profile";
 import { Profile } from "@/lib/types";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface DisplayPreferencesProps {
   profile: Profile | null;
@@ -11,6 +14,8 @@ interface DisplayPreferencesProps {
 
 export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferencesProps) => {
   const { updateProfile } = useProfile();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleExtraPaymentsToggle = async (checked: boolean) => {
     if (!profile) return;
@@ -27,7 +32,7 @@ export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferen
   };
 
   const handleLumpSumToggle = async (checked: boolean) => {
-    if (!profile) return;
+    if (!profile || !user?.id) return;
 
     console.log('Toggling lump sum payments:', checked);
     try {
@@ -37,13 +42,37 @@ export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferen
         show_lump_sum_payments: checked,
       });
       
-      // Then call the callback to handle one-time funding deletion if toggle is turned off
+      // If toggle is turned off, delete all pending one-time funding entries
       if (!checked) {
-        console.log('Lump sum payments disabled, calling deletion callback');
-        onLumpSumToggle?.(checked);
+        console.log('Lump sum payments disabled, deleting entries for user:', user.id);
+        const { error, count } = await supabase
+          .from('one_time_funding')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('is_applied', false)
+          .select('count');
+
+        if (error) {
+          console.error('Error deleting one-time funding entries:', error);
+          throw error;
+        }
+
+        console.log('Successfully deleted one-time funding entries, count:', count);
+        toast({
+          title: "Success",
+          description: "All pending lump sum payments have been deleted",
+        });
       }
+      
+      // Call the callback to handle any additional cleanup
+      onLumpSumToggle?.(checked);
     } catch (error) {
       console.error('Error updating lump sum payments preference:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update lump sum payment settings",
+        variant: "destructive",
+      });
     }
   };
 
