@@ -8,7 +8,7 @@ import {
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { strategies } from "@/lib/strategies";
-import { UnifiedInterestCalculator } from "@/lib/services/calculations/UnifiedInterestCalculator";
+import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 import {
   Tooltip,
   TooltipContent,
@@ -22,7 +22,9 @@ import { useState } from "react";
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
+  const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
+  const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
 
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
@@ -41,47 +43,47 @@ export const DebtComparison = () => {
       };
     }
 
-    console.log('DebtComparison: Starting calculation with:', {
-      debtsCount: debts.length,
-      monthlyPayment: profile.monthly_payment,
-      strategy: profile.selected_strategy,
-      oneTimeFundingsCount: oneTimeFundings.length
-    });
+    console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
-    const results = UnifiedInterestCalculator.calculateInterest(
+    // Calculate minimum payments total
+    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+    
+    // Get timeline data
+    const timelineData = calculateTimelineData(
       debts,
       profile.monthly_payment,
       selectedStrategy,
       oneTimeFundings
     );
 
-    // Calculate payment efficiency
-    const totalPayment = results.baselineInterest + debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const interestPercentage = (results.baselineInterest / totalPayment) * 100;
+    // Get the last data point for final balances and interest
+    const lastDataPoint = timelineData[timelineData.length - 1];
+    
+    // Find when accelerated balance reaches 0
+    const acceleratedPayoffPoint = timelineData.find(d => d.acceleratedBalance <= 0);
+    const optimizedPayoffDate = acceleratedPayoffPoint 
+      ? new Date(acceleratedPayoffPoint.date)
+      : new Date(lastDataPoint.date);
+
+    // Calculate payment efficiency from original timeline
+    const totalPayment = lastDataPoint.baselineInterest + debts.reduce((sum, debt) => sum + debt.balance, 0);
+    const interestPercentage = (lastDataPoint.baselineInterest / totalPayment) * 100;
     const principalPercentage = 100 - interestPercentage;
 
     // Calculate months for baseline scenario
-    const baselineMonths = Math.ceil(results.monthsSaved);
+    const baselineMonths = timelineData.length;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
 
-    console.log('DebtComparison: Calculation complete:', {
-      baselineInterest: results.baselineInterest,
-      acceleratedInterest: results.acceleratedInterest,
-      interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved,
-      payoffDate: results.payoffDate
-    });
-
     return {
       totalDebts: debts.length,
-      originalPayoffDate: new Date(results.payoffDate),
-      originalTotalInterest: results.baselineInterest,
-      optimizedPayoffDate: results.payoffDate,
-      optimizedTotalInterest: results.acceleratedInterest,
-      moneySaved: results.interestSaved,
+      originalPayoffDate: new Date(lastDataPoint.date),
+      originalTotalInterest: lastDataPoint.baselineInterest,
+      optimizedPayoffDate,
+      optimizedTotalInterest: lastDataPoint.acceleratedInterest,
+      moneySaved: lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest,
       baselineYears,
       baselineMonths: remainingMonths,
       principalPercentage,
