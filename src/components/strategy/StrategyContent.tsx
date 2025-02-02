@@ -15,7 +15,9 @@ import { strategies } from "@/lib/strategies";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DecimalToggle } from "@/components/DecimalToggle";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
 
 interface StrategyContentProps {
@@ -47,21 +49,21 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
 
-  // Initialize strategy from profile only once when component mounts
+  // Initialize strategy from profile
   useEffect(() => {
     if (profile?.selected_strategy) {
       const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
-      if (savedStrategy && savedStrategy.id !== selectedStrategy.id) {
+      if (savedStrategy) {
         console.log('Initializing strategy from profile:', savedStrategy.id);
         setSelectedStrategy(savedStrategy);
         parentOnSelectStrategy(savedStrategy);
       }
     }
-  }, [profile?.selected_strategy]); // Only depend on profile.selected_strategy
+  }, [profile, parentOnSelectStrategy]);
 
-  // Initialize UI preferences from profile
   useEffect(() => {
     if (profile) {
       setShowExtraPayment(profile.show_extra_payments || false);
@@ -76,18 +78,12 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
 
   const handleStrategyChange = async (strategy: Strategy) => {
     console.log('Changing strategy to:', strategy.id);
-    
-    if (strategy.id === selectedStrategy.id) {
-      setIsStrategyDialogOpen(false);
-      return; // Don't update if it's the same strategy
-    }
-
     setSelectedStrategy(strategy);
     parentOnSelectStrategy(strategy);
     
     if (profile) {
       try {
-        await updateProfile.mutate({
+        await updateProfile.mutateAsync({
           selected_strategy: strategy.id
         });
         toast({
@@ -111,7 +107,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     setShowExtraPayment(checked);
     if (profile) {
       try {
-        await updateProfile.mutate({
+        await updateProfile.mutateAsync({
           show_extra_payments: checked
         });
       } catch (error) {
@@ -128,9 +124,33 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const handleOneTimeFundingToggle = async (checked: boolean) => {
     console.log('Toggling lump sum payments:', checked);
     setShowOneTimeFunding(checked);
+    if (!checked && user) {
+      try {
+        const { error } = await supabase
+          .from('one_time_funding')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('is_applied', false);
+
+        if (error) throw error;
+
+        toast({
+          title: "One-time fundings deleted",
+          description: "All pending one-time fundings have been removed",
+        });
+      } catch (error) {
+        console.error('Error deleting one-time fundings:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete one-time fundings",
+          variant: "destructive",
+        });
+      }
+    }
+    
     if (profile) {
       try {
-        await updateProfile.mutate({
+        await updateProfile.mutateAsync({
           show_lump_sum_payments: checked
         });
       } catch (error) {
@@ -256,7 +276,10 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             <StrategySelector
               strategies={strategies}
               selectedStrategy={selectedStrategy}
-              onSelectStrategy={handleStrategyChange}
+              onSelectStrategy={(strategy) => {
+                onSelectStrategy(strategy);
+                setIsStrategyDialogOpen(false);
+              }}
             />
           </div>
         </DialogContent>
