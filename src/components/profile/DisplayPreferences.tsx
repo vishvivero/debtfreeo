@@ -42,25 +42,23 @@ export const DisplayPreferences = ({ profile, onLumpSumToggle }: DisplayPreferen
         show_lump_sum_payments: checked,
       });
       
-      // If toggle is turned off, delete all pending one-time funding entries
+      // If toggle is turned off, delete all one-time funding entries
       if (!checked) {
-        console.log('Lump sum payments disabled, deleting entries for user:', user.id);
-        const { error, count } = await supabase
+        console.log('Lump sum payments disabled, deleting all entries for user:', user.id);
+        const { error } = await supabase
           .from('one_time_funding')
           .delete()
-          .eq('user_id', user.id)
-          .eq('is_applied', false)
-          .select('count');
+          .eq('user_id', user.id);
 
         if (error) {
           console.error('Error deleting one-time funding entries:', error);
           throw error;
         }
 
-        console.log('Successfully deleted one-time funding entries, count:', count);
+        console.log('Successfully deleted all one-time funding entries');
         toast({
           title: "Success",
-          description: "All pending lump sum payments have been deleted",
+          description: "All lump sum payments have been deleted",
         });
       }
       
