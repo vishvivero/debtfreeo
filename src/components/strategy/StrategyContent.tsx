@@ -276,10 +276,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             <StrategySelector
               strategies={strategies}
               selectedStrategy={selectedStrategy}
-              onSelectStrategy={(strategy) => {
-                onSelectStrategy(strategy);
-                setIsStrategyDialogOpen(false);
-              }}
+              onSelectStrategy={handleStrategyChange}
             />
           </div>
         </DialogContent>
