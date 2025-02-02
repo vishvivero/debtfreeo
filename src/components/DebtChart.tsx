@@ -51,7 +51,15 @@ export const DebtChart = ({
   });
 
   try {
-    const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
+    // Update to use the selected strategy
+    const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
+      debts,
+      monthlyPayment,
+      selectedStrategy,
+      oneTimeFundings
+    );
+
+    const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings, selectedStrategy);
     
     if (!chartData || chartData.length === 0) {
       console.log('No chart data generated');

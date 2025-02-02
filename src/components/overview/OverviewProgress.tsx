@@ -4,6 +4,7 @@ import { useDebts } from "@/hooks/use-debts";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { strategies } from "@/lib/strategies";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { useProfile } from "@/hooks/use-profile";
 
 interface OverviewProgressProps {
   totalDebt: number;
@@ -24,10 +25,13 @@ export const OverviewProgress = ({
       return undefined;
     }
 
+    const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
+    console.log('Calculating payoff with strategy:', selectedStrategy.name);
+
     const payoffDetails = calculatePayoffDetails(
       debts,
       profile.monthly_payment,
-      strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
+      selectedStrategy,
       oneTimeFundings
     );
 
