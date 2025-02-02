@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencySelector } from "./CurrencySelector";
 import { Badge } from "@/components/ui/badge";
 import { countryCurrencies } from "@/lib/utils/currency-data";
+import { useCallback } from "react";
 
 interface DisplayPreferencesProps {
   preferredCurrency: string;
@@ -18,17 +19,17 @@ export function DisplayPreferences({
   onToggleChange,
   isUpdating
 }: DisplayPreferencesProps) {
-  console.log('DisplayPreferences - Current preferred currency:', preferredCurrency);
+  console.log('DisplayPreferences render - Current preferred currency:', preferredCurrency);
 
-  // Handler to convert currency code to symbol before saving
-  const handleCurrencyChange = (currencyCode: string) => {
+  // Memoize the currency change handler
+  const handleCurrencyChange = useCallback((currencyCode: string) => {
     console.log('Currency code selected:', currencyCode);
     const currency = countryCurrencies.find(c => c.code === currencyCode);
     if (currency) {
       console.log('Converting currency code to symbol:', currency.symbol);
       onCurrencyChange(currency.symbol);
     }
-  };
+  }, [onCurrencyChange]);
 
   // Convert stored symbol back to code for the selector
   const currentCurrencyCode = (() => {
@@ -39,6 +40,12 @@ export function DisplayPreferences({
     });
     return currency?.code || 'GBP';
   })();
+
+  // Memoize the toggle change handler
+  const handleToggleChange = useCallback((key: string, checked: boolean) => {
+    console.log('Toggle changed:', { key, checked });
+    onToggleChange(key, checked);
+  }, [onToggleChange]);
 
   return (
     <Card>
@@ -64,7 +71,7 @@ export function DisplayPreferences({
               </div>
               <Switch 
                 defaultChecked 
-                onCheckedChange={(checked) => onToggleChange('notifications', checked)}
+                onCheckedChange={(checked) => handleToggleChange('notifications', checked)}
                 disabled={isUpdating}
               />
             </div>
