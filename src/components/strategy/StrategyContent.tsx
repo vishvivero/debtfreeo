@@ -32,10 +32,10 @@ interface StrategyContentProps {
 
 export const StrategyContent: React.FC<StrategyContentProps> = ({
   debts,
-  selectedStrategy: initialStrategy,
+  selectedStrategy,
   onUpdateDebt,
   onDeleteDebt,
-  onSelectStrategy: parentOnSelectStrategy,
+  onSelectStrategy,
   preferredCurrency,
   totalDebtValue
 }) => {
@@ -50,19 +50,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
-
-  // Initialize strategy from profile
-  useEffect(() => {
-    if (profile?.selected_strategy) {
-      const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
-      if (savedStrategy) {
-        console.log('Initializing strategy from profile:', savedStrategy.id);
-        setSelectedStrategy(savedStrategy);
-        parentOnSelectStrategy(savedStrategy);
-      }
-    }
-  }, [profile, parentOnSelectStrategy]);
 
   useEffect(() => {
     if (profile) {
@@ -74,32 +61,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const handleResultsClick = () => {
     setHasViewedResults(true);
     setIsResultsDialogOpen(true);
-  };
-
-  const handleStrategyChange = async (strategy: Strategy) => {
-    console.log('Changing strategy to:', strategy.id);
-    setSelectedStrategy(strategy);
-    parentOnSelectStrategy(strategy);
-    
-    if (profile) {
-      try {
-        await updateProfile.mutateAsync({
-          selected_strategy: strategy.id
-        });
-        toast({
-          title: "Strategy Updated",
-          description: `Your debt repayment strategy has been updated to ${strategy.name}`,
-        });
-      } catch (error) {
-        console.error('Error updating strategy preference:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save strategy preference",
-          variant: "destructive",
-        });
-      }
-    }
-    setIsStrategyDialogOpen(false);
   };
 
   const handleExtraPaymentToggle = async (checked: boolean) => {
@@ -276,7 +237,10 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             <StrategySelector
               strategies={strategies}
               selectedStrategy={selectedStrategy}
-              onSelectStrategy={handleStrategyChange}
+              onSelectStrategy={(strategy) => {
+                onSelectStrategy(strategy);
+                setIsStrategyDialogOpen(false);
+              }}
             />
           </div>
         </DialogContent>
