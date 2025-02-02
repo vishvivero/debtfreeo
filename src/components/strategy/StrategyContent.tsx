@@ -43,8 +43,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile, updateProfile } = useProfile();
-  const [showExtraPayment, setShowExtraPayment] = useState(profile?.show_extra_payments || false);
-  const [showOneTimeFunding, setShowOneTimeFunding] = useState(profile?.show_lump_sum_payments || false);
+  const [showExtraPayment, setShowExtraPayment] = useState(profile?.show_extra_payments ?? false);
+  const [showOneTimeFunding, setShowOneTimeFunding] = useState(profile?.show_lump_sum_payments ?? false);
   const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
@@ -53,8 +53,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
 
   useEffect(() => {
     if (profile) {
-      setShowExtraPayment(profile.show_extra_payments || false);
-      setShowOneTimeFunding(profile.show_lump_sum_payments || false);
+      setShowExtraPayment(profile.show_extra_payments ?? false);
+      setShowOneTimeFunding(profile.show_lump_sum_payments ?? false);
     }
   }, [profile]);
 
