@@ -51,15 +51,21 @@ export const DebtChart = ({
   });
 
   try {
+    // Convert string dates to Date objects for the service
+    const formattedFundings = oneTimeFundings.map(funding => ({
+      ...funding,
+      payment_date: new Date(funding.payment_date)
+    }));
+
     // Update to use the selected strategy
     const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       monthlyPayment,
       selectedStrategy,
-      oneTimeFundings
+      formattedFundings
     );
 
-    const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings, selectedStrategy);
+    const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
     
     if (!chartData || chartData.length === 0) {
       console.log('No chart data generated');
