@@ -51,6 +51,17 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Initialize strategy from profile
+  useEffect(() => {
+    if (profile?.selected_strategy) {
+      const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
+      if (savedStrategy && savedStrategy.id !== selectedStrategy.id) {
+        console.log('Loading saved strategy:', savedStrategy.name);
+        onSelectStrategy(savedStrategy);
+      }
+    }
+  }, [profile?.selected_strategy, onSelectStrategy, selectedStrategy.id]);
+
   useEffect(() => {
     if (profile) {
       setShowExtraPayment(profile.show_extra_payments ?? false);
@@ -119,6 +130,30 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         toast({
           title: "Error",
           description: "Failed to save your preference",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleStrategyChange = async (strategy: Strategy) => {
+    onSelectStrategy(strategy);
+    setIsStrategyDialogOpen(false);
+
+    if (profile) {
+      try {
+        await updateProfile.mutateAsync({
+          selected_strategy: strategy.id
+        });
+        toast({
+          title: "Strategy Updated",
+          description: `Your debt payoff strategy has been changed to ${strategy.name}`,
+        });
+      } catch (error) {
+        console.error('Error updating strategy preference:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save your strategy preference",
           variant: "destructive",
         });
       }
@@ -237,10 +272,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             <StrategySelector
               strategies={strategies}
               selectedStrategy={selectedStrategy}
-              onSelectStrategy={(strategy) => {
-                onSelectStrategy(strategy);
-                setIsStrategyDialogOpen(false);
-              }}
+              onSelectStrategy={handleStrategyChange}
             />
           </div>
         </DialogContent>
