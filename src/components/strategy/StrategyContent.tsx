@@ -43,8 +43,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile, updateProfile } = useProfile();
-  const [showExtraPayment, setShowExtraPayment] = useState(profile?.show_extra_payments ?? false);
-  const [showOneTimeFunding, setShowOneTimeFunding] = useState(profile?.show_lump_sum_payments ?? false);
+  const [showExtraPayment, setShowExtraPayment] = useState(false);
+  const [showOneTimeFunding, setShowOneTimeFunding] = useState(false);
   const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
@@ -60,8 +60,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         onSelectStrategy(savedStrategy);
       }
     }
-  }, [profile?.selected_strategy, onSelectStrategy, selectedStrategy.id]);
+  }, [profile?.selected_strategy]); // Remove selectedStrategy.id from dependencies
 
+  // Initialize UI preferences from profile
   useEffect(() => {
     if (profile) {
       setShowExtraPayment(profile.show_extra_payments ?? false);
