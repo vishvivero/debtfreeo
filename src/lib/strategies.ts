@@ -7,6 +7,7 @@ export interface Strategy {
   name: string;
   description: string;
   calculate: (debts: Debt[]) => Debt[];
+  useRedistribution?: boolean;
 }
 
 export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number => {
@@ -51,6 +52,7 @@ const avalancheStrategy: Strategy = {
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
   },
+  useRedistribution: true
 };
 
 const snowballStrategy: Strategy = {
@@ -60,6 +62,7 @@ const snowballStrategy: Strategy = {
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => a.balance - b.balance);
   },
+  useRedistribution: true
 };
 
 const balanceRatioStrategy: Strategy = {
@@ -73,10 +76,22 @@ const balanceRatioStrategy: Strategy = {
       return ratioB - ratioA;
     });
   },
+  useRedistribution: true
+};
+
+const noRedistributionStrategy: Strategy = {
+  id: 'no-redistribution',
+  name: "Fixed Payment Method",
+  description: "Keep payments consistent without redistributing paid off amounts",
+  calculate: (debts: Debt[]) => {
+    return [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
+  },
+  useRedistribution: false
 };
 
 export const strategies: Strategy[] = [
   avalancheStrategy,
   snowballStrategy,
   balanceRatioStrategy,
+  noRedistributionStrategy
 ];

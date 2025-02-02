@@ -25,6 +25,7 @@ export const calculateTimelineData = (
     totalDebts: debts.length,
     totalMonthlyPayment,
     strategy: strategy.name,
+    useRedistribution: strategy.useRedistribution,
     oneTimeFundings: oneTimeFundings.length
   });
 
@@ -44,6 +45,7 @@ export const calculateTimelineData = (
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   let month = 0;
   const maxMonths = 360; // 30 years cap
+  let releasedPayments = 0;
 
   while (month < maxMonths) {
     const currentDate = addMonths(startDate, month);
@@ -82,6 +84,11 @@ export const calculateTimelineData = (
     let monthlyAcceleratedInterest = 0;
     let remainingAcceleratedPayment = totalMonthlyPayment + oneTimeFundingAmount;
 
+    if (strategy.useRedistribution) {
+      remainingAcceleratedPayment += releasedPayments;
+    }
+    releasedPayments = 0;
+
     // First apply minimum payments
     debts.forEach(debt => {
       const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
@@ -94,6 +101,11 @@ export const calculateTimelineData = (
         
         const newBalance = acceleratedBalance + acceleratedInterest - minPayment;
         acceleratedBalances.set(debt.id, newBalance);
+
+        // Track released payments if debt is paid off and redistribution is enabled
+        if (newBalance <= 0 && strategy.useRedistribution) {
+          releasedPayments += debt.minimum_payment;
+        }
       }
     });
 
