@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { FileDown } from "lucide-react";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "./ui/use-toast";
-import { OneTimeFunding } from "@/lib/types/payment";
+import { countryCurrencies } from "@/lib/utils/currency-data";
 
 interface DebtTableContainerProps {
   debts: Debt[];
@@ -32,7 +32,7 @@ export const DebtTableContainer = ({
 }: DebtTableContainerProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
-  const [oneTimeFundings, setOneTimeFundings] = useState<OneTimeFunding[]>([]);
+  const [oneTimeFundings, setOneTimeFundings] = useState<{ amount: number; payment_date: Date }[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -54,14 +54,9 @@ export const DebtTableContainer = ({
       return;
     }
 
-    const mappedFundings: OneTimeFunding[] = data.map(funding => ({
-      id: funding.id,
-      user_id: funding.user_id,
+    const mappedFundings = data.map(funding => ({
       amount: funding.amount,
-      payment_date: funding.payment_date,
-      notes: funding.notes,
-      is_applied: funding.is_applied,
-      currency_symbol: funding.currency_symbol
+      payment_date: new Date(funding.payment_date)
     }));
     
     console.log('Updated one-time fundings:', mappedFundings);
@@ -128,14 +123,10 @@ export const DebtTableContainer = ({
   const sortedDebts = strategy.calculate([...debts]);
   console.log('DebtTableContainer: Debts sorted according to strategy:', strategy.name);
   
+  // Convert Date objects to ISO strings before passing to calculatePayoffDetails
   const formattedFundings = oneTimeFundings.map(funding => ({
-    id: funding.id,
-    user_id: funding.user_id,
     amount: funding.amount,
-    payment_date: funding.payment_date,
-    notes: funding.notes,
-    is_applied: funding.is_applied,
-    currency_symbol: funding.currency_symbol
+    payment_date: funding.payment_date.toISOString()
   }));
   
   const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy, formattedFundings);
