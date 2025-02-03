@@ -51,7 +51,6 @@ export const DebtChart = ({
   });
 
   try {
-    // Update to use the selected strategy
     const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       monthlyPayment,
