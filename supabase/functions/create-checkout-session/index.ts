@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from 'https://esm.sh/stripe@14.21.0'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,82 +13,51 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-  )
-
   try {
-    // Get the session or user object
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data } = await supabaseClient.auth.getUser(token)
-    const user = data.user
-    const email = user?.email
-
-    if (!email) {
-      throw new Error('No email found')
-    }
-
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
+      httpClient: Stripe.createFetchHttpClient(),
     })
 
-    const customers = await stripe.customers.list({
-      email: email,
-      limit: 1
-    })
+    const { priceId, returnUrl } = await req.json()
+    
+    console.log('Creating checkout session with:', { priceId, returnUrl })
 
-    // Replace this with your actual Stripe Price ID
-    const price_id = "price_1Qi5leJIds4GFBpIiQeQkakV"
-
-    let customer_id = undefined
-    if (customers.data.length > 0) {
-      customer_id = customers.data[0].id
-      // check if already subscribed to this price
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customers.data[0].id,
-        status: 'active',
-        price: price_id,
-        limit: 1
-      })
-
-      if (subscriptions.data.length > 0) {
-        throw new Error("Already subscribed to Pro plan")
-      }
-    }
-
-    console.log('Creating checkout session...')
     const session = await stripe.checkout.sessions.create({
-      customer: customer_id,
-      customer_email: customer_id ? undefined : email,
+      payment_method_types: ['card'],
       line_items: [
         {
-          price: price_id,
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/overview?success=true`,
-      cancel_url: `${req.headers.get('origin')}/pricing?canceled=true`,
+      success_url: `${returnUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${returnUrl}/cancel`,
     })
 
-    console.log('Checkout session created:', session.id)
+    console.log('Checkout session created:', session.url)
+
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      },
     )
   } catch (error) {
     console.error('Error creating checkout session:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
+        status: 400,
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      },
     )
   }
 })
