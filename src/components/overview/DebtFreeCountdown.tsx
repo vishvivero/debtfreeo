@@ -27,7 +27,7 @@ export const DebtFreeCountdown = () => {
     // Convert oneTimeFundings to the correct format with Date objects
     const formattedFundings = oneTimeFundings.map(funding => ({
       amount: funding.amount,
-      payment_date: new Date(funding.payment_date)
+      payment_date: funding.payment_date // Keep as string
     }));
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
