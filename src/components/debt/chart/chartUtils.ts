@@ -50,17 +50,11 @@ export const generateChartData = (
     }))
   });
 
-  // Convert string dates to Date objects
-  const formattedFundings = oneTimeFundings.map(funding => ({
-    ...funding,
-    payment_date: new Date(funding.payment_date)
-  }));
-
   const payoffDetails = calculatePayoffDetails(
     debts,
     monthlyPayment,
     strategies.find(s => s.id === 'avalanche') || strategies[0],
-    formattedFundings
+    oneTimeFundings
   );
 
   const data: ChartData[] = [];

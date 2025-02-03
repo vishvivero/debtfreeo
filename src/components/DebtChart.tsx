@@ -51,18 +51,12 @@ export const DebtChart = ({
   });
 
   try {
-    // Convert string dates to Date objects for the service
-    const formattedFundings = oneTimeFundings.map(funding => ({
-      ...funding,
-      payment_date: new Date(funding.payment_date)
-    }));
-
     // Update to use the selected strategy
     const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       monthlyPayment,
       selectedStrategy,
-      formattedFundings
+      oneTimeFundings
     );
 
     const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
