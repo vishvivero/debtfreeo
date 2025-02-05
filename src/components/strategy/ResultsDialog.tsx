@@ -11,6 +11,7 @@ import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimeline
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
+import { ScoreInsightsSection } from "./sections/ScoreInsightsSection";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export const ResultsDialog = ({
   currencySymbol = '£'
 }: ResultsDialogProps) => {
   const { toast } = useToast();
-  const [showTimeline, setShowTimeline] = useState(false);
+  const [currentView, setCurrentView] = useState<'initial' | 'timeline' | 'insights'>('initial');
 
   // Trigger confetti on dialog open
   if (isOpen) {
@@ -54,9 +55,47 @@ export const ResultsDialog = ({
 
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
 
-  if (showTimeline) {
+  const handleNext = () => {
+    if (currentView === 'initial') {
+      setCurrentView('timeline');
+    } else if (currentView === 'timeline') {
+      setCurrentView('insights');
+    }
+  };
+
+  const handleClose = () => {
+    setCurrentView('initial');
+    onClose();
+  };
+
+  if (currentView === 'insights') {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              Your Debt Score Insights
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <ScoreInsightsSection />
+            <div className="mt-6 flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={handleClose}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (currentView === 'timeline') {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
@@ -68,12 +107,12 @@ export const ResultsDialog = ({
               debts={debts}
               extraPayment={extraPayment}
             />
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end gap-4">
               <Button 
-                variant="outline" 
-                onClick={onClose}
+                className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
+                onClick={handleNext}
               >
-                Close
+                Next
               </Button>
             </div>
           </div>
@@ -83,7 +122,7 @@ export const ResultsDialog = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader className="text-center space-y-4">
           <motion.div
@@ -174,14 +213,14 @@ export const ResultsDialog = ({
           >
             <Button 
               variant="outline" 
-              onClick={onClose}
+              onClick={handleClose}
               className="w-full"
             >
               Close
             </Button>
             <Button 
               className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
-              onClick={() => setShowTimeline(true)}
+              onClick={handleNext}
             >
               Next
             </Button>
