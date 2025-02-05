@@ -108,7 +108,7 @@ export const BlogList = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-4xl mx-auto space-y-4 px-4">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-6">
@@ -124,7 +124,7 @@ export const BlogList = () => {
 
   if (error) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="mx-4">
         <AlertDescription>
           Error loading blog posts: {error instanceof Error ? error.message : "Unknown error"}
         </AlertDescription>
@@ -136,9 +136,9 @@ export const BlogList = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto space-y-8"
+      className="max-w-4xl mx-auto space-y-8 px-4"
     >
-      <div className="bg-white rounded-2xl p-8 shadow-sm space-y-6">
+      <div className="bg-white rounded-2xl p-4 sm:p-8 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <Input
             type="text"
@@ -173,54 +173,48 @@ export const BlogList = () => {
           </Alert>
         ) : (
           <div className="space-y-6">
-            {blogs?.map((blog) => {
-              console.log("Rendering blog card:", blog.slug);
-              return (
-                <Link 
-                  key={blog.id} 
-                  to={`/blog/post/${blog.slug}`}
-                  onClick={() => {
-                    console.log("Blog card clicked:", blog.slug);
-                  }}
-                  className="block"
-                >
-                  <Card className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      {blog.image_url && (
-                        <div className="aspect-[16/9] mb-4 overflow-hidden rounded-lg">
-                          <img 
-                            src={blog.image_url} 
-                            alt={blog.title}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">
-                            {blog.category}
-                          </Badge>
-                          <div className="flex items-center gap-1 text-sm text-gray-500">
-                            <Clock className="w-4 h-4" />
-                            <span>{blog.read_time_minutes} min read</span>
-                          </div>
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-bold mb-2 line-clamp-2">{blog.title}</h2>
-                          <p className="text-gray-600 line-clamp-3">{blog.excerpt}</p>
-                        </div>
-                        <div className="mt-auto pt-4 flex justify-between items-center text-sm text-gray-500">
-                          <span>By {blog.profiles?.email}</span>
-                          <span>
-                            {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
-                          </span>
+            {blogs?.map((blog) => (
+              <Link 
+                key={blog.id} 
+                to={`/blog/post/${blog.slug}`}
+                className="block"
+              >
+                <Card className="hover:shadow-md transition-shadow overflow-hidden">
+                  <CardContent className="p-4 sm:p-6">
+                    {blog.image_url && (
+                      <div className="aspect-[16/9] mb-4 overflow-hidden rounded-lg">
+                        <img 
+                          src={blog.image_url} 
+                          alt={blog.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="secondary" className="bg-primary/10 text-primary">
+                          {blog.category}
+                        </Badge>
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          <span>{blog.read_time_minutes} min read</span>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-2 line-clamp-2">{blog.title}</h2>
+                        <p className="text-gray-600 line-clamp-3 text-sm sm:text-base">{blog.excerpt}</p>
+                      </div>
+                      <div className="mt-auto pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-sm text-gray-500">
+                        <span>By {blog.profiles?.email}</span>
+                        <span>
+                          {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
         )}
       </div>
