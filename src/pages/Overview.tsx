@@ -10,7 +10,6 @@ import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
-import { countryCurrencies } from "@/lib/utils/currency-data";
 
 const Overview = () => {
   const { toast } = useToast();
@@ -18,17 +17,12 @@ const Overview = () => {
   const { debts, isLoading } = useDebts();
   const { profile, updateProfile } = useProfile();
 
-  const getCurrencySymbol = (currencyCode: string) => {
-    const currency = countryCurrencies.find(c => c.code === currencyCode);
-    return currency?.symbol || '£';
-  };
-
-  const handleCurrencyChange = async (newCurrency: string) => {
+  const handleCurrencyChange = async (newCurrencySymbol: string) => {
     if (!user?.id) return;
 
     try {
       await updateProfile.mutateAsync({
-        preferred_currency: newCurrency
+        preferred_currency: newCurrencySymbol
       });
 
       toast({
@@ -55,9 +49,7 @@ const Overview = () => {
     );
   }
 
-  const currentCurrencySymbol = profile?.preferred_currency 
-    ? getCurrencySymbol(profile.preferred_currency)
-    : '£';
+  const currentCurrencySymbol = profile?.preferred_currency || '£';
 
   return (
     <MainLayout>
@@ -67,7 +59,6 @@ const Overview = () => {
             currencySymbol={currentCurrencySymbol}
             onCurrencyChange={handleCurrencyChange}
           />
-
           <DebtScoreCard />
         </div>
       </div>

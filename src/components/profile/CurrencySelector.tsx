@@ -24,7 +24,7 @@ export function CurrencySelector({ value, onValueChange, disabled }: CurrencySel
         </SelectTrigger>
         <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px]">
           {countryCurrencies.map((item) => (
-            <SelectItem key={item.code} value={item.code}>
+            <SelectItem key={item.symbol} value={item.symbol}>
               <span className="flex items-center gap-2">
                 <span className="font-medium">{item.symbol}</span>
                 <span>{item.country} - {item.currency}</span>
