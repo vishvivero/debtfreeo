@@ -9,37 +9,33 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { motion } from "framer-motion";
+import { useProfile } from "@/hooks/use-profile";
 
 const Overview = () => {
-  const [currencySymbol, setCurrencySymbol] = useState<string>('£');
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading, profile } = useDebts();
-
-  useEffect(() => {
-    if (profile?.preferred_currency) {
-      setCurrencySymbol(profile.preferred_currency);
-    }
-  }, [profile]);
+  const { debts, isLoading } = useDebts();
+  const { profile, updateProfile } = useProfile();
 
   const handleCurrencyChange = async (newCurrency: string) => {
-    setCurrencySymbol(newCurrency);
-    
     if (!user?.id) return;
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ preferred_currency: newCurrency })
-      .eq("id", user.id);
+    try {
+      await updateProfile.mutateAsync({
+        preferred_currency: newCurrency
+      });
 
-    if (error) {
+      toast({
+        title: "Success",
+        description: "Currency preference updated successfully",
+      });
+    } catch (error) {
       console.error("Error saving currency preference:", error);
       toast({
         title: "Error",
         description: "Failed to save currency preference",
         variant: "destructive",
       });
-      return;
     }
   };
 
@@ -58,7 +54,7 @@ const Overview = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container py-8 space-y-6">
           <OverviewHeader 
-            currencySymbol={currencySymbol}
+            currencySymbol={profile?.preferred_currency || '£'}
             onCurrencyChange={handleCurrencyChange}
           />
 
