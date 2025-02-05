@@ -1,3 +1,4 @@
+
 export interface CountryCurrency {
   country: string;
   currency: string;
@@ -19,6 +20,5 @@ export const countryCurrencies: CountryCurrency[] = [
   { country: "South Korea", currency: "South Korean Won", code: "KRW", symbol: "₩" },
   { country: "Russia", currency: "Russian Ruble", code: "RUB", symbol: "₽" },
   { country: "South Africa", currency: "South African Rand", code: "ZAR", symbol: "R" },
-  { country: "Mexico", currency: "Mexican Peso", code: "MXN", symbol: "$" },
   { country: "Singapore", currency: "Singapore Dollar", code: "SGD", symbol: "S$" },
 ];
