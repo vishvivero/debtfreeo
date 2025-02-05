@@ -1,3 +1,4 @@
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { countryCurrencies } from "@/lib/utils/currency-data";
 
@@ -24,7 +25,10 @@ export function CurrencySelector({ value, onValueChange, disabled }: CurrencySel
         <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px]">
           {countryCurrencies.map((item) => (
             <SelectItem key={item.code} value={item.code}>
-              {item.country} - {item.currency} ({item.symbol})
+              <span className="flex items-center gap-2">
+                <span className="font-medium">{item.symbol}</span>
+                <span>{item.country} - {item.currency}</span>
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
