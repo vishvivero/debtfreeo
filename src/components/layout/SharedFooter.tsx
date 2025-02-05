@@ -5,23 +5,28 @@ import { LegalFooter } from "@/components/legal/LegalFooter";
 export const SharedFooter = () => {
   const navigate = useNavigate();
 
-  const handleLinkClick = (path: string) => (e: React.MouseEvent) => {
+  const handleLinkClick = (path: string) => async (e: React.MouseEvent) => {
     e.preventDefault();
     
     // First navigate to the new route
     navigate(path);
     
-    // Then scroll to top with a small delay to ensure the new page is loaded
+    // Use a slightly longer timeout and ensure we're at the root document
     setTimeout(() => {
+      // Get the document root element
+      const docElement = document.documentElement;
+      const bodyElement = document.body;
+      
+      // Reset both documentElement and body scroll
+      docElement.scrollTop = 0;
+      bodyElement.scrollTop = 0;
+      
+      // Fallback to window.scrollTo for broader compatibility
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: 'instant' // Use instant instead of smooth for more reliable behavior
       });
-      // Fallback for browsers that don't support smooth scrolling
-      if (!('scrollBehavior' in document.documentElement.style)) {
-        window.scrollTo(0, 0);
-      }
-    }, 100);
+    }, 150); // Increased timeout for better reliability
   };
 
   return (
