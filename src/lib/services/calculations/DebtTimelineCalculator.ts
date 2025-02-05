@@ -30,20 +30,18 @@ export class DebtTimelineCalculator {
       oneTimeFundings: oneTimeFundings.length
     });
 
-    // Sort debts according to strategy
-    const sortedDebts = strategy.calculate([...debts]);
-    
-    // Calculate baseline scenario (minimum payments only)
+    // Calculate baseline scenario (minimum payments only, no strategy)
+    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
     const baselineResult = this.calculateScenario(
-      sortedDebts,
-      sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+      [...debts],
+      totalMinimumPayment,
       [],
       false
     );
 
-    // Calculate accelerated scenario (with extra payments and one-time funding)
+    // Calculate accelerated scenario (with strategy and extra payments)
     const acceleratedResult = this.calculateScenario(
-      sortedDebts,
+      strategy.calculate([...debts]), // Apply strategy sorting here
       monthlyPayment,
       oneTimeFundings,
       true
@@ -113,7 +111,7 @@ export class DebtTimelineCalculator {
         availablePayment += monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
       }
 
-      // Calculate interest and apply payments
+      // First apply minimum payments
       for (const debt of remainingDebts) {
         const currentBalance = balances.get(debt.id) || 0;
         const monthlyInterest = Number(((currentBalance * (debt.interest_rate / 100)) / 12).toFixed(2));
@@ -136,9 +134,9 @@ export class DebtTimelineCalculator {
         }
       }
 
-      // Apply extra payments
-      if (availablePayment > 0 && remainingDebts.length > 0) {
-        const targetDebt = remainingDebts[0];
+      // Then apply extra payments according to strategy for accelerated scenario
+      if (isAccelerated && availablePayment > 0 && remainingDebts.length > 0) {
+        const targetDebt = remainingDebts[0]; // First debt according to strategy
         const currentBalance = balances.get(targetDebt.id) || 0;
         const extraPayment = Math.min(availablePayment, currentBalance);
         
@@ -155,11 +153,14 @@ export class DebtTimelineCalculator {
         }
       }
 
-      // Check for paid off debts
+      // Check for paid off debts and handle redistributions
       remainingDebts = remainingDebts.filter(debt => {
         const currentBalance = balances.get(debt.id) || 0;
         if (currentBalance <= 0.01) {
-          releasedPayments += minimumPayments.get(debt.id) || 0;
+          // Release minimum payment for redistribution in accelerated scenario
+          if (isAccelerated) {
+            releasedPayments += minimumPayments.get(debt.id) || 0;
+          }
           return false;
         }
         return true;
