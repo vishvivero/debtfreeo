@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown } from "lucide-react";
@@ -8,6 +9,7 @@ import { TimelineChart } from "./TimelineChart";
 import { TimelineMetrics } from "./TimelineMetrics";
 import { calculateTimelineData } from "./TimelineCalculator";
 import { format } from "date-fns";
+import { useProfile } from "@/hooks/use-profile";
 
 interface PayoffTimelineContainerProps {
   debts: Debt[];
@@ -22,6 +24,8 @@ export const PayoffTimelineContainer = ({
   strategy,
   oneTimeFundings
 }: PayoffTimelineContainerProps) => {
+  const { profile } = useProfile();
+  
   console.log('PayoffTimelineContainer: Starting calculation for debts:', {
     totalDebts: debts.length,
     extraPayment,
@@ -53,6 +57,8 @@ export const PayoffTimelineContainer = ({
   // Calculate interest saved
   const lastDataPoint = timelineData[timelineData.length - 1];
   const interestSaved = lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest;
+
+  const currencySymbol = profile?.preferred_currency || '£';
 
   return (
     <motion.div
@@ -87,7 +93,7 @@ export const PayoffTimelineContainer = ({
             monthsSaved={monthsSaved}
             baselineLatestDate={baselineLatestDate}
             interestSaved={interestSaved}
-            currencySymbol={debts[0].currency_symbol}
+            currencySymbol={currencySymbol}
           />
           <TimelineChart 
             data={timelineData}

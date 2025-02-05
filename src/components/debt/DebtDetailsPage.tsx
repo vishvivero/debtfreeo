@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
@@ -62,7 +63,7 @@ export const DebtDetailsPage = () => {
     fetchPaymentHistory();
   }, [debt]);
 
-  if (!debt) {
+  if (!debt || !profile) {
     console.log('Debt not found for id:', debtId);
     return <div>Debt not found</div>;
   }
@@ -80,6 +81,8 @@ export const DebtDetailsPage = () => {
     remainingBalance: entry.endingBalance
   }));
 
+  const currencySymbol = profile.preferred_currency || '£';
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -87,6 +90,7 @@ export const DebtDetailsPage = () => {
           debt={debt}
           totalPaid={totalPaid}
           payoffDate={payoffDetails.payoffDate}
+          currencySymbol={currencySymbol}
         />
 
         <Separator className="my-8" />
@@ -95,12 +99,13 @@ export const DebtDetailsPage = () => {
           debt={debt}
           totalPaid={totalPaid}
           totalInterest={totalInterest}
+          currencySymbol={currencySymbol}
         />
 
         <Separator className="my-8" />
 
         <PayoffTimeline 
-          debts={[debt]} // Pass the current debt as an array
+          debts={[debt]}
           extraPayment={monthlyPayment - debt.minimum_payment}
         />
 
@@ -109,7 +114,8 @@ export const DebtDetailsPage = () => {
         {amortizationData && amortizationData.length > 0 && (
           <AmortizationTable 
             debt={debt} 
-            amortizationData={amortizationData} 
+            amortizationData={amortizationData}
+            currencySymbol={currencySymbol}
           />
         )}
       </div>
