@@ -15,9 +15,7 @@ import { strategies } from "@/lib/strategies";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DecimalToggle } from "@/components/DecimalToggle";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
 
 interface StrategyContentProps {
@@ -32,10 +30,10 @@ interface StrategyContentProps {
 
 export const StrategyContent: React.FC<StrategyContentProps> = ({
   debts,
-  selectedStrategy,
+  selectedStrategy: initialStrategy,
   onUpdateDebt,
   onDeleteDebt,
-  onSelectStrategy,
+  onSelectStrategy: parentOnSelectStrategy,
   preferredCurrency,
   totalDebtValue
 }) => {
@@ -43,30 +41,31 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile, updateProfile } = useProfile();
-  const [showExtraPayment, setShowExtraPayment] = useState(false);
-  const [showOneTimeFunding, setShowOneTimeFunding] = useState(false);
+  const [showExtraPayment, setShowExtraPayment] = useState(profile?.show_extra_payments || false);
+  const [showOneTimeFunding, setShowOneTimeFunding] = useState(profile?.show_lump_sum_payments || false);
   const [isStrategyDialogOpen, setIsStrategyDialogOpen] = useState(false);
   const [hasViewedResults, setHasViewedResults] = useState(false);
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
 
-  // Initialize strategy from profile
+  // Initialize strategy from profile only once when component mounts
   useEffect(() => {
     if (profile?.selected_strategy) {
       const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
       if (savedStrategy && savedStrategy.id !== selectedStrategy.id) {
-        console.log('Loading saved strategy:', savedStrategy.name);
-        onSelectStrategy(savedStrategy);
+        console.log('Initializing strategy from profile:', savedStrategy.id);
+        setSelectedStrategy(savedStrategy);
+        parentOnSelectStrategy(savedStrategy);
       }
     }
-  }, [profile?.selected_strategy]); // Remove selectedStrategy.id from dependencies
+  }, [profile?.selected_strategy]); // Only depend on profile.selected_strategy
 
   // Initialize UI preferences from profile
   useEffect(() => {
     if (profile) {
-      setShowExtraPayment(profile.show_extra_payments ?? false);
-      setShowOneTimeFunding(profile.show_lump_sum_payments ?? false);
+      setShowExtraPayment(profile.show_extra_payments || false);
+      setShowOneTimeFunding(profile.show_lump_sum_payments || false);
     }
   }, [profile]);
 
@@ -75,12 +74,44 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     setIsResultsDialogOpen(true);
   };
 
+  const handleStrategyChange = async (strategy: Strategy) => {
+    console.log('Changing strategy to:', strategy.id);
+    
+    if (strategy.id === selectedStrategy.id) {
+      setIsStrategyDialogOpen(false);
+      return; // Don't update if it's the same strategy
+    }
+
+    setSelectedStrategy(strategy);
+    parentOnSelectStrategy(strategy);
+    
+    if (profile) {
+      try {
+        await updateProfile.mutate({
+          selected_strategy: strategy.id
+        });
+        toast({
+          title: "Strategy Updated",
+          description: `Your debt repayment strategy has been updated to ${strategy.name}`,
+        });
+      } catch (error) {
+        console.error('Error updating strategy preference:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save strategy preference",
+          variant: "destructive",
+        });
+      }
+    }
+    setIsStrategyDialogOpen(false);
+  };
+
   const handleExtraPaymentToggle = async (checked: boolean) => {
     console.log('Toggling extra payments:', checked);
     setShowExtraPayment(checked);
     if (profile) {
       try {
-        await updateProfile.mutateAsync({
+        await updateProfile.mutate({
           show_extra_payments: checked
         });
       } catch (error) {
@@ -97,33 +128,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const handleOneTimeFundingToggle = async (checked: boolean) => {
     console.log('Toggling lump sum payments:', checked);
     setShowOneTimeFunding(checked);
-    if (!checked && user) {
-      try {
-        const { error } = await supabase
-          .from('one_time_funding')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('is_applied', false);
-
-        if (error) throw error;
-
-        toast({
-          title: "One-time fundings deleted",
-          description: "All pending one-time fundings have been removed",
-        });
-      } catch (error) {
-        console.error('Error deleting one-time fundings:', error);
-        toast({
-          title: "Error",
-          description: "Failed to delete one-time fundings",
-          variant: "destructive",
-        });
-      }
-    }
-    
     if (profile) {
       try {
-        await updateProfile.mutateAsync({
+        await updateProfile.mutate({
           show_lump_sum_payments: checked
         });
       } catch (error) {
@@ -131,30 +138,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         toast({
           title: "Error",
           description: "Failed to save your preference",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleStrategyChange = async (strategy: Strategy) => {
-    onSelectStrategy(strategy);
-    setIsStrategyDialogOpen(false);
-
-    if (profile) {
-      try {
-        await updateProfile.mutateAsync({
-          selected_strategy: strategy.id
-        });
-        toast({
-          title: "Strategy Updated",
-          description: `Your debt payoff strategy has been changed to ${strategy.name}`,
-        });
-      } catch (error) {
-        console.error('Error updating strategy preference:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save your strategy preference",
           variant: "destructive",
         });
       }

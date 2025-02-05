@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
 import { OneTimeFundingDialog } from "./OneTimeFundingDialog";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,7 @@ export const OneTimeFundingSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchFundingEntries = useCallback(async () => {
+  const fetchFundingEntries = async () => {
     console.log('Fetching one-time funding entries');
     try {
       const { data, error } = await supabase
@@ -52,7 +52,7 @@ export const OneTimeFundingSection = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  };
 
   useEffect(() => {
     fetchFundingEntries();
@@ -74,11 +74,11 @@ export const OneTimeFundingSection = () => {
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [fetchFundingEntries]);
+  }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = async (id: string) => {
     console.log('Deleting funding entry:', id);
     try {
       const { error } = await supabase
@@ -101,7 +101,7 @@ export const OneTimeFundingSection = () => {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  };
 
   const totalFunding = fundingEntries.reduce((sum, entry) => sum + entry.amount, 0);
 

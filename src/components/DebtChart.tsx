@@ -51,13 +51,6 @@ export const DebtChart = ({
   });
 
   try {
-    const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
-      debts,
-      monthlyPayment,
-      selectedStrategy,
-      oneTimeFundings
-    );
-
     const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
     
     if (!chartData || chartData.length === 0) {

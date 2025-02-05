@@ -9,7 +9,7 @@ export const useDebtCalculations = () => {
       debts: Debt[],
       monthlyPayment: number,
       strategy: Strategy,
-      oneTimeFundings: { amount: number; payment_date: string }[] = []
+      oneTimeFundings: { amount: number; payment_date: Date }[] = []
     ): { [key: string]: PayoffDetails } => {
       console.log('useDebtCalculations: Calculating payoff details', {
         debts: debts.length,

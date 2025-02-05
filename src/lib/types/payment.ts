@@ -18,11 +18,12 @@ export interface AllocationResult {
 }
 
 export interface OneTimeFunding {
-  payment_date: string;
+  id: string;
+  user_id: string;
   amount: number;
-  notes?: string | null;
-  is_applied?: boolean;
-  currency_symbol?: string;
-  id?: string;
-  user_id?: string;
+  payment_date: string;
+  notes: string | null;
+  is_applied: boolean;
+  currency_symbol: string;
+  created_at?: string;
 }

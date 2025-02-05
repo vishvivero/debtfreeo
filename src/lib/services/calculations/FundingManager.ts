@@ -1,6 +1,6 @@
 export interface OneTimeFunding {
   amount: number;
-  payment_date: string;
+  payment_date: Date;
 }
 
 export class FundingManager {
@@ -9,7 +9,7 @@ export class FundingManager {
     currentDate: Date
   ): OneTimeFunding[] {
     return fundings.filter(funding => {
-      const fundingDate = new Date(funding.payment_date);
+      const fundingDate = funding.payment_date;
       return fundingDate.getMonth() === currentDate.getMonth() &&
              fundingDate.getFullYear() === currentDate.getFullYear();
     });
@@ -21,7 +21,7 @@ export class FundingManager {
 
   public static sortFundingsByDate(fundings: OneTimeFunding[]): OneTimeFunding[] {
     return [...fundings].sort(
-      (a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()
+      (a, b) => a.payment_date.getTime() - b.payment_date.getTime()
     );
   }
 }

@@ -58,20 +58,12 @@ export function PricingPlan({
         return;
       }
 
-      console.log('Creating checkout session...');
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { 
-          priceId: "your_price_id",
-          returnUrl: window.location.origin // Add the return URL
-        }
+        body: { priceId: "your_price_id" }
       });
 
-      if (error) {
-        console.error('Error creating checkout session:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Checkout session created:', data);
       if (data?.url) {
         window.location.href = data.url;
       }

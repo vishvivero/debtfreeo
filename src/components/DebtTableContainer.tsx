@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { FileDown } from "lucide-react";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "./ui/use-toast";
-import { countryCurrencies } from "@/lib/utils/currency-data";
+import { OneTimeFunding } from "@/lib/types/payment";
 
 interface DebtTableContainerProps {
   debts: Debt[];
@@ -32,7 +32,7 @@ export const DebtTableContainer = ({
 }: DebtTableContainerProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
-  const [oneTimeFundings, setOneTimeFundings] = useState<{ amount: number; payment_date: Date }[]>([]);
+  const [oneTimeFundings, setOneTimeFundings] = useState<OneTimeFunding[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -54,9 +54,14 @@ export const DebtTableContainer = ({
       return;
     }
 
-    const mappedFundings = data.map(funding => ({
+    const mappedFundings: OneTimeFunding[] = data.map(funding => ({
+      id: funding.id,
+      user_id: funding.user_id,
       amount: funding.amount,
-      payment_date: new Date(funding.payment_date)
+      payment_date: funding.payment_date,
+      notes: funding.notes,
+      is_applied: funding.is_applied,
+      currency_symbol: funding.currency_symbol
     }));
     
     console.log('Updated one-time fundings:', mappedFundings);
@@ -123,10 +128,14 @@ export const DebtTableContainer = ({
   const sortedDebts = strategy.calculate([...debts]);
   console.log('DebtTableContainer: Debts sorted according to strategy:', strategy.name);
   
-  // Convert Date objects to ISO strings before passing to calculatePayoffDetails
   const formattedFundings = oneTimeFundings.map(funding => ({
+    id: funding.id,
+    user_id: funding.user_id,
     amount: funding.amount,
-    payment_date: funding.payment_date.toISOString()
+    payment_date: funding.payment_date,
+    notes: funding.notes,
+    is_applied: funding.is_applied,
+    currency_symbol: funding.currency_symbol
   }));
   
   const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy, formattedFundings);
