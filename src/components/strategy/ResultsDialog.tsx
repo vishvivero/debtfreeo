@@ -1,15 +1,16 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Sparkles, DollarSign, Clock, Calendar } from "lucide-react";
+import { Sparkles, DollarSign, Clock, Calendar } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import confetti from 'canvas-confetti';
-import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
 import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
 import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const ResultsDialog = ({
   currencySymbol = '£'
 }: ResultsDialogProps) => {
   const { toast } = useToast();
+  const [showTimeline, setShowTimeline] = useState(false);
 
   // Trigger confetti on dialog open
   if (isOpen) {
@@ -52,35 +54,33 @@ export const ResultsDialog = ({
 
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
 
-  const handleDownload = () => {
-    try {
-      const doc = generateDebtOverviewPDF(
-        debts,
-        monthlyPayment,
-        extraPayment,
-        timelineResults.baselineMonths,
-        timelineResults.acceleratedMonths,
-        timelineResults.baselineInterest,
-        timelineResults.acceleratedInterest,
-        selectedStrategy,
-        oneTimeFundings,
-        currencySymbol
-      );
-      doc.save('debt-freedom-plan.pdf');
-      
-      toast({
-        title: "Success",
-        description: "Your payoff strategy report has been downloaded",
-      });
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate the payoff strategy report",
-        variant: "destructive",
-      });
-    }
-  };
+  if (showTimeline) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              Combined Debt Payoff Timeline
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <PayoffTimeline
+              debts={debts}
+              extraPayment={extraPayment}
+            />
+            <div className="mt-6 flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -181,10 +181,9 @@ export const ResultsDialog = ({
             </Button>
             <Button 
               className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
-              onClick={handleDownload}
+              onClick={() => setShowTimeline(true)}
             >
-              <Download className="h-4 w-4" />
-              Download Plan
+              Next
             </Button>
           </motion.div>
         </div>
