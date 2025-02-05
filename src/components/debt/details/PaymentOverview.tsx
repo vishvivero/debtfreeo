@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types/debt";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -7,9 +8,10 @@ interface PaymentOverviewProps {
   debt: Debt;
   totalPaid: number;
   totalInterest: number;
+  currencySymbol: string;
 }
 
-export const PaymentOverview = ({ debt, totalPaid, totalInterest }: PaymentOverviewProps) => {
+export const PaymentOverview = ({ debt, totalPaid, totalInterest, currencySymbol }: PaymentOverviewProps) => {
   const principalReduction = totalPaid - totalInterest;
 
   console.log('Payment overview calculations:', {
@@ -59,7 +61,7 @@ export const PaymentOverview = ({ debt, totalPaid, totalInterest }: PaymentOverv
                   <card.icon className={`h-5 w-5 text-${card.color}-500`} />
                 </div>
                 <p className="mt-2 text-2xl font-bold">
-                  {debt.currency_symbol}{card.amount.toLocaleString(undefined, {
+                  {currencySymbol}{card.amount.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}

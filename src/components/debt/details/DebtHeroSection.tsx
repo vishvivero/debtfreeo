@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types/debt";
 import { Card } from "@/components/ui/card";
 import { CircularProgress } from "./CircularProgress";
@@ -9,9 +10,10 @@ interface DebtHeroSectionProps {
   debt: Debt;
   totalPaid: number;
   payoffDate: Date;
+  currencySymbol: string;
 }
 
-export const DebtHeroSection = ({ debt, totalPaid, payoffDate }: DebtHeroSectionProps) => {
+export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }: DebtHeroSectionProps) => {
   // Calculate progress percentage based on total paid vs current balance
   const totalAmount = totalPaid + debt.balance;
   const progressPercentage = totalAmount > 0 
@@ -47,7 +49,7 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate }: DebtHeroSection
               <div>
                 <p className="text-sm text-gray-600">Current Balance</p>
                 <p className="text-lg font-semibold">
-                  {debt.currency_symbol}{debt.balance.toLocaleString()}
+                  {currencySymbol}{debt.balance.toLocaleString()}
                 </p>
               </div>
             </div>

@@ -15,9 +15,10 @@ interface AmortizationTableProps {
     interest: number;
     remainingBalance: number;
   }>;
+  currencySymbol: string;
 }
 
-export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableProps) => {
+export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: AmortizationTableProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const visibleData = isExpanded ? amortizationData : amortizationData.slice(0, 3);
@@ -31,8 +32,8 @@ export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableP
 
   // Safe number formatting function
   const formatCurrency = (value: number | undefined) => {
-    if (value === undefined || isNaN(value)) return `${debt.currency_symbol}0.00`;
-    return `${debt.currency_symbol}${value.toLocaleString(undefined, { 
+    if (value === undefined || isNaN(value)) return `${currencySymbol}0.00`;
+    return `${currencySymbol}${value.toLocaleString(undefined, { 
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 
     })}`;
