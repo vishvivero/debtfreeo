@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Sparkles, DollarSign, Clock, Calendar } from "lucide-react";
@@ -37,7 +38,6 @@ export const ResultsDialog = ({
   const { toast } = useToast();
   const [currentView, setCurrentView] = useState<'initial' | 'timeline' | 'insights'>('initial');
 
-  // Trigger confetti on dialog open
   if (isOpen) {
     confetti({
       particleCount: 100,
@@ -71,9 +71,9 @@ export const ResultsDialog = ({
   if (currentView === 'insights') {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-4xl">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+            <DialogTitle className="text-xl sm:text-2xl font-bold">
               Your Debt Score Insights
             </DialogTitle>
           </DialogHeader>
@@ -96,9 +96,9 @@ export const ResultsDialog = ({
   if (currentView === 'timeline') {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-4xl">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+            <DialogTitle className="text-xl sm:text-2xl font-bold">
               Combined Debt Payoff Timeline
             </DialogTitle>
           </DialogHeader>
@@ -123,7 +123,7 @@ export const ResultsDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto px-4 sm:px-6">
         <DialogHeader className="text-center space-y-4">
           <motion.div
             initial={{ scale: 0 }}
@@ -138,31 +138,31 @@ export const ResultsDialog = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
+            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
               Your Path to Debt Freedom
             </DialogTitle>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               Here's your personalized debt payoff strategy
             </p>
           </motion.div>
         </DialogHeader>
         
-        <div className="space-y-8 py-4">
+        <div className="space-y-6 py-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-3 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
             <div className="bg-emerald-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-5 w-5 text-emerald-600" />
                 <h3 className="font-semibold text-emerald-800">Interest Saved</h3>
               </div>
-              <p className="text-2xl font-bold text-emerald-600">
+              <p className="text-lg sm:text-2xl font-bold text-emerald-600">
                 {currencySymbol}{timelineResults.interestSaved.toLocaleString()}
               </p>
-              <p className="text-sm text-emerald-700">Total savings on interest</p>
+              <p className="text-xs sm:text-sm text-emerald-700">Total savings on interest</p>
             </div>
 
             <div className="bg-blue-50 p-4 rounded-lg">
@@ -170,10 +170,10 @@ export const ResultsDialog = ({
                 <Clock className="h-5 w-5 text-blue-600" />
                 <h3 className="font-semibold text-blue-800">Time Saved</h3>
               </div>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-lg sm:text-2xl font-bold text-blue-600">
                 {timelineResults.monthsSaved} months
               </p>
-              <p className="text-sm text-blue-700">Faster debt freedom</p>
+              <p className="text-xs sm:text-sm text-blue-700">Faster debt freedom</p>
             </div>
 
             <div className="bg-purple-50 p-4 rounded-lg">
@@ -181,13 +181,13 @@ export const ResultsDialog = ({
                 <Calendar className="h-5 w-5 text-purple-600" />
                 <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
               </div>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-lg sm:text-2xl font-bold text-purple-600">
                 {timelineResults.payoffDate.toLocaleDateString('en-US', { 
                   month: 'long',
                   year: 'numeric'
                 })}
               </p>
-              <p className="text-sm text-purple-700">Target completion date</p>
+              <p className="text-xs sm:text-sm text-purple-700">Target completion date</p>
             </div>
           </motion.div>
 
@@ -209,7 +209,7 @@ export const ResultsDialog = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="flex justify-between pt-4 gap-4"
+            className="flex flex-col sm:flex-row justify-between pt-4 gap-4"
           >
             <Button 
               variant="outline" 
