@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { calculateMonthlyAllocations } from "@/components/strategy/PaymentCalculator";
 import { strategies } from "@/lib/strategies";
+import { useProfile } from "@/lib/hooks/useProfile";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -16,6 +17,8 @@ interface OverviewTabProps {
 
 export const OverviewTab = ({ debts }: OverviewTabProps) => {
   const { toast } = useToast();
+  const { profile } = useProfile();
+  const currencySymbol = profile?.preferred_currency || '£';
 
   const handleDownloadReport = () => {
     try {
@@ -36,7 +39,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         0, // optimizedTotalInterest
         strategies[0],
         [], // oneTimeFundings
-        debts[0]?.currency_symbol || '£'
+        currencySymbol
       );
       
       doc.save('debt-overview-report.pdf');
@@ -83,7 +86,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{debts[0]?.currency_symbol || '£'}{totalDebt.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{currencySymbol}{totalDebt.toLocaleString()}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -119,7 +122,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{debts[0]?.currency_symbol || '£'}{totalMinimumPayment.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{currencySymbol}{totalMinimumPayment.toLocaleString()}</p>
             </CardContent>
           </Card>
         </motion.div>

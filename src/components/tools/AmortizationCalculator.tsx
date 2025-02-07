@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AmortizationTable } from "@/components/debt/AmortizationTable";
 import { motion } from "framer-motion";
+import { useProfile } from "@/hooks/use-profile";
 
 interface AmortizationEntry {
   date: Date;
@@ -17,10 +18,11 @@ interface AmortizationEntry {
 }
 
 export const AmortizationCalculator = () => {
+  const { profile } = useProfile();
   const [loanAmount, setLoanAmount] = useState("");
   const [interestRate, setInterestRate] = useState("");
   const [loanTerm, setLoanTerm] = useState("");
-  const [currency, setCurrency] = useState("£");
+  const [currency, setCurrency] = useState(profile?.preferred_currency || "£");
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationEntry[]>([]);
 
   const calculateAmortization = () => {
