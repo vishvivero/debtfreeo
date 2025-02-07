@@ -2,7 +2,7 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { UnifiedCalculationService } from "./UnifiedCalculationService";
+import { StandardizedDebtCalculator } from "./StandardizedDebtCalculator";
 
 export interface UnifiedTimelineResults {
   baselineMonths: number;
@@ -19,12 +19,12 @@ export interface UnifiedTimelineResults {
 }
 
 export class UnifiedDebtTimelineCalculator {
-  public static async calculateTimeline(
+  public static calculateTimeline(
     debts: Debt[],
     monthlyPayment: number,
     strategy: Strategy,
     oneTimeFundings: OneTimeFunding[] = []
-  ): Promise<UnifiedTimelineResults> {
+  ): UnifiedTimelineResults {
     console.log('Starting unified timeline calculation:', {
       totalDebts: debts.length,
       monthlyPayment,
@@ -32,7 +32,7 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings: oneTimeFundings.length
     });
 
-    const results = await UnifiedCalculationService.calculateUnifiedTimeline(
+    const results = StandardizedDebtCalculator.calculateTimeline(
       debts,
       monthlyPayment,
       strategy,
@@ -43,8 +43,7 @@ export class UnifiedDebtTimelineCalculator {
       baselineInterest: results.baselineInterest,
       acceleratedInterest: results.acceleratedInterest,
       interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved,
-      payoffDate: results.payoffDate
+      monthsSaved: results.monthsSaved
     });
 
     return results;
