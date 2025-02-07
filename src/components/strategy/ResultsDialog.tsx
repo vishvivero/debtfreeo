@@ -8,7 +8,7 @@ import { OneTimeFunding } from "@/lib/types/payment";
 import confetti from 'canvas-confetti';
 import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
@@ -125,7 +125,12 @@ export const ResultsDialog = ({
               Combined Debt Payoff Timeline
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mt-4"
+          >
             <PayoffTimeline
               debts={debts}
               extraPayment={extraPayment}
@@ -147,7 +152,7 @@ export const ResultsDialog = ({
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
     );
