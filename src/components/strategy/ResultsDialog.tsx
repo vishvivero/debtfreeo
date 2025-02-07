@@ -8,11 +8,10 @@ import { OneTimeFunding } from "@/lib/types/payment";
 import confetti from 'canvas-confetti';
 import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
-import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
-import { ScoreInsightsSection } from "./sections/ScoreInsightsSection";
+import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -46,7 +45,7 @@ export const ResultsDialog = ({
     });
   }
 
-  const timelineResults = DebtTimelineCalculator.calculateTimeline(
+  const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
     debts,
     monthlyPayment,
     selectedStrategy,
@@ -55,22 +54,9 @@ export const ResultsDialog = ({
 
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
 
-  const handleNext = () => {
-    if (currentView === 'initial') {
-      setCurrentView('timeline');
-    } else if (currentView === 'timeline') {
-      setCurrentView('insights');
-    }
-  };
-
-  const handleClose = () => {
-    setCurrentView('initial');
-    onClose();
-  };
-
   if (currentView === 'insights') {
     return (
-      <Dialog open={isOpen} onOpenChange={handleClose}>
+      <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl font-bold">
@@ -82,7 +68,7 @@ export const ResultsDialog = ({
             <div className="mt-6 flex justify-end">
               <Button 
                 variant="outline" 
-                onClick={handleClose}
+                onClick={onClose}
               >
                 Close
               </Button>
@@ -95,7 +81,7 @@ export const ResultsDialog = ({
 
   if (currentView === 'timeline') {
     return (
-      <Dialog open={isOpen} onOpenChange={handleClose}>
+      <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl font-bold">
@@ -122,7 +108,7 @@ export const ResultsDialog = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto px-4 sm:px-6">
         <DialogHeader className="text-center space-y-4">
           <motion.div
@@ -213,14 +199,14 @@ export const ResultsDialog = ({
           >
             <Button 
               variant="outline" 
-              onClick={handleClose}
+              onClick={onClose}
               className="w-full"
             >
               Close
             </Button>
             <Button 
               className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
-              onClick={handleNext}
+              onClick={() => setCurrentView('timeline')}
             >
               Next
             </Button>

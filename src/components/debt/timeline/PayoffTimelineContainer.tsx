@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown } from "lucide-react";
@@ -10,6 +9,7 @@ import { TimelineMetrics } from "./TimelineMetrics";
 import { calculateTimelineData } from "./TimelineCalculator";
 import { format } from "date-fns";
 import { useProfile } from "@/hooks/use-profile";
+import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 
 interface PayoffTimelineContainerProps {
   debts: Debt[];
@@ -40,23 +40,14 @@ export const PayoffTimelineContainer = ({
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const totalMonthlyPayment = totalMinimumPayment + extraPayment;
 
+  const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
+    debts,
+    totalMonthlyPayment,
+    strategy,
+    formattedFundings
+  );
+
   const timelineData = calculateTimelineData(debts, totalMonthlyPayment, strategy, formattedFundings);
-
-  // Calculate months between start and end dates
-  const startDate = new Date();
-  const baselineLatestDate = new Date(timelineData[timelineData.length - 1].date);
-  const baselineMonths = Math.ceil((baselineLatestDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
-  
-  const acceleratedLatestDate = timelineData.find(d => d.acceleratedBalance <= 0)?.date;
-  const acceleratedMonths = acceleratedLatestDate 
-    ? Math.ceil((new Date(acceleratedLatestDate).getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
-    : baselineMonths;
-  
-  const monthsSaved = Math.max(0, baselineMonths - acceleratedMonths);
-
-  // Calculate interest saved
-  const lastDataPoint = timelineData[timelineData.length - 1];
-  const interestSaved = lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest;
 
   const currencySymbol = profile?.preferred_currency || '£';
 
@@ -74,25 +65,25 @@ export const PayoffTimelineContainer = ({
               <TrendingDown className="h-5 w-5 text-emerald-500" />
               Combined Debt Payoff Timeline
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                ({format(baselineLatestDate, 'MMMM yyyy')})
+                ({format(timelineResults.payoffDate, 'MMMM yyyy')})
               </span>
             </div>
           </CardTitle>
           <div className="text-sm text-muted-foreground">
-            {monthsSaved > 0 && (
+            {timelineResults.monthsSaved > 0 && (
               <span className="text-emerald-600">
-                {monthsSaved} months faster
+                {timelineResults.monthsSaved} months faster
               </span>
             )}
           </div>
         </CardHeader>
         <CardContent>
           <TimelineMetrics 
-            baselineMonths={baselineMonths}
-            acceleratedMonths={acceleratedMonths}
-            monthsSaved={monthsSaved}
-            baselineLatestDate={baselineLatestDate}
-            interestSaved={interestSaved}
+            baselineMonths={timelineResults.baselineMonths}
+            acceleratedMonths={timelineResults.acceleratedMonths}
+            monthsSaved={timelineResults.monthsSaved}
+            baselineLatestDate={timelineResults.payoffDate}
+            interestSaved={timelineResults.interestSaved}
             currencySymbol={currencySymbol}
           />
           <TimelineChart 
