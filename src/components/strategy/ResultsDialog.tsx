@@ -46,8 +46,17 @@ export const ResultsDialog = ({
     });
   }
 
-  // Calculate total monthly payment including extra payment
-  const totalMonthlyPayment = monthlyPayment + extraPayment;
+  // Calculate total minimum payment required
+  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+
+  console.log('ResultsDialog calculation params:', {
+    totalDebts: debts.length,
+    totalMinimumPayment,
+    extraPayment,
+    totalMonthlyPayment,
+    selectedStrategy: selectedStrategy.name
+  });
 
   const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
     debts,
