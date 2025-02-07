@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { motion } from "framer-motion";
 import { strategies } from "@/lib/strategies";
 import { useProfile } from "@/hooks/use-profile";
 import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
+import { Debt } from "@/lib/types";
 
 interface OverviewTabProps {
   debts: Debt[];
