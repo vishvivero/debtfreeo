@@ -68,18 +68,24 @@ export const ResultsDialog = ({
     oneTimeFundings
   );
 
-  // Get the last data point to determine payoff date
-  const lastDataPoint = timelineData[timelineData.length - 1];
-  const payoffDate = new Date(lastDataPoint.date);
+  // Find the point where accelerated balance reaches zero
+  const acceleratedPayoffPoint = timelineData.find(point => point.acceleratedBalance <= 0) || timelineData[timelineData.length - 1];
+  const baselinePayoffPoint = timelineData.find(point => point.baselineBalance <= 0) || timelineData[timelineData.length - 1];
+
+  const payoffDate = new Date(acceleratedPayoffPoint.date);
+  const baselinePayoffDate = new Date(baselinePayoffPoint.date);
+
+  // Calculate months saved based on the difference between baseline and accelerated payoff
+  const monthsSaved = Math.round((baselinePayoffDate.getTime() - payoffDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)); // Average month length
 
   // Calculate total interest values
-  const baselineInterest = lastDataPoint.baselineInterest;
-  const acceleratedInterest = lastDataPoint.acceleratedInterest;
+  const baselineInterest = acceleratedPayoffPoint.baselineInterest;
+  const acceleratedInterest = acceleratedPayoffPoint.acceleratedInterest;
   const interestSaved = baselineInterest - acceleratedInterest;
-  const monthsSaved = timelineData.length;
 
   console.log('ResultsDialog: Using timeline calculation results:', {
     payoffDate: payoffDate.toISOString(),
+    baselinePayoffDate: baselinePayoffDate.toISOString(),
     baselineInterest,
     acceleratedInterest,
     interestSaved,
