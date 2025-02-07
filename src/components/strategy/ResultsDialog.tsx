@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
+import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -53,6 +54,14 @@ export const ResultsDialog = ({
   );
 
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
+
+  const handleNext = () => {
+    if (currentView === 'initial') {
+      setCurrentView('timeline');
+    } else if (currentView === 'timeline') {
+      setCurrentView('insights');
+    }
+  };
 
   if (currentView === 'insights') {
     return (
@@ -206,7 +215,7 @@ export const ResultsDialog = ({
             </Button>
             <Button 
               className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
-              onClick={() => setCurrentView('timeline')}
+              onClick={handleNext}
             >
               Next
             </Button>
