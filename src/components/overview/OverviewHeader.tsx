@@ -1,33 +1,15 @@
+
 import { CurrencySelector } from "@/components/profile/CurrencySelector";
-import { useProfile } from "@/hooks/use-profile";
-import { useToast } from "@/components/ui/use-toast";
 
-export const OverviewHeader = () => {
-  const { profile, updateProfile } = useProfile();
-  const { toast } = useToast();
-  
-  const handleCurrencyChange = async (currency: string) => {
-    if (!profile) return;
-    
-    try {
-      await updateProfile.mutateAsync({
-        preferred_currency: currency
-      });
-      
-      toast({
-        title: "Currency Updated",
-        description: "Your preferred currency has been updated successfully.",
-      });
-    } catch (error) {
-      console.error('Error updating currency:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update currency preference",
-        variant: "destructive",
-      });
-    }
-  };
+interface OverviewHeaderProps {
+  currencySymbol: string;
+  onCurrencyChange: (currency: string) => void;
+}
 
+export const OverviewHeader = ({
+  currencySymbol,
+  onCurrencyChange,
+}: OverviewHeaderProps) => {
   return (
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div className="space-y-1">
@@ -39,8 +21,8 @@ export const OverviewHeader = () => {
         </p>
       </div>
       <CurrencySelector
-        value={profile?.preferred_currency || '£'}
-        onValueChange={handleCurrencyChange}
+        value={currencySymbol}
+        onValueChange={onCurrencyChange}
       />
     </div>
   );

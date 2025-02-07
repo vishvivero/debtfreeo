@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { PayoffDetails } from "@/lib/services/UnifiedDebtCalculationService";
@@ -23,7 +22,7 @@ export const calculateDebtScore = (
 ): ScoreComponents => {
   console.log('Calculating debt score with:', {
     totalDebts: debts.length,
-    selectedStrategy: selectedStrategy?.name || 'default',
+    selectedStrategy: selectedStrategy.name,
     monthlyPayment
   });
 

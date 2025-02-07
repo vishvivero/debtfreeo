@@ -137,7 +137,6 @@ export const AmortizationCalculator = () => {
                   status: "active"
                 }}
                 amortizationData={amortizationSchedule}
-                currencySymbol={currency}
               />
             </div>
           )}
