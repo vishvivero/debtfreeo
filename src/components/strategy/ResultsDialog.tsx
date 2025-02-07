@@ -13,7 +13,6 @@ import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
-import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -56,42 +55,17 @@ export const ResultsDialog = ({
     totalMinimumPayment,
     extraPayment,
     totalMonthlyPayment,
-    selectedStrategy: selectedStrategy.name,
-    oneTimeFundings: oneTimeFundings.length
+    selectedStrategy: selectedStrategy.name
   });
 
-  // Use the same timeline data calculation as PayoffTimelineContainer
-  const timelineData = calculateTimelineData(
+  const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
     debts,
     totalMonthlyPayment,
     selectedStrategy,
     oneTimeFundings
   );
 
-  // Find the point where accelerated balance reaches zero
-  const acceleratedPayoffPoint = timelineData.find(point => point.acceleratedBalance <= 0) || timelineData[timelineData.length - 1];
-  const baselinePayoffPoint = timelineData.find(point => point.baselineBalance <= 0) || timelineData[timelineData.length - 1];
-
-  const payoffDate = new Date(acceleratedPayoffPoint.date);
-  const baselinePayoffDate = new Date(baselinePayoffPoint.date);
-
-  // Calculate months saved based on the difference between baseline and accelerated payoff
-  const monthsSaved = Math.round((baselinePayoffDate.getTime() - payoffDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)); // Average month length
-
-  // Calculate total interest values
-  const baselineInterest = acceleratedPayoffPoint.baselineInterest;
-  const acceleratedInterest = acceleratedPayoffPoint.acceleratedInterest;
-  const interestSaved = baselineInterest - acceleratedInterest;
-
-  console.log('ResultsDialog: Using timeline calculation results:', {
-    payoffDate: payoffDate.toISOString(),
-    baselinePayoffDate: baselinePayoffDate.toISOString(),
-    baselineInterest,
-    acceleratedInterest,
-    interestSaved,
-    monthsSaved,
-    dataPoints: timelineData.length
-  });
+  console.log('Timeline calculation results in ResultsDialog:', timelineResults);
 
   const handleNext = () => {
     if (currentView === 'initial') {
@@ -193,7 +167,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-emerald-800">Interest Saved</h3>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-emerald-600">
-                {currencySymbol}{interestSaved.toLocaleString()}
+                {currencySymbol}{timelineResults.interestSaved.toLocaleString()}
               </p>
               <p className="text-xs sm:text-sm text-emerald-700">Total savings on interest</p>
             </div>
@@ -204,7 +178,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-blue-800">Time Saved</h3>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-blue-600">
-                {monthsSaved} months
+                {timelineResults.monthsSaved} months
               </p>
               <p className="text-xs sm:text-sm text-blue-700">Faster debt freedom</p>
             </div>
@@ -215,7 +189,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-purple-600">
-                {payoffDate.toLocaleDateString('en-US', { 
+                {timelineResults.payoffDate.toLocaleDateString('en-US', { 
                   month: 'long',
                   year: 'numeric'
                 })}
