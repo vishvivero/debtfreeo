@@ -1,6 +1,7 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingDown } from "lucide-react";
+import { TrendingDown, Loader2 } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { Strategy } from "@/lib/strategies";
@@ -10,6 +11,7 @@ import { calculateTimelineData } from "./TimelineCalculator";
 import { format } from "date-fns";
 import { useProfile } from "@/hooks/use-profile";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
+import { useState, useEffect } from "react";
 
 interface PayoffTimelineContainerProps {
   debts: Debt[];
@@ -25,30 +27,44 @@ export const PayoffTimelineContainer = ({
   oneTimeFundings
 }: PayoffTimelineContainerProps) => {
   const { profile } = useProfile();
-  
-  console.log('PayoffTimelineContainer: Starting calculation for debts:', {
-    totalDebts: debts.length,
-    extraPayment,
-    strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.length
-  });
+  const [timelineResults, setTimelineResults] = useState<UnifiedTimelineResults | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Keep fundings as is, let TimelineCalculator handle date conversion
-  const formattedFundings = [...oneTimeFundings];
+  useEffect(() => {
+    const calculateTimeline = async () => {
+      try {
+        const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+        const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+        
+        const results = await UnifiedDebtTimelineCalculator.calculateTimeline(
+          debts,
+          totalMonthlyPayment,
+          strategy,
+          oneTimeFundings
+        );
+        setTimelineResults(results);
+      } catch (error) {
+        console.error('Error calculating timeline:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Calculate total minimum payment required
-  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+    calculateTimeline();
+  }, [debts, extraPayment, strategy, oneTimeFundings]);
 
-  const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
-    debts,
-    totalMonthlyPayment,
-    strategy,
-    formattedFundings
-  );
+  if (isLoading || !timelineResults) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Calculating timeline...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, strategy, formattedFundings);
-
+  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, strategy, oneTimeFundings);
   const currencySymbol = profile?.preferred_currency || '£';
 
   return (
@@ -89,7 +105,7 @@ export const PayoffTimelineContainer = ({
           <TimelineChart 
             data={timelineData}
             debts={debts}
-            formattedFundings={formattedFundings}
+            formattedFundings={oneTimeFundings}
           />
         </CardContent>
       </Card>

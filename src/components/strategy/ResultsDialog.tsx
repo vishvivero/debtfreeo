@@ -1,6 +1,7 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, DollarSign, Clock, Calendar } from "lucide-react";
+import { Sparkles, DollarSign, Clock, Calendar, Loader2 } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
@@ -10,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
-import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
+import { UnifiedDebtTimelineCalculator, UnifiedTimelineResults } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
 
 interface ResultsDialogProps {
