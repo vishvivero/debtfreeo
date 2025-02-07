@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { calculateMonthlyAllocations } from "@/components/strategy/PaymentCalculator";
 import { strategies } from "@/lib/strategies";
-import { useProfile } from "@/lib/hooks/useProfile";
+import { useProfile } from "@/hooks/use-profile";
 
 interface OverviewTabProps {
   debts: Debt[];
