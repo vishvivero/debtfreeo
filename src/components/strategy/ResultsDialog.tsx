@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
-import { UnifiedDebtTimelineCalculator, UnifiedTimelineResults } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
+import { UnifiedCalculationService } from "@/lib/services/calculations/UnifiedCalculationService";
+import { UnifiedTimelineResults } from "@/lib/services/calculations/UnifiedCalculationService";
 import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
 
 interface ResultsDialogProps {
@@ -44,7 +45,7 @@ export const ResultsDialog = ({
     const calculateTimeline = async () => {
       try {
         setIsLoading(true);
-        const results = await UnifiedDebtTimelineCalculator.calculateTimeline(
+        const results = await UnifiedCalculationService.calculateUnifiedTimeline(
           debts,
           monthlyPayment,
           selectedStrategy,
@@ -72,14 +73,6 @@ export const ResultsDialog = ({
       });
     }
   }, [isOpen, debts, monthlyPayment, selectedStrategy, oneTimeFundings, toast]);
-
-  const handleNext = () => {
-    if (currentView === 'initial') {
-      setCurrentView('timeline');
-    } else if (currentView === 'timeline') {
-      setCurrentView('insights');
-    }
-  };
 
   if (!timelineResults || isLoading) {
     return (
@@ -148,6 +141,14 @@ export const ResultsDialog = ({
       </Dialog>
     );
   }
+
+  const handleNext = () => {
+    if (currentView === 'initial') {
+      setCurrentView('timeline');
+    } else if (currentView === 'timeline') {
+      setCurrentView('insights');
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -258,3 +259,4 @@ export const ResultsDialog = ({
     </Dialog>
   );
 };
+
