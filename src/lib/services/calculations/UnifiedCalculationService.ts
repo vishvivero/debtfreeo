@@ -3,8 +3,9 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { supabase } from "@/integrations/supabase/client";
+import { addMonths } from "date-fns";
 
-export interface UnifiedCalculationResult {
+export interface UnifiedTimelineResults {
   baselineMonths: number;
   acceleratedMonths: number;
   baselineInterest: number;
@@ -28,7 +29,7 @@ export class UnifiedCalculationService {
     monthlyPayment: number,
     strategy: Strategy,
     oneTimeFundings: OneTimeFunding[] = []
-  ): Promise<UnifiedCalculationResult> {
+  ): Promise<UnifiedTimelineResults> {
     console.log('Starting unified calculation:', {
       totalDebts: debts.length,
       monthlyPayment,
@@ -40,16 +41,16 @@ export class UnifiedCalculationService {
     const baselineResult = this.calculateScenario(
       debts,
       debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
-      [],
-      false
+      strategy,
+      []
     );
 
     // Calculate accelerated scenario (with strategy and extra payments)
     const acceleratedResult = this.calculateScenario(
-      strategy.calculate([...debts]),
+      debts,
       monthlyPayment,
-      oneTimeFundings,
-      true
+      strategy,
+      oneTimeFundings
     );
 
     const monthsSaved = Math.max(0, baselineResult.months - acceleratedResult.months);
@@ -66,11 +67,10 @@ export class UnifiedCalculationService {
       monthlyPayments: acceleratedResult.payments
     };
 
-    // Store calculation results for debugging
+    // Store calculation for debugging
     const userId = (await supabase.auth.getUser()).data.user?.id;
     if (userId) {
-      await supabase.from('calculation_results').insert({
-        user_id: userId,
+      await supabase.from('calculation_results').insert([{
         calculation_type: 'timeline',
         input_data: {
           debts,
@@ -79,10 +79,11 @@ export class UnifiedCalculationService {
           oneTimeFundings
         },
         output_results: result,
-        payoff_date: result.payoffDate,
+        payoff_date: result.payoffDate.toISOString(),
         total_interest: result.acceleratedInterest,
-        months_to_payoff: result.acceleratedMonths
-      });
+        months_to_payoff: result.acceleratedMonths,
+        user_id: userId
+      }]);
     }
 
     return result;
@@ -91,8 +92,8 @@ export class UnifiedCalculationService {
   private static calculateScenario(
     debts: Debt[],
     monthlyPayment: number,
-    oneTimeFundings: OneTimeFunding[],
-    applyStrategy: boolean
+    strategy: Strategy,
+    oneTimeFundings: OneTimeFunding[]
   ) {
     const balances = new Map<string, number>();
     const minimumPayments = new Map<string, number>();
@@ -111,6 +112,7 @@ export class UnifiedCalculationService {
     });
 
     while (remainingDebts.length > 0 && currentMonth < maxMonths) {
+      remainingDebts = strategy.calculate([...remainingDebts]);
       let availablePayment = monthlyPayment + releasedPayments;
       releasedPayments = 0;
 
@@ -149,8 +151,8 @@ export class UnifiedCalculationService {
         }
       }
 
-      // Apply extra payments according to strategy
-      if (availablePayment > 0 && remainingDebts.length > 0 && applyStrategy) {
+      // Apply extra payments
+      if (availablePayment > 0 && remainingDebts.length > 0) {
         const targetDebt = remainingDebts[0];
         const currentBalance = balances.get(targetDebt.id) || 0;
         const extraPayment = Math.min(availablePayment, currentBalance);
@@ -181,8 +183,7 @@ export class UnifiedCalculationService {
       currentMonth++;
     }
 
-    const finalPayoffDate = new Date(startDate);
-    finalPayoffDate.setMonth(finalPayoffDate.getMonth() + currentMonth);
+    const finalPayoffDate = addMonths(startDate, currentMonth);
 
     return {
       months: currentMonth,
