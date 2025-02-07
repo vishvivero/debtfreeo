@@ -13,6 +13,7 @@ import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
+import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -55,17 +56,36 @@ export const ResultsDialog = ({
     totalMinimumPayment,
     extraPayment,
     totalMonthlyPayment,
-    selectedStrategy: selectedStrategy.name
+    selectedStrategy: selectedStrategy.name,
+    oneTimeFundings: oneTimeFundings.length
   });
 
-  const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
+  // Use the same timeline data calculation as PayoffTimelineContainer
+  const timelineData = calculateTimelineData(
     debts,
     totalMonthlyPayment,
     selectedStrategy,
     oneTimeFundings
   );
 
-  console.log('Timeline calculation results in ResultsDialog:', timelineResults);
+  // Get the last data point to determine payoff date
+  const lastDataPoint = timelineData[timelineData.length - 1];
+  const payoffDate = new Date(lastDataPoint.date);
+
+  // Calculate total interest values
+  const baselineInterest = lastDataPoint.baselineInterest;
+  const acceleratedInterest = lastDataPoint.acceleratedInterest;
+  const interestSaved = baselineInterest - acceleratedInterest;
+  const monthsSaved = timelineData.length;
+
+  console.log('ResultsDialog: Using timeline calculation results:', {
+    payoffDate: payoffDate.toISOString(),
+    baselineInterest,
+    acceleratedInterest,
+    interestSaved,
+    monthsSaved,
+    dataPoints: timelineData.length
+  });
 
   const handleNext = () => {
     if (currentView === 'initial') {
@@ -167,7 +187,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-emerald-800">Interest Saved</h3>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-emerald-600">
-                {currencySymbol}{timelineResults.interestSaved.toLocaleString()}
+                {currencySymbol}{interestSaved.toLocaleString()}
               </p>
               <p className="text-xs sm:text-sm text-emerald-700">Total savings on interest</p>
             </div>
@@ -178,7 +198,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-blue-800">Time Saved</h3>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-blue-600">
-                {timelineResults.monthsSaved} months
+                {monthsSaved} months
               </p>
               <p className="text-xs sm:text-sm text-blue-700">Faster debt freedom</p>
             </div>
@@ -189,7 +209,7 @@ export const ResultsDialog = ({
                 <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
               </div>
               <p className="text-lg sm:text-2xl font-bold text-purple-600">
-                {timelineResults.payoffDate.toLocaleDateString('en-US', { 
+                {payoffDate.toLocaleDateString('en-US', { 
                   month: 'long',
                   year: 'numeric'
                 })}
