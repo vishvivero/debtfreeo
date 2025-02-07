@@ -10,7 +10,7 @@ export const countryCurrencies: CountryCurrency[] = [
   { country: "United States", currency: "US Dollar", code: "USD", symbol: "$" },
   { country: "United Kingdom", currency: "British Pound", code: "GBP", symbol: "£" },
   { country: "European Union", currency: "Euro", code: "EUR", symbol: "€" },
-  { country: "Japan", currency: "Japanese Yen", code: "JPY", symbol: "¥" },
+  { country: "Japan", currency: "Japanese Yen", code: "JPY", symbol: "JP¥" },
   { country: "Australia", currency: "Australian Dollar", code: "AUD", symbol: "A$" },
   { country: "Canada", currency: "Canadian Dollar", code: "CAD", symbol: "C$" },
   { country: "Switzerland", currency: "Swiss Franc", code: "CHF", symbol: "Fr" },
@@ -22,3 +22,4 @@ export const countryCurrencies: CountryCurrency[] = [
   { country: "South Africa", currency: "South African Rand", code: "ZAR", symbol: "R" },
   { country: "Singapore", currency: "Singapore Dollar", code: "SGD", symbol: "S$" },
 ];
+
