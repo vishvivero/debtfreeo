@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useDebts } from "@/hooks/use-debts";
 import { calculateDebtScore } from "@/lib/utils/scoring/debtScoreCalculator";
@@ -7,16 +8,34 @@ import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { DebtNameChart } from "@/components/debt/DebtNameChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartLine, BarChart3, PieChart } from "lucide-react";
+import { strategies } from "@/lib/strategies";
 
 export const DebtScoreCard = () => {
   const { debts, profile } = useDebts();
   const currencySymbol = profile?.preferred_currency || '£';
+  const selectedStrategy = strategies[0]; // Default to first strategy if none selected
 
   if (!debts || debts.length === 0) {
     return null;
   }
 
-  const score = calculateDebtScore(debts);
+  // Mock payoff details for initial implementation
+  const mockPayoffDetails = debts.reduce((acc, debt) => {
+    acc[debt.id] = {
+      months: 12,
+      totalInterest: 0,
+      payoffDate: new Date()
+    };
+    return acc;
+  }, {} as { [key: string]: { months: number; totalInterest: number; payoffDate: Date } });
+
+  const score = calculateDebtScore(
+    debts,
+    mockPayoffDetails,
+    mockPayoffDetails,
+    selectedStrategy,
+    profile?.monthly_payment || 0
+  );
 
   return (
     <motion.div
