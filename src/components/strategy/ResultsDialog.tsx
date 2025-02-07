@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Sparkles, DollarSign, Clock, Calendar } from "lucide-react";
@@ -9,7 +8,7 @@ import confetti from 'canvas-confetti';
 import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
@@ -37,23 +36,41 @@ export const ResultsDialog = ({
 }: ResultsDialogProps) => {
   const { toast } = useToast();
   const [currentView, setCurrentView] = useState<'initial' | 'timeline' | 'insights'>('initial');
+  const [timelineResults, setTimelineResults] = useState<UnifiedTimelineResults | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (isOpen) {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-  }
+  useEffect(() => {
+    const calculateTimeline = async () => {
+      try {
+        setIsLoading(true);
+        const results = await UnifiedDebtTimelineCalculator.calculateTimeline(
+          debts,
+          monthlyPayment,
+          selectedStrategy,
+          oneTimeFundings
+        );
+        setTimelineResults(results);
+      } catch (error) {
+        console.error('Error calculating timeline:', error);
+        toast({
+          title: "Calculation Error",
+          description: "There was an error calculating your debt payoff timeline.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
-    debts,
-    monthlyPayment,
-    selectedStrategy,
-    oneTimeFundings
-  );
-
-  console.log('Timeline calculation results in ResultsDialog:', timelineResults);
+    if (isOpen) {
+      calculateTimeline();
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  }, [isOpen, debts, monthlyPayment, selectedStrategy, oneTimeFundings, toast]);
 
   const handleNext = () => {
     if (currentView === 'initial') {
@@ -62,6 +79,21 @@ export const ResultsDialog = ({
       setCurrentView('insights');
     }
   };
+
+  if (!timelineResults || isLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-2xl">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Calculating your debt freedom journey...</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (currentView === 'insights') {
     return (

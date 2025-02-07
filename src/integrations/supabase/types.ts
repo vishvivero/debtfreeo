@@ -130,6 +130,42 @@ export type Database = {
           },
         ]
       }
+      calculation_results: {
+        Row: {
+          calculation_type: string
+          created_at: string | null
+          id: string
+          input_data: Json
+          months_to_payoff: number
+          output_results: Json
+          payoff_date: string
+          total_interest: number
+          user_id: string | null
+        }
+        Insert: {
+          calculation_type: string
+          created_at?: string | null
+          id?: string
+          input_data: Json
+          months_to_payoff: number
+          output_results: Json
+          payoff_date: string
+          total_interest: number
+          user_id?: string | null
+        }
+        Update: {
+          calculation_type?: string
+          created_at?: string | null
+          id?: string
+          input_data?: Json
+          months_to_payoff?: number
+          output_results?: Json
+          payoff_date?: string
+          total_interest?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       debts: {
         Row: {
           balance: number
