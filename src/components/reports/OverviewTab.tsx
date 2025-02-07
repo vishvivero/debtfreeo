@@ -1,15 +1,15 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { FileDown, TrendingUp, DollarSign, Calendar, Tag } from "lucide-react";
 import { DebtOverviewChart } from "./DebtOverviewChart";
-import { Debt } from "@/lib/types/debt";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
-import { calculateMonthlyAllocations } from "@/components/strategy/PaymentCalculator";
 import { strategies } from "@/lib/strategies";
 import { useProfile } from "@/hooks/use-profile";
+import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -23,22 +23,25 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
   const handleDownloadReport = () => {
     try {
       const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      const { allocations, payoffDetails } = calculateMonthlyAllocations(
+      
+      // Use the same calculation method as the timeline
+      const timelineResults = DebtTimelineCalculator.calculateTimeline(
         debts,
         totalMinimumPayments,
-        strategies[0] // Default to first strategy
+        strategies[0],
+        []
       );
       
       const doc = generateDebtOverviewPDF(
         debts,
         totalMinimumPayments,
-        0, // extraPayment
-        0, // baseMonths
-        0, // optimizedMonths
-        0, // baseTotalInterest
-        0, // optimizedTotalInterest
+        0,
+        timelineResults.baselineMonths,
+        timelineResults.acceleratedMonths,
+        timelineResults.baselineInterest,
+        timelineResults.acceleratedInterest,
         strategies[0],
-        [], // oneTimeFundings
+        [],
         currencySymbol
       );
       
