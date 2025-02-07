@@ -10,7 +10,7 @@ import { TimelineMetrics } from "./TimelineMetrics";
 import { calculateTimelineData } from "./TimelineCalculator";
 import { format } from "date-fns";
 import { useProfile } from "@/hooks/use-profile";
-import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
+import { UnifiedDebtTimelineCalculator, UnifiedTimelineResults } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { useState, useEffect } from "react";
 
 interface PayoffTimelineContainerProps {
@@ -29,16 +29,18 @@ export const PayoffTimelineContainer = ({
   const { profile } = useProfile();
   const [timelineResults, setTimelineResults] = useState<UnifiedTimelineResults | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalMonthlyPayment, setTotalMonthlyPayment] = useState(0);
 
   useEffect(() => {
     const calculateTimeline = async () => {
       try {
-        const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-        const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+        const minimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+        const calculatedTotalMonthlyPayment = minimumPayment + extraPayment;
+        setTotalMonthlyPayment(calculatedTotalMonthlyPayment);
         
         const results = await UnifiedDebtTimelineCalculator.calculateTimeline(
           debts,
-          totalMonthlyPayment,
+          calculatedTotalMonthlyPayment,
           strategy,
           oneTimeFundings
         );
