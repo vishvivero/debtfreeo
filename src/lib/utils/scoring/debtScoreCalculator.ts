@@ -2,33 +2,29 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { PayoffDetails } from "@/lib/services/UnifiedDebtCalculationService";
 
+interface ScoreComponents {
+  interestScore: number;
+  durationScore: number;
+  behaviorScore: {
+    ontimePayments: number;
+    excessPayments: number;
+    strategyUsage: number;
+  };
+  totalScore: number;
+}
+
 export const calculateDebtScore = (
   debts: Debt[],
-  originalPayoffDetails?: { [key: string]: PayoffDetails },
-  optimizedPayoffDetails?: { [key: string]: PayoffDetails },
-  selectedStrategy?: Strategy,
-  monthlyPayment: number = 0
+  originalPayoffDetails: { [key: string]: PayoffDetails },
+  optimizedPayoffDetails: { [key: string]: PayoffDetails },
+  selectedStrategy: Strategy,
+  monthlyPayment: number
 ): ScoreComponents => {
   console.log('Calculating debt score with:', {
-    totalDebts: debts?.length || 0,
-    selectedStrategy: selectedStrategy?.name || 'none',
+    totalDebts: debts.length,
+    selectedStrategy: selectedStrategy.name,
     monthlyPayment
   });
-
-  // If we don't have the required data, return a default score
-  if (!debts?.length || !originalPayoffDetails || !optimizedPayoffDetails) {
-    console.log('Missing required data for full score calculation, returning default score');
-    return {
-      interestScore: 0,
-      durationScore: 0,
-      behaviorScore: {
-        ontimePayments: 0,
-        excessPayments: 0,
-        strategyUsage: 0
-      },
-      totalScore: 0
-    };
-  }
 
   // Calculate Interest Score (50% weight)
   const calculateInterestScore = () => {
@@ -152,14 +148,3 @@ export const getScoreCategory = (score: number): {
     };
   }
 };
-
-interface ScoreComponents {
-  interestScore: number;
-  durationScore: number;
-  behaviorScore: {
-    ontimePayments: number;
-    excessPayments: number;
-    strategyUsage: number;
-  };
-  totalScore: number;
-}
