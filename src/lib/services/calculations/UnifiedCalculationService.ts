@@ -70,20 +70,22 @@ export class UnifiedCalculationService {
     // Store calculation for debugging
     const userId = (await supabase.auth.getUser()).data.user?.id;
     if (userId) {
-      await supabase.from('calculation_results').insert([{
+      const dbRecord = {
         calculation_type: 'timeline',
-        input_data: {
+        input_data: JSON.stringify({
           debts,
           monthlyPayment,
           strategyName: strategy.name,
           oneTimeFundings
-        },
-        output_results: result,
+        }),
+        output_results: JSON.stringify(result),
         payoff_date: result.payoffDate.toISOString(),
         total_interest: result.acceleratedInterest,
         months_to_payoff: result.acceleratedMonths,
         user_id: userId
-      }]);
+      };
+      
+      await supabase.from('calculation_results').insert([dbRecord]);
     }
 
     return result;
