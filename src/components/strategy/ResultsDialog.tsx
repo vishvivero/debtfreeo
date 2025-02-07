@@ -46,9 +46,12 @@ export const ResultsDialog = ({
     });
   }
 
+  // Calculate total monthly payment including extra payment
+  const totalMonthlyPayment = monthlyPayment + extraPayment;
+
   const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
     debts,
-    monthlyPayment,
+    totalMonthlyPayment,
     selectedStrategy,
     oneTimeFundings
   );
