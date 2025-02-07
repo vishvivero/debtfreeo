@@ -41,13 +41,21 @@ export const ResultsDialog = ({
   const [timelineResults, setTimelineResults] = useState<UnifiedTimelineResults | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleNext = () => {
+    if (currentView === 'initial') {
+      setCurrentView('timeline');
+    } else if (currentView === 'timeline') {
+      setCurrentView('insights');
+    }
+  };
+
   useEffect(() => {
     const calculateTimeline = async () => {
       try {
         setIsLoading(true);
         const results = await UnifiedCalculationService.calculateUnifiedTimeline(
           debts,
-          monthlyPayment,
+          monthlyPayment + extraPayment, // Include extraPayment in total monthly payment
           selectedStrategy,
           oneTimeFundings
         );
@@ -72,7 +80,7 @@ export const ResultsDialog = ({
         origin: { y: 0.6 }
       });
     }
-  }, [isOpen, debts, monthlyPayment, selectedStrategy, oneTimeFundings, toast]);
+  }, [isOpen, debts, monthlyPayment, extraPayment, selectedStrategy, oneTimeFundings, toast]);
 
   if (!timelineResults || isLoading) {
     return (
@@ -141,14 +149,6 @@ export const ResultsDialog = ({
       </Dialog>
     );
   }
-
-  const handleNext = () => {
-    if (currentView === 'initial') {
-      setCurrentView('timeline');
-    } else if (currentView === 'timeline') {
-      setCurrentView('insights');
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -259,4 +259,3 @@ export const ResultsDialog = ({
     </Dialog>
   );
 };
-
