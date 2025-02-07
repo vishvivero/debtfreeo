@@ -45,72 +45,91 @@ export const ScoreInsightsSection = () => {
     const totalMinPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
     const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
     const lowestBalanceDebt = [...debts].sort((a, b) => a.balance - b.balance)[0];
+    const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+    const highInterestThreshold = 15; // 15% interest rate threshold
 
     // Interest Score Recommendations
     if (scoreDetails.interestScore < 25) {
-      recommendations.push({
-        text: `Focus on paying off your ${highestInterestDebt.name} first with ${highestInterestDebt.interest_rate}% interest rate to reduce overall interest costs.`,
-        icon: <Coins className="h-5 w-5 text-yellow-500" />,
-        priority: 1
-      });
+      if (highestInterestDebt.interest_rate > highInterestThreshold) {
+        recommendations.push({
+          text: `Prioritize paying off ${highestInterestDebt.name} with ${highestInterestDebt.interest_rate}% interest rate. This could save you ${profile.preferred_currency}${Math.round(highestInterestDebt.balance * highestInterestDebt.interest_rate / 100)} in interest annually.`,
+          icon: <Coins className="h-5 w-5 text-yellow-500" />,
+          priority: 1
+        });
+      } else {
+        recommendations.push({
+          text: `Consider debt consolidation to reduce your average interest rate of ${(debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length).toFixed(1)}%.`,
+          icon: <Coins className="h-5 w-5 text-yellow-500" />,
+          priority: 2
+        });
+      }
     }
 
     // Duration Score Recommendations
     if (scoreDetails.durationScore < 15) {
-      const extraPaymentNeeded = Math.ceil((totalMinPayments * 0.2) / 10) * 10; // Round to nearest 10
+      const suggestedIncrease = Math.ceil((totalMinPayments * 0.2) / 10) * 10;
+      const monthsSaved = Math.round((totalDebt / (profile.monthly_payment + suggestedIncrease)) - (totalDebt / profile.monthly_payment));
+      
       recommendations.push({
-        text: `Consider increasing your monthly payment by ${profile.preferred_currency}${extraPaymentNeeded} to significantly reduce your payoff timeline.`,
+        text: `Increasing your monthly payment by ${profile.preferred_currency}${suggestedIncrease} could help you become debt-free ${monthsSaved} months earlier.`,
         icon: <Clock className="h-5 w-5 text-blue-500" />,
-        priority: 2
+        priority: 3
       });
     }
 
     // Payment Behavior Recommendations
     if (scoreDetails.behaviorScore.ontimePayments < 5) {
       recommendations.push({
-        text: "Set up automatic payments to ensure consistent, on-time payments and improve your payment behavior score.",
+        text: "Set up automatic payments to ensure consistent, on-time payments. This could improve your credit score by up to 35%.",
         icon: <Zap className="h-5 w-5 text-purple-500" />,
-        priority: 3
+        priority: 4
       });
     }
 
     // Strategy Optimization
     if (scoreDetails.behaviorScore.strategyUsage < 5) {
-      const suggestedStrategy = highestInterestDebt.interest_rate > 15 ? "avalanche" : "snowball";
+      const suggestedStrategy = highestInterestDebt.interest_rate > highInterestThreshold ? "avalanche" : "snowball";
       if (suggestedStrategy !== selectedStrategy.id) {
+        const strategyBenefit = suggestedStrategy === "avalanche" 
+          ? "maximize interest savings"
+          : "build momentum with quick wins";
+        
         recommendations.push({
-          text: `Switch to the ${suggestedStrategy} method to optimize your debt payoff strategy based on your current debt profile.`,
+          text: `Switch to the ${suggestedStrategy} method to ${strategyBenefit}. This strategy is optimal for your current debt profile.`,
           icon: <TrendingUp className="h-5 w-5 text-emerald-500" />,
-          priority: 4
+          priority: 5
         });
       }
     }
 
     // Extra Payment Recommendations
     if (scoreDetails.behaviorScore.excessPayments < 2.5) {
-      const smallestExtra = Math.ceil((lowestBalanceDebt.minimum_payment * 0.1) / 5) * 5; // Round to nearest 5
+      const smallestExtra = Math.ceil((lowestBalanceDebt.minimum_payment * 0.1) / 5) * 5;
+      const impactEstimate = Math.round((lowestBalanceDebt.balance * lowestBalanceDebt.interest_rate / 100) * (smallestExtra / lowestBalanceDebt.minimum_payment));
+      
       recommendations.push({
-        text: `Start small: add just ${profile.preferred_currency}${smallestExtra} extra to your monthly payment to build momentum.`,
+        text: `Adding just ${profile.preferred_currency}${smallestExtra} extra to your monthly payment could save you approximately ${profile.preferred_currency}${impactEstimate} in interest over time.`,
         icon: <Target className="h-5 w-5 text-indigo-500" />,
-        priority: 5
-      });
-    }
-
-    // If score is good, provide maintenance advice
-    if (scoreDetails.totalScore >= 80) {
-      recommendations.push({
-        text: "Your debt management strategy is solid! Consider setting up an emergency fund to prevent future debt.",
-        icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
         priority: 6
       });
     }
 
-    // If no specific recommendations, provide a default one
+    // High Score Maintenance Advice
+    if (scoreDetails.totalScore >= 80) {
+      const emergencyFundTarget = Math.round(totalMinPayments * 6 / 100) * 100;
+      recommendations.push({
+        text: `Great job managing your debt! Consider building an emergency fund of ${profile.preferred_currency}${emergencyFundTarget} (6 months of payments) to prevent future debt.`,
+        icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
+        priority: 7
+      });
+    }
+
+    // Default recommendation
     if (recommendations.length === 0) {
       recommendations.push({
         text: "Keep monitoring your debt repayment progress and stay consistent with your payments.",
         icon: <AlertCircle className="h-5 w-5 text-gray-500" />,
-        priority: 7
+        priority: 8
       });
     }
 

@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, DollarSign, Clock, Calendar } from "lucide-react";
+import { Sparkles, DollarSign, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
@@ -75,6 +75,14 @@ export const ResultsDialog = ({
     }
   };
 
+  const handleBack = () => {
+    if (currentView === 'timeline') {
+      setCurrentView('initial');
+    } else if (currentView === 'insights') {
+      setCurrentView('timeline');
+    }
+  };
+
   if (currentView === 'insights') {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -86,7 +94,15 @@ export const ResultsDialog = ({
           </DialogHeader>
           <div className="mt-4">
             <ScoreInsightsSection />
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-between">
+              <Button 
+                variant="outline" 
+                onClick={handleBack}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={onClose}
@@ -114,12 +130,21 @@ export const ResultsDialog = ({
               debts={debts}
               extraPayment={extraPayment}
             />
-            <div className="mt-6 flex justify-end gap-4">
+            <div className="mt-6 flex justify-between gap-4">
               <Button 
-                className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
+                variant="outline" 
+                onClick={handleBack}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <Button 
+                className="flex items-center gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" 
                 onClick={handleNext}
               >
                 Next
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -230,6 +255,7 @@ export const ResultsDialog = ({
               onClick={handleNext}
             >
               Next
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </motion.div>
         </div>
