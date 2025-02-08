@@ -1,21 +1,47 @@
+
 import Header from "@/components/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { SharedFooter } from "@/components/layout/SharedFooter";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { 
   BarChart3, 
   LineChart, 
   PieChart, 
   Target, 
   Clock, 
-  TrendingUp 
+  TrendingUp,
+  PartyPopper
 } from "lucide-react";
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col w-full">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full bg-gradient-to-r from-emerald-400 to-blue-400 text-white py-3 px-4 text-center"
+      >
+        <motion.div
+          className="flex items-center justify-center gap-2"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        >
+          <PartyPopper className="w-5 h-5 animate-bounce" />
+          <a 
+            href="https://launched.lovable.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-medium hover:underline"
+          >
+            DebtFreeo is now live on launched.lovable.app! Please check it out, vote, and show your support!
+          </a>
+          <PartyPopper className="w-5 h-5 animate-bounce" />
+        </motion.div>
+      </motion.div>
+      
       <Header />
       <main className="flex-grow w-full">
         <HeroSection />
