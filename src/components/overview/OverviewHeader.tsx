@@ -11,19 +11,22 @@ export const OverviewHeader = ({
   onCurrencyChange,
 }: OverviewHeaderProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-      <div className="space-y-1">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
-          Your Debt Overview
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold">
+          <span className="text-emerald-600">Your Financial</span>{" "}
+          <span className="text-blue-600">Overview</span>
         </h1>
-        <p className="text-gray-600">
-          Track Your Progress Toward Financial Freedom
+        <p className="text-gray-600 text-lg">
+          Track and optimize your journey to financial freedom
         </p>
       </div>
-      <CurrencySelector
-        value={currencySymbol}
-        onValueChange={onCurrencyChange}
-      />
+      <div>
+        <CurrencySelector
+          value={currencySymbol}
+          onValueChange={onCurrencyChange}
+        />
+      </div>
     </div>
   );
 };
