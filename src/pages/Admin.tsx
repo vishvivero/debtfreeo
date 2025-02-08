@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { AdminMetrics } from "@/components/admin/AdminMetrics";
-import { AdminBlogList } from "@/components/admin/AdminBlogList";
+import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { BlogPostForm } from "@/components/blog/BlogPostForm";
 import { CategoryManager } from "@/components/blog/CategoryManager";
 import { MainLayout } from "@/components/layout/MainLayout";
