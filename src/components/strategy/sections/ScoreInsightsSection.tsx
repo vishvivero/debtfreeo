@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -27,6 +26,21 @@ import {
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
 
+const getScoreColor = (score: number) => {
+  if (score >= 80) return "text-emerald-500";
+  if (score >= 60) return "text-blue-500";
+  if (score >= 40) return "text-yellow-500";
+  return "text-red-500";
+};
+
+const getProgressColor = (score: number, max: number) => {
+  const percentage = (score / max) * 100;
+  if (percentage >= 80) return "bg-emerald-500";
+  if (percentage >= 60) return "bg-blue-500";
+  if (percentage >= 40) return "bg-yellow-500";
+  return "bg-red-500";
+};
+
 export const ScoreInsightsSection = () => {
   const { debts, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
@@ -44,11 +58,16 @@ export const ScoreInsightsSection = () => {
     []
   );
 
+  const formattedFundings = oneTimeFundings.map(funding => ({
+    ...funding,
+    payment_date: new Date(funding.payment_date)
+  }));
+
   const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
     profile.monthly_payment,
     selectedStrategy,
-    oneTimeFundings
+    formattedFundings
   );
 
   const scoreDetails = calculateDebtScore(
@@ -159,21 +178,6 @@ export const ScoreInsightsSection = () => {
   };
 
   const recommendation = getDetailedRecommendations();
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-emerald-500";
-    if (score >= 60) return "text-blue-500";
-    if (score >= 40) return "text-yellow-500";
-    return "text-red-500";
-  };
-
-  const getProgressColor = (score: number, max: number) => {
-    const percentage = (score / max) * 100;
-    if (percentage >= 80) return "bg-emerald-500";
-    if (percentage >= 60) return "bg-blue-500";
-    if (percentage >= 40) return "bg-yellow-500";
-    return "bg-red-500";
-  };
 
   return (
     <motion.div
@@ -400,4 +404,3 @@ export const ScoreInsightsSection = () => {
     </motion.div>
   );
 };
-
