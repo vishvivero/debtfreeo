@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
@@ -63,12 +64,12 @@ export const DebtScoreCard = () => {
     if (!scoreDetails) return null;
 
     return (
-      <div className="relative w-64 h-64">
+      <div className="relative w-72 h-72">
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
-          <div className="text-6xl font-bold text-gray-900">
+          <div className="text-7xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent">
             {Math.round(scoreDetails.totalScore)}
           </div>
-          <div className="text-emerald-500 font-medium text-lg">
+          <div className={`${scoreCategory?.color} font-medium text-xl mt-2`}>
             {scoreCategory?.label}
           </div>
         </div>
@@ -76,34 +77,32 @@ export const DebtScoreCard = () => {
           <defs>
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#ef4444" />
-              <stop offset="25%" stopColor="#f97316" />
               <stop offset="50%" stopColor="#facc15" />
-              <stop offset="75%" stopColor="#84cc16" />
               <stop offset="100%" stopColor="#22c55e" />
             </linearGradient>
           </defs>
           <circle
-            cx="128"
-            cy="128"
-            r="116"
-            stroke="currentColor"
-            strokeWidth="16"
+            cx="144"
+            cy="144"
+            r="120"
+            stroke="#f3f4f6"
+            strokeWidth="24"
             fill="none"
-            className="text-gray-100"
           />
           <motion.circle
-            initial={{ strokeDashoffset: 729 }}
+            initial={{ strokeDashoffset: 754 }}
             animate={{ 
-              strokeDashoffset: 729 - (729 * scoreDetails.totalScore) / 100 
+              strokeDashoffset: 754 - (754 * scoreDetails.totalScore) / 100 
             }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            cx="128"
-            cy="128"
-            r="116"
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            cx="144"
+            cy="144"
+            r="120"
             stroke="url(#scoreGradient)"
-            strokeWidth="16"
+            strokeWidth="24"
             fill="none"
-            strokeDasharray="729"
+            strokeLinecap="round"
+            strokeDasharray="754"
             className="transition-all duration-1000 ease-out"
           />
         </svg>
@@ -114,35 +113,76 @@ export const DebtScoreCard = () => {
   const renderScoreBreakdown = () => {
     if (!scoreDetails) return null;
 
+    const metrics = [
+      {
+        label: "Interest Savings",
+        score: scoreDetails.interestScore,
+        total: 50,
+        color: "emerald",
+        description: "Potential interest saved through optimized payments"
+      },
+      {
+        label: "Duration Reduction",
+        score: scoreDetails.durationScore,
+        total: 30,
+        color: "blue",
+        description: "Time saved on your debt repayment journey"
+      },
+      {
+        label: "Payment Behavior",
+        score: scoreDetails.behaviorScore.ontimePayments + 
+               scoreDetails.behaviorScore.excessPayments + 
+               scoreDetails.behaviorScore.strategyUsage,
+        total: 20,
+        color: "purple",
+        description: "Score based on payment habits and strategy usage"
+      }
+    ];
+
     return (
-      <div className="space-y-4 mt-6">
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-          Your Optimized Debt Repayment Strategy
-        </h3>
-        <p className="text-gray-600 mt-2">
-          We've analyzed your debts and created a plan to minimize interest and accelerate your path to financial freedom.
-        </p>
-        <div className="space-y-4">
-          <div className="p-4 bg-emerald-50/50 rounded-lg">
-            <div className="text-gray-600">Interest Savings</div>
-            <div className="text-lg font-semibold text-emerald-600">
-              {scoreDetails.interestScore.toFixed(1)}/50
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            Your Optimized Debt Repayment Strategy
+          </h3>
+          <p className="text-gray-600 mt-2 text-lg">
+            We've analyzed your debts and created a plan to minimize interest and accelerate your path to financial freedom.
+          </p>
+        </div>
+        <div className="grid gap-4">
+          {metrics.map((metric) => (
+            <div
+              key={metric.label}
+              className={`p-6 bg-${metric.color}-50/50 rounded-xl border border-${metric.color}-100 hover:shadow-md transition-shadow`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">{metric.label}</span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className={`w-4 h-4 text-${metric.color}-500`} />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-sm">{metric.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <span className={`text-xl font-bold text-${metric.color}-600`}>
+                  {metric.score.toFixed(1)}/{metric.total}
+                </span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(metric.score / metric.total) * 100}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className={`h-full bg-${metric.color}-500 rounded-full`}
+                />
+              </div>
             </div>
-          </div>
-          <div className="p-4 bg-blue-50/50 rounded-lg">
-            <div className="text-gray-600">Duration Reduction</div>
-            <div className="text-lg font-semibold text-blue-600">
-              {scoreDetails.durationScore.toFixed(1)}/30
-            </div>
-          </div>
-          <div className="p-4 bg-purple-50/50 rounded-lg">
-            <div className="text-gray-600">Payment Behavior</div>
-            <div className="text-lg font-semibold text-purple-600">
-              {(scoreDetails.behaviorScore.ontimePayments + 
-                scoreDetails.behaviorScore.excessPayments + 
-                scoreDetails.behaviorScore.strategyUsage).toFixed(1)}/20
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     );
@@ -181,16 +221,16 @@ export const DebtScoreCard = () => {
 
     return (
       <>
-        <div className="flex flex-col md:flex-row items-center gap-8">
+        <div className="flex flex-col lg:flex-row items-center gap-8 p-6">
           <div className="flex-shrink-0">
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
               <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">YOUR DEBT SCORE</h3>
+                <h3 className="text-xl font-semibold text-gray-900">YOUR DEBT SCORE</h3>
               </div>
               {renderCircularProgress()}
             </div>
           </div>
-          <div className="flex-grow">
+          <div className="flex-grow w-full lg:w-auto">
             {renderScoreBreakdown()}
           </div>
         </div>
@@ -209,7 +249,7 @@ export const DebtScoreCard = () => {
       transition={{ duration: 0.5 }}
       className="mb-6"
     >
-      <Card className="bg-white p-6 relative overflow-hidden">
+      <Card className="bg-white overflow-hidden">
         {renderContent()}
       </Card>
     </motion.div>
