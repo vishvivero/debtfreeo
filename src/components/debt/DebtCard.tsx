@@ -1,6 +1,7 @@
+
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
@@ -105,11 +106,8 @@ export const DebtCard = ({
     };
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent navigation if clicking on buttons
-    if ((e.target as HTMLElement).closest('button')) {
-      return;
-    }
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click event
     navigate(`/overview/debt/${debt.id}`);
   };
 
@@ -120,8 +118,7 @@ export const DebtCard = ({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
-        onClick={handleCardClick}
+        className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
       >
         <div className="flex justify-between items-start mb-6">
           <h3 className="text-2xl font-bold text-gray-900">{debt.name}</h3>
@@ -166,14 +163,25 @@ export const DebtCard = ({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <h4 className="font-semibold text-gray-900">Progress</h4>
-            <span className="text-sm font-medium text-gray-600">
-              {payoffDetails.progressPercentage}%
-            </span>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <h4 className="font-semibold text-gray-900">Progress</h4>
+              <span className="text-sm font-medium text-gray-600">
+                {payoffDetails.progressPercentage}%
+              </span>
+            </div>
+            <Progress value={payoffDetails.progressPercentage} className="h-2" />
           </div>
-          <Progress value={payoffDetails.progressPercentage} className="h-2" />
+
+          <Button 
+            onClick={handleViewDetails}
+            className="w-full bg-[#9b87f5] hover:bg-[#8674e0] text-white flex items-center justify-center gap-2"
+          >
+            View Details
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
           <p className="text-sm text-gray-600 text-center">
             Estimated payoff in {payoffDetails.formattedTime}
           </p>
