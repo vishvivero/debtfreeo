@@ -67,8 +67,7 @@ export const DebtTableRow = ({
 
   return (
     <tr 
-      className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors cursor-pointer group"
-      onClick={handleRowClick}
+      className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors group"
     >
       <td className="py-4">
         <div>
@@ -137,11 +136,12 @@ export const DebtTableRow = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="text-blue-500 hover:text-blue-600 flex items-center gap-1 group-hover:opacity-100 transition-opacity opacity-0"
+                  onClick={() => handleRowClick()}
+                  className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 flex items-center gap-1"
                 >
-                  <span className="text-sm">View Details</span>
+                  <span className="text-sm">Details</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
