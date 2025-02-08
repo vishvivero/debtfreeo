@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
@@ -116,7 +115,13 @@ export const DebtScoreCard = () => {
     if (!scoreDetails) return null;
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 mt-6">
+        <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          Your Optimized Debt Repayment Strategy
+        </h3>
+        <p className="text-gray-600 mt-2">
+          We've analyzed your debts and created a plan to minimize interest and accelerate your path to financial freedom.
+        </p>
         <div className="space-y-4">
           <div className="p-4 bg-emerald-50/50 rounded-lg">
             <div className="text-gray-600">Interest Savings</div>
@@ -176,10 +181,7 @@ export const DebtScoreCard = () => {
 
     return (
       <>
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">
-          Your Optimized Debt Repayment Strategy
-        </h3>
-        <div className="flex flex-col md:flex-row items-start gap-8">
+        <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="flex-shrink-0">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
               <div className="text-center mb-4">
@@ -189,9 +191,6 @@ export const DebtScoreCard = () => {
             </div>
           </div>
           <div className="flex-grow">
-            <p className="text-gray-600 mb-6">
-              We've analyzed your debts and created a plan to minimize interest and accelerate your path to financial freedom.
-            </p>
             {renderScoreBreakdown()}
           </div>
         </div>
@@ -216,4 +215,3 @@ export const DebtScoreCard = () => {
     </motion.div>
   );
 };
-
