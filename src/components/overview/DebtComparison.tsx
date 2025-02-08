@@ -340,10 +340,23 @@ export const DebtComparison = () => {
                   With your savings, you could get:
                 </h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                    <Plane className="w-4 h-4" />
+                  <motion.div 
+                    className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
+                    initial={{ x: -20, y: 20 }}
+                    animate={{ 
+                      x: 0,
+                      y: 0,
+                      transition: {
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut"
+                      }
+                    }}
+                  >
+                    <Plane className="w-4 h-4 transform -rotate-45" />
                     <span>{Math.floor(comparison.moneySaved / 1000)} international trips</span>
-                  </div>
+                  </motion.div>
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <Smartphone className="w-4 h-4" />
                     <span>{Math.floor(comparison.moneySaved / 800)} premium smartphones</span>
