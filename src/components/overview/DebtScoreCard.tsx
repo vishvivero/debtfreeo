@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
@@ -66,7 +65,7 @@ export const DebtScoreCard = () => {
     return (
       <div className="relative w-64 h-64">
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
-          <div className="text-6xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <div className="text-6xl font-bold text-gray-900">
             {Math.round(scoreDetails.totalScore)}
           </div>
           <div className="text-emerald-500 font-medium text-lg">
@@ -116,93 +115,33 @@ export const DebtScoreCard = () => {
     if (!scoreDetails) return null;
 
     return (
-      <div className="space-y-6">
-        <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg p-6">
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-4">
-            Your Optimized Debt Repayment Strategy
-          </h3>
-          <p className="text-gray-600 mb-6">
-            We've analyzed your debts and created a personalized plan to minimize interest and accelerate your path to financial freedom. Here's how you're doing:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col">
-                <div className="text-emerald-600 font-semibold mb-2">Interest Savings</div>
-                <div className="text-3xl font-bold text-emerald-600 mb-2">
-                  {scoreDetails.interestScore.toFixed(1)}/50
-                </div>
-                <div className="text-sm text-gray-500">
-                  Your strategy is helping you save on interest payments
-                </div>
-                <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(scoreDetails.interestScore / 50) * 100}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col">
-                <div className="text-blue-600 font-semibold mb-2">Time Savings</div>
-                <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {scoreDetails.durationScore.toFixed(1)}/30
-                </div>
-                <div className="text-sm text-gray-500">
-                  You're on track to become debt-free faster
-                </div>
-                <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(scoreDetails.durationScore / 30) * 100}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-blue-400 to-blue-600"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col">
-                <div className="text-purple-600 font-semibold mb-2">Payment Behavior</div>
-                <div className="text-3xl font-bold text-purple-600 mb-2">
-                  {(scoreDetails.behaviorScore.ontimePayments + 
-                    scoreDetails.behaviorScore.excessPayments + 
-                    scoreDetails.behaviorScore.strategyUsage).toFixed(1)}/20
-                </div>
-                <div className="text-sm text-gray-500">
-                  Your consistent payments are making a difference
-                </div>
-                <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((scoreDetails.behaviorScore.ontimePayments + 
-                      scoreDetails.behaviorScore.excessPayments + 
-                      scoreDetails.behaviorScore.strategyUsage) / 20) * 100}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-purple-400 to-purple-600"
-                  />
-                </div>
-              </div>
-            </motion.div>
+      <div className="space-y-4 mt-6">
+        <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          Your Optimized Debt Repayment Strategy
+        </h3>
+        <p className="text-gray-600 mt-2">
+          We've analyzed your debts and created a plan to minimize interest and accelerate your path to financial freedom.
+        </p>
+        <div className="space-y-4">
+          <div className="p-4 bg-emerald-50/50 rounded-lg">
+            <div className="text-gray-600">Interest Savings</div>
+            <div className="text-lg font-semibold text-emerald-600">
+              {scoreDetails.interestScore.toFixed(1)}/50
+            </div>
+          </div>
+          <div className="p-4 bg-blue-50/50 rounded-lg">
+            <div className="text-gray-600">Duration Reduction</div>
+            <div className="text-lg font-semibold text-blue-600">
+              {scoreDetails.durationScore.toFixed(1)}/30
+            </div>
+          </div>
+          <div className="p-4 bg-purple-50/50 rounded-lg">
+            <div className="text-gray-600">Payment Behavior</div>
+            <div className="text-lg font-semibold text-purple-600">
+              {(scoreDetails.behaviorScore.ontimePayments + 
+                scoreDetails.behaviorScore.excessPayments + 
+                scoreDetails.behaviorScore.strategyUsage).toFixed(1)}/20
+            </div>
           </div>
         </div>
       </div>
@@ -244,24 +183,9 @@ export const DebtScoreCard = () => {
       <>
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="flex-shrink-0">
-            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
               <div className="text-center mb-4">
-                <div className="flex items-center justify-center gap-2">
-                  <h3 className="text-lg font-semibold text-gray-700">YOUR DEBT SCORE</h3>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="h-4 w-4 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-xs">
-                          Your Debt Score is calculated based on your interest savings, time to debt freedom, and payment behavior.
-                          A higher score means you're on the right track!
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                <h3 className="text-lg font-semibold text-gray-700">YOUR DEBT SCORE</h3>
               </div>
               {renderCircularProgress()}
             </div>
