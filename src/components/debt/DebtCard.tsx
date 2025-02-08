@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ChevronRight } from "lucide-react";
@@ -100,6 +101,7 @@ export const DebtCard = ({
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
+    window.scrollTo(0, 0);
     navigate(`/overview/debt/${debt.id}`);
   };
 
