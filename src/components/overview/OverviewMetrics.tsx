@@ -34,8 +34,7 @@ export const OverviewMetrics = () => {
       value: "Coming Soon",
       icon: LineChart,
       bgColor: "bg-purple-50",
-      iconColor: "text-purple-500",
-      comingSoon: true
+      iconColor: "text-purple-500"
     }
   ];
 
@@ -57,14 +56,6 @@ export const OverviewMetrics = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">{card.title}</p>
                 <p className="text-2xl font-bold mt-1">{card.value}</p>
-                {card.comingSoon && (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-purple-700"
-                  >
-                    Coming Soon
-                  </Badge>
-                )}
               </div>
               <div className={`p-3 rounded-full ${card.bgColor}`}>
                 <card.icon className={`w-5 h-5 ${card.iconColor}`} />
