@@ -1,8 +1,9 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AdminBlogList } from "./AdminBlogList";
+import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { CategoryManager } from "../blog/CategoryManager";
 import { FileText, Tags } from "lucide-react";
 
@@ -11,6 +12,7 @@ export const ContentManagement = () => {
     queryKey: ["contentStats"],
     queryFn: async () => {
       console.log("Fetching content stats...");
+      
       const { data: blogs, error: blogsError } = await supabase
         .from("blogs")
         .select("count");
