@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +9,13 @@ import { AdminLoadingSpinner } from "./AdminLoadingSpinner";
 import { AdminBlogTable } from "./AdminBlogTable";
 import { AdminBlogHeader } from "./AdminBlogHeader";
 import { ChartBar, List, PenTool } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const AdminBlogList = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: blogs, isLoading } = useQuery({
     queryKey: ["adminBlogs", user?.id],
@@ -85,7 +89,16 @@ export const AdminBlogList = () => {
 
   return (
     <div className="space-y-6">
-      <AdminBlogHeader />
+      <div className="flex justify-between items-center">
+        <AdminBlogHeader />
+        <Button 
+          onClick={() => navigate("/admin/new-post")}
+          className="flex items-center gap-2"
+        >
+          <PenTool className="w-4 h-4" />
+          New Post
+        </Button>
+      </div>
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
           <TabsTrigger value="all" className="flex items-center gap-2">
