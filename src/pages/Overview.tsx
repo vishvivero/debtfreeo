@@ -1,12 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
+import { supabase } from "@/integrations/supabase/client";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
-import { DebtComparison } from "@/components/overview/DebtComparison";
+import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
 
 const Overview = () => {
@@ -51,14 +53,13 @@ const Overview = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container py-8 space-y-6">
           <OverviewHeader 
             currencySymbol={currentCurrencySymbol}
             onCurrencyChange={handleCurrencyChange}
           />
           <DebtScoreCard />
-          <DebtComparison />
         </div>
       </div>
     </MainLayout>
