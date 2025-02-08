@@ -1,5 +1,6 @@
 
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
@@ -30,10 +31,11 @@ export const OverviewMetrics = () => {
     },
     {
       title: "Debt Payment Progress",
-      value: `${progress}%`,
+      value: "Coming Soon",
       icon: LineChart,
       bgColor: "bg-purple-50",
-      iconColor: "text-purple-500"
+      iconColor: "text-purple-500",
+      comingSoon: true
     }
   ];
 
@@ -50,11 +52,19 @@ export const OverviewMetrics = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
         >
-          <Card className="p-6 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="p-6 shadow-sm hover:shadow-md transition-shadow relative">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-gray-600 text-sm font-medium">{card.title}</p>
                 <p className="text-2xl font-bold mt-1">{card.value}</p>
+                {card.comingSoon && (
+                  <Badge 
+                    variant="secondary" 
+                    className="mt-2 bg-purple-100 text-purple-700"
+                  >
+                    Coming Soon
+                  </Badge>
+                )}
               </div>
               <div className={`p-3 rounded-full ${card.bgColor}`}>
                 <card.icon className={`w-5 h-5 ${card.iconColor}`} />
