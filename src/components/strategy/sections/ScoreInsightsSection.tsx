@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -156,6 +157,13 @@ export const ScoreInsightsSection = () => {
   };
 
   const recommendation = getDetailedRecommendations();
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-500";
+    if (score >= 60) return "text-blue-500";
+    if (score >= 40) return "text-yellow-500";
+    return "text-red-500";
+  };
 
   const getProgressColor = (score: number, max: number) => {
     const percentage = (score / max) * 100;
