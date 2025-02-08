@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ChevronRight } from "lucide-react";
@@ -47,7 +46,6 @@ export const DebtCard = ({
     fetchPaymentHistory();
   }, [debt.id, debt.user_id, debt.created_at]);
 
-  // Calculate months to payoff and progress percentage
   const getPayoffDetails = (debt: Debt): { months: number; formattedTime: string; progressPercentage: number } => {
     console.log('Calculating payoff details for debt:', {
       name: debt.name,
@@ -61,10 +59,8 @@ export const DebtCard = ({
     const monthlyPayment = debt.minimum_payment;
     const balance = debt.balance;
     
-    // Calculate monthly interest amount
     const monthlyInterestAmount = balance * monthlyInterest;
     
-    // If monthly payment can't cover interest, return 0% progress
     if (monthlyPayment <= monthlyInterestAmount) {
       console.log('Payment cannot cover interest:', {
         payment: monthlyPayment,
@@ -73,11 +69,8 @@ export const DebtCard = ({
       return { months: Infinity, formattedTime: "Never", progressPercentage: 0 };
     }
 
-    // Calculate total amount to be paid over the loan term using the loan amortization formula
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
-    
-    // Calculate progress based on actual payments made
-    const originalBalance = balance + totalPaid; // Add back the amount already paid
+    const originalBalance = balance + totalPaid;
     const progressPercentage = (totalPaid / originalBalance) * 100;
     
     console.log('Progress calculation:', {
@@ -88,7 +81,6 @@ export const DebtCard = ({
       progressPercentage
     });
     
-    // Format the time display
     const years = Math.floor(months / 12);
     const remainingMonths = Math.ceil(months % 12);
     
@@ -182,9 +174,14 @@ export const DebtCard = ({
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          <p className="text-sm text-gray-600 text-center">
-            Estimated payoff in {payoffDetails.formattedTime}
-          </p>
+          <div className="text-center space-y-1">
+            <p className="text-sm font-medium text-gray-500">
+              Standard repayment duration (without debt payoff strategy):
+            </p>
+            <p className="text-sm text-gray-600">
+              {payoffDetails.formattedTime}
+            </p>
+          </div>
         </div>
       </motion.div>
 
