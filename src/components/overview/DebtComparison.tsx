@@ -343,15 +343,10 @@ export const DebtComparison = () => {
                   <motion.div 
                     className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
                     initial={{ x: -20, y: 20 }}
-                    animate={{ 
-                      x: 0,
-                      y: 0,
-                      transition: {
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut"
-                      }
+                    animate={{ x: 0, y: 0 }}
+                    transition={{
+                      duration: 2,
+                      ease: "easeInOut"
                     }}
                   >
                     <Plane className="w-4 h-4 transform -rotate-45" />
