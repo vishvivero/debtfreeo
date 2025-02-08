@@ -275,7 +275,12 @@ export const ResultsDialog = ({
             </motion.div>
           )}
         </AnimatePresence>
+
+        <p className="text-xs text-muted-foreground text-center mt-6 px-4">
+          Disclaimer: The calculations provided are estimates only. Always review and make payments based on your creditor's requirements.
+        </p>
       </DialogContent>
     </Dialog>
   );
 };
+
