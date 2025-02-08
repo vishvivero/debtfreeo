@@ -1,10 +1,8 @@
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Header from "@/components/Header";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { LaunchBanner } from "./LaunchBanner";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -24,7 +22,6 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
-        <LaunchBanner />
         {SidebarComponent}
         <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''}`}>
           <Header />
