@@ -2,7 +2,7 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { PayoffDetails } from "@/lib/services/UnifiedDebtCalculationService";
 
-export interface ScoreDetails {
+interface ScoreComponents {
   interestScore: number;
   durationScore: number;
   behaviorScore: {
@@ -12,8 +12,6 @@ export interface ScoreDetails {
   };
   totalScore: number;
 }
-
-export interface ScoreComponents extends ScoreDetails {}
 
 export const calculateDebtScore = (
   debts: Debt[],
