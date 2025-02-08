@@ -16,6 +16,7 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtScoreCalculator";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 export const ScoreInsightsSection = () => {
   const { debts, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
 
   if (!debts || debts.length === 0 || !profile?.monthly_payment) {
     return null;
@@ -46,7 +48,7 @@ export const ScoreInsightsSection = () => {
     debts,
     profile.monthly_payment,
     selectedStrategy,
-    []
+    oneTimeFundings
   );
 
   const scoreDetails = calculateDebtScore(
@@ -270,7 +272,7 @@ export const ScoreInsightsSection = () => {
                   />
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80">
+              <HoverCardContent>
                 <div className="space-y-2">
                   <h4 className="font-semibold">Interest Optimization Score</h4>
                   <p className="text-sm text-muted-foreground">
@@ -302,7 +304,7 @@ export const ScoreInsightsSection = () => {
                   />
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80">
+              <HoverCardContent>
                 <div className="space-y-2">
                   <h4 className="font-semibold">Payment Efficiency Score</h4>
                   <p className="text-sm text-muted-foreground">
@@ -351,7 +353,7 @@ export const ScoreInsightsSection = () => {
                   />
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80">
+              <HoverCardContent>
                 <div className="space-y-2">
                   <h4 className="font-semibold">Financial Behavior Score</h4>
                   <p className="text-sm text-muted-foreground">
@@ -398,3 +400,4 @@ export const ScoreInsightsSection = () => {
     </motion.div>
   );
 };
+
