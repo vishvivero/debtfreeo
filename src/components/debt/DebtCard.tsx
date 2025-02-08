@@ -107,7 +107,7 @@ export const DebtCard = ({
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click event
+    e.stopPropagation();
     navigate(`/overview/debt/${debt.id}`);
   };
 
@@ -176,7 +176,7 @@ export const DebtCard = ({
 
           <Button 
             onClick={handleViewDetails}
-            className="w-full bg-[#9b87f5] hover:bg-[#8674e0] text-white flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-emerald-400 to-blue-400 hover:from-emerald-500 hover:to-blue-500 text-white flex items-center justify-center gap-2"
           >
             View Details
             <ChevronRight className="h-4 w-4" />
