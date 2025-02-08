@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface DebtTableRowProps {
   debt: Debt;
@@ -39,6 +39,7 @@ export const DebtTableRow = ({
   currencySymbol = '$'
 }: DebtTableRowProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const formatPayoffTime = (months: number): string => {
     if (months === Infinity || months > 1200) return "Never";
@@ -62,7 +63,9 @@ export const DebtTableRow = ({
   };
 
   const handleRowClick = () => {
-    navigate(`/overview/debt/${debt.id}`);
+    // Determine the correct navigation path based on the current route
+    const basePath = location.pathname.includes('/overview') ? '/overview' : '';
+    navigate(`${basePath}/debt/${debt.id}`);
   };
 
   return (
@@ -138,7 +141,7 @@ export const DebtTableRow = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleRowClick()}
+                  onClick={handleRowClick}
                   className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 flex items-center gap-1"
                 >
                   <span className="text-sm">Details</span>
