@@ -1,11 +1,30 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Target, TrendingUp, Award, AlertCircle, CheckCircle2, Coins, Clock, Zap } from "lucide-react";
+import { 
+  Target, 
+  TrendingUp, 
+  Award, 
+  AlertCircle, 
+  CheckCircle2, 
+  Coins, 
+  Clock, 
+  Zap,
+  Lightbulb,
+  PieChart,
+  ArrowUpRight
+} from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtScoreCalculator";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { cn } from "@/lib/utils";
 
 export const ScoreInsightsSection = () => {
   const { debts, profile } = useDebts();
@@ -139,10 +158,19 @@ export const ScoreInsightsSection = () => {
 
   const recommendation = getDetailedRecommendations();
 
-  const getRecommendationStyle = (score: number) => {
-    if (score < 50) return "bg-destructive/5 border-destructive/10";
-    if (score < 75) return "bg-secondary/5 border-secondary/10";
-    return "bg-primary/5 border-primary/10";
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-500";
+    if (score >= 60) return "text-blue-500";
+    if (score >= 40) return "text-yellow-500";
+    return "text-red-500";
+  };
+
+  const getProgressColor = (score: number, max: number) => {
+    const percentage = (score / max) * 100;
+    if (percentage >= 80) return "bg-emerald-500";
+    if (percentage >= 60) return "bg-blue-500";
+    if (percentage >= 40) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
@@ -152,104 +180,221 @@ export const ScoreInsightsSection = () => {
       transition={{ delay: 0.2 }}
       className="space-y-6"
     >
-      <Card className="bg-white/95">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
-            Score Insights
+      <Card className="bg-gradient-to-br from-white to-gray-50">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            <PieChart className="h-6 w-6 text-primary" />
+            Debt Management Score
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Score Circle */}
           <div className="flex flex-col items-center justify-center p-4">
-            <div className="relative w-32 h-32">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              className="relative w-48 h-48"
+            >
               <svg className="w-full h-full transform -rotate-90">
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="58"
+                  cx="96"
+                  cy="96"
+                  r="88"
                   stroke="currentColor"
-                  strokeWidth="12"
+                  strokeWidth="16"
                   fill="none"
                   className="text-gray-100"
                 />
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="58"
+                <motion.circle
+                  cx="96"
+                  cy="96"
+                  r="88"
                   stroke="currentColor"
-                  strokeWidth="12"
+                  strokeWidth="16"
                   fill="none"
-                  strokeDasharray="364.425"
-                  strokeDashoffset={364.425 - (364.425 * scoreDetails.totalScore) / 100}
-                  className="text-primary transition-all duration-1000 ease-out"
+                  strokeDasharray="552.92"
+                  initial={{ strokeDashoffset: 552.92 }}
+                  animate={{ 
+                    strokeDashoffset: 552.92 - (552.92 * scoreDetails.totalScore) / 100 
+                  }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  className={cn(
+                    "transition-all duration-1000 ease-out",
+                    getScoreColor(scoreDetails.totalScore)
+                  )}
                 />
               </svg>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <div className="text-3xl font-bold text-gray-900">
-                  {Math.round(scoreDetails.totalScore)}
-                </div>
-                <div className={`text-sm font-medium ${scoreCategory.color}`}>
-                  {scoreCategory.label}
-                </div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <div className={cn(
+                    "text-4xl font-bold",
+                    getScoreColor(scoreDetails.totalScore)
+                  )}>
+                    {Math.round(scoreDetails.totalScore)}
+                  </div>
+                  <div className={cn(
+                    "text-lg font-medium",
+                    scoreCategory.color
+                  )}>
+                    {scoreCategory.label}
+                  </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Interest Optimization</span>
-                <span className="font-medium">{scoreDetails.interestScore.toFixed(1)}/50</span>
-              </div>
-              <Progress value={(scoreDetails.interestScore / 50) * 100} className="h-2" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Payment Efficiency</span>
-                <span className="font-medium">{scoreDetails.durationScore.toFixed(1)}/30</span>
-              </div>
-              <Progress value={(scoreDetails.durationScore / 30) * 100} className="h-2" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Financial Behavior</span>
-                <span className="font-medium">
-                  {(
-                    scoreDetails.behaviorScore.ontimePayments +
-                    scoreDetails.behaviorScore.excessPayments +
-                    scoreDetails.behaviorScore.strategyUsage
-                  ).toFixed(1)}/20
-                </span>
-              </div>
-              <Progress 
-                value={
-                  ((scoreDetails.behaviorScore.ontimePayments +
-                    scoreDetails.behaviorScore.excessPayments +
-                    scoreDetails.behaviorScore.strategyUsage) / 20) * 100
-                } 
-                className="h-2" 
-              />
-            </div>
-          </div>
-
-          {recommendation && (
-            <div className={`mt-6 p-4 rounded-lg border transition-all duration-300 ${getRecommendationStyle(scoreDetails.totalScore)}`}>
-              <div className="flex items-start gap-3">
-                {recommendation.icon}
-                <div className="space-y-2">
-                  <h4 className="font-medium text-gray-900">Personalized Action Step</h4>
-                  <p className="text-sm text-gray-600">{recommendation.text}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Award className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-gray-500">
-                      Based on your current debt profile and payment patterns
+          {/* Score Breakdown */}
+          <div className="space-y-6">
+            <HoverCard openDelay={200}>
+              <HoverCardTrigger asChild>
+                <div className="space-y-2 cursor-help">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <Coins className="h-4 w-4 text-primary" />
+                      Interest Optimization
+                    </span>
+                    <span className={cn(
+                      "font-medium",
+                      getScoreColor(scoreDetails.interestScore)
+                    )}>
+                      {scoreDetails.interestScore.toFixed(1)}/50
                     </span>
                   </div>
+                  <Progress 
+                    value={(scoreDetails.interestScore / 50) * 100} 
+                    className="h-2"
+                    indicatorClassName={getProgressColor(scoreDetails.interestScore, 50)}
+                  />
                 </div>
-              </div>
-            </div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Interest Optimization Score</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Measures how effectively you're minimizing interest payments through your chosen repayment strategy and payment allocation.
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+
+            <HoverCard openDelay={200}>
+              <HoverCardTrigger asChild>
+                <div className="space-y-2 cursor-help">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      Payment Efficiency
+                    </span>
+                    <span className={cn(
+                      "font-medium",
+                      getScoreColor(scoreDetails.durationScore)
+                    )}>
+                      {scoreDetails.durationScore.toFixed(1)}/30
+                    </span>
+                  </div>
+                  <Progress 
+                    value={(scoreDetails.durationScore / 30) * 100} 
+                    className="h-2"
+                    indicatorClassName={getProgressColor(scoreDetails.durationScore, 30)}
+                  />
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Payment Efficiency Score</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Evaluates how quickly you're paying off your debts compared to the minimum payment schedule.
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+
+            <HoverCard openDelay={200}>
+              <HoverCardTrigger asChild>
+                <div className="space-y-2 cursor-help">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      Financial Behavior
+                    </span>
+                    <span className={cn(
+                      "font-medium",
+                      getScoreColor(
+                        scoreDetails.behaviorScore.ontimePayments +
+                        scoreDetails.behaviorScore.excessPayments +
+                        scoreDetails.behaviorScore.strategyUsage
+                      )
+                    )}>
+                      {(
+                        scoreDetails.behaviorScore.ontimePayments +
+                        scoreDetails.behaviorScore.excessPayments +
+                        scoreDetails.behaviorScore.strategyUsage
+                      ).toFixed(1)}/20
+                    </span>
+                  </div>
+                  <Progress 
+                    value={
+                      ((scoreDetails.behaviorScore.ontimePayments +
+                        scoreDetails.behaviorScore.excessPayments +
+                        scoreDetails.behaviorScore.strategyUsage) / 20) * 100
+                    } 
+                    className="h-2"
+                    indicatorClassName={getProgressColor(
+                      scoreDetails.behaviorScore.ontimePayments +
+                      scoreDetails.behaviorScore.excessPayments +
+                      scoreDetails.behaviorScore.strategyUsage,
+                      20
+                    )}
+                  />
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Financial Behavior Score</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Reflects your consistency in making payments, utilizing extra payments, and following your chosen debt repayment strategy.
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+
+          {/* Recommendation Card */}
+          {recommendation && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="mt-6"
+            >
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                    Personalized Recommendation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start gap-3">
+                    {recommendation.icon}
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">{recommendation.text}</p>
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-gray-500">
+                          Based on your current debt profile and payment patterns
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
         </CardContent>
       </Card>
