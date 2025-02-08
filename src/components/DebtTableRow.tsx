@@ -1,15 +1,14 @@
 
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ChevronRight, ExternalLink } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { useNavigate } from "react-router-dom";
+import { Pencil, Trash2, ChevronRight } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useNavigate } from "react-router-dom";
 
 interface DebtTableRowProps {
   debt: Debt;
@@ -140,7 +139,7 @@ export const DebtTableRow = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-blue-500 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+                  className="text-blue-500 hover:text-blue-600 flex items-center gap-1 group-hover:opacity-100 transition-opacity opacity-0"
                 >
                   <span className="text-sm">View Details</span>
                   <ChevronRight className="h-4 w-4" />
@@ -156,3 +155,4 @@ export const DebtTableRow = ({
     </tr>
   );
 };
+
