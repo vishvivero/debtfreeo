@@ -60,7 +60,7 @@ export const OverviewMetrics = () => {
                 {card.comingSoon && (
                   <Badge 
                     variant="secondary" 
-                    className="mt-2 bg-purple-100 text-purple-700"
+                    className="text-purple-700"
                   >
                     Coming Soon
                   </Badge>
