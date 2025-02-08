@@ -1,7 +1,15 @@
+
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ChevronRight, ExternalLink } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useNavigate } from "react-router-dom";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DebtTableRowProps {
   debt: Debt;
@@ -31,7 +39,8 @@ export const DebtTableRow = ({
   showDecimals = false,
   currencySymbol = '$'
 }: DebtTableRowProps) => {
-  // Format the time to payoff in years and months
+  const navigate = useNavigate();
+
   const formatPayoffTime = (months: number): string => {
     if (months === Infinity || months > 1200) return "Never";
     
@@ -53,15 +62,15 @@ export const DebtTableRow = ({
       : Math.round(num).toLocaleString();
   };
 
-  console.log(`Rendering debt row for ${debt.name}:`, {
-    payoffMonths: payoffDetails.months,
-    formattedTime: formatPayoffTime(payoffDetails.months),
-    totalInterest: payoffDetails.totalInterest,
-    payoffDate: payoffDetails.payoffDate
-  });
+  const handleRowClick = () => {
+    navigate(`/overview/debt/${debt.id}`);
+  };
 
   return (
-    <tr className="border-b border-gray-100 last:border-0">
+    <tr 
+      className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors cursor-pointer group"
+      onClick={handleRowClick}
+    >
       <td className="py-4">
         <div>
           <h3 className="font-medium text-gray-900">{debt.banker_name}</h3>
@@ -102,11 +111,14 @@ export const DebtTableRow = ({
         </span>
       </td>
       <td className="py-4">
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 items-center">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onUpdateDebt(debt)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdateDebt(debt);
+            }}
             className="text-gray-500 hover:text-gray-700"
           >
             <Pencil className="h-4 w-4" />
@@ -114,11 +126,31 @@ export const DebtTableRow = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onDeleteClick(debt)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteClick(debt);
+            }}
             className="text-red-500 hover:text-red-600"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-500 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+                >
+                  <span className="text-sm">View Details</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click to see payment schedule and detailed analytics</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </td>
     </tr>
