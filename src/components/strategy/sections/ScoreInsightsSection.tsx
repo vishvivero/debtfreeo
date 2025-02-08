@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -158,13 +157,6 @@ export const ScoreInsightsSection = () => {
 
   const recommendation = getDetailedRecommendations();
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-emerald-500";
-    if (score >= 60) return "text-blue-500";
-    if (score >= 40) return "text-yellow-500";
-    return "text-red-500";
-  };
-
   const getProgressColor = (score: number, max: number) => {
     const percentage = (score / max) * 100;
     if (percentage >= 80) return "bg-emerald-500";
@@ -188,7 +180,6 @@ export const ScoreInsightsSection = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Score Circle */}
           <div className="flex flex-col items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0 }}
@@ -248,7 +239,6 @@ export const ScoreInsightsSection = () => {
             </motion.div>
           </div>
 
-          {/* Score Breakdown */}
           <div className="space-y-6">
             <HoverCard openDelay={200}>
               <HoverCardTrigger asChild>
@@ -364,7 +354,6 @@ export const ScoreInsightsSection = () => {
             </HoverCard>
           </div>
 
-          {/* Recommendation Card */}
           {recommendation && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
