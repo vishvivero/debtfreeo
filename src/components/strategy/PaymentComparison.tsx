@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
@@ -49,7 +50,7 @@ export const PaymentComparison = ({
             Total Interest: {formatCurrency(timelineResults.baselineInterest, currencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
-            Months to Pay Off: {timelineResults.baselineMonths}
+            Months to Pay Off: {Math.ceil(timelineResults.baselineMonths)}
           </p>
         </div>
       </div>
@@ -66,7 +67,7 @@ export const PaymentComparison = ({
             Total Interest: {formatCurrency(timelineResults.acceleratedInterest, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
-            Months to Pay Off: {timelineResults.acceleratedMonths}
+            Months to Pay Off: {Math.ceil(timelineResults.acceleratedMonths)}
           </p>
         </div>
       </div>
