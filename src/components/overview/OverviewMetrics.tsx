@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
+import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 
 export const OverviewMetrics = () => {
   const { debts, profile, isLoading } = useDebts();
@@ -40,6 +41,11 @@ export const OverviewMetrics = () => {
 
   if (isLoading) {
     return <div className="h-24 animate-pulse bg-gray-100 rounded-lg" />;
+  }
+
+  // Return early if there are no debts
+  if (!debts || debts.length === 0) {
+    return <NoDebtsMessage />;
   }
 
   return (
