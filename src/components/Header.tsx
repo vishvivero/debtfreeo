@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -67,23 +66,23 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
             <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
+              <SheetContent side="left" className="w-64">
                 <Navigation />
               </SheetContent>
             </Sheet>
             <Link to="/" className="font-bold text-xl text-primary">
               Debtfreeo
             </Link>
-            <div className="hidden lg:block">
+            <div className="hidden md:block">
               <Navigation />
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-4">
             <ThemeToggle />
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
