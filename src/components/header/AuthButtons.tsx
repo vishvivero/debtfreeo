@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -63,26 +62,26 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   };
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4">
+    <div className="flex items-center gap-4">
       {user ? (
         <>
           <Link to="/overview">
             <Button 
               variant="ghost"
-              className="bg-primary hover:bg-primary/90 text-white gap-2 hidden sm:flex"
+              className="bg-primary hover:bg-primary/90 text-white gap-2"
             >
               <LayoutDashboard className="h-4 w-4" />
-              <span className="hidden sm:inline">Dashboard</span>
+              Dashboard
             </Button>
           </Link>
           {user && profile?.is_admin && (
             <Link to="/admin">
               <Button 
                 variant="ghost"
-                className="bg-primary hover:bg-primary/90 text-white gap-2 hidden sm:flex"
+                className="bg-primary hover:bg-primary/90 text-white gap-2"
               >
                 <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Admin</span>
+                Admin
               </Button>
             </Link>
           )}
@@ -92,7 +91,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
             className="bg-primary hover:bg-primary/90 text-white gap-2"
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
+            Sign Out
           </Button>
         </>
       ) : (
