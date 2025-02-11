@@ -5,7 +5,8 @@ import FeaturesSection from "@/components/landing/FeaturesSection";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { SharedFooter } from "@/components/layout/SharedFooter";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   BarChart3, 
   LineChart, 
@@ -13,34 +14,50 @@ import {
   Target, 
   Clock, 
   TrendingUp,
-  PartyPopper
+  PartyPopper,
+  Loader2
 } from "lucide-react";
 
 const Index = () => {
+  const { data: bannerSettings, isLoading } = useQuery({
+    queryKey: ["bannerSettings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("banner_settings")
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="min-h-screen flex flex-col w-full">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full bg-gradient-to-r from-emerald-400 to-blue-400 text-white py-3 px-4 text-center"
-      >
+      {bannerSettings?.is_visible && (
         <motion.div
-          className="flex items-center justify-center gap-2"
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full bg-gradient-to-r from-emerald-400 to-blue-400 text-white py-3 px-4 text-center"
         >
-          <PartyPopper className="w-5 h-5 animate-bounce" />
-          <a 
-            href="https://launched.lovable.app/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="font-medium hover:underline"
+          <motion.div
+            className="flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            DebtFreeo is now live on launched.lovable.app! Please check it out, vote, and show your support!
-          </a>
-          <PartyPopper className="w-5 h-5 animate-bounce" />
+            <PartyPopper className="w-5 h-5 animate-bounce" />
+            <a 
+              href={bannerSettings.link_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-medium hover:underline"
+            >
+              {bannerSettings.message}
+            </a>
+            <PartyPopper className="w-5 h-5 animate-bounce" />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
       
       <Header />
       <main className="flex-grow w-full">

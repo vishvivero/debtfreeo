@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ import { ContentManagement } from "@/components/admin/ContentManagement";
 import { AnalyticsReporting } from "@/components/admin/AnalyticsReporting";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
+import { BannerManagement } from "@/components/admin/BannerManagement";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -112,6 +114,7 @@ const Admin = () => {
             } />
             <Route path="users" element={<UserManagement />} />
             <Route path="settings" element={<SystemSettings />} />
+            <Route path="banner" element={<BannerManagement />} />
             <Route path="security" element={<SecurityMonitoring />} />
             <Route path="content" element={<ContentManagement />} />
             <Route path="analytics" element={<AnalyticsReporting />} />

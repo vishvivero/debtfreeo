@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard, 
   FileEdit, 
@@ -13,7 +14,8 @@ import {
   LayoutGrid,
   BarChart,
   ScrollText,
-  Activity
+  Activity,
+  Flag
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -46,6 +48,11 @@ const menuItems = [
     title: "System Settings",
     url: "/admin/settings",
     icon: Settings,
+  },
+  {
+    title: "Banner Management",
+    url: "/admin/banner",
+    icon: Flag,
   },
   {
     title: "Security Monitoring",

@@ -47,6 +47,36 @@ export type Database = {
           },
         ]
       }
+      banner_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_visible: boolean | null
+          link_text: string | null
+          link_url: string | null
+          message: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          message: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          message?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_categories: {
         Row: {
           created_at: string | null
