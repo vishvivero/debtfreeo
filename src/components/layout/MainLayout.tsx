@@ -4,6 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import Header from "@/components/Header";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   const SidebarComponent = sidebar || <AppSidebar />;
   const hasSidebar = !!sidebar || true;
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   // Scroll to top on route change
   useEffect(() => {
@@ -21,9 +23,9 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   }, [location.pathname]);
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex min-h-screen w-full">
-        <div className="hidden lg:block">
+        <div className={`${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'hidden lg:block'}`}>
           {SidebarComponent}
         </div>
         <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''}`}>
