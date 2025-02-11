@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
-import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 
 export const OverviewMetrics = () => {
   const { debts, profile, isLoading } = useDebts();
@@ -43,11 +42,6 @@ export const OverviewMetrics = () => {
     return <div className="h-24 animate-pulse bg-gray-100 rounded-lg" />;
   }
 
-  // Hide KPI metrics when there are no debts
-  if (!debts || debts.length === 0) {
-    return null;
-  }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
       {cards.map((card, index) => (
@@ -73,4 +67,3 @@ export const OverviewMetrics = () => {
     </div>
   );
 };
-
