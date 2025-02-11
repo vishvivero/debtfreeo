@@ -17,32 +17,38 @@ import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 export const DebtScoreCard = () => {
   const { debts, profile } = useDebts();
   
-  console.log('Rendering DebtScoreCard with debts:', {
+  console.log('Rendering DebtScoreCard with:', {
     debtCount: debts?.length,
     totalBalance: debts?.reduce((sum, debt) => sum + debt.balance, 0),
+    monthlyPayment: profile?.monthly_payment,
+    profile
   });
 
-  // Calculate total debt
+  // Calculate total debt and minimum payments
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) || 0;
   
   const hasNoDebts = !debts || debts.length === 0;
   const isDebtFree = debts && debts.length > 0 && totalDebt === 0;
   
   const calculateScore = () => {
-    if (!debts || debts.length === 0 || !profile?.monthly_payment) return null;
+    if (!debts || debts.length === 0) return null;
+
+    // Use either the profile's monthly payment or total minimum payments if monthly payment is not set
+    const effectiveMonthlyPayment = profile?.monthly_payment || totalMinimumPayments;
 
     const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
     
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
-      debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+      totalMinimumPayments,
       selectedStrategy,
       []
     );
 
     const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
-      profile.monthly_payment,
+      effectiveMonthlyPayment,
       selectedStrategy,
       []
     );
@@ -52,7 +58,7 @@ export const DebtScoreCard = () => {
       originalPayoff,
       optimizedPayoff,
       selectedStrategy,
-      profile.monthly_payment
+      effectiveMonthlyPayment
     );
   };
 
