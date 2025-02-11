@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,18 +19,44 @@ export const DangerZoneCard = ({ showNotifications }: DangerZoneCardProps) => {
   const { toast } = useToast();
 
   const handleResetData = async () => {
+    if (!user?.id) return;
+
     try {
       setIsUpdating(true);
-      await supabase.from('debts').delete().eq('user_id', user?.id);
-      await supabase.from('payment_history').delete().eq('user_id', user?.id);
-      await supabase.from('one_time_funding').delete().eq('user_id', user?.id);
       
+      // Start all operations in parallel for better performance
+      const operations = [
+        // Delete debts
+        supabase.from('debts').delete().eq('user_id', user.id),
+        // Delete payment history
+        supabase.from('payment_history').delete().eq('user_id', user.id),
+        // Delete one-time funding
+        supabase.from('one_time_funding').delete().eq('user_id', user.id),
+        // Reset monthly payment in profile
+        supabase.from('profiles').update({ 
+          monthly_payment: 0,
+          show_extra_payments: false,
+          show_lump_sum_payments: false 
+        }).eq('id', user.id)
+      ];
+
+      // Wait for all operations to complete
+      const results = await Promise.all(operations);
+
+      // Check if any operation failed
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        console.error("Errors during data reset:", errors);
+        throw new Error("Failed to reset some data");
+      }
+      
+      // Invalidate all relevant queries to refresh the UI
       queryClient.invalidateQueries();
       
       if (showNotifications) {
         toast({
-          title: "Data Reset",
-          description: "All your data has been successfully reset."
+          title: "Data Reset Complete",
+          description: "All your data has been successfully reset"
         });
       }
     } catch (error) {
@@ -58,7 +85,7 @@ export const DangerZoneCard = ({ showNotifications }: DangerZoneCardProps) => {
         <div>
           <h3 className="font-medium mb-1">Reset Account Data</h3>
           <p className="text-sm text-muted-foreground mb-2">
-            All user-entered data will be deleted, but your account will remain active.
+            All your debts, payments, and preferences will be deleted, but your account will remain active.
           </p>
           <Button 
             variant="outline" 
@@ -66,7 +93,7 @@ export const DangerZoneCard = ({ showNotifications }: DangerZoneCardProps) => {
             onClick={handleResetData}
             disabled={isUpdating}
           >
-            Reset Data
+            {isUpdating ? "Resetting..." : "Reset Data"}
           </Button>
         </div>
       </CardContent>
