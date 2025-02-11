@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -27,16 +27,18 @@ export const BannerManagement = () => {
 
       if (error) throw error;
       return data;
-    },
-    onSuccess: (data) => {
-      if (data) {
-        setIsVisible(data.is_visible);
-        setMessage(data.message);
-        setLinkUrl(data.link_url || "");
-        setLinkText(data.link_text || "");
-      }
-    },
+    }
   });
+
+  // Use useEffect to handle the data changes
+  useEffect(() => {
+    if (bannerSettings) {
+      setIsVisible(bannerSettings.is_visible);
+      setMessage(bannerSettings.message);
+      setLinkUrl(bannerSettings.link_url || "");
+      setLinkText(bannerSettings.link_text || "");
+    }
+  }, [bannerSettings]);
 
   const updateBanner = useMutation({
     mutationFn: async () => {
