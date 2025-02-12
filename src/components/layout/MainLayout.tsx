@@ -25,10 +25,15 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex min-h-screen w-full">
-        <div className={`${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'hidden lg:block'}`}>
+        {/* Mobile sidebar - always visible when on authenticated routes */}
+        <div className="lg:hidden fixed inset-y-0 left-0 z-50">
           {SidebarComponent}
         </div>
-        <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''}`}>
+        {/* Desktop sidebar */}
+        <div className="hidden lg:block">
+          {SidebarComponent}
+        </div>
+        <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''} ${isMobile ? 'ml-12' : ''}`}>
           <Header />
           <main className="flex-1 pt-16">
             <div className="content-container">
