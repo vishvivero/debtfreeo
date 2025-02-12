@@ -11,9 +11,9 @@ import {
 } from './tableGenerators';
 import { formatDate, formatCurrency, formatPercentage } from './formatters';
 
-const BRAND_COLOR = [0, 211, 130]; // Green
-const ACCENT_COLOR = [147, 51, 234]; // Purple
-const TEXT_COLOR = [31, 41, 55]; // Gray-800
+const BRAND_COLOR = [0, 211, 130] as const; // Green
+const ACCENT_COLOR = [147, 51, 234] as const; // Purple
+const TEXT_COLOR = [31, 41, 55] as const; // Gray-800
 
 export const generateDebtOverviewPDF = (
   debts: Debt[],
@@ -31,7 +31,7 @@ export const generateDebtOverviewPDF = (
   let currentY = 0;
 
   // Helper function to add colored rectangle
-  const addColoredRect = (y: number, height: number, color: number[]) => {
+  const addColoredRect = (y: number, height: number, color: readonly number[]) => {
     doc.setFillColor(color[0], color[1], color[2]);
     doc.rect(0, y, doc.internal.pageSize.width, height, 'F');
   };
@@ -52,7 +52,7 @@ export const generateDebtOverviewPDF = (
 
   // Add executive summary
   currentY = 50;
-  doc.setTextColor(...TEXT_COLOR);
+  doc.setTextColor(TEXT_COLOR[0], TEXT_COLOR[1], TEXT_COLOR[2]);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('Executive Summary', 20, currentY);
@@ -77,7 +77,7 @@ export const generateDebtOverviewPDF = (
     
     // Add text
     doc.setFontSize(8);
-    doc.setTextColor(...TEXT_COLOR);
+    doc.setTextColor(TEXT_COLOR[0], TEXT_COLOR[1], TEXT_COLOR[2]);
     doc.text(box.label, x + 5, y + 7);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -161,7 +161,7 @@ export const generateDebtOverviewPDF = (
     '✓ Consider consolidating high-interest debts if possible'
   ];
 
-  tips.forEach((tip, index) => {
+  tips.forEach((tip) => {
     currentY += 10;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
@@ -174,7 +174,7 @@ export const generateDebtOverviewPDF = (
     doc.setPage(i);
     
     // Add footer line
-    addColoredRect(doc.internal.pageSize.height - 20, 0.5, [229, 231, 235]);
+    addColoredRect(doc.internal.pageSize.height - 20, 0.5, [229, 231, 235] as const);
     
     // Add page number and website
     doc.setFontSize(8);
