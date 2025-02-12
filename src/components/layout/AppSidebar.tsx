@@ -1,3 +1,4 @@
+
 import { ArrowLeft } from "lucide-react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
