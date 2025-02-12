@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { FileDown, TrendingUp, DollarSign, Calendar, Tag } from "lucide-react";
+import { FileDown, TrendingUp, DollarSign, Calendar, Tag, Download, FileText, ChevronRight } from "lucide-react";
 import { DebtOverviewChart } from "./DebtOverviewChart";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,6 +10,7 @@ import { strategies } from "@/lib/strategies";
 import { useProfile } from "@/hooks/use-profile";
 import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 import { Debt } from "@/lib/types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -24,7 +25,6 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     try {
       const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
       
-      // Use the same calculation method as the timeline
       const timelineResults = DebtTimelineCalculator.calculateTimeline(
         debts,
         totalMinimumPayments,
@@ -49,13 +49,14 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
       
       toast({
         title: "Success",
-        description: "Debt overview report downloaded successfully",
+        description: "Your debt overview report has been downloaded successfully",
+        duration: 3000,
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
         title: "Error",
-        description: "Failed to generate report",
+        description: "Failed to generate your report. Please try again.",
         variant: "destructive",
       });
     }
@@ -198,20 +199,66 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         </motion.div>
       </div>
 
-      {/* Download Report Button */}
+      {/* Redesigned Download Report Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="flex justify-end"
+        className="mt-8"
       >
-        <Button 
-          onClick={handleDownloadReport}
-          className="bg-primary hover:bg-primary/90 flex items-center gap-2"
-        >
-          <FileDown className="h-4 w-4" />
-          Download Overview Report
-        </Button>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-300">
+              <FileText className="h-5 w-5" />
+              Generate Detailed Report
+            </CardTitle>
+            <CardDescription className="text-purple-600 dark:text-purple-400">
+              Download a comprehensive overview of your debt management progress
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-medium text-purple-800 dark:text-purple-300">Report Contents:</h4>
+                <ul className="space-y-2">
+                  {[
+                    { icon: <TrendingUp className="h-4 w-4" />, text: "Debt Distribution Analysis" },
+                    { icon: <Calendar className="h-4 w-4" />, text: "Payment Timeline" },
+                    { icon: <DollarSign className="h-4 w-4" />, text: "Interest Savings" },
+                    { icon: <Tag className="h-4 w-4" />, text: "Category Breakdown" }
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                      {item.icon}
+                      <span>{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex flex-col justify-center items-center space-y-4">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleDownloadReport}
+                        className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 p-6"
+                      >
+                        <Download className="h-5 w-5" />
+                        Download PDF Report
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Generate a detailed PDF report of your debt overview</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <p className="text-sm text-purple-600 dark:text-purple-400 text-center">
+                  PDF format • Includes all metrics • {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   );
