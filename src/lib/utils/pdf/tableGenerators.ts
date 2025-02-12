@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
 import { formatCurrency, formatDate, formatPercentage, formatMonths } from './formatters';
@@ -10,17 +11,29 @@ export const generateDebtSummaryTable = (doc: jsPDF, debts: Debt[], startY: numb
     debt.banker_name,
     formatCurrency(debt.balance, debt.currency_symbol),
     formatPercentage(debt.interest_rate),
-    formatCurrency(debt.minimum_payment, debt.currency_symbol),
-    debt.next_payment_date ? formatDate(new Date(debt.next_payment_date)) : 'N/A'
+    formatCurrency(debt.minimum_payment, debt.currency_symbol)
   ]);
 
   autoTable(doc, {
     startY,
-    head: [['Debt Name', 'Lender', 'Balance', 'Interest Rate', 'Min Payment', 'Next Payment']],
+    head: [['Debt Name', 'Lender', 'Balance', 'Interest Rate', 'Min Payment']],
     body: tableData,
-    theme: 'striped',
-    headStyles: { fillColor: [0, 211, 130], textColor: [255, 255, 255] },
-    styles: { fontSize: 10 },
+    theme: 'grid',
+    styles: { 
+      fontSize: 10,
+      cellPadding: 6,
+      lineColor: [229, 231, 235],
+      lineWidth: 0.1,
+    },
+    headStyles: { 
+      fillColor: [0, 211, 130],
+      textColor: [255, 255, 255],
+      fontSize: 10,
+      fontStyle: 'bold',
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    }
   });
 
   return (doc as any).lastAutoTable.finalY;
@@ -34,9 +47,9 @@ export const generatePaymentDetailsTable = (
   currencySymbol: string
 ) => {
   const tableData = [
-    ['📅 Monthly Payment', formatCurrency(monthlyPayment - extraPayment, currencySymbol)],
-    ['⭐ Extra Payment', formatCurrency(extraPayment, currencySymbol)],
-    ['💰 Total Monthly', formatCurrency(monthlyPayment, currencySymbol)]
+    ['Regular Monthly Payment', formatCurrency(monthlyPayment - extraPayment, currencySymbol)],
+    ['Extra Payment', formatCurrency(extraPayment, currencySymbol)],
+    ['Total Monthly Commitment', formatCurrency(monthlyPayment, currencySymbol)]
   ];
 
   autoTable(doc, {
@@ -44,12 +57,12 @@ export const generatePaymentDetailsTable = (
     body: tableData,
     theme: 'plain',
     styles: { 
-      fontSize: 12,
-      cellPadding: 5
+      fontSize: 11,
+      cellPadding: 8,
     },
     columnStyles: {
-      0: { fontStyle: 'bold' },
-      1: { halign: 'right', fontStyle: 'bold' }
+      0: { fontStyle: 'bold', cellWidth: 100 },
+      1: { halign: 'right', cellWidth: 80 }
     }
   });
 
@@ -69,23 +82,26 @@ export const generateSavingsTable = (
   const interestSaved = Math.max(0, baseTotalInterest - optimizedTotalInterest);
   
   const tableData = [
-    ['⏱️ Time Saved', formatMonths(monthsSaved)],
-    ['💵 Interest Saved', formatCurrency(interestSaved, currencySymbol)],
-    ['🎯 New Payoff Timeline', formatMonths(optimizedMonths)],
-    ['📊 Interest Reduction', formatPercentage((interestSaved / baseTotalInterest) * 100)]
+    ['Time Saved', formatMonths(monthsSaved)],
+    ['Interest Savings', formatCurrency(interestSaved, currencySymbol)],
+    ['New Payoff Timeline', formatMonths(optimizedMonths)],
+    ['Interest Reduction', formatPercentage((interestSaved / baseTotalInterest) * 100)]
   ];
 
   autoTable(doc, {
     startY,
     body: tableData,
-    theme: 'grid',
+    theme: 'striped',
     styles: { 
-      fontSize: 12,
-      cellPadding: 5
+      fontSize: 11,
+      cellPadding: 8,
     },
     columnStyles: {
-      0: { fontStyle: 'bold' },
-      1: { halign: 'right', fontStyle: 'bold', textColor: [0, 211, 130] }
+      0: { fontStyle: 'bold', cellWidth: 100 },
+      1: { halign: 'right', cellWidth: 80, textColor: [0, 211, 130] }
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
     }
   });
 
@@ -100,31 +116,39 @@ export const generateNextStepsTable = (
   startY: number,
   currencySymbol: string
 ) => {
-  const tableData = [
-    ['📅 Monthly Payment Schedule'],
-    ['Regular Payment', formatCurrency(monthlyPayment - extraPayment, currencySymbol)],
-    ['Extra Payment', formatCurrency(extraPayment, currencySymbol)],
-    ['Total Monthly', formatCurrency(monthlyPayment, currencySymbol)],
-    [''],
-    ['💰 Upcoming Lump Sum Payments']
+  const actions = [
+    [`Set up your monthly payment of ${formatCurrency(monthlyPayment, currencySymbol)}`, 'Immediate'],
+    [`Allocate extra payment of ${formatCurrency(extraPayment, currencySymbol)}`, 'Monthly'],
   ];
 
   oneTimeFundings.forEach(funding => {
-    tableData.push([
-      `${formatDate(new Date(funding.payment_date))} - ${formatCurrency(funding.amount, currencySymbol)}`
+    actions.push([
+      `Add lump sum payment of ${formatCurrency(funding.amount, currencySymbol)}`,
+      formatDate(new Date(funding.payment_date))
     ]);
   });
 
   autoTable(doc, {
     startY,
-    body: tableData,
-    theme: 'plain',
+    head: [['Action Item', 'Timeline']],
+    body: actions,
+    theme: 'grid',
     styles: { 
-      fontSize: 12,
-      cellPadding: 5
+      fontSize: 10,
+      cellPadding: 6,
+    },
+    headStyles: {
+      fillColor: [147, 51, 234],
+      textColor: [255, 255, 255],
+      fontSize: 10,
+      fontStyle: 'bold',
     },
     columnStyles: {
-      0: { fontStyle: 'bold' }
+      0: { cellWidth: 130 },
+      1: { cellWidth: 50, halign: 'center' }
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
     }
   });
 

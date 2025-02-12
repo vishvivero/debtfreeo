@@ -9,7 +9,11 @@ import {
   generateSavingsTable,
   generateNextStepsTable
 } from './tableGenerators';
-import { formatDate } from './formatters';
+import { formatDate, formatCurrency, formatPercentage } from './formatters';
+
+const BRAND_COLOR = [0, 211, 130]; // Green
+const ACCENT_COLOR = [147, 51, 234]; // Purple
+const TEXT_COLOR = [31, 41, 55]; // Gray-800
 
 export const generateDebtOverviewPDF = (
   debts: Debt[],
@@ -24,54 +28,95 @@ export const generateDebtOverviewPDF = (
   currencySymbol: string
 ): jsPDF => {
   const doc = new jsPDF();
-  let currentY = 20;
+  let currentY = 0;
 
-  // Add header with logo and date
+  // Helper function to add colored rectangle
+  const addColoredRect = (y: number, height: number, color: number[]) => {
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.rect(0, y, doc.internal.pageSize.width, height, 'F');
+  };
+
+  // Add header banner
+  addColoredRect(0, 40, BRAND_COLOR);
+  
+  // Add title and date
+  currentY = 25;
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(24);
-  doc.setTextColor(0, 211, 130);
-  doc.text('Debt Overview Report', 20, currentY);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Debt Freedom Journey', 20, currentY);
   
   doc.setFontSize(10);
-  doc.setTextColor(128, 128, 128);
-  doc.text(`Generated on ${formatDate(new Date())}`, 20, currentY + 8);
-  
-  currentY += 25;
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Report generated on ${formatDate(new Date())}`, 20, currentY + 8);
 
-  // Add summary section
-  doc.setFontSize(16);
-  doc.setTextColor(0, 0, 0);
-  doc.text('Your Debt Summary', 20, currentY);
+  // Add executive summary
+  currentY = 50;
+  doc.setTextColor(...TEXT_COLOR);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Executive Summary', 20, currentY);
+
+  // Summary boxes
   currentY += 10;
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const boxes = [
+    { label: 'Total Debt', value: formatCurrency(totalDebt, currencySymbol) },
+    { label: 'Monthly Payment', value: formatCurrency(monthlyPayment, currencySymbol) },
+    { label: 'Time to Freedom', value: `${optimizedMonths} months` },
+    { label: 'Interest Savings', value: formatCurrency(baseTotalInterest - optimizedTotalInterest, currencySymbol) }
+  ];
 
-  // Generate debt summary table
-  currentY = generateDebtSummaryTable(doc, debts, currentY) + 15;
+  boxes.forEach((box, index) => {
+    const x = 20 + (index % 2) * 85;
+    const y = currentY + Math.floor(index / 2) * 25;
+    
+    // Add box background
+    doc.setFillColor(248, 250, 252); // Gray-50
+    doc.roundedRect(x, y, 75, 20, 3, 3, 'F');
+    
+    // Add text
+    doc.setFontSize(8);
+    doc.setTextColor(...TEXT_COLOR);
+    doc.text(box.label, x + 5, y + 7);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(box.value, x + 5, y + 16);
+  });
 
-  // Add payment strategy section
-  doc.setFontSize(16);
-  doc.text('Payment Strategy', 20, currentY);
-  currentY += 10;
-
-  doc.setFontSize(12);
-  doc.setTextColor(89, 89, 89);
-  doc.text(`Using ${strategy.name} strategy`, 20, currentY);
+  // Progress section
+  currentY += 60;
+  addColoredRect(currentY, 3, ACCENT_COLOR);
   currentY += 15;
-
-  // Generate payment details table
-  currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol) + 15;
-
-  // Check if we need a new page
-  if (currentY > doc.internal.pageSize.height - 60) {
-    doc.addPage();
-    currentY = 20;
-  }
-
-  // Add savings section
-  doc.setFontSize(16);
-  doc.setTextColor(0, 0, 0);
-  doc.text('Projected Savings', 20, currentY);
+  
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Your Progress Overview', 20, currentY);
+  
+  // Add debt breakdown table
   currentY += 10;
+  currentY = generateDebtSummaryTable(doc, debts, currentY) + 20;
 
-  // Generate savings table
+  // Strategy section
+  doc.addPage();
+  currentY = 20;
+  
+  // Strategy header
+  addColoredRect(currentY - 10, 3, BRAND_COLOR);
+  doc.setFontSize(14);
+  doc.text('Payment Strategy & Timeline', 20, currentY);
+  
+  // Strategy details
+  currentY += 15;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Using ${strategy.name} strategy to accelerate your debt freedom`, 20, currentY);
+  
+  // Payment breakdown
+  currentY += 10;
+  currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol) + 20;
+
+  // Savings projection
   currentY = generateSavingsTable(
     doc,
     baseMonths,
@@ -80,20 +125,20 @@ export const generateDebtOverviewPDF = (
     optimizedTotalInterest,
     currentY,
     currencySymbol
-  ) + 15;
+  ) + 20;
 
-  // Check if we need a new page
-  if (currentY > doc.internal.pageSize.height - 60) {
-    doc.addPage();
-    currentY = 20;
-  }
-
-  // Add next steps section
-  doc.setFontSize(16);
-  doc.text('Next Steps', 20, currentY);
-  currentY += 10;
-
-  // Generate next steps table
+  // Action items page
+  doc.addPage();
+  currentY = 20;
+  
+  // Action items header
+  addColoredRect(currentY - 10, 3, ACCENT_COLOR);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Your Next Steps', 20, currentY);
+  
+  // Next steps and recommendations
+  currentY += 15;
   currentY = generateNextStepsTable(
     doc,
     monthlyPayment,
@@ -103,12 +148,37 @@ export const generateDebtOverviewPDF = (
     currencySymbol
   );
 
-  // Add footer
-  doc.setFontSize(8);
-  doc.setTextColor(128, 128, 128);
+  // Add tips section
+  currentY += 20;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Pro Tips for Success:', 20, currentY);
+  
+  const tips = [
+    '✓ Set up automatic payments to never miss a due date',
+    '✓ Apply any extra funds to your highest interest debt first',
+    '✓ Track your progress monthly and celebrate milestones',
+    '✓ Consider consolidating high-interest debts if possible'
+  ];
+
+  tips.forEach((tip, index) => {
+    currentY += 10;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(tip, 25, currentY);
+  });
+
+  // Add footer to all pages
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
+    
+    // Add footer line
+    addColoredRect(doc.internal.pageSize.height - 20, 0.5, [229, 231, 235]);
+    
+    // Add page number and website
+    doc.setFontSize(8);
+    doc.setTextColor(156, 163, 175);
     doc.text(
       `Page ${i} of ${pageCount}`,
       doc.internal.pageSize.width / 2,
