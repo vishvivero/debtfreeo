@@ -25,9 +25,11 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex min-h-screen w-full">
-        <div className={`${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'hidden lg:block'}`}>
+        {/* Sidebar container - always render but control visibility with CSS */}
+        <div className={`${isMobile ? 'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out' : 'hidden lg:block'}`}>
           {SidebarComponent}
         </div>
+        {/* Main content area */}
         <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''}`}>
           <Header />
           <main className="flex-1 pt-16">
