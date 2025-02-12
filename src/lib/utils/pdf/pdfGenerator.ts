@@ -1,14 +1,15 @@
+
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
-import { formatDate } from './formatters';
-import { 
-  generateDebtSummaryTable, 
+import { Strategy } from '@/lib/strategies';
+import { OneTimeFunding } from '@/lib/types/payment';
+import {
+  generateDebtSummaryTable,
   generatePaymentDetailsTable,
   generateSavingsTable,
   generateNextStepsTable
 } from './tableGenerators';
-import { Strategy } from '@/lib/strategies';
-import { OneTimeFunding } from '@/lib/types/payment';
+import { formatDate } from './formatters';
 
 export const generateDebtOverviewPDF = (
   debts: Debt[],
@@ -18,54 +19,59 @@ export const generateDebtOverviewPDF = (
   optimizedMonths: number,
   baseTotalInterest: number,
   optimizedTotalInterest: number,
-  selectedStrategy: Strategy,
-  oneTimeFundings: OneTimeFunding[] = [],
-  currencySymbol: string = '£'
-) => {
-  console.log('Generating enhanced PDF report with:', {
-    numberOfDebts: debts.length,
-    monthlyPayment,
-    extraPayment,
-    strategy: selectedStrategy.name,
-    oneTimeFundings: oneTimeFundings.length
-  });
-
+  strategy: Strategy,
+  oneTimeFundings: OneTimeFunding[],
+  currencySymbol: string
+): jsPDF => {
   const doc = new jsPDF();
   let currentY = 20;
 
-  // Add title and header
+  // Add header with logo and date
   doc.setFontSize(24);
   doc.setTextColor(0, 211, 130);
-  doc.text('Your Debt Freedom Plan', 14, currentY);
+  doc.text('Debt Overview Report', 20, currentY);
   
-  currentY += 10;
-  doc.setFontSize(12);
+  doc.setFontSize(10);
   doc.setTextColor(128, 128, 128);
-  doc.text(`Generated on ${formatDate(new Date())}`, 14, currentY);
+  doc.text(`Generated on ${formatDate(new Date())}`, 20, currentY + 8);
   
-  currentY += 8;
-  doc.text(`Strategy: ${selectedStrategy.name}`, 14, currentY);
-  
-  // Add debt summary section
-  currentY += 15;
+  currentY += 25;
+
+  // Add summary section
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  doc.text('Current Debt Overview', 14, currentY);
+  doc.text('Your Debt Summary', 20, currentY);
   currentY += 10;
-  currentY = generateDebtSummaryTable(doc, debts, currentY);
 
-  // Add payment details section
-  currentY += 15;
-  doc.setFontSize(16);
-  doc.text('Payment Strategy', 14, currentY);
-  currentY += 10;
-  currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol);
+  // Generate debt summary table
+  currentY = generateDebtSummaryTable(doc, debts, currentY) + 15;
 
-  // Add savings summary
-  currentY += 15;
+  // Add payment strategy section
   doc.setFontSize(16);
-  doc.text('Your Savings', 14, currentY);
+  doc.text('Payment Strategy', 20, currentY);
   currentY += 10;
+
+  doc.setFontSize(12);
+  doc.setTextColor(89, 89, 89);
+  doc.text(`Using ${strategy.name} strategy`, 20, currentY);
+  currentY += 15;
+
+  // Generate payment details table
+  currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol) + 15;
+
+  // Check if we need a new page
+  if (currentY > doc.internal.pageSize.height - 60) {
+    doc.addPage();
+    currentY = 20;
+  }
+
+  // Add savings section
+  doc.setFontSize(16);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Projected Savings', 20, currentY);
+  currentY += 10;
+
+  // Generate savings table
   currentY = generateSavingsTable(
     doc,
     baseMonths,
@@ -74,14 +80,20 @@ export const generateDebtOverviewPDF = (
     optimizedTotalInterest,
     currentY,
     currencySymbol
-  );
+  ) + 15;
+
+  // Check if we need a new page
+  if (currentY > doc.internal.pageSize.height - 60) {
+    doc.addPage();
+    currentY = 20;
+  }
 
   // Add next steps section
-  doc.addPage();
-  currentY = 20;
   doc.setFontSize(16);
-  doc.text('Next Steps', 14, currentY);
+  doc.text('Next Steps', 20, currentY);
   currentY += 10;
+
+  // Generate next steps table
   currentY = generateNextStepsTable(
     doc,
     monthlyPayment,
@@ -90,6 +102,20 @@ export const generateDebtOverviewPDF = (
     currentY,
     currencySymbol
   );
+
+  // Add footer
+  doc.setFontSize(8);
+  doc.setTextColor(128, 128, 128);
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.text(
+      `Page ${i} of ${pageCount}`,
+      doc.internal.pageSize.width / 2,
+      doc.internal.pageSize.height - 10,
+      { align: 'center' }
+    );
+  }
 
   return doc;
 };
