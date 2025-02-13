@@ -1,6 +1,7 @@
+
 import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { LegalFooter } from "@/components/legal/LegalFooter";
@@ -9,6 +10,12 @@ import { useState } from "react";
 
 const FreeTools = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleToolClick = (url: string) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(url);
+  };
 
   const tools = [
     {
@@ -90,7 +97,6 @@ const FreeTools = () => {
 
   const categories = [...new Set(tools.map(tool => tool.category))];
 
-  // ... keep existing code (rest of the component remains unchanged)
   return (
     <div className="flex flex-col min-h-screen w-full">
       <div className="flex-1 w-full bg-gray-50">
@@ -149,8 +155,8 @@ const FreeTools = () => {
                         Coming Soon
                       </span>
                     ) : (
-                      <Button asChild>
-                        <Link to={tool.url}>Try Now</Link>
+                      <Button onClick={() => handleToolClick(tool.url)}>
+                        Try Now
                       </Button>
                     )}
                     <span className="text-sm text-gray-500 capitalize">{tool.category}</span>
