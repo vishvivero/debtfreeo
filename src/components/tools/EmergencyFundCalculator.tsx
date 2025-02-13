@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -128,11 +129,11 @@ export function EmergencyFundCalculator() {
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-background border border-input">
                         <SelectValue placeholder="Select risk level" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-background border border-input">
                       <SelectItem value="low">Low Risk (3 months)</SelectItem>
                       <SelectItem value="moderate">
                         Moderate Risk (6 months)
