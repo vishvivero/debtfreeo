@@ -29,6 +29,7 @@ const Admin = () => {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [keyTakeaways, setKeyTakeaways] = useState(""); // Add the new state
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", user?.id],
@@ -95,6 +96,8 @@ const Admin = () => {
                 image={image}
                 setImage={setImage}
                 imagePreview={setImagePreview}
+                keyTakeaways={keyTakeaways}
+                setKeyTakeaways={setKeyTakeaways}
               />
             } />
             <Route path="edit/:id" element={
@@ -110,6 +113,8 @@ const Admin = () => {
                 image={image}
                 setImage={setImage}
                 imagePreview={setImagePreview}
+                keyTakeaways={keyTakeaways}
+                setKeyTakeaways={setKeyTakeaways}
               />
             } />
             <Route path="users" element={<UserManagement />} />
