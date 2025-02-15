@@ -31,6 +31,7 @@ export const BlogPostForm = ({
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [keyTakeaways, setKeyTakeaways] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -76,7 +77,7 @@ export const BlogPostForm = ({
         imageUrl = publicUrl;
       }
 
-      // Create the blog post with SEO fields
+      // Create the blog post with SEO fields and key takeaways
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const keywordsArray = keywords.length > 0 ? keywords : title.toLowerCase().split(' ');
 
@@ -94,6 +95,7 @@ export const BlogPostForm = ({
           meta_title: metaTitle || title,
           meta_description: metaDescription || excerpt,
           keywords: keywordsArray,
+          key_takeaways: keyTakeaways,
         });
 
       if (postError) throw postError;
@@ -185,6 +187,8 @@ export const BlogPostForm = ({
         setExcerpt={setExcerpt}
         content={content}
         setContent={setContent}
+        keyTakeaways={keyTakeaways}
+        setKeyTakeaways={setKeyTakeaways}
       />
 
       <div className="flex justify-end gap-4">

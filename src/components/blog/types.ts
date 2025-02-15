@@ -12,4 +12,6 @@ export interface BlogFormProps {
   image: File | null;
   setImage: (file: File | null) => void;
   imagePreview: string | null | ((preview: string) => void);
+  keyTakeaways: string;
+  setKeyTakeaways: (value: string) => void;
 }
