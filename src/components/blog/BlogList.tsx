@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 
@@ -108,13 +109,16 @@ export const BlogList = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-4 px-4">
-        {[1, 2, 3].map((i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="h-6 bg-gray-200 rounded w-1/4 mb-4" />
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <CardContent className="p-0">
+              <div className="aspect-[16/9] bg-gray-200 rounded-t-lg" />
+              <div className="p-6 space-y-4">
+                <div className="h-6 bg-gray-200 rounded w-1/4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -124,7 +128,7 @@ export const BlogList = () => {
 
   if (error) {
     return (
-      <Alert variant="destructive" className="mx-4">
+      <Alert variant="destructive">
         <AlertDescription>
           Error loading blog posts: {error instanceof Error ? error.message : "Unknown error"}
         </AlertDescription>
@@ -136,62 +140,56 @@ export const BlogList = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto space-y-8 px-4"
+      className="space-y-8"
     >
-      <div className="bg-white rounded-2xl p-4 sm:p-8 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Input
-            type="text"
-            placeholder="Search blogs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1"
-          />
-          <Select
-            value={selectedCategory}
-            onValueChange={setSelectedCategory}
-          >
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map((category) => (
-                <SelectItem key={category.id} value={category.name}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <Select
+          value={selectedCategory}
+          onValueChange={setSelectedCategory}
+        >
+          <SelectTrigger className="w-full sm:w-[200px] bg-white/90 backdrop-blur-sm rounded-full">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories?.map((category) => (
+              <SelectItem key={category.id} value={category.name}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        {blogs?.length === 0 ? (
-          <Alert>
-            <AlertDescription>
-              No blog posts found. Try adjusting your search or category filters.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-6">
-            {blogs?.map((blog) => (
-              <Link 
-                key={blog.id} 
-                to={`/blog/post/${blog.slug}`}
-                className="block"
-              >
-                <Card className="hover:shadow-md transition-shadow overflow-hidden">
-                  <CardContent className="p-4 sm:p-6">
+      {blogs?.length === 0 ? (
+        <Alert>
+          <AlertDescription>
+            No blog posts found. Try adjusting your search or category filters.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {blogs?.map((blog, index) => (
+            <motion.div
+              key={blog.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Link to={`/blog/post/${blog.slug}`}>
+                <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl">
+                  <CardContent className="p-0">
                     {blog.image_url && (
-                      <div className="aspect-[16/9] mb-4 overflow-hidden rounded-lg">
+                      <div className="aspect-[16/9] overflow-hidden">
                         <img 
                           src={blog.image_url} 
                           alt={blog.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
                     )}
-                    <div className="flex flex-col gap-4">
-                      <div className="flex flex-wrap items-center gap-2">
+                    <div className="p-6 space-y-4">
+                      <div className="flex items-center gap-2">
                         <Badge variant="secondary" className="bg-primary/10 text-primary">
                           {blog.category}
                         </Badge>
@@ -200,24 +198,28 @@ export const BlogList = () => {
                           <span>{blog.read_time_minutes} min read</span>
                         </div>
                       </div>
+                      
                       <div>
-                        <h2 className="text-xl sm:text-2xl font-bold mb-2 line-clamp-2">{blog.title}</h2>
-                        <p className="text-gray-600 line-clamp-3 text-sm sm:text-base">{blog.excerpt}</p>
+                        <h2 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                          {blog.title}
+                        </h2>
+                        <p className="text-gray-600 line-clamp-2">{blog.excerpt}</p>
                       </div>
-                      <div className="mt-auto pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-sm text-gray-500">
-                        <span>By {blog.profiles?.email}</span>
-                        <span>
+
+                      <div className="flex justify-between items-center pt-4 border-t">
+                        <span className="text-sm text-gray-500">
                           {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
                         </span>
+                        <ArrowRight className="w-5 h-5 text-primary transform transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
-            ))}
-          </div>
-        )}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 };
