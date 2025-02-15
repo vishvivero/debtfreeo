@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +30,9 @@ const EditBlogPost = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [keyTakeaways, setKeyTakeaways] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
 
   const { data: blog, isLoading: blogLoading } = useQuery({
     queryKey: ["blog", id],
@@ -75,6 +77,9 @@ const EditBlogPost = () => {
       setExcerpt(blog.excerpt);
       setCategory(blog.category);
       setKeyTakeaways(blog.key_takeaways || "");
+      setMetaTitle(blog.meta_title || "");
+      setMetaDescription(blog.meta_description || "");
+      setKeywords(blog.keywords || []);
       if (blog.image_url) {
         setImagePreview(blog.image_url);
       }
@@ -105,6 +110,12 @@ const EditBlogPost = () => {
       imagePreview={setImagePreview}
       keyTakeaways={keyTakeaways}
       setKeyTakeaways={setKeyTakeaways}
+      metaTitle={metaTitle}
+      setMetaTitle={setMetaTitle}
+      metaDescription={metaDescription}
+      setMetaDescription={setMetaDescription}
+      keywords={keywords}
+      setKeywords={setKeywords}
     />
   );
 };
@@ -118,6 +129,9 @@ const NewBlogPost = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [keyTakeaways, setKeyTakeaways] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["blog-categories"],
@@ -159,6 +173,12 @@ const NewBlogPost = () => {
       imagePreview={setImagePreview}
       keyTakeaways={keyTakeaways}
       setKeyTakeaways={setKeyTakeaways}
+      metaTitle={metaTitle}
+      setMetaTitle={setMetaTitle}
+      metaDescription={metaDescription}
+      setMetaDescription={setMetaDescription}
+      keywords={keywords}
+      setKeywords={setKeywords}
     />
   );
 };
