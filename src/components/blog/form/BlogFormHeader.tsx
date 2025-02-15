@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,12 +40,16 @@ export const BlogFormHeader = ({
       <div>
         <Label htmlFor="category">Category</Label>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full bg-white">
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white border-gray-200">
             {categories?.map((cat) => (
-              <SelectItem key={cat.id} value={cat.slug}>
+              <SelectItem 
+                key={cat.id} 
+                value={cat.slug}
+                className="hover:bg-gray-100"
+              >
                 {cat.name}
               </SelectItem>
             ))}
