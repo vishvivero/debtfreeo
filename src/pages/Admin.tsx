@@ -29,9 +29,9 @@ const Admin = () => {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [keyTakeaways, setKeyTakeaways] = useState(""); // Add the new state
+  const [keyTakeaways, setKeyTakeaways] = useState("");
 
-  const { data: profile, isLoading, error } = useQuery({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -51,11 +51,27 @@ const Admin = () => {
     staleTime: 1000 * 60 * 5
   });
 
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+      return data;
+    }
+  });
+
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  if (isLoading) {
+  if (profileLoading || categoriesLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -63,7 +79,7 @@ const Admin = () => {
     );
   }
 
-  if (error || !profile?.is_admin) {
+  if (profileError || !profile?.is_admin) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -93,6 +109,7 @@ const Admin = () => {
                 setExcerpt={setExcerpt}
                 category={category}
                 setCategory={setCategory}
+                categories={categories}
                 image={image}
                 setImage={setImage}
                 imagePreview={setImagePreview}
@@ -110,6 +127,7 @@ const Admin = () => {
                 setExcerpt={setExcerpt}
                 category={category}
                 setCategory={setCategory}
+                categories={categories}
                 image={image}
                 setImage={setImage}
                 imagePreview={setImagePreview}
