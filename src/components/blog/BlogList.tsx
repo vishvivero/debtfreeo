@@ -1,9 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -147,7 +145,7 @@ export const BlogList = () => {
           value={selectedCategory}
           onValueChange={setSelectedCategory}
         >
-          <SelectTrigger className="w-full sm:w-[200px] bg-white/90 backdrop-blur-sm rounded-full">
+          <SelectTrigger className="w-full sm:w-[200px] bg-white rounded-full border-0 shadow">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
@@ -177,7 +175,7 @@ export const BlogList = () => {
               transition={{ delay: index * 0.1 }}
             >
               <Link to={`/blog/post/${blog.slug}`}>
-                <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl">
+                <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-0">
                     {blog.image_url && (
                       <div className="aspect-[16/9] overflow-hidden">

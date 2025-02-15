@@ -10,8 +10,38 @@ import { Search } from "lucide-react";
 const Blog = () => {
   return (
     <div className="flex flex-col min-h-screen w-full">
-      <div className="flex-1 w-full bg-gradient-to-br from-blue-600 to-indigo-700">
-        <div className="w-full container mx-auto px-4 py-16 space-y-16">
+      <div className="relative bg-gradient-to-b from-gray-50 to-white flex-1">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0">
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute opacity-[0.08] bg-primary"
+                style={{
+                  width: '40%',
+                  height: '40%',
+                  borderRadius: '40%',
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  x: [0, 30, 0],
+                  y: [0, 20, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  delay: i * 0.8,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="container mx-auto px-4 py-16 space-y-16 relative z-10">
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -21,15 +51,15 @@ const Blog = () => {
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-5xl font-bold text-white"
+                className="text-4xl md:text-6xl font-bold leading-tight text-gray-900"
               >
-                Financial Freedom Blog
+                Financial Freedom <span className="text-primary">Blog</span>
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-xl text-blue-100"
+                className="text-xl text-gray-600 max-w-xl mx-auto"
               >
                 Expert insights and guides for your debt-free journey
               </motion.p>
@@ -44,7 +74,7 @@ const Blog = () => {
                   <Input
                     type="text"
                     placeholder="Search articles..."
-                    className="pl-12 h-14 text-lg bg-white/90 backdrop-blur-sm border-0 rounded-full shadow-lg"
+                    className="pl-12 h-14 text-lg bg-white shadow-lg border-0 rounded-full"
                   />
                   <Button 
                     size="icon"
@@ -60,7 +90,7 @@ const Blog = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-xl"
+              className="bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-lg"
             >
               <BlogList />
             </motion.div>
