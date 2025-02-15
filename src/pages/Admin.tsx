@@ -1,6 +1,6 @@
 
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
@@ -21,8 +21,9 @@ import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
 
-const Admin = () => {
-  const { user } = useAuth();
+// Create a new component for the edit form
+const EditBlogPost = () => {
+  const { id } = useParams();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -31,6 +32,140 @@ const Admin = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [keyTakeaways, setKeyTakeaways] = useState("");
 
+  const { data: blog, isLoading: blogLoading } = useQuery({
+    queryKey: ["blog", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching blog:", error);
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!id
+  });
+
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+      return data;
+    }
+  });
+
+  // Update form when blog data is loaded
+  useEffect(() => {
+    if (blog) {
+      setTitle(blog.title);
+      setContent(blog.content);
+      setExcerpt(blog.excerpt);
+      setCategory(blog.category);
+      setKeyTakeaways(blog.key_takeaways || "");
+      if (blog.image_url) {
+        setImagePreview(blog.image_url);
+      }
+    }
+  }, [blog]);
+
+  if (blogLoading || categoriesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <BlogPostForm
+      title={title}
+      setTitle={setTitle}
+      content={content}
+      setContent={setContent}
+      excerpt={excerpt}
+      setExcerpt={setExcerpt}
+      category={category}
+      setCategory={setCategory}
+      categories={categories}
+      image={image}
+      setImage={setImage}
+      imagePreview={setImagePreview}
+      keyTakeaways={keyTakeaways}
+      setKeyTakeaways={setKeyTakeaways}
+    />
+  );
+};
+
+// Create a new component for the new post form
+const NewBlogPost = () => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [category, setCategory] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [keyTakeaways, setKeyTakeaways] = useState("");
+
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+      return data;
+    }
+  });
+
+  if (categoriesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <BlogPostForm
+      title={title}
+      setTitle={setTitle}
+      content={content}
+      setContent={setContent}
+      excerpt={excerpt}
+      setExcerpt={setExcerpt}
+      category={category}
+      setCategory={setCategory}
+      categories={categories}
+      image={image}
+      setImage={setImage}
+      imagePreview={setImagePreview}
+      keyTakeaways={keyTakeaways}
+      setKeyTakeaways={setKeyTakeaways}
+    />
+  );
+};
+
+const Admin = () => {
+  const { user } = useAuth();
+  
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -51,27 +186,11 @@ const Admin = () => {
     staleTime: 1000 * 60 * 5
   });
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["blog-categories"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_categories")
-        .select("*")
-        .order("name", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
-      }
-      return data;
-    }
-  });
-
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  if (profileLoading || categoriesLoading) {
+  if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -99,42 +218,8 @@ const Admin = () => {
             <Route index element={<AdminMetrics />} />
             <Route path="blogs" element={<AdminBlogList />} />
             <Route path="categories" element={<CategoryManager />} />
-            <Route path="new-post" element={
-              <BlogPostForm
-                title={title}
-                setTitle={setTitle}
-                content={content}
-                setContent={setContent}
-                excerpt={excerpt}
-                setExcerpt={setExcerpt}
-                category={category}
-                setCategory={setCategory}
-                categories={categories}
-                image={image}
-                setImage={setImage}
-                imagePreview={setImagePreview}
-                keyTakeaways={keyTakeaways}
-                setKeyTakeaways={setKeyTakeaways}
-              />
-            } />
-            <Route path="edit/:id" element={
-              <BlogPostForm
-                title={title}
-                setTitle={setTitle}
-                content={content}
-                setContent={setContent}
-                excerpt={excerpt}
-                setExcerpt={setExcerpt}
-                category={category}
-                setCategory={setCategory}
-                categories={categories}
-                image={image}
-                setImage={setImage}
-                imagePreview={setImagePreview}
-                keyTakeaways={keyTakeaways}
-                setKeyTakeaways={setKeyTakeaways}
-              />
-            } />
+            <Route path="new-post" element={<NewBlogPost />} />
+            <Route path="edit/:id" element={<EditBlogPost />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="settings" element={<SystemSettings />} />
             <Route path="banner" element={<BannerManagement />} />
