@@ -10,6 +10,8 @@ import { BlogContent } from "./form/BlogContent";
 import { BlogFormProps } from "./types";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const BlogPostForm = ({
   title,
@@ -26,6 +28,9 @@ export const BlogPostForm = ({
   imagePreview,
 }: BlogFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -71,7 +76,10 @@ export const BlogPostForm = ({
         imageUrl = publicUrl;
       }
 
-      // Create the blog post
+      // Create the blog post with SEO fields
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const keywordsArray = keywords.length > 0 ? keywords : title.toLowerCase().split(' ');
+
       const { error: postError } = await supabase
         .from('blogs')
         .insert({
@@ -82,7 +90,10 @@ export const BlogPostForm = ({
           author_id: user.id,
           is_published: !isDraft,
           image_url: imageUrl,
-          slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          slug,
+          meta_title: metaTitle || title,
+          meta_description: metaDescription || excerpt,
+          keywords: keywordsArray,
         });
 
       if (postError) throw postError;
@@ -105,6 +116,11 @@ export const BlogPostForm = ({
     }
   };
 
+  const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const keywordsString = e.target.value;
+    setKeywords(keywordsString.split(',').map(k => k.trim()));
+  };
+
   return (
     <div className="space-y-8">
       <BlogFormHeader
@@ -114,6 +130,50 @@ export const BlogPostForm = ({
         setCategory={setCategory}
         categories={categories}
       />
+
+      <div className="space-y-4 bg-white p-6 rounded-lg border">
+        <h2 className="text-lg font-semibold text-gray-900">SEO Settings</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="metaTitle">Meta Title (SEO)</Label>
+            <Input
+              id="metaTitle"
+              placeholder="Meta title for search engines"
+              value={metaTitle}
+              onChange={(e) => setMetaTitle(e.target.value)}
+              className="max-w-2xl"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Leave blank to use the post title
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="metaDescription">Meta Description</Label>
+            <Input
+              id="metaDescription"
+              placeholder="Brief description for search engines"
+              value={metaDescription}
+              onChange={(e) => setMetaDescription(e.target.value)}
+              className="max-w-2xl"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Leave blank to use the post excerpt
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="keywords">Keywords (comma-separated)</Label>
+            <Input
+              id="keywords"
+              placeholder="e.g., debt management, financial planning, savings"
+              onChange={handleKeywordsChange}
+              className="max-w-2xl"
+            />
+          </div>
+        </div>
+      </div>
 
       <BlogImageUpload
         setImage={setImage}

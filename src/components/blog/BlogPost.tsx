@@ -12,7 +12,6 @@ import { useAuth } from "@/lib/auth";
 export const BlogPost = () => {
   const { slug } = useParams();
   const { user } = useAuth();
-  console.log("BlogPost component mounted with slug:", slug);
 
   const { data: blog, isLoading, error } = useQuery({
     queryKey: ["blogPost", slug],
@@ -60,6 +59,22 @@ export const BlogPost = () => {
         console.log("Blog post not published and user is not admin");
         throw new Error("Blog post not available");
       }
+
+      // Update document title and meta tags
+      document.title = blogData.meta_title || blogData.title;
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', blogData.meta_description || blogData.excerpt);
+      }
+      
+      // Update keywords meta tag
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement('meta');
+        metaKeywords.setAttribute('name', 'keywords');
+        document.head.appendChild(metaKeywords);
+      }
+      metaKeywords.setAttribute('content', (blogData.keywords || []).join(', '));
 
       console.log("Blog post fetched successfully:", blogData);
       return blogData;

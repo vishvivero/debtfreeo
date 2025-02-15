@@ -109,6 +109,9 @@ export type Database = {
           image_url: string | null
           is_published: boolean | null
           json_content: Json | null
+          keywords: string[] | null
+          meta_description: string | null
+          meta_title: string | null
           published_at: string | null
           read_time_minutes: number | null
           slug: string
@@ -126,6 +129,9 @@ export type Database = {
           image_url?: string | null
           is_published?: boolean | null
           json_content?: Json | null
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_at?: string | null
           read_time_minutes?: number | null
           slug: string
@@ -143,6 +149,9 @@ export type Database = {
           image_url?: string | null
           is_published?: boolean | null
           json_content?: Json | null
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_at?: string | null
           read_time_minutes?: number | null
           slug?: string
