@@ -3,7 +3,22 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, X, Linkedin, Link2, Share2, Instagram, Youtube, X as CloseIcon, DollarSign, ArrowRight } from "lucide-react";
+import { 
+  AlertCircle, 
+  Clock, 
+  ChevronRight, 
+  Facebook, 
+  X, 
+  Linkedin, 
+  Link2, 
+  Share2, 
+  Instagram, 
+  Youtube, 
+  X as CloseIcon, 
+  DollarSign, 
+  ArrowRight,
+  Check 
+} from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
