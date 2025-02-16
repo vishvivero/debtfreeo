@@ -18,6 +18,7 @@ const Header = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isPlannerPage = location.pathname === '/overview';
+  const isSignupPage = location.pathname === '/signup';
 
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", user?.id],
@@ -85,6 +86,13 @@ const Header = () => {
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
+            {!isSignupPage && !user && (
+              <Link to="/signup">
+                <Button variant="default" className="bg-primary hover:bg-primary/90">
+                  Sign Up
+                </Button>
+              </Link>
+            )}
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
             ) : (
