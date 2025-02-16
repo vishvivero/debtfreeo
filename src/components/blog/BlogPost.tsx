@@ -9,10 +9,45 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import { useEffect } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 export const BlogPost = () => {
   const { slug } = useParams();
   const { user } = useAuth();
+
+  // Track visit
+  useEffect(() => {
+    const trackVisit = async () => {
+      if (!slug) return;
+
+      // Get or create visitor ID from localStorage
+      let visitorId = localStorage.getItem('visitor_id');
+      if (!visitorId) {
+        visitorId = uuidv4();
+        localStorage.setItem('visitor_id', visitorId);
+      }
+
+      // Get blog ID
+      const { data: blog } = await supabase
+        .from('blogs')
+        .select('id')
+        .eq('slug', slug)
+        .single();
+
+      if (!blog) return;
+
+      // Record visit
+      await supabase.from('blog_visits').insert({
+        blog_id: blog.id,
+        visitor_id: visitorId,
+        user_id: user?.id,
+        is_authenticated: !!user
+      });
+    };
+
+    trackVisit();
+  }, [slug, user]);
 
   const { data: blog, isLoading, error } = useQuery({
     queryKey: ["blogPost", slug],

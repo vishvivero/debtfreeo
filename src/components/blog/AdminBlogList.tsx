@@ -38,16 +38,19 @@ export const AdminBlogList = () => {
         throw profileError;
       }
 
-      console.log("Admin profile check:", profile);
-
       if (!profile?.is_admin) {
         console.log("User is not an admin");
         throw new Error("Unauthorized");
       }
 
+      // Fetch blogs with visit counts
       const { data: blogData, error: blogsError } = await supabase
         .from("blogs")
-        .select("*, profiles(email)")
+        .select(`
+          *,
+          profiles(email),
+          visit_count:blog_visits(count)
+        `)
         .order("created_at", { ascending: false });
 
       if (blogsError) {
@@ -55,8 +58,14 @@ export const AdminBlogList = () => {
         throw blogsError;
       }
       
-      console.log("Successfully fetched blogs:", blogData?.length);
-      return blogData;
+      // Process the visit counts
+      const processedBlogs = blogData?.map(blog => ({
+        ...blog,
+        visit_count: blog.visit_count?.[0]?.count || 0
+      }));
+
+      console.log("Successfully fetched blogs:", processedBlogs?.length);
+      return processedBlogs;
     },
     enabled: !!user?.id,
     meta: {
@@ -107,11 +116,11 @@ export const AdminBlogList = () => {
           </TabsTrigger>
           <TabsTrigger value="published" className="flex items-center gap-2">
             <ChartBar className="w-4 h-4" />
-            Published ({publishedPosts.length})
+            Published ({blogs?.filter(blog => blog.is_published)?.length || 0})
           </TabsTrigger>
           <TabsTrigger value="drafts" className="flex items-center gap-2">
             <PenTool className="w-4 h-4" />
-            Drafts ({draftPosts.length})
+            Drafts ({blogs?.filter(blog => !blog.is_published)?.length || 0})
           </TabsTrigger>
         </TabsList>
 
@@ -120,11 +129,11 @@ export const AdminBlogList = () => {
         </TabsContent>
 
         <TabsContent value="published">
-          <AdminBlogTable posts={publishedPosts} />
+          <AdminBlogTable posts={blogs?.filter(blog => blog.is_published) || null} />
         </TabsContent>
 
         <TabsContent value="drafts">
-          <AdminBlogTable posts={draftPosts} />
+          <AdminBlogTable posts={blogs?.filter(blog => !blog.is_published) || null} />
         </TabsContent>
       </Tabs>
     </div>

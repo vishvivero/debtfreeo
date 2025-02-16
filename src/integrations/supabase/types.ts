@@ -98,6 +98,41 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_visits: {
+        Row: {
+          blog_id: string
+          id: string
+          is_authenticated: boolean | null
+          user_id: string | null
+          visited_at: string | null
+          visitor_id: string
+        }
+        Insert: {
+          blog_id: string
+          id?: string
+          is_authenticated?: boolean | null
+          user_id?: string | null
+          visited_at?: string | null
+          visitor_id: string
+        }
+        Update: {
+          blog_id?: string
+          id?: string
+          is_authenticated?: boolean | null
+          user_id?: string | null
+          visited_at?: string | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_visits_blog_id_fkey"
+            columns: ["blog_id"]
+            isOneToOne: false
+            referencedRelation: "blogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blogs: {
         Row: {
           author_id: string

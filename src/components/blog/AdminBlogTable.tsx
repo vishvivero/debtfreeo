@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { FileEdit, Trash2 } from "lucide-react";
+import { FileEdit, Trash2, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ interface BlogPost {
   is_published: boolean;
   updated_at: string;
   profiles: { email: string };
+  visit_count: number;
 }
 
 interface AdminBlogTableProps {
@@ -77,6 +78,7 @@ export const AdminBlogTable = ({ posts }: AdminBlogTableProps) => {
           <TableHead>Title</TableHead>
           <TableHead>Category</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Visits</TableHead>
           <TableHead>Last Updated</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -90,6 +92,12 @@ export const AdminBlogTable = ({ posts }: AdminBlogTableProps) => {
               <Badge variant={blog.is_published ? "default" : "secondary"}>
                 {blog.is_published ? "Published" : "Draft"}
               </Badge>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-gray-500" />
+                {blog.visit_count || 0}
+              </div>
             </TableCell>
             <TableCell>
               {blog.updated_at
