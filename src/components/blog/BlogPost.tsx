@@ -359,16 +359,51 @@ export const BlogPost = () => {
         )}
       </motion.article>
 
-      <div className="max-w-4xl mx-auto p-6 my-8 bg-[#f4fdf9] rounded-xl">
+      <div className="max-w-4xl mx-auto p-6 my-8 bg-white rounded-xl shadow-lg border border-gray-100">
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="w-full md:w-1/2 relative">
             <img
-              src="/lovable-uploads/d3b492e9-c9ff-4186-9dbe-113e5937683e.png"
-              alt="Budget App Preview"
-              className="w-full h-auto"
+              src="/lovable-uploads/ea38c424-d2a8-4e46-8673-4c5953d279a6.png"
+              alt="Your Path to Debt Freedom"
+              className="w-full h-auto rounded-lg shadow-md"
             />
           </div>
           <div className="w-full md:w-1/2 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-sm font-medium">
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              Start Your Journey
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Your Path to <span className="text-primary">Debt Freedom</span>
+            </h2>
+            <p className="text-gray-600 text-lg">
+              Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6">
+                Start Your Free Plan
+              </Button>
+              <Button variant="outline" className="border-gray-200">
+                Learn More
+              </Button>
+            </div>
+            <div className="pt-4 flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>Free Forever</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                <span>No Credit Card</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-6 my-8 bg-[#f4fdf9] rounded-xl">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="w-full md:w-1/2">
             <h2 className="text-3xl font-bold text-gray-900">
               Save more. Spend better. Budget confidently.
             </h2>
@@ -378,6 +413,13 @@ export const BlogPost = () => {
             <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
               Create Your Free Budget
             </Button>
+          </div>
+          <div className="w-full md:w-1/2">
+            <img
+              src="/lovable-uploads/d3b492e9-c9ff-4186-9dbe-113e5937683e.png"
+              alt="Budget App Preview"
+              className="w-full h-auto"
+            />
           </div>
         </div>
       </div>
