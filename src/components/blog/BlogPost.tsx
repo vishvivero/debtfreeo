@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, Twitter, Mail } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, Twitter, Mail, Linkedin, Copy, Youtube, Instagram } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -144,7 +143,6 @@ export const BlogPost = () => {
     }
 
     try {
-      // Since we can't use the table directly, we'll create a serverless function to handle this
       const { error } = await supabase.functions.invoke('subscribe-newsletter', {
         body: { email }
       });
@@ -164,6 +162,14 @@ export const BlogPost = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link copied!",
+      description: "The article link has been copied to your clipboard.",
+    });
   };
 
   if (isLoading) {
@@ -328,7 +334,7 @@ export const BlogPost = () => {
                   className="hover:text-orange-600 hover:border-orange-600"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 11.779c0-1.459-1.192-2.645-2.657-2.645-.715 0-1.363.286-1.84.746-1.81-1.191-4.259-1.949-6.971-2.046l1.483-4.669 4.016.941-.006.058c0 1.193.975 2.163 2.174 2.163 1.198 0 2.172-.97 2.172-2.163s-.975-2.164-2.172-2.164c-.92 0-1.704.574-2.021 1.379l-4.329-1.015c-.189-.046-.381.063-.44.249l-1.654 5.207c-2.838.034-5.409.798-7.3 2.025-.474-.438-1.103-.712-1.799-.712-1.465 0-2.656 1.187-2.656 2.646 0 .97.533 1.811 1.317 2.271-.052.282-.086.567-.086.857 0 3.911 4.808 7.093 10.719 7.093s10.72-3.182 10.72-7.093c0-.274-.029-.544-.075-.81.832-.447 1.405-1.312 1.405-2.318zm-17.224 1.816c0-.868.71-1.575 1.582-1.575.872 0 1.581.707 1.581 1.575s-.709 1.574-1.581 1.574-1.582-.706-1.582-1.574zm9.061 4.669c-.797.793-2.048 1.179-3.824 1.179l-.013-.003-.013.003c-1.777 0-3.028-.386-3.824-1.179-.145-.144-.145-.379 0-.523.145-.145.381-.145.526 0 .65.647 1.729.961 3.298.961l.013.003.013-.003c1.569 0 2.648-.315 3.298-.962.145-.145.381-.144.526 0 .145.145.145.379 0 .524zm-.189-3.095c-.872 0-1.581-.706-1.581-1.574 0-.868.709-1.575 1.581-1.575s1.581.707 1.581 1.575-.709 1.574-1.581 1.574z"/>
+                    <path d="M24 11.779c0-1.459-1.192-2.645-2.657-2.645-.715 0-1.363.286-1.84.746-1.81-1.191-4.259-1.949-6.971-2.046l1.483-4.669 4.016.941-.006.058c0 1.193.975 2.163 2.174 2.163 1.198 0 2.172-.97 2.172-2.163s-.975-2.164-2.172-2.164c-.92 0-1.704.574-2.021 1.379l-4.329-1.015c-.189-.046-.381.063-.44.249l-1.654 5.207c-2.838.034-5.409.798-7.3 2.025-.474-.438-1.103-.712-1.799-.712-1.465 0-2.656 1.187-2.656 2.646 0 .97.533 1.811 1.317 2.271-.052.282-.086.567-.086.857 0 3.911 4.808 7.093 10.719 7.093s10.72-3.182 10.72-7.093c0-.274-.029-.544-.075-.81.832-.447 1.405-1.312 1.405-2.318zm-17.224 1.816c0-.868.71-1.575 1.582-1.575 0-.868.709-1.575 1.581-1.575s1.581.707 1.581 1.575-.709 1.574-1.581 1.574z"/>
                   </svg>
                 </Button>
               </div>
@@ -353,14 +359,137 @@ export const BlogPost = () => {
         )}
       </motion.article>
 
+      <div className="max-w-4xl mx-auto p-6 my-8 bg-[#f4fdf9] rounded-xl">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="w-full md:w-1/2 relative">
+            <img
+              src="/lovable-uploads/d3b492e9-c9ff-4186-9dbe-113e5937683e.png"
+              alt="Budget App Preview"
+              className="w-full h-auto"
+            />
+          </div>
+          <div className="w-full md:w-1/2 space-y-4">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Save more. Spend better. Budget confidently.
+            </h2>
+            <p className="text-gray-600">
+              Get EveryDollar: the free app that makes creating—and keeping—a budget <span className="italic">simple</span>. (Yes, please.)
+            </p>
+            <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+              Create Your Free Budget
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-6 my-8 border-t border-b">
+        <div className="text-center space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900">
+            Did you find this article helpful? Share it!
+          </h3>
+          <div className="flex justify-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('facebook')}
+              className="rounded-full hover:bg-blue-50"
+            >
+              <Facebook className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('linkedin')}
+              className="rounded-full hover:bg-blue-50"
+            >
+              <Linkedin className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('twitter')}
+              className="rounded-full hover:bg-gray-50"
+            >
+              <Twitter className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`}
+              className="rounded-full hover:bg-gray-50"
+            >
+              <Mail className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <p className="text-sm text-gray-600">Link</p>
+            <div className="flex-1 max-w-md flex gap-2">
+              <Input
+                value={window.location.href}
+                readOnly
+                className="bg-gray-50"
+              />
+              <Button
+                onClick={handleCopyLink}
+                variant="outline"
+                className="flex gap-2 items-center"
+              >
+                <Copy className="h-4 w-4" /> Copy
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-6 mb-8">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-16 h-16 bg-primary text-white rounded-lg flex items-center justify-center text-2xl font-bold">
+              {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm text-gray-600">ABOUT THE AUTHOR</p>
+            <h3 className="text-xl font-bold text-gray-900 mt-1">
+              {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+            </h3>
+            <p className="text-gray-600 mt-2">
+              Helping people regain control of their money, build wealth, grow their leadership skills, and enhance their lives through personal development since 1992.
+            </p>
+            <div className="flex items-center gap-4 mt-4">
+              <Link to="#" className="text-gray-600 hover:text-gray-900">
+                <Facebook className="h-5 w-5" />
+              </Link>
+              <Link to="#" className="text-gray-600 hover:text-gray-900">
+                <Twitter className="h-5 w-5" />
+              </Link>
+              <Link to="#" className="text-gray-600 hover:text-gray-900">
+                <Instagram className="h-5 w-5" />
+              </Link>
+              <Link to="#" className="text-gray-600 hover:text-gray-900">
+                <Youtube className="h-5 w-5" />
+              </Link>
+            </div>
+            <div className="mt-4">
+              <Link 
+                to={`/blog?author=${blog.profiles?.email}`}
+                className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              >
+                More Articles From {blog.profiles?.email?.split('@')[0] || 'Anonymous'} <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="w-full bg-primary text-white py-16">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-1 space-y-4">
-              <h2 className="text-3xl font-bold">
+            <div className="w-full md:w-1/2">
+              <h2 className="text-3xl font-bold text-white">
                 Subscribe to Our Newsletter
               </h2>
-              <p className="text-primary-50">
+              <p className="text-white-50">
                 Get the latest financial tips, debt management strategies, and exclusive content delivered directly to your inbox.
               </p>
             </div>
