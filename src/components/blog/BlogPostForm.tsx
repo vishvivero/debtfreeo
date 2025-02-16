@@ -60,25 +60,36 @@ export const BlogPostForm = ({
     }
 
     setIsSubmitting(true);
+    console.log("Starting blog post submission...");
 
     try {
       let imageUrl = null;
 
       // Handle image upload if an image is selected
       if (image) {
+        console.log("Processing image upload...");
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        
+        console.log("Uploading image to storage:", fileName);
         const { error: uploadError, data } = await supabase.storage
           .from('blog-images')
           .upload(fileName, image);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Image upload error:", uploadError);
+          throw uploadError;
+        }
 
+        console.log("Image upload successful:", data);
+        
+        // Get the public URL for the uploaded image
         const { data: { publicUrl } } = supabase.storage
           .from('blog-images')
           .getPublicUrl(fileName);
 
-        imageUrl = publicUrl;
+        imageUrl = fileName; // Store only the filename in the database
+        console.log("Image URL saved:", imageUrl);
       }
 
       // Generate a unique slug by appending a timestamp
@@ -87,6 +98,7 @@ export const BlogPostForm = ({
       
       const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
 
+      console.log("Creating blog post entry...");
       const { error: postError } = await supabase
         .from('blogs')
         .insert({
@@ -104,8 +116,12 @@ export const BlogPostForm = ({
           key_takeaways: keyTakeaways || '',
         });
 
-      if (postError) throw postError;
+      if (postError) {
+        console.error("Blog post creation error:", postError);
+        throw postError;
+      }
 
+      console.log("Blog post created successfully");
       toast({
         title: "Success",
         description: isDraft ? "Draft saved successfully" : "Post published successfully",
