@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
@@ -372,7 +373,71 @@ export const BlogPost = () => {
               <p className="text-gray-600 text-lg leading-relaxed">
                 Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
               </p>
-              <div className="space-y-4">
+
+              <div className="grid md:grid-cols-3 gap-4 my-8">
+                <div className="bg-emerald-50 rounded-xl p-6 space-y-2">
+                  <div className="text-emerald-600 font-medium mb-4">Interest Saved</div>
+                  <div className="text-4xl font-bold text-emerald-700">$1,981.69</div>
+                  <div className="text-emerald-600">Total savings on interest</div>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-6 space-y-2">
+                  <div className="text-blue-600 font-medium mb-4">Time Saved</div>
+                  <div className="text-4xl font-bold text-blue-600">18 months</div>
+                  <div className="text-blue-600">Faster debt freedom</div>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-6 space-y-2">
+                  <div className="text-purple-600 font-medium mb-4">Debt-free Date</div>
+                  <div className="text-4xl font-bold text-purple-600">August 2028</div>
+                  <div className="text-purple-600">Target completion date</div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 bg-gray-50 rounded-xl p-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-gray-900">Original Timeline</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Debt:</span>
+                      <span className="font-medium">$48,000.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Monthly Payment:</span>
+                      <span className="font-medium">$1,375.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Interest:</span>
+                      <span className="font-medium">$10,394.28</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Months to Pay Off:</span>
+                      <span className="font-medium">60</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-emerald-700">Accelerated Timeline</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Debt:</span>
+                      <span className="font-medium text-emerald-700">$48,000.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Monthly Payment:</span>
+                      <span className="font-medium text-emerald-700">$1,375.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Interest:</span>
+                      <span className="font-medium text-emerald-700">$8,412.59</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Months to Pay Off:</span>
+                      <span className="font-medium text-emerald-700">42</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4">
                 <Button asChild className="bg-emerald-500 hover:bg-emerald-600">
                   <Link to="/strategy">
                     Start Your Free Plan
@@ -388,6 +453,9 @@ export const BlogPost = () => {
                     No Credit Card
                   </span>
                 </div>
+                <p className="text-sm text-gray-500 italic">
+                  Disclaimer: The calculations provided are estimates only. Always review and make payments based on your creditor's requirements.
+                </p>
               </div>
             </div>
           </div>
