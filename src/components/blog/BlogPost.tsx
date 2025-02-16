@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
@@ -252,12 +253,12 @@ export const BlogPost = () => {
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-primary font-medium text-lg">
-                      {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+                      V
                     </span>
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">
-                      {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+                      Vishnu Raj
                     </p>
                     <p className="text-sm text-gray-600">
                       Written on {new Date(blog.created_at).toLocaleDateString()}
@@ -294,12 +295,12 @@ export const BlogPost = () => {
               <div className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-primary font-medium text-xl">
-                    {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+                    V
                   </span>
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">
-                    {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+                    Vishnu Raj
                   </p>
                   <p className="text-sm text-gray-600">
                     Written on {new Date(blog.created_at).toLocaleDateString()}
