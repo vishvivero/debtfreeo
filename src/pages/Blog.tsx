@@ -1,3 +1,4 @@
+
 import { BlogList } from "@/components/blog/BlogList";
 import { motion } from "framer-motion";
 import { CookieConsent } from "@/components/legal/CookieConsent";
@@ -8,8 +9,8 @@ import { Search, Star, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
 
 const Blog = () => {
   // Query for staff picks (showing only published posts)
@@ -140,19 +141,26 @@ const Blog = () => {
                           to={`/blog/post/${post.slug}`}
                           className="block group"
                         >
-                          <div className="space-y-2">
-                            <Badge 
-                              variant="secondary" 
-                              className="bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                            >
-                              {post.category}
-                            </Badge>
-                            <h3 className="text-base font-medium text-gray-800 group-hover:text-primary transition-colors line-clamp-2">
-                              {post.title}
-                            </h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <span>{new Date(post.published_at || post.created_at).toLocaleDateString()}</span>
-                              <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                          <div className="flex gap-3">
+                            {post.image_url && (
+                              <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={post.image_url} 
+                                  alt={post.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 space-y-2">
+                              <h3 className="text-base font-medium text-gray-800 group-hover:text-primary transition-colors line-clamp-2">
+                                {post.title}
+                              </h3>
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <span>
+                                  {format(new Date(post.published_at || post.created_at), 'MMM yyyy')}
+                                </span>
+                                <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                              </div>
                             </div>
                           </div>
                         </Link>

@@ -95,10 +95,10 @@ export const BlogList = () => {
           value={selectedCategory}
           onValueChange={setSelectedCategory}
         >
-          <SelectTrigger className="w-full sm:w-[200px] bg-white rounded-full border-0 shadow">
+          <SelectTrigger className="w-full sm:w-[200px] bg-white/95 backdrop-blur-sm rounded-full border-0 shadow-sm">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white border-0 shadow-md">
             <SelectItem value="all">All Categories</SelectItem>
             {categories?.map((category) => (
               <SelectItem key={category.id} value={category.name}>
