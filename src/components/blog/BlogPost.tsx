@@ -113,14 +113,34 @@ const BlogPost = () => {
         throw new Error("Blog post not available");
       }
 
-      // Get public URL for image if it exists
-      if (blogData.image_url && !blogData.image_url.startsWith('http')) {
-        const { data: { publicUrl } } = supabase
-          .storage
-          .from('blog-images')
-          .getPublicUrl(blogData.image_url);
-        blogData.image_url = publicUrl;
+      // Get public URL for image if it exists and handle image errors
+      if (blogData.image_url) {
+        console.log("Original image URL:", blogData.image_url);
+        
+        if (!blogData.image_url.startsWith('http')) {
+          try {
+            const { data: { publicUrl } } = supabase
+              .storage
+              .from('blog-images')
+              .getPublicUrl(blogData.image_url);
+            
+            console.log("Generated public URL:", publicUrl);
+            blogData.image_url = publicUrl;
+
+            // Verify the image exists
+            const imageResponse = await fetch(publicUrl, { method: 'HEAD' });
+            if (!imageResponse.ok) {
+              console.error("Image not found at URL:", publicUrl);
+              blogData.image_url = null; // Clear invalid image URL
+            }
+          } catch (error) {
+            console.error("Error processing image URL:", error);
+            blogData.image_url = null; // Clear invalid image URL
+          }
+        }
       }
+
+      console.log("Final blog data with processed image:", blogData);
 
       // Set meta tags
       document.title = blogData.meta_title || blogData.title;
@@ -137,7 +157,6 @@ const BlogPost = () => {
       }
       metaKeywords.setAttribute('content', (blogData.keywords || []).join(', '));
 
-      console.log("Blog post fetched successfully:", blogData);
       return blogData;
     },
     retry: 1,
