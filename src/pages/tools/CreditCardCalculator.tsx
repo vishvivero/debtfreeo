@@ -36,13 +36,37 @@ const CreditCardCalculatorPage = () => {
           className="space-y-8"
         >
           <div className="max-w-4xl mx-auto">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] bg-clip-text text-transparent">
                 Credit Card Payoff Calculator
               </h1>
-              <p className="text-gray-600 text-lg">
-                Plan your credit card debt payoff strategy and timeline.
-              </p>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-600 text-lg">
+                  Plan your credit card debt payoff strategy and see exactly when you'll be debt-free.
+                </p>
+                <h2 className="text-2xl font-semibold text-gray-800 mt-6">Take Control of Your Credit Card Debt</h2>
+                <p className="text-gray-600">
+                  Our credit card payoff calculator helps you create a clear path to becoming debt-free. Understand how different payment strategies affect your payoff timeline and total interest paid.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">Calculator Features:</h3>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Calculate your debt-free date</li>
+                  <li>See total interest savings with increased payments</li>
+                  <li>Compare different payment strategies</li>
+                  <li>Understand the impact of interest rates</li>
+                  <li>Create a realistic payoff plan</li>
+                </ul>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">Benefits of Having a Payoff Plan</h3>
+                <p className="text-gray-600">
+                  Using this calculator helps you:
+                </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Set realistic debt payoff goals</li>
+                  <li>Minimize interest charges</li>
+                  <li>Stay motivated with a clear timeline</li>
+                  <li>Make informed decisions about your payments</li>
+                </ul>
+              </div>
             </div>
 
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">

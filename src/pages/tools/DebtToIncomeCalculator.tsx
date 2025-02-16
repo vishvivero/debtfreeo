@@ -36,13 +36,36 @@ const DebtToIncomeCalculatorPage = () => {
           className="space-y-8"
         >
           <div className="max-w-4xl mx-auto">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] bg-clip-text text-transparent">
                 Debt-to-Income Calculator
               </h1>
-              <p className="text-gray-600 text-lg">
-                Calculate your debt-to-income ratio to understand your financial health.
-              </p>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-600 text-lg">
+                  Calculate your debt-to-income ratio to understand your financial health and borrowing capacity.
+                </p>
+                <h2 className="text-2xl font-semibold text-gray-800 mt-6">Understanding Your Debt-to-Income Ratio</h2>
+                <p className="text-gray-600">
+                  Your debt-to-income (DTI) ratio is a key financial metric that lenders use to evaluate your borrowing capacity. This calculator helps you understand where you stand and what it means for your financial future.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">What This Calculator Helps You Understand:</h3>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Your current debt-to-income ratio</li>
+                  <li>How lenders view your financial situation</li>
+                  <li>Your capacity to take on additional debt</li>
+                  <li>Areas where you might need to reduce debt</li>
+                </ul>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">Why Your DTI Ratio Matters</h3>
+                <p className="text-gray-600">
+                  Understanding your DTI ratio helps you:
+                </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Evaluate your current financial health</li>
+                  <li>Prepare for mortgage or loan applications</li>
+                  <li>Identify when to focus on debt reduction</li>
+                  <li>Make informed decisions about taking on new debt</li>
+                </ul>
+              </div>
             </div>
 
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">

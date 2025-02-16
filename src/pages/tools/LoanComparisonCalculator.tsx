@@ -36,13 +36,37 @@ const LoanComparisonCalculatorPage = () => {
           className="space-y-8"
         >
           <div className="max-w-4xl mx-auto">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] bg-clip-text text-transparent">
                 Loan Comparison Calculator
               </h1>
-              <p className="text-gray-600 text-lg">
-                Compare different loan options to find the best rates and terms for you.
-              </p>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-600 text-lg">
+                  Compare different loan options side by side to find the best rates and terms for your financial needs.
+                </p>
+                <h2 className="text-2xl font-semibold text-gray-800 mt-6">How Our Loan Comparison Calculator Works</h2>
+                <p className="text-gray-600">
+                  Our loan comparison calculator helps you evaluate multiple loan offers simultaneously, making it easier to choose the best option for your financial situation. Compare interest rates, terms, and total costs to make an informed decision.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">Key Features:</h3>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Compare up to three different loans side by side</li>
+                  <li>Calculate total interest paid for each loan option</li>
+                  <li>View monthly payment differences</li>
+                  <li>Analyze total cost of borrowing</li>
+                  <li>See loan amortization schedules</li>
+                </ul>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">Benefits of Comparing Loans</h3>
+                <p className="text-gray-600">
+                  Making an informed decision about your loan can save you thousands of pounds over the loan term. This calculator helps you:
+                </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Find the most cost-effective loan option</li>
+                  <li>Understand the impact of different interest rates</li>
+                  <li>Compare monthly payment obligations</li>
+                  <li>Evaluate loans with different terms</li>
+                </ul>
+              </div>
             </div>
 
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
