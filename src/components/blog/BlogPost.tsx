@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram, Pinterest, Share2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -110,7 +110,8 @@ export const BlogPost = () => {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
       pinterest: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&description=${encodeURIComponent(title)}`,
-      reddit: `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`
+      reddit: `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`,
+      indiehackers: `https://www.indiehackers.com/new-post?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`
     };
     window.open(shareUrls[platform], '_blank', 'width=600,height=400');
   };
@@ -305,18 +306,69 @@ export const BlogPost = () => {
           <h3 className="text-2xl font-bold text-gray-900">
             Did you find this article helpful? Share it!
           </h3>
-          <div className="flex justify-center gap-4">
-            <Button variant="outline" size="icon" onClick={() => handleShare('facebook')} className="rounded-full hover:bg-blue-50">
-              <Facebook className="h-5 w-5" />
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('facebook')}
+              className="rounded-full hover:bg-blue-50 border-2 border-gray-200"
+              aria-label="Share on Facebook"
+            >
+              <Facebook className="h-5 w-5 text-gray-600" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => handleShare('linkedin')} className="rounded-full hover:bg-blue-50">
-              <Linkedin className="h-5 w-5" />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('linkedin')}
+              className="rounded-full hover:bg-blue-50 border-2 border-gray-200"
+              aria-label="Share on LinkedIn"
+            >
+              <Linkedin className="h-5 w-5 text-gray-600" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => handleShare('twitter')} className="rounded-full hover:bg-gray-50">
-              <X className="h-5 w-5" />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('twitter')}
+              className="rounded-full hover:bg-gray-50 border-2 border-gray-200"
+              aria-label="Share on X"
+            >
+              <X className="h-5 w-5 text-gray-600" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`} className="rounded-full hover:bg-gray-50">
-              <Mail className="h-5 w-5" />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('pinterest')}
+              className="rounded-full hover:bg-red-50 border-2 border-gray-200"
+              aria-label="Share on Pinterest"
+            >
+              <Pinterest className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('reddit')}
+              className="rounded-full hover:bg-orange-50 border-2 border-gray-200"
+              aria-label="Share on Reddit"
+            >
+              <Share2 className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleShare('indiehackers')}
+              className="rounded-full hover:bg-gray-50 border-2 border-gray-200"
+              aria-label="Share on IndieHackers"
+            >
+              <Share2 className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`}
+              className="rounded-full hover:bg-gray-50 border-2 border-gray-200"
+              aria-label="Share via Email"
+            >
+              <Mail className="h-5 w-5 text-gray-600" />
             </Button>
           </div>
           <div className="flex items-center justify-center gap-2">
