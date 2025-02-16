@@ -15,34 +15,24 @@ export const BlogList = () => {
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Second query: Get categories
+  // Query for categories
   const { data: categories = [] } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
-      console.log("Fetching blog categories");
       const { data, error } = await supabase
         .from("blog_categories")
         .select("*")
         .order("name");
       
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
-      }
-      
-      console.log("Categories fetched:", data);
+      if (error) throw error;
       return data || [];
     },
   });
 
-  // Third query: Get published blogs with filters
+  // Query for published blogs with filters
   const { data: blogs = [], isLoading, error } = useQuery({
     queryKey: ["blogs", selectedCategory],
     queryFn: async () => {
-      console.log("Fetching published blogs with filters:", {
-        selectedCategory,
-      });
-
       let query = supabase
         .from("blogs")
         .select(`
@@ -51,7 +41,7 @@ export const BlogList = () => {
             email
           )
         `)
-        .eq('is_published', true); // Only fetch published posts
+        .eq('is_published', true);
 
       if (selectedCategory !== "all") {
         query = query.eq("category", selectedCategory);
@@ -59,27 +49,23 @@ export const BlogList = () => {
 
       const { data, error } = await query.order("created_at", { ascending: false });
       
-      if (error) {
-        console.error("Error fetching blogs:", error);
-        throw error;
-      }
-
-      console.log("Blogs fetched:", data?.length, "posts");
+      if (error) throw error;
       return data || [];
     },
   });
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="space-y-8">
+        {[1, 2, 3].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardContent className="p-0">
-              <div className="aspect-[16/9] bg-gray-200 rounded-t-lg" />
-              <div className="p-6 space-y-4">
-                <div className="h-6 bg-gray-200 rounded w-1/4" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <CardContent className="p-6 flex gap-6">
+              <div className="w-48 h-48 bg-gray-200 rounded-lg flex-shrink-0" />
+              <div className="flex-1 space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="h-6 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-gray-200 rounded w-2/3" />
               </div>
             </CardContent>
           </Card>
@@ -104,7 +90,7 @@ export const BlogList = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8"
     >
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row gap-4">
         <Select
           value={selectedCategory}
           onValueChange={setSelectedCategory}
@@ -130,7 +116,7 @@ export const BlogList = () => {
           </AlertDescription>
         </Alert>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
           {blogs?.map((blog, index) => (
             <motion.div
               key={blog.id}
@@ -139,40 +125,45 @@ export const BlogList = () => {
               transition={{ delay: index * 0.1 }}
             >
               <Link to={`/blog/post/${blog.slug}`}>
-                <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                  <CardContent className="p-0">
-                    {blog.image_url && (
-                      <div className="aspect-[16/9] overflow-hidden">
-                        <img 
-                          src={blog.image_url} 
-                          alt={blog.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                    )}
-                    <div className="p-6 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="bg-primary/10 text-primary">
-                          {blog.category}
-                        </Badge>
-                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                          <Clock className="w-4 h-4" />
-                          <span>{blog.read_time_minutes} min read</span>
+                <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white/90">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      {blog.image_url && (
+                        <div className="md:w-48 h-48 overflow-hidden rounded-lg flex-shrink-0">
+                          <img 
+                            src={blog.image_url} 
+                            alt={blog.title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
                         </div>
-                      </div>
-                      
-                      <div>
-                        <h2 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                          {blog.title}
-                        </h2>
-                        <p className="text-gray-600 line-clamp-2">{blog.excerpt}</p>
-                      </div>
+                      )}
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">
+                            {blog.category}
+                          </Badge>
+                          <div className="flex items-center gap-1 text-sm text-gray-500">
+                            <Clock className="w-4 h-4" />
+                            <span>{blog.read_time_minutes} min read</span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                            {blog.title}
+                          </h2>
+                          <p className="text-gray-600 line-clamp-2">{blog.excerpt}</p>
+                        </div>
 
-                      <div className="flex justify-between items-center pt-4 border-t">
-                        <span className="text-sm text-gray-500">
-                          {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
-                        </span>
-                        <ArrowRight className="w-5 h-5 text-primary transform transition-transform group-hover:translate-x-1" />
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                          <span className="text-sm text-gray-500">
+                            {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
+                          </span>
+                          <div className="flex items-center gap-2 text-primary">
+                            <span className="text-sm font-medium">Read more</span>
+                            <ArrowRight className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
