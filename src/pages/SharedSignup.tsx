@@ -1,13 +1,16 @@
 
 import { AuthForm } from "@/components/AuthForm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Newspaper, CheckCircle2, Clock, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import Header from "@/components/Header";
 
 const SharedSignup = () => {
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50">
+      <Header />
+      
       {/* Elegant animated background pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0">
@@ -38,7 +41,7 @@ const SharedSignup = () => {
         </div>
       </div>
 
-      <div className="relative h-screen flex items-center z-10">
+      <div className="relative h-screen flex items-center z-10 pt-16">
         <div className="w-full grid md:grid-cols-2 gap-0">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -55,8 +58,10 @@ const SharedSignup = () => {
               >
                 Welcome to DebtFreeo
               </motion.span>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
-                Start Your Journey to Financial Freedom
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-[1.1]">
+                Start Your <br className="hidden sm:block" />
+                Journey to <br className="hidden sm:block" />
+                Financial Freedom
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
                 Join thousands of others who are taking control of their financial future
@@ -116,13 +121,7 @@ const SharedSignup = () => {
             className="relative bg-gradient-to-br from-gray-50/90 via-white/50 to-gray-50/90 h-screen flex flex-col justify-center px-8 md:px-16 lg:px-24 backdrop-blur-md"
           >
             <Card className="relative backdrop-blur-xl bg-white/80 border-0 shadow-xl shadow-black/5 ring-1 ring-black/5">
-              <CardHeader className="space-y-1 pb-4">
-                <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Get started with your free account today
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <AuthForm defaultView="signup" />
               </CardContent>
             </Card>
