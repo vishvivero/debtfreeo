@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, Twitter, Mail, X, Linkedin, Copy, Link2, Reddit } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Linkedin, Link2, Share2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -340,7 +340,7 @@ export const BlogPost = () => {
                     onClick={() => handleShare('reddit')}
                     className="h-10 w-10 rounded-full border hover:bg-[#FF4500]/10 hover:border-[#FF4500]/30"
                   >
-                    <Reddit className="h-4 w-4 text-[#FF4500]" />
+                    <Share2 className="h-4 w-4 text-[#FF4500]" />
                   </Button>
                   <Button
                     variant="outline"
