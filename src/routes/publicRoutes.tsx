@@ -31,6 +31,10 @@ export const publicRoutes: RouteObject[] = [
     element: <BlogPost />,
   },
   {
+    path: "/blog/post/:slug",
+    element: <BlogPost />,
+  },
+  {
     path: "/contact",
     element: <Contact />,
   },
