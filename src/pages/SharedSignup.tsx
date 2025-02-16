@@ -38,13 +38,13 @@ const SharedSignup = () => {
         </div>
       </div>
 
-      <div className="container relative mx-auto px-4 h-screen flex items-center z-10">
-        <div className="w-full max-w-[1000px] mx-auto grid md:grid-cols-2 gap-12">
+      <div className="relative h-screen flex items-center z-10">
+        <div className="w-full grid md:grid-cols-2 gap-12">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="space-y-8"
+            className="space-y-8 px-8 md:px-16 lg:px-24"
           >
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
@@ -125,7 +125,7 @@ const SharedSignup = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-6"
+            className="space-y-6 bg-gray-50/50 h-screen flex flex-col justify-center px-8 md:px-16 lg:px-24"
           >
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader className="space-y-1">
