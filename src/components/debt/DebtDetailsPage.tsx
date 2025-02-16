@@ -16,7 +16,7 @@ import {
 } from "@/lib/utils/payment/standardizedCalculations";
 import { Separator } from "@/components/ui/separator";
 
-const DebtDetailsPage = () => {
+export const DebtDetailsPage = () => {
   const { debtId } = useParams();
   const { debts } = useDebts();
   const { profile } = useProfile();
@@ -122,5 +122,3 @@ const DebtDetailsPage = () => {
     </MainLayout>
   );
 };
-
-export default DebtDetailsPage;

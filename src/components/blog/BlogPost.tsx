@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 
-const BlogPost = () => {
+export const BlogPost = () => {
   const { slug } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -513,5 +513,3 @@ const BlogPost = () => {
 
   return null;
 };
-
-export default BlogPost;
