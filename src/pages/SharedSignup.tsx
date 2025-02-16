@@ -6,8 +6,14 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { SharedFooter } from "@/components/layout/SharedFooter";
+import { useEffect } from "react";
 
 const SharedSignup = () => {
+  // Add useEffect to scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex flex-col">
       <Header />
