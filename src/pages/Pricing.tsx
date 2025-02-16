@@ -1,26 +1,11 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { PricingPlan } from "@/components/pricing/PricingPlan";
-import { Link } from "react-router-dom";
-import { LegalFooter } from "@/components/legal/LegalFooter";
 import { CookieConsent } from "@/components/legal/CookieConsent";
-
-const basicFeatures = [
-  { text: "Basic debt tracking (cannot save debts)" },
-  { text: "Simple payment calculator" },
-  { text: "Standard charts and graphs" },
-];
-
-const proFeatures = [
-  { text: "Everything in Basic" },
-  { text: "Save debts in your profile" },
-  { text: "Save monthly payment preferences" },
-  { text: "Save currency preferences" },
-  { text: "Advanced debt strategies" },
-  { text: "Priority email support" },
-];
+import { SharedFooter } from "@/components/layout/SharedFooter";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -96,67 +81,25 @@ const Pricing = () => {
           </motion.div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-50 py-12 border-t border-gray-100 w-full">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <Link to="/" className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
-                Debtfreeo
-              </Link>
-              <p className="text-gray-600">
-                Your journey to financial freedom starts here.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-600">
-                <li>
-                  <Link to="/tools" className="hover:text-primary transition-colors">
-                    Free Tools
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="hover:text-primary transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/faq" className="hover:text-primary transition-colors">
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/pricing" className="hover:text-primary transition-colors">
-                    Pricing
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-600">
-                <li>
-                  <Link to="/about" className="hover:text-primary transition-colors">
-                    About
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-              <LegalFooter />
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
-            <p>&copy; 2025 Debtfreeo. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
       <CookieConsent />
     </div>
   );
 };
+
+const basicFeatures = [
+  { text: "Basic debt tracking (cannot save debts)" },
+  { text: "Simple payment calculator" },
+  { text: "Standard charts and graphs" },
+];
+
+const proFeatures = [
+  { text: "Everything in Basic" },
+  { text: "Save debts in your profile" },
+  { text: "Save monthly payment preferences" },
+  { text: "Save currency preferences" },
+  { text: "Advanced debt strategies" },
+  { text: "Priority email support" },
+];
 
 export default Pricing;
