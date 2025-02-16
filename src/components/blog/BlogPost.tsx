@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, X, Linkedin, Link2, Share2, Instagram, Youtube } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Linkedin, Link2, Share2, Instagram, Youtube, X as CloseIcon, DollarSign } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -358,108 +357,86 @@ export const BlogPost = () => {
         </motion.article>
 
         <div className="max-w-4xl mx-auto px-4 my-12 space-y-12">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-emerald-500 font-medium">★</span>
-                </div>
-                <span className="text-emerald-600 font-medium">Start Your Journey</span>
-              </div>
-              
-              <div className="space-y-4">
-                <h2 className="text-4xl font-bold">
-                  Your Path to <span className="text-emerald-500">Debt Freedom</span>
-                </h2>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
-                </p>
-
-                <div className="space-y-4 pt-4">
-                  <Button asChild className="bg-emerald-500 hover:bg-emerald-600">
-                    <Link to="/strategy">
-                      Start Your Free Plan
-                    </Link>
-                  </Button>
-                  <div className="flex items-center gap-6 text-gray-600">
-                    <span className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-gray-600"></span>
-                      Free Forever
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-gray-600"></span>
-                      No Credit Card
-                    </span>
-                  </div>
-                </div>
+          <div className="bg-white rounded-3xl shadow-lg p-8 relative">
+            <div className="absolute top-6 right-6">
+              <div className="h-12 w-12 rounded-full bg-[#F2FCE2] flex items-center justify-center">
+                <span className="text-[#4CAF50] text-2xl">★</span>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-emerald-50 rounded-xl p-6 space-y-2">
-                  <div className="text-emerald-600 font-medium mb-4">Interest Saved</div>
-                  <div className="text-4xl font-bold text-emerald-700">$1,981.69</div>
-                  <div className="text-emerald-600">Total savings on interest</div>
+            <div className="max-w-3xl mx-auto space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-4xl font-bold text-[#4CAF50]">
+                  Your Path to Debt Freedom
+                </h2>
+                <p className="text-gray-600 text-xl">
+                  Here's your personalized debt payoff strategy
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-[#F2FCE2] rounded-2xl p-6 space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="h-6 w-6 text-[#4CAF50]" />
+                    <span className="text-[#4CAF50] font-semibold">Interest Saved</span>
+                  </div>
+                  <div className="text-4xl font-bold text-[#4CAF50]">$1,981.69</div>
+                  <div className="text-[#4CAF50]">Total savings on interest</div>
                 </div>
-                <div className="bg-blue-50 rounded-xl p-6 space-y-2">
-                  <div className="text-blue-600 font-medium mb-4">Time Saved</div>
-                  <div className="text-4xl font-bold text-blue-600">18 months</div>
-                  <div className="text-blue-600">Faster debt freedom</div>
+                <div className="bg-[#EEF2FF] rounded-2xl p-6 space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-6 w-6 text-[#4F46E5]" />
+                    <span className="text-[#4F46E5] font-semibold">Time Saved</span>
+                  </div>
+                  <div className="text-4xl font-bold text-[#4F46E5]">18 months</div>
+                  <div className="text-[#4F46E5]">Faster debt freedom</div>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-6 space-y-2">
-                  <div className="text-purple-600 font-medium mb-4">Debt-free Date</div>
-                  <div className="text-4xl font-bold text-purple-600">August 2028</div>
-                  <div className="text-purple-600">Target completion date</div>
+                <div className="bg-[#F3E8FF] rounded-2xl p-6 space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <svg className="h-6 w-6 text-[#9333EA]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M3 10H21" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M16 2L16 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M8 2L8 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    <span className="text-[#9333EA] font-semibold">Debt-free Date</span>
+                  </div>
+                  <div className="text-4xl font-bold text-[#9333EA]">August 2028</div>
+                  <div className="text-[#9333EA]">Target completion date</div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 bg-gray-50 rounded-xl p-6">
+              <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-gray-900">Original Timeline</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Debt:</span>
-                      <span className="font-medium">$48,000.00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Monthly Payment:</span>
-                      <span className="font-medium">$1,375.00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Interest:</span>
-                      <span className="font-medium">$10,394.28</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Months to Pay Off:</span>
-                      <span className="font-medium">60</span>
-                    </div>
+                  <div className="space-y-3">
+                    <p className="text-gray-600">Total Debt: <span className="text-gray-900 font-medium">$48,000.00</span></p>
+                    <p className="text-gray-600">Monthly Payment: <span className="text-gray-900 font-medium">$1,375.00</span></p>
+                    <p className="text-gray-600">Total Interest: <span className="text-gray-900 font-medium">$10,394.28</span></p>
+                    <p className="text-gray-600">Months to Pay Off: <span className="text-gray-900 font-medium">60</span></p>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-emerald-700">Accelerated Timeline</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Debt:</span>
-                      <span className="font-medium text-emerald-700">$48,000.00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Monthly Payment:</span>
-                      <span className="font-medium text-emerald-700">$1,375.00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Interest:</span>
-                      <span className="font-medium text-emerald-700">$8,412.59</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Months to Pay Off:</span>
-                      <span className="font-medium text-emerald-700">42</span>
-                    </div>
+                <div className="bg-[#F2FCE2] rounded-2xl p-6 space-y-4">
+                  <h3 className="text-xl font-semibold text-[#4CAF50]">Accelerated Timeline</h3>
+                  <div className="space-y-3">
+                    <p className="text-gray-600">Total Debt: <span className="text-[#4CAF50] font-medium">$48,000.00</span></p>
+                    <p className="text-gray-600">Monthly Payment: <span className="text-[#4CAF50] font-medium">$1,375.00</span></p>
+                    <p className="text-gray-600">Total Interest: <span className="text-[#4CAF50] font-medium">$8,412.59</span></p>
+                    <p className="text-gray-600">Months to Pay Off: <span className="text-[#4CAF50] font-medium">42</span></p>
                   </div>
                 </div>
               </div>
-              
-              <p className="text-sm text-gray-500 italic">
+
+              <div className="flex gap-4">
+                <Button variant="outline" className="flex-1 h-12 text-lg">
+                  Close
+                </Button>
+                <Button className="flex-1 h-12 text-lg bg-[#4CAF50] hover:bg-[#45a049]">
+                  Next <ChevronRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+
+              <p className="text-sm text-gray-500 text-center">
                 Disclaimer: The calculations provided are estimates only. Always review and make payments based on your creditor's requirements.
               </p>
             </div>
