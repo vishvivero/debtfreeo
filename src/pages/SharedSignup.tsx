@@ -5,7 +5,6 @@ import { Newspaper, CheckCircle2, Clock, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
-import { SharedFooter } from "@/components/layout/SharedFooter";
 import { useEffect } from "react";
 
 const SharedSignup = () => {
@@ -143,8 +142,6 @@ const SharedSignup = () => {
           </div>
         </div>
       </main>
-      
-      <SharedFooter />
     </div>
   );
 };
