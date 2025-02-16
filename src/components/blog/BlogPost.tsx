@@ -356,7 +356,42 @@ export const BlogPost = () => {
           </div>
         </motion.article>
 
-        <div className="max-w-4xl mx-auto px-4 my-12">
+        <div className="max-w-4xl mx-auto px-4 my-12 space-y-12">
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-emerald-500 font-medium">★</span>
+              </div>
+              <span className="text-emerald-600 font-medium">Start Your Journey</span>
+            </div>
+            
+            <div className="space-y-4">
+              <h2 className="text-4xl font-bold">
+                Your Path to <span className="text-emerald-500">Debt Freedom</span>
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
+              </p>
+              <div className="space-y-4">
+                <Button asChild className="bg-emerald-500 hover:bg-emerald-600">
+                  <Link to="/strategy">
+                    Start Your Free Plan
+                  </Link>
+                </Button>
+                <div className="flex items-center gap-6 text-gray-600">
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-gray-600"></span>
+                    Free Forever
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-gray-600"></span>
+                    No Credit Card
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-start gap-6">
             <div className="h-16 w-16 rounded-lg bg-[#82D1AC] flex items-center justify-center flex-shrink-0">
               <span className="text-white font-medium text-2xl">V</span>
@@ -384,6 +419,13 @@ export const BlogPost = () => {
                     aria-label="Twitter"
                   >
                     <X className="h-5 w-5" />
+                  </a>
+                  <a 
+                    href="#" 
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin className="h-5 w-5" />
                   </a>
                   <a 
                     href="#" 
