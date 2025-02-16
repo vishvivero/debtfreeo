@@ -363,37 +363,111 @@ export const BlogPost = () => {
           </div>
         </motion.div>
 
-        <div className="mt-12 mb-8">
+        <div className="grid md:grid-cols-2 gap-8 mt-12">
+          <div className="space-y-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
+            >
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-20 h-20 bg-primary text-white rounded-xl flex items-center justify-center text-3xl font-bold shadow-lg">
+                    V
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-primary uppercase tracking-wider">ABOUT THE AUTHOR</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                    Vishnu Raj
+                  </h3>
+                  <p className="text-gray-600 mt-3 leading-relaxed">
+                    Helping people take control of their debts, achieve financial freedom, and build a stress-free future.
+                  </p>
+                  <div className="flex items-center gap-4 mt-4">
+                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                      <Facebook className="h-5 w-5" />
+                    </Link>
+                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                      <X className="h-5 w-5" />
+                    </Link>
+                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                      <Instagram className="h-5 w-5" />
+                    </Link>
+                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                      <Youtube className="h-5 w-5" />
+                    </Link>
+                  </div>
+                  <Link 
+                    to={`/blog?author=${blog.profiles?.email}`} 
+                    className="inline-flex items-center gap-1 text-primary hover:text-primary/80 mt-4 font-medium"
+                  >
+                    More Articles <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-primary to-primary/90 text-white rounded-2xl p-8"
+            >
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold">
+                  Subscribe to Our Newsletter
+                </h2>
+                <p className="text-white/90">
+                  Get the latest financial tips and debt management strategies delivered to your inbox.
+                </p>
+                <form onSubmit={handleSubscribe} className="space-y-3">
+                  <Input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter your email" 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60" 
+                    required 
+                  />
+                  <Button type="submit" variant="secondary" className="w-full font-medium">
+                    Subscribe
+                  </Button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl shadow-lg overflow-hidden"
+            className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl shadow-lg overflow-hidden h-full"
           >
-            <div className="flex flex-col md:flex-row items-center gap-8 p-8">
-              <div className="w-full md:w-1/2 relative">
-                <img 
-                  src="/lovable-uploads/ea38c424-d2a8-4e46-8673-4c5953d279a6.png" 
-                  alt="Your Path to Debt Freedom" 
-                  className="w-full h-auto rounded-xl shadow-md transform transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-              <div className="w-full md:w-1/2 space-y-6">
+            <div className="p-8 flex flex-col h-full">
+              <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
                   <div className="w-2 h-2 rounded-full bg-primary"></div>
                   Start Your Journey
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                <h2 className="text-3xl font-bold text-gray-900">
                   Your Path to <span className="text-primary">Debt Freedom</span>
                 </h2>
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
+                  Get a personalized debt payoff strategy that helps you become debt-free faster.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-6 text-lg">
-                    Start Your Free Plan
-                  </Button>
-                </div>
-                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
+              </div>
+              
+              <div className="mt-6 flex-1 relative">
+                <img 
+                  src="/lovable-uploads/ea38c424-d2a8-4e46-8673-4c5953d279a6.png" 
+                  alt="Your Path to Debt Freedom" 
+                  className="w-full h-48 object-cover rounded-xl shadow-md transform transition-transform duration-300 hover:scale-105"
+                />
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-6 text-lg">
+                  Start Your Free Plan
+                </Button>
+                <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
                     <span>Free Forever</span>
@@ -406,105 +480,6 @@ export const BlogPost = () => {
               </div>
             </div>
           </motion.div>
-        </div>
-
-        <div className="mb-12">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
-          >
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-20 h-20 bg-primary text-white rounded-xl flex items-center justify-center text-3xl font-bold shadow-lg">
-                  V
-                </div>
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <p className="text-sm font-medium text-primary uppercase tracking-wider">ABOUT THE AUTHOR</p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">
-                  Vishnu Raj
-                </h3>
-                <p className="text-gray-600 mt-3 leading-relaxed">
-                  Helping people take control of their debts, achieve financial freedom, and build a stress-free future with smart repayment strategies and personal growth.
-                </p>
-                <div className="flex items-center justify-center md:justify-start gap-4 mt-4">
-                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <Facebook className="h-5 w-5" />
-                  </Link>
-                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <X className="h-5 w-5" />
-                  </Link>
-                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <Instagram className="h-5 w-5" />
-                  </Link>
-                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <Youtube className="h-5 w-5" />
-                  </Link>
-                </div>
-                <div className="mt-4">
-                  <Link 
-                    to={`/blog?author=${blog.profiles?.email}`} 
-                    className="text-primary hover:text-primary/80 flex items-center gap-1 justify-center md:justify-start font-medium"
-                  >
-                    More Articles From Vishnu Raj <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="w-full bg-gradient-to-br from-primary to-primary/90 text-white rounded-2xl overflow-hidden">
-          <div className="px-8 py-12">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="w-full md:w-1/2 space-y-4">
-                <h2 className="text-3xl font-bold">
-                  Subscribe to Our Newsletter
-                </h2>
-                <p className="text-white/90">
-                  Get the latest financial tips, debt management strategies, and exclusive content delivered directly to your inbox.
-                </p>
-              </div>
-              <div className="w-full md:w-auto">
-                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
-                  <Input 
-                    type="email" 
-                    name="email" 
-                    placeholder="Enter your email" 
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60" 
-                    required 
-                  />
-                  <Button type="submit" variant="secondary" className="whitespace-nowrap font-medium">
-                    Subscribe
-                  </Button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full bg-primary text-white py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="w-full md:w-1/2">
-              <h2 className="text-3xl font-bold text-white">
-                Subscribe to Our Newsletter
-              </h2>
-              <p className="text-white-50">
-                Get the latest financial tips, debt management strategies, and exclusive content delivered directly to your inbox.
-              </p>
-            </div>
-            <div className="w-full md:w-auto">
-              <form onSubmit={handleSubscribe} className="flex gap-2">
-                <Input type="email" name="email" placeholder="Enter your email" className="bg-white/10 border-white/20 text-white placeholder:text-white/60" required />
-                <Button type="submit" variant="secondary" className="whitespace-nowrap">
-                  Subscribe
-                </Button>
-              </form>
-            </div>
-          </div>
         </div>
       </div>
     </>;
