@@ -1,3 +1,4 @@
+
 import Header from "@/components/Header";
 import { useTrackVisit } from "@/hooks/use-track-visit";
 import { Button } from "@/components/ui/button";
@@ -15,17 +16,13 @@ export default function Layout({ children }: LayoutProps) {
   const isBlogPost = location.pathname.startsWith('/blog/post/');
   const isToolPage = location.pathname.startsWith('/tools/') && location.pathname !== '/tools';
   
-  const backButtonText = isBlogPost 
-    ? "Back to Blog List" 
-    : isToolPage 
-      ? "Back to Tools" 
-      : "Back to Home";
+  const backButtonText = isToolPage 
+    ? "Back to Tools" 
+    : "Back to Home";
       
-  const backButtonLink = isBlogPost 
-    ? "/blog" 
-    : isToolPage 
-      ? "/tools" 
-      : "/";
+  const backButtonLink = isToolPage 
+    ? "/tools" 
+    : "/";
 
   // Scroll to top on route change
   useEffect(() => {
@@ -45,7 +42,7 @@ export default function Layout({ children }: LayoutProps) {
       <Header />
       <main className="flex-1 flex flex-col w-full pt-16">
         <div className="flex-1 flex flex-col w-full relative">
-          {location.pathname !== "/" && (
+          {location.pathname !== "/" && !isBlogPost && (
             <Link to={backButtonLink} onClick={handleLinkClick}>
               <Button variant="outline" size="sm" className="absolute top-4 left-4 z-10">
                 <ArrowLeft className="w-4 h-4 mr-2" />
