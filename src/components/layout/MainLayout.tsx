@@ -2,7 +2,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Header from "@/components/Header";
-import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -16,14 +15,6 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   const hasSidebar = !!sidebar || true;
   const location = useLocation();
   const isMobile = useIsMobile();
-  
-  // Global scroll to top on route change
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }, [location.pathname]);
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>

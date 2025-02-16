@@ -4,7 +4,6 @@ import { useTrackVisit } from "@/hooks/use-track-visit";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { useEffect } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,14 +13,6 @@ export default function Layout({ children }: LayoutProps) {
   useTrackVisit();
   const location = useLocation();
   const isBlogPost = location.pathname.startsWith('/blog/post/');
-  
-  // Global scroll to top on route change
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }, [location.pathname]);
 
   return (
     <div className="flex flex-col min-h-screen w-full">
