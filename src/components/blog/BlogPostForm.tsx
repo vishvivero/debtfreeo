@@ -26,12 +26,16 @@ export const BlogPostForm = ({
   image,
   setImage,
   imagePreview,
+  keyTakeaways,
+  setKeyTakeaways,
+  metaTitle,
+  setMetaTitle,
+  metaDescription,
+  setMetaDescription,
+  keywords,
+  setKeywords,
 }: BlogFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [metaTitle, setMetaTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
-  const [keywords, setKeywords] = useState<string[]>([]);
-  const [keyTakeaways, setKeyTakeaways] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -77,9 +81,11 @@ export const BlogPostForm = ({
         imageUrl = publicUrl;
       }
 
-      // Create the blog post with SEO fields and key takeaways
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const keywordsArray = keywords.length > 0 ? keywords : title.toLowerCase().split(' ');
+      // Generate a unique slug by appending a timestamp
+      const timestamp = new Date().getTime();
+      const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
+      
+      const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
 
       const { error: postError } = await supabase
         .from('blogs')
@@ -95,7 +101,7 @@ export const BlogPostForm = ({
           meta_title: metaTitle || title,
           meta_description: metaDescription || excerpt,
           keywords: keywordsArray,
-          key_takeaways: keyTakeaways,
+          key_takeaways: keyTakeaways || '',
         });
 
       if (postError) throw postError;
@@ -119,8 +125,10 @@ export const BlogPostForm = ({
   };
 
   const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const keywordsString = e.target.value;
-    setKeywords(keywordsString.split(',').map(k => k.trim()));
+    if (setKeywords) {
+      const keywordsString = e.target.value;
+      setKeywords(keywordsString.split(',').map(k => k.trim()));
+    }
   };
 
   return (
@@ -143,7 +151,7 @@ export const BlogPostForm = ({
               id="metaTitle"
               placeholder="Meta title for search engines"
               value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
+              onChange={(e) => setMetaTitle && setMetaTitle(e.target.value)}
               className="max-w-2xl"
             />
             <p className="text-sm text-gray-500 mt-1">
@@ -157,7 +165,7 @@ export const BlogPostForm = ({
               id="metaDescription"
               placeholder="Brief description for search engines"
               value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
+              onChange={(e) => setMetaDescription && setMetaDescription(e.target.value)}
               className="max-w-2xl"
             />
             <p className="text-sm text-gray-500 mt-1">
@@ -170,6 +178,7 @@ export const BlogPostForm = ({
             <Input
               id="keywords"
               placeholder="e.g., debt management, financial planning, savings"
+              value={keywords?.join(', ')}
               onChange={handleKeywordsChange}
               className="max-w-2xl"
             />
