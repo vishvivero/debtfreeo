@@ -1,14 +1,13 @@
-
 import { BlogList } from "@/components/blog/BlogList";
 import { motion } from "framer-motion";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { SharedFooter } from "@/components/layout/SharedFooter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Star, ArrowRight } from "lucide-react";
+import { Search, Star, ArrowRight, TrendingUp, BookOpen, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -29,6 +28,26 @@ const Blog = () => {
 
       if (error) throw error;
       return data || [];
+    },
+  });
+
+  // Query for blog statistics
+  const { data: blogStats } = useQuery({
+    queryKey: ["blogStats"],
+    queryFn: async () => {
+      const { count: totalPosts } = await supabase
+        .from("blogs")
+        .select("*", { count: "exact", head: true })
+        .eq("is_published", true);
+
+      const { count: totalReaders } = await supabase
+        .from("blog_visits")
+        .select("*", { count: "exact", head: true });
+
+      return {
+        posts: totalPosts || 0,
+        readers: totalReaders || 0,
+      };
     },
   });
 
@@ -166,6 +185,99 @@ const Blog = () => {
                         </Link>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* Blog Statistics */}
+                <div className="bg-[#F2FCE2] backdrop-blur-sm rounded-3xl p-6 shadow-sm">
+                  <h2 className="text-lg font-medium text-[#4CAF50] mb-4">
+                    Blog Statistics
+                  </h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-[#4CAF50]" />
+                        <span className="text-sm text-gray-600">Total Posts</span>
+                      </div>
+                      <p className="text-2xl font-bold text-[#4CAF50]">
+                        {blogStats?.posts || 0}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-[#4CAF50]" />
+                        <span className="text-sm text-gray-600">Total Readers</span>
+                      </div>
+                      <p className="text-2xl font-bold text-[#4CAF50]">
+                        {blogStats?.readers || 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Links */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-sm">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">
+                    Quick Links
+                  </h2>
+                  <div className="space-y-3">
+                    <Link 
+                      to="/tools/DebtToIncomeCalculator"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
+                    >
+                      <span className="text-gray-700 group-hover:text-primary">Debt-to-Income Calculator</span>
+                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+                    </Link>
+                    <Link 
+                      to="/tools/BudgetCalculator"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
+                    >
+                      <span className="text-gray-700 group-hover:text-primary">Budget Calculator</span>
+                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+                    </Link>
+                    <Link 
+                      to="/tools/DebtConsolidationCalculator"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
+                    >
+                      <span className="text-gray-700 group-hover:text-primary">Debt Consolidation Calculator</span>
+                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Trending Topics */}
+                <div className="bg-[#E5DEFF] backdrop-blur-sm rounded-3xl p-6 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="h-4 w-4 text-[#7E69AB]" />
+                    <h2 className="text-lg font-medium text-[#7E69AB]">
+                      Trending Topics
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link 
+                      to="/blog?category=Debt Management"
+                      className="px-3 py-1 rounded-full bg-white/50 hover:bg-white/80 text-sm text-[#7E69AB] transition-colors"
+                    >
+                      Debt Management
+                    </Link>
+                    <Link 
+                      to="/blog?category=Budgeting"
+                      className="px-3 py-1 rounded-full bg-white/50 hover:bg-white/80 text-sm text-[#7E69AB] transition-colors"
+                    >
+                      Budgeting
+                    </Link>
+                    <Link 
+                      to="/blog?category=Saving"
+                      className="px-3 py-1 rounded-full bg-white/50 hover:bg-white/80 text-sm text-[#7E69AB] transition-colors"
+                    >
+                      Saving Tips
+                    </Link>
+                    <Link 
+                      to="/blog?category=Financial Planning"
+                      className="px-3 py-1 rounded-full bg-white/50 hover:bg-white/80 text-sm text-[#7E69AB] transition-colors"
+                    >
+                      Financial Planning
+                    </Link>
                   </div>
                 </div>
               </motion.div>
