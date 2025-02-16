@@ -116,7 +116,6 @@ export type Database = {
           published_at: string | null
           read_time_minutes: number | null
           slug: string
-          staff_pick: boolean | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -138,7 +137,6 @@ export type Database = {
           published_at?: string | null
           read_time_minutes?: number | null
           slug: string
-          staff_pick?: boolean | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -160,7 +158,6 @@ export type Database = {
           published_at?: string | null
           read_time_minutes?: number | null
           slug?: string
-          staff_pick?: boolean | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
