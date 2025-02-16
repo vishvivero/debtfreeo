@@ -73,13 +73,19 @@ const BlogPost = () => {
         throw new Error("No slug provided");
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", user?.id)
-        .maybeSingle();
+      // First, fetch the user's profile if they're logged in
+      let isAdmin = false;
+      if (user?.id) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+        
+        isAdmin = !!profile?.is_admin;
+      }
 
-      console.log("User profile check:", { isAdmin: profile?.is_admin });
+      console.log("User admin status:", { isAdmin });
 
       const { data: blogData, error: blogError } = await supabase
         .from("blogs")
@@ -102,11 +108,12 @@ const BlogPost = () => {
         throw new Error("Blog post not found");
       }
 
-      if (!blogData.is_published && !profile?.is_admin) {
+      if (!blogData.is_published && !isAdmin) {
         console.log("Blog post not published and user is not admin");
         throw new Error("Blog post not available");
       }
 
+      // Set meta tags
       document.title = blogData.meta_title || blogData.title;
       const metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
