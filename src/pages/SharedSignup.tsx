@@ -38,7 +38,7 @@ const SharedSignup = () => {
         </div>
       </div>
 
-      <div className="container relative mx-auto px-4 py-16 z-10">
+      <div className="container relative mx-auto px-4 h-screen flex items-center z-10">
         <div className="w-full max-w-[1000px] mx-auto grid md:grid-cols-2 gap-12">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
