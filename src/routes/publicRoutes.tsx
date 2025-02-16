@@ -1,4 +1,3 @@
-
 import { Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import Index from "@/pages/Index";
@@ -23,7 +22,6 @@ import DebtConsolidationCalculatorPage from "@/pages/tools/DebtConsolidationCalc
 import EmergencyFundCalculatorPage from "@/pages/tools/EmergencyFundCalculator";
 import SavingsGoalCalculatorPage from "@/pages/tools/SavingsGoalCalculator";
 import BudgetCalculatorPage from "@/pages/tools/BudgetCalculator";
-import BlogSignup from "@/pages/BlogSignup";
 
 export const publicRoutes = [
   <Route key="/" path="/" element={<Layout><Index /></Layout>} />,
@@ -32,7 +30,6 @@ export const publicRoutes = [
   <Route key="/pricing" path="/pricing" element={<Layout><Pricing /></Layout>} />,
   <Route key="/blog" path="/blog" element={<Layout><Blog /></Layout>} />,
   <Route key="/blog/post" path="/blog/post/:slug" element={<Layout><BlogPost /></Layout>} />,
-  <Route key="/blog/signup" path="/blog/signup" element={<BlogSignup />} />,
   <Route key="/tools" path="/tools" element={<Layout><FreeTools /></Layout>} />,
   <Route key="/tools/amortization" path="/tools/amortization-calculator" element={<Layout><AmortizationCalculatorPage /></Layout>} />,
   <Route key="/tools/interest" path="/tools/interest-calculator" element={<Layout><InterestCalculatorPage /></Layout>} />,
