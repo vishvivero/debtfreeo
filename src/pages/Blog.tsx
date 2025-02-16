@@ -11,8 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { useState } from "react";
 
 const Blog = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Query for staff picks (showing only published posts)
   const { data: staffPicks = [] } = useQuery({
     queryKey: ["staffPicks"],
@@ -96,13 +99,10 @@ const Blog = () => {
                     type="text"
                     placeholder="Search articles..."
                     className="pl-12 h-14 text-lg bg-white shadow-lg border-0 rounded-full"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <Button 
-                    size="icon"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-primary/10 hover:bg-primary/20"
-                  >
-                    <Search className="h-5 w-5 text-primary" />
-                  </Button>
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </motion.div>
             </div>
@@ -115,7 +115,7 @@ const Blog = () => {
                 transition={{ delay: 0.3 }}
                 className="flex-1 bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-lg"
               >
-                <BlogList />
+                <BlogList searchQuery={searchQuery} />
               </motion.div>
 
               {/* Minimalist Staff Picks Sidebar */}

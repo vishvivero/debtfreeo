@@ -11,7 +11,11 @@ import { Clock, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 
-export const BlogList = () => {
+interface BlogListProps {
+  searchQuery?: string;
+}
+
+export const BlogList = ({ searchQuery = "" }: BlogListProps) => {
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -29,9 +33,9 @@ export const BlogList = () => {
     },
   });
 
-  // Query for published blogs with filters
+  // Query for published blogs with filters and search
   const { data: blogs = [], isLoading, error } = useQuery({
-    queryKey: ["blogs", selectedCategory],
+    queryKey: ["blogs", selectedCategory, searchQuery],
     queryFn: async () => {
       let query = supabase
         .from("blogs")
@@ -45,6 +49,10 @@ export const BlogList = () => {
 
       if (selectedCategory !== "all") {
         query = query.eq("category", selectedCategory);
+      }
+
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
       }
 
       const { data, error } = await query.order("created_at", { ascending: false });
@@ -112,7 +120,10 @@ export const BlogList = () => {
       {blogs?.length === 0 ? (
         <Alert>
           <AlertDescription>
-            No blog posts found. Try adjusting your category filter.
+            {searchQuery 
+              ? "No blog posts found matching your search. Try different keywords or clear the search."
+              : "No blog posts found. Try adjusting your category filter."
+            }
           </AlertDescription>
         </Alert>
       ) : (
