@@ -1,6 +1,12 @@
-import { Route } from "react-router-dom";
-import Admin from "@/pages/Admin";
 
-export const adminRoutes = [
-  <Route key="/admin" path="/admin/*" element={<Admin />} />
+import { lazy } from "react";
+import { RouteObject } from "react-router-dom";
+
+const Admin = lazy(() => import("@/pages/Admin"));
+
+export const adminRoutes: RouteObject[] = [
+  {
+    path: "/admin/*",
+    element: <Admin />
+  }
 ];
