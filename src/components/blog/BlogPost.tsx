@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram, Share2 } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram, Share2, Heart } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -266,156 +266,220 @@ export const BlogPost = () => {
           </div>}
       </motion.article>
 
-      <div className="max-w-4xl mx-auto p-6 my-8 border-t border-b">
-        <div className="text-center space-y-6">
-          <h3 className="text-2xl font-bold text-gray-900">
-            Did you find this article helpful? Share it!
-          </h3>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleShare('facebook')}
-              className="rounded-full hover:bg-blue-50 border-2 border-gray-200"
-              aria-label="Share on Facebook"
-            >
-              <Facebook className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleShare('linkedin')}
-              className="rounded-full hover:bg-blue-50 border-2 border-gray-200"
-              aria-label="Share on LinkedIn"
-            >
-              <Linkedin className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleShare('twitter')}
-              className="rounded-full hover:bg-gray-50 border-2 border-gray-200"
-              aria-label="Share on X"
-            >
-              <X className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleShare('pinterest')}
-              className="rounded-full hover:bg-red-50 border-2 border-gray-200"
-              aria-label="Share on Pinterest"
-            >
-              <Share2 className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleShare('reddit')}
-              className="rounded-full hover:bg-orange-50 border-2 border-gray-200"
-              aria-label="Share on Reddit"
-            >
-              <Share2 className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleShare('indiehackers')}
-              className="rounded-full hover:bg-gray-50 border-2 border-gray-200"
-              aria-label="Share on IndieHackers"
-            >
-              <Share2 className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`}
-              className="rounded-full hover:bg-gray-50 border-2 border-gray-200"
-              aria-label="Share via Email"
-            >
-              <Mail className="h-5 w-5 text-gray-600" />
-            </Button>
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <p className="text-sm text-gray-600">Link</p>
-            <div className="flex-1 max-w-md flex gap-2">
-              <Input value={window.location.href} readOnly className="bg-gray-50" />
-              <Button onClick={handleCopyLink} variant="outline" className="flex gap-2 items-center">
-                <Copy className="h-4 w-4" /> Copy
+      <div className="max-w-4xl mx-auto p-6 my-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 p-8"
+        >
+          <div className="text-center space-y-6">
+            <div className="space-y-2">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto"
+              >
+                <Heart className="w-6 h-6 text-primary" />
+              </motion.div>
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Did you find this article helpful?
+              </h3>
+              <p className="text-gray-600 max-w-lg mx-auto">
+                Share this article with your friends and help them on their journey to financial freedom
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('facebook')}
+                className="rounded-full hover:bg-blue-50 hover:border-blue-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
+                aria-label="Share on Facebook"
+              >
+                <Facebook className="h-5 w-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('linkedin')}
+                className="rounded-full hover:bg-blue-50 hover:border-blue-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
+                aria-label="Share on LinkedIn"
+              >
+                <Linkedin className="h-5 w-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('twitter')}
+                className="rounded-full hover:bg-gray-50 hover:border-gray-300 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
+                aria-label="Share on X"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('reddit')}
+                className="rounded-full hover:bg-orange-50 hover:border-orange-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
+                aria-label="Share on Reddit"
+              >
+                <Share2 className="h-5 w-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('indiehackers')}
+                className="rounded-full hover:bg-violet-50 hover:border-violet-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
+                aria-label="Share on IndieHackers"
+              >
+                <Share2 className="h-5 w-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`}
+                className="rounded-full hover:bg-gray-50 hover:border-gray-300 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
+                aria-label="Share via Email"
+              >
+                <Mail className="h-5 w-5 text-gray-600" />
+              </Button>
+            </div>
+            
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Input 
+                value={window.location.href} 
+                readOnly 
+                className="bg-gray-50/50 border-2 border-gray-200 max-w-md text-sm" 
+              />
+              <Button 
+                onClick={handleCopyLink} 
+                variant="outline" 
+                className="flex gap-2 items-center border-2 hover:bg-gray-50"
+              >
+                <Copy className="h-4 w-4" /> Copy Link
               </Button>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
 
-      <div className="max-w-4xl mx-auto p-6 my-8 bg-white rounded-xl shadow-lg border border-gray-100">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="w-full md:w-1/2 relative">
-            <img src="/lovable-uploads/ea38c424-d2a8-4e46-8673-4c5953d279a6.png" alt="Your Path to Debt Freedom" className="w-full h-auto rounded-lg shadow-md" />
-          </div>
-          <div className="w-full md:w-1/2 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-sm font-medium">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-              Start Your Journey
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900">
-              Your Path to <span className="text-primary">Debt Freedom</span>
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6">
-                Start Your Free Plan
-              </Button>
-            </div>
-            <div className="pt-4 flex items-center gap-4 text-sm text-gray-500">
-              <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
-                <span>Free Forever</span>
+        <div className="mt-12 mb-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl shadow-lg overflow-hidden"
+          >
+            <div className="flex flex-col md:flex-row items-center gap-8 p-8">
+              <div className="w-full md:w-1/2 relative">
+                <img 
+                  src="/lovable-uploads/ea38c424-d2a8-4e46-8673-4c5953d279a6.png" 
+                  alt="Your Path to Debt Freedom" 
+                  className="w-full h-auto rounded-xl shadow-md transform transition-transform duration-300 hover:scale-105"
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
-                <span>No Credit Card</span>
+              <div className="w-full md:w-1/2 space-y-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                  Start Your Journey
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  Your Path to <span className="text-primary">Debt Freedom</span>
+                </h2>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-6 text-lg">
+                    Start Your Free Plan
+                  </Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Free Forever</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>No Credit Card</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto p-6 mb-8">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-16 h-16 bg-primary text-white rounded-lg flex items-center justify-center text-2xl font-bold">
-              V
+        <div className="mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
+          >
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 bg-primary text-white rounded-xl flex items-center justify-center text-3xl font-bold shadow-lg">
+                  V
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <p className="text-sm font-medium text-primary uppercase tracking-wider">ABOUT THE AUTHOR</p>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                  Vishnu Raj
+                </h3>
+                <p className="text-gray-600 mt-3 leading-relaxed">
+                  Helping people take control of their debts, achieve financial freedom, and build a stress-free future with smart repayment strategies and personal growth.
+                </p>
+                <div className="flex items-center justify-center md:justify-start gap-4 mt-4">
+                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <Facebook className="h-5 w-5" />
+                  </Link>
+                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <X className="h-5 w-5" />
+                  </Link>
+                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <Instagram className="h-5 w-5" />
+                  </Link>
+                  <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <Youtube className="h-5 w-5" />
+                  </Link>
+                </div>
+                <div className="mt-4">
+                  <Link 
+                    to={`/blog?author=${blog.profiles?.email}`} 
+                    className="text-primary hover:text-primary/80 flex items-center gap-1 justify-center md:justify-start font-medium"
+                  >
+                    More Articles From Vishnu Raj <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-gray-600">ABOUT THE AUTHOR</p>
-            <h3 className="text-xl font-bold text-gray-900 mt-1">
-              Vishnu Raj
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Helping people take control of their debts, achieve financial freedom, and build a stress-free future with smart repayment strategies and personal growth.
-            </p>
-            <div className="flex items-center gap-4 mt-4">
-              <Link to="#" className="text-gray-600 hover:text-gray-900">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link to="#" className="text-gray-600 hover:text-gray-900">
-                <X className="h-5 w-5" />
-              </Link>
-              <Link to="#" className="text-gray-600 hover:text-gray-900">
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link to="#" className="text-gray-600 hover:text-gray-900">
-                <Youtube className="h-5 w-5" />
-              </Link>
-            </div>
-            <div className="mt-4">
-              <Link to={`/blog?author=${blog.profiles?.email}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                More Articles From Vishnu Raj <ChevronRight className="h-4 w-4" />
-              </Link>
+          </motion.div>
+        </div>
+
+        <div className="w-full bg-gradient-to-br from-primary to-primary/90 text-white rounded-2xl overflow-hidden">
+          <div className="px-8 py-12">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="w-full md:w-1/2 space-y-4">
+                <h2 className="text-3xl font-bold">
+                  Subscribe to Our Newsletter
+                </h2>
+                <p className="text-white/90">
+                  Get the latest financial tips, debt management strategies, and exclusive content delivered directly to your inbox.
+                </p>
+              </div>
+              <div className="w-full md:w-auto">
+                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
+                  <Input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter your email" 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60" 
+                    required 
+                  />
+                  <Button type="submit" variant="secondary" className="whitespace-nowrap font-medium">
+                    Subscribe
+                  </Button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
