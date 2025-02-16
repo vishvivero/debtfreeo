@@ -25,21 +25,7 @@ function App() {
         <SidebarProvider>
           <BrowserRouter>
             <Routes>
-              {publicRoutes.map((route) => (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={route.element}
-                />
-              ))}
-              {protectedRoutes.map((route) => (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={route.element}
-                />
-              ))}
-              {adminRoutes.map((route) => (
+              {[...publicRoutes, ...protectedRoutes, ...adminRoutes].map((route) => (
                 <Route
                   key={route.path}
                   path={route.path}
