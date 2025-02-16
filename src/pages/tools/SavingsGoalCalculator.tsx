@@ -1,10 +1,9 @@
-
 import { SavingsGoalCalculator } from "@/components/tools/SavingsGoalCalculator";
 import { CookieConsent } from "@/components/legal/CookieConsent";
-import { LegalFooter } from "@/components/legal/LegalFooter";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
+import { SharedFooter } from "@/components/layout/SharedFooter";
 
 const SavingsGoalCalculatorPage = () => {
   return (
@@ -98,38 +97,7 @@ const SavingsGoalCalculatorPage = () => {
           </div>
         </motion.div>
       </div>
-
-      <footer className="bg-white border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">About</h4>
-              <p className="text-gray-600">
-                Plan your savings goals and track your progress effectively.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
-              <ul className="space-y-2 text-gray-600">
-                <li>
-                  <Link to="/tools" className="hover:text-[#9b87f5] transition-colors">
-                    All Calculators
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="hover:text-[#9b87f5] transition-colors">
-                    Financial Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-              <LegalFooter />
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
       <CookieConsent />
     </div>
   );
