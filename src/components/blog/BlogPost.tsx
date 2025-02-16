@@ -358,23 +358,45 @@ export const BlogPost = () => {
         </motion.article>
 
         <div className="max-w-4xl mx-auto px-4 my-12 space-y-12">
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                <span className="text-emerald-500 font-medium">★</span>
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="text-emerald-500 font-medium">★</span>
+                </div>
+                <span className="text-emerald-600 font-medium">Start Your Journey</span>
               </div>
-              <span className="text-emerald-600 font-medium">Start Your Journey</span>
-            </div>
-            
-            <div className="space-y-4">
-              <h2 className="text-4xl font-bold">
-                Your Path to <span className="text-emerald-500">Debt Freedom</span>
-              </h2>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
-              </p>
+              
+              <div className="space-y-4">
+                <h2 className="text-4xl font-bold">
+                  Your Path to <span className="text-emerald-500">Debt Freedom</span>
+                </h2>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Get a personalized debt payoff strategy that helps you become debt-free faster. Save money on interest and track your progress along the way.
+                </p>
 
-              <div className="grid md:grid-cols-3 gap-4 my-8">
+                <div className="space-y-4 pt-4">
+                  <Button asChild className="bg-emerald-500 hover:bg-emerald-600">
+                    <Link to="/strategy">
+                      Start Your Free Plan
+                    </Link>
+                  </Button>
+                  <div className="flex items-center gap-6 text-gray-600">
+                    <span className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-gray-600"></span>
+                      Free Forever
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-gray-600"></span>
+                      No Credit Card
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="bg-emerald-50 rounded-xl p-6 space-y-2">
                   <div className="text-emerald-600 font-medium mb-4">Interest Saved</div>
                   <div className="text-4xl font-bold text-emerald-700">$1,981.69</div>
@@ -392,7 +414,7 @@ export const BlogPost = () => {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 bg-gray-50 rounded-xl p-6">
+              <div className="grid grid-cols-2 gap-6 bg-gray-50 rounded-xl p-6">
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-gray-900">Original Timeline</h3>
                   <div className="space-y-2">
@@ -436,27 +458,10 @@ export const BlogPost = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="space-y-4 pt-4">
-                <Button asChild className="bg-emerald-500 hover:bg-emerald-600">
-                  <Link to="/strategy">
-                    Start Your Free Plan
-                  </Link>
-                </Button>
-                <div className="flex items-center gap-6 text-gray-600">
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-gray-600"></span>
-                    Free Forever
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-gray-600"></span>
-                    No Credit Card
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500 italic">
-                  Disclaimer: The calculations provided are estimates only. Always review and make payments based on your creditor's requirements.
-                </p>
-              </div>
+              
+              <p className="text-sm text-gray-500 italic">
+                Disclaimer: The calculations provided are estimates only. Always review and make payments based on your creditor's requirements.
+              </p>
             </div>
           </div>
 
