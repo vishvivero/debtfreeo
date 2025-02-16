@@ -304,6 +304,42 @@ export const BlogPost = () => {
             <ReactMarkdown>{blog.content}</ReactMarkdown>
           </div>
 
+          <div className="mt-8 border-t pt-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+              <p className="text-gray-600">Share this article:</p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleShare('facebook')}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Share on Facebook"
+                >
+                  <Facebook className="h-5 w-5 text-[#1877F2]" />
+                </button>
+                <button
+                  onClick={() => handleShare('twitter')}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Share on Twitter"
+                >
+                  <X className="h-5 w-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={() => handleShare('linkedin')}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Share on LinkedIn"
+                >
+                  <Linkedin className="h-5 w-5 text-[#0A66C2]" />
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Copy link"
+                >
+                  <Link2 className="h-5 w-5 text-gray-700" />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-8 pt-6">
             <Card className="p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-[#F2FCE2] rounded-bl-[100px] -z-0" />
