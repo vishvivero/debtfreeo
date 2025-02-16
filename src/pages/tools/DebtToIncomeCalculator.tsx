@@ -48,48 +48,6 @@ const DebtToIncomeCalculatorPage = () => {
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
               <DebtToIncomeCalculator />
             </div>
-
-            <div className="mt-12 prose prose-gray max-w-none">
-              <h2 className="text-2xl font-semibold text-gray-800">Understanding Your Debt-to-Income Ratio</h2>
-              
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">What is DTI?</h3>
-              <p>
-                Your Debt-to-Income (DTI) ratio is a key financial metric that compares your monthly debt payments to your monthly income. It's a crucial indicator of financial health and borrowing capacity.
-              </p>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Why DTI Matters</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Lenders use it to assess loan applications</li>
-                <li>Indicates financial stability</li>
-                <li>Helps in budgeting decisions</li>
-                <li>Guides debt management strategies</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Understanding DTI Ranges</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Below 43%: Generally good for most loans</li>
-                <li>43-50%: May need improvement</li>
-                <li>Above 50%: Could indicate financial stress</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">How to Improve Your DTI</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Increase your income</li>
-                <li>Pay down existing debt</li>
-                <li>Avoid taking on new debt</li>
-                <li>Refinance to lower payments</li>
-              </ul>
-
-              <div className="bg-primary/5 p-6 rounded-lg mt-6">
-                <h3 className="text-xl font-semibold text-gray-800">Important Considerations</h3>
-                <ul className="list-disc pl-6 space-y-2 mt-3">
-                  <li>Include all recurring monthly debt payments</li>
-                  <li>Use gross monthly income for calculations</li>
-                  <li>Consider both front-end and back-end DTI</li>
-                  <li>Regular monitoring helps track financial health</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </motion.div>
       </div>
@@ -100,7 +58,7 @@ const DebtToIncomeCalculatorPage = () => {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">About</h4>
               <p className="text-gray-600">
-                Evaluate your debt-to-income ratio and make informed financial decisions.
+                Understand your debt-to-income ratio and make informed financial decisions.
               </p>
             </div>
             <div>
