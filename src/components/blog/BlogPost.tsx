@@ -267,101 +267,67 @@ export const BlogPost = () => {
       </motion.article>
 
       <div className="max-w-4xl mx-auto p-6 my-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 p-8"
-        >
-          <div className="text-center space-y-6">
-            <div className="space-y-2">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto"
-              >
-                <Heart className="w-6 h-6 text-primary" />
-              </motion.div>
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Did you find this article helpful?
-              </h3>
-              <p className="text-gray-600 max-w-lg mx-auto">
-                Share this article with your friends and help them on their journey to financial freedom
-              </p>
+        <div className="border-t border-gray-200 pt-8">
+          <div className="flex flex-col md:flex-row items-start gap-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-primary font-medium text-xl">
+                  {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+                </span>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">
+                  {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Written on {new Date(blog.created_at).toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div>
             </div>
-            
-            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('facebook')}
-                className="rounded-full hover:bg-blue-50 hover:border-blue-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
-                aria-label="Share on Facebook"
-              >
-                <Facebook className="h-5 w-5 text-gray-600" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('linkedin')}
-                className="rounded-full hover:bg-blue-50 hover:border-blue-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
-                aria-label="Share on LinkedIn"
-              >
-                <Linkedin className="h-5 w-5 text-gray-600" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('twitter')}
-                className="rounded-full hover:bg-gray-50 hover:border-gray-300 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
-                aria-label="Share on X"
-              >
-                <X className="h-5 w-5 text-gray-600" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('reddit')}
-                className="rounded-full hover:bg-orange-50 hover:border-orange-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
-                aria-label="Share on Reddit"
-              >
-                <Share2 className="h-5 w-5 text-gray-600" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('indiehackers')}
-                className="rounded-full hover:bg-violet-50 hover:border-violet-200 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
-                aria-label="Share on IndieHackers"
-              >
-                <Share2 className="h-5 w-5 text-gray-600" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`}
-                className="rounded-full hover:bg-gray-50 hover:border-gray-300 border-2 border-gray-200 transition-all duration-300 transform hover:scale-110"
-                aria-label="Share via Email"
-              >
-                <Mail className="h-5 w-5 text-gray-600" />
-              </Button>
-            </div>
-            
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Input 
-                value={window.location.href} 
-                readOnly 
-                className="bg-gray-50/50 border-2 border-gray-200 max-w-md text-sm" 
-              />
-              <Button 
-                onClick={handleCopyLink} 
-                variant="outline" 
-                className="flex gap-2 items-center border-2 hover:bg-gray-50"
-              >
-                <Copy className="h-4 w-4" /> Copy Link
-              </Button>
+
+            <div className="flex-1 w-full md:w-auto">
+              <p className="text-gray-600 mb-4">Share on social:</p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleShare('facebook')}
+                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                >
+                  <Facebook className="h-4 w-4 text-gray-600" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleShare('twitter')}
+                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                >
+                  <X className="h-4 w-4 text-gray-600" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleShare('reddit')}
+                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                >
+                  <Share2 className="h-4 w-4 text-gray-600" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleShare('linkedin')}
+                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                >
+                  <Linkedin className="h-4 w-4 text-gray-600" />
+                </Button>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8 mt-12">
           <div className="space-y-8">
