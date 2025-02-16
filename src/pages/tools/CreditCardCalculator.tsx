@@ -48,6 +48,49 @@ const CreditCardCalculatorPage = () => {
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
               <CreditCardCalculator />
             </div>
+
+            <div className="mt-12 prose prose-gray max-w-none">
+              <h2 className="text-2xl font-semibold text-gray-800">Managing Credit Card Debt</h2>
+              
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Understanding Credit Card Debt</h3>
+              <p>
+                Credit card debt can be particularly challenging due to high interest rates and compound interest. Our calculator helps you create a clear path to becoming debt-free.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">What This Calculator Shows You</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Time to pay off your debt</li>
+                <li>Total interest you'll pay</li>
+                <li>Monthly payment requirements</li>
+                <li>Impact of different payment amounts</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Payoff Strategies</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Debt avalanche (highest interest first)</li>
+                <li>Debt snowball (smallest balance first)</li>
+                <li>Fixed payment approach</li>
+                <li>Balance transfer options</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Tips for Faster Payoff</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Pay more than the minimum payment</li>
+                <li>Stop using credit cards while paying off debt</li>
+                <li>Consider balance transfer options</li>
+                <li>Create a budget to find extra money for payments</li>
+              </ul>
+
+              <div className="bg-primary/5 p-6 rounded-lg mt-6">
+                <h3 className="text-xl font-semibold text-gray-800">Important Considerations</h3>
+                <ul className="list-disc pl-6 space-y-2 mt-3">
+                  <li>Higher payments lead to less total interest paid</li>
+                  <li>Consider credit card interest rates when prioritizing payments</li>
+                  <li>Look for opportunities to reduce interest rates</li>
+                  <li>Create an emergency fund to avoid new credit card debt</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
