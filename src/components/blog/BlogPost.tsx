@@ -116,7 +116,7 @@ export const BlogPost = () => {
 
   return (
     <>
-      {/* New breadcrumb header */}
+      {/* Breadcrumb navigation */}
       <div className="w-full bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <nav className="flex items-center gap-2 text-sm">
@@ -133,42 +133,63 @@ export const BlogPost = () => {
         </div>
       </div>
 
+      {/* Hero section with title and image */}
+      <div className="w-full bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-6">
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                {blog.title}
+              </h1>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4" />
+                  <span>{blog.read_time_minutes} MIN READ</span>
+                </div>
+                <span className="mx-2">•</span>
+                <time dateTime={blog.published_at || blog.created_at}>
+                  {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </time>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary font-medium">
+                    {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+                  </span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-gray-600">By </span>
+                  <span className="font-medium text-gray-900">
+                    {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {blog.image_url && (
+              <div className="lg:col-span-6">
+                <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-100">
+                  <img 
+                    src={blog.image_url} 
+                    alt={blog.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Article content */}
       <motion.article 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm overflow-hidden p-6 my-8"
+        className="max-w-4xl mx-auto bg-white p-6 my-8"
       >
-        <header className="mb-8 border-b pb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 leading-tight">
-            {blog.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
-            <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
-              {blog.category}
-            </Badge>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{blog.read_time_minutes} min read</span>
-            </div>
-            <span>
-              {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
-          </div>
-          {blog.image_url && (
-            <div className="aspect-[16/9] overflow-hidden rounded-lg mb-8">
-              <img 
-                src={blog.image_url} 
-                alt={blog.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          )}
-        </header>
-
         <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary hover:prose-a:text-primary/80 prose-a:transition-colors prose-strong:text-gray-900 prose-em:text-gray-800 prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-blockquote:border-l-primary prose-blockquote:text-gray-700 prose-img:rounded-lg prose-hr:border-gray-200">
           <ReactMarkdown>{blog.content}</ReactMarkdown>
         </div>
