@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, Twitter, Mail, Linkedin, Copy, Youtube, Instagram } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+
 export const BlogPost = () => {
   const {
     slug
@@ -284,9 +285,6 @@ export const BlogPost = () => {
               <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6">
                 Start Your Free Plan
               </Button>
-              <Button variant="outline" className="border-gray-200">
-                Learn More
-              </Button>
             </div>
             <div className="pt-4 flex items-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-2">
@@ -298,25 +296,6 @@ export const BlogPost = () => {
                 <span>No Credit Card</span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto p-6 my-8 bg-[#f4fdf9] rounded-xl">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="w-full md:w-1/2">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Save more. Spend better. Budget confidently.
-            </h2>
-            <p className="text-gray-600">
-              Get EveryDollar: the free app that makes creating—and keeping—a budget <span className="italic">simple</span>. (Yes, please.)
-            </p>
-            <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
-              Create Your Free Budget
-            </Button>
-          </div>
-          <div className="w-full md:w-1/2">
-            <img src="/lovable-uploads/d3b492e9-c9ff-4186-9dbe-113e5937683e.png" alt="Budget App Preview" className="w-full h-auto" />
           </div>
         </div>
       </div>
@@ -334,7 +313,7 @@ export const BlogPost = () => {
               <Linkedin className="h-5 w-5" />
             </Button>
             <Button variant="outline" size="icon" onClick={() => handleShare('twitter')} className="rounded-full hover:bg-gray-50">
-              <Twitter className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </Button>
             <Button variant="outline" size="icon" onClick={() => window.location.href = `mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent(window.location.href)}`} className="rounded-full hover:bg-gray-50">
               <Mail className="h-5 w-5" />
@@ -356,23 +335,23 @@ export const BlogPost = () => {
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <div className="w-16 h-16 bg-primary text-white rounded-lg flex items-center justify-center text-2xl font-bold">
-              {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+              V
             </div>
           </div>
           <div className="flex-1">
             <p className="text-sm text-gray-600">ABOUT THE AUTHOR</p>
             <h3 className="text-xl font-bold text-gray-900 mt-1">
-              {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+              Vishnu Raj
             </h3>
             <p className="text-gray-600 mt-2">
-              Helping people regain control of their money, build wealth, grow their leadership skills, and enhance their lives through personal development since 1992.
+              Helping people take control of their debts, achieve financial freedom, and build a stress-free future with smart repayment strategies and personal growth.
             </p>
             <div className="flex items-center gap-4 mt-4">
               <Link to="#" className="text-gray-600 hover:text-gray-900">
                 <Facebook className="h-5 w-5" />
               </Link>
               <Link to="#" className="text-gray-600 hover:text-gray-900">
-                <Twitter className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </Link>
               <Link to="#" className="text-gray-600 hover:text-gray-900">
                 <Instagram className="h-5 w-5" />
@@ -383,7 +362,7 @@ export const BlogPost = () => {
             </div>
             <div className="mt-4">
               <Link to={`/blog?author=${blog.profiles?.email}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                More Articles From {blog.profiles?.email?.split('@')[0] || 'Anonymous'} <ChevronRight className="h-4 w-4" />
+                More Articles From Vishnu Raj <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
