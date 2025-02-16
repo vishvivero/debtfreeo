@@ -444,7 +444,7 @@ const BlogPost = () => {
 
                 <div className="pt-2">
                   <Button asChild className="w-full h-10 bg-[#4CAF50] hover:bg-[#45a049]">
-                    <Link to="/signup">
+                    <Link to="/signup" onClick={() => window.scrollTo(0, 0)}>
                       Create Your Free Account <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
