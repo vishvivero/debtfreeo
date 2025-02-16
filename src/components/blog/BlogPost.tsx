@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram, Pinterest, Share2 } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Mail, Linkedin, Copy, Youtube, Instagram, Share2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -341,7 +341,7 @@ export const BlogPost = () => {
               className="rounded-full hover:bg-red-50 border-2 border-gray-200"
               aria-label="Share on Pinterest"
             >
-              <Pinterest className="h-5 w-5 text-gray-600" />
+              <Share2 className="h-5 w-5 text-gray-600" />
             </Button>
             <Button
               variant="outline"
