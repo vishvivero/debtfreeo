@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -12,31 +13,7 @@ import { motion } from "framer-motion";
 
 export const BlogList = () => {
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-
-  // First query: Get user profile
-  const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      console.log("Fetching profile for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-      
-      console.log("Profile data:", data);
-      return data;
-    },
-    enabled: !!user?.id,
-  });
 
   // Second query: Get categories
   const { data: categories = [] } = useQuery({
@@ -58,14 +35,12 @@ export const BlogList = () => {
     },
   });
 
-  // Third query: Get blogs with filters
+  // Third query: Get published blogs with filters
   const { data: blogs = [], isLoading, error } = useQuery({
-    queryKey: ["blogs", searchTerm, selectedCategory, profile?.is_admin],
+    queryKey: ["blogs", selectedCategory],
     queryFn: async () => {
-      console.log("Fetching blogs with filters:", {
-        searchTerm,
+      console.log("Fetching published blogs with filters:", {
         selectedCategory,
-        isAdmin: profile?.is_admin
       });
 
       let query = supabase
@@ -75,20 +50,11 @@ export const BlogList = () => {
           profiles (
             email
           )
-        `);
-
-      // Apply filters
-      if (searchTerm) {
-        query = query.ilike("title", `%${searchTerm}%`);
-      }
+        `)
+        .eq('is_published', true); // Only fetch published posts
 
       if (selectedCategory !== "all") {
         query = query.eq("category", selectedCategory);
-      }
-
-      // If not admin, only show published posts
-      if (!profile?.is_admin) {
-        query = query.eq("is_published", true);
       }
 
       const { data, error } = await query.order("created_at", { ascending: false });
@@ -101,8 +67,6 @@ export const BlogList = () => {
       console.log("Blogs fetched:", data?.length, "posts");
       return data || [];
     },
-    enabled: true,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   if (isLoading) {
@@ -162,7 +126,7 @@ export const BlogList = () => {
       {blogs?.length === 0 ? (
         <Alert>
           <AlertDescription>
-            No blog posts found. Try adjusting your search or category filters.
+            No blog posts found. Try adjusting your category filter.
           </AlertDescription>
         </Alert>
       ) : (
