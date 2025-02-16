@@ -41,12 +41,59 @@ const DebtConsolidationCalculatorPage = () => {
                 Debt Consolidation Calculator
               </h1>
               <p className="text-gray-600 text-lg">
-                Compare debt consolidation options and potential savings.
+                Explore potential savings through debt consolidation.
               </p>
             </div>
 
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
               <DebtConsolidationCalculator />
+            </div>
+
+            <div className="mt-12 prose prose-gray max-w-none">
+              <h2 className="text-2xl font-semibold text-gray-800">Understanding Debt Consolidation</h2>
+              
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">What is Debt Consolidation?</h3>
+              <p>
+                Debt consolidation combines multiple debts into a single loan, often with a lower interest rate. This calculator helps you determine if consolidation could save you money and simplify your payments.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Benefits of Consolidation</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Single monthly payment</li>
+                <li>Potentially lower interest rate</li>
+                <li>Fixed repayment schedule</li>
+                <li>Simplified debt management</li>
+                <li>Possible credit score improvement</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">What to Consider</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Current interest rates</li>
+                <li>Total debt amount</li>
+                <li>Monthly payment affordability</li>
+                <li>Loan terms and conditions</li>
+                <li>Origination fees</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Calculator Features</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Compare multiple debts</li>
+                <li>Calculate potential savings</li>
+                <li>View consolidated payment options</li>
+                <li>Analyze different scenarios</li>
+                <li>Track total interest savings</li>
+              </ul>
+
+              <div className="bg-primary/5 p-6 rounded-lg mt-6">
+                <h3 className="text-xl font-semibold text-gray-800">Best Practices</h3>
+                <ul className="list-disc pl-6 space-y-2 mt-3">
+                  <li>List all current debts accurately</li>
+                  <li>Compare multiple consolidation offers</li>
+                  <li>Consider both short and long-term impacts</li>
+                  <li>Read all terms and conditions</li>
+                  <li>Create a plan to avoid future debt</li>
+                </ul>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -58,7 +105,7 @@ const DebtConsolidationCalculatorPage = () => {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">About</h4>
               <p className="text-gray-600">
-                Evaluate debt consolidation options and calculate potential savings.
+                Calculate potential savings and benefits of debt consolidation.
               </p>
             </div>
             <div>

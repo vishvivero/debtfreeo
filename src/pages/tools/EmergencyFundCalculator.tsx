@@ -41,12 +41,58 @@ const EmergencyFundCalculatorPage = () => {
                 Emergency Fund Calculator
               </h1>
               <p className="text-gray-600 text-lg">
-                Calculate how much you should save for emergencies based on your expenses and risk factors.
+                Calculate how much you should save for emergencies.
               </p>
             </div>
 
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
               <EmergencyFundCalculator />
+            </div>
+
+            <div className="mt-12 prose prose-gray max-w-none">
+              <h2 className="text-2xl font-semibold text-gray-800">Planning Your Emergency Fund</h2>
+              
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Why Have an Emergency Fund?</h3>
+              <p>
+                An emergency fund is your financial safety net for unexpected expenses or income loss. This calculator helps you determine how much you should save based on your personal circumstances.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Key Components</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Monthly living expenses</li>
+                <li>Job stability factors</li>
+                <li>Family size considerations</li>
+                <li>Insurance deductibles</li>
+                <li>Lifestyle requirements</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Recommended Coverage</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>3-6 months: Stable dual income</li>
+                <li>6-9 months: Single income household</li>
+                <li>9-12 months: Self-employed</li>
+                <li>12+ months: Variable income</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Building Your Fund</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Set realistic monthly savings goals</li>
+                <li>Automate your savings</li>
+                <li>Start small and increase over time</li>
+                <li>Keep funds easily accessible</li>
+                <li>Monitor and adjust as needed</li>
+              </ul>
+
+              <div className="bg-primary/5 p-6 rounded-lg mt-6">
+                <h3 className="text-xl font-semibold text-gray-800">Smart Saving Tips</h3>
+                <ul className="list-disc pl-6 space-y-2 mt-3">
+                  <li>Use high-yield savings accounts</li>
+                  <li>Review and cut unnecessary expenses</li>
+                  <li>Consider part-time income opportunities</li>
+                  <li>Keep emergency funds separate</li>
+                  <li>Replenish after using</li>
+                </ul>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -58,7 +104,7 @@ const EmergencyFundCalculatorPage = () => {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">About</h4>
               <p className="text-gray-600">
-                Plan your emergency fund based on your personal circumstances and risk tolerance.
+                Plan your emergency fund and strengthen your financial security.
               </p>
             </div>
             <div>
