@@ -450,6 +450,35 @@ export const BlogPost = () => {
           </div>
         </motion.article>
 
+        <div className="max-w-4xl mx-auto px-6 py-12 bg-white">
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-gray-900">About the Author</h3>
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-primary font-medium text-xl">V</span>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-900">Vishnu Raj</h4>
+                <p className="text-gray-600">
+                  Financial expert and debt freedom advocate with over a decade of experience helping people achieve their financial goals. 
+                  Passionate about making financial education accessible to everyone.
+                </p>
+                <div className="flex items-center gap-3">
+                  <Link to="#" className="text-primary hover:text-primary/80">
+                    <Youtube className="h-5 w-5" />
+                  </Link>
+                  <Link to="#" className="text-primary hover:text-primary/80">
+                    <Instagram className="h-5 w-5" />
+                  </Link>
+                  <Link to="#" className="text-primary hover:text-primary/80">
+                    <X className="h-5 w-5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="w-full bg-primary text-white py-16">
           <div className="max-w-4xl mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-8">
