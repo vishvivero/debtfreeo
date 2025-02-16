@@ -268,59 +268,59 @@ export const BlogPost = () => {
 
       <div className="max-w-4xl mx-auto p-6 my-12">
         <div className="border-t border-gray-200 pt-8">
-          <div className="flex flex-col md:flex-row items-start gap-8">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-primary font-medium text-xl">
-                  {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <span className="text-gray-600 font-medium text-xl">
+                  R
                 </span>
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">
-                  {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+                  rv.rajvishnu
                 </h3>
                 <p className="text-sm text-gray-500">
                   Written on {new Date(blog.created_at).toLocaleDateString('en-US', {
-                    day: 'numeric',
                     month: 'long',
+                    day: 'numeric',
                     year: 'numeric'
                   })}
                 </p>
               </div>
             </div>
 
-            <div className="flex-1 w-full md:w-auto">
-              <p className="text-gray-600 mb-4">Share on social:</p>
-              <div className="flex flex-wrap gap-3">
+            <div>
+              <p className="text-gray-600 mb-3">Share on social:</p>
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => handleShare('facebook')}
-                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                  className="h-10 w-10 rounded-full border border-gray-200 hover:bg-gray-50"
                 >
                   <Facebook className="h-4 w-4 text-gray-600" />
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => handleShare('twitter')}
-                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                  className="h-10 w-10 rounded-full border border-gray-200 hover:bg-gray-50"
                 >
                   <X className="h-4 w-4 text-gray-600" />
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => handleShare('reddit')}
-                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                  className="h-10 w-10 rounded-full border border-gray-200 hover:bg-gray-50"
                 >
                   <Share2 className="h-4 w-4 text-gray-600" />
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => handleShare('linkedin')}
-                  className="bg-white hover:bg-gray-50 border border-gray-200 rounded-full px-6"
+                  className="h-10 w-10 rounded-full border border-gray-200 hover:bg-gray-50"
                 >
                   <Linkedin className="h-4 w-4 text-gray-600" />
                 </Button>
@@ -329,78 +329,33 @@ export const BlogPost = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
-          <div className="space-y-8">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
-            >
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0">
-                  <div className="w-20 h-20 bg-primary text-white rounded-xl flex items-center justify-center text-3xl font-bold shadow-lg">
-                    V
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-primary uppercase tracking-wider">ABOUT THE AUTHOR</p>
-                  <h3 className="text-2xl font-bold text-gray-900 mt-1">
-                    Vishnu Raj
-                  </h3>
-                  <p className="text-gray-600 mt-3 leading-relaxed">
-                    Helping people take control of their debts, achieve financial freedom, and build a stress-free future.
-                  </p>
-                  <div className="flex items-center gap-4 mt-4">
-                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                      <Facebook className="h-5 w-5" />
-                    </Link>
-                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                      <X className="h-5 w-5" />
-                    </Link>
-                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                      <Instagram className="h-5 w-5" />
-                    </Link>
-                    <Link to="#" className="text-gray-400 hover:text-gray-600 transition-colors">
-                      <Youtube className="h-5 w-5" />
-                    </Link>
-                  </div>
-                  <Link 
-                    to={`/blog?author=${blog.profiles?.email}`} 
-                    className="inline-flex items-center gap-1 text-primary hover:text-primary/80 mt-4 font-medium"
-                  >
-                    More Articles <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-primary to-primary/90 text-white rounded-2xl p-8"
-            >
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">
-                  Subscribe to Our Newsletter
-                </h2>
-                <p className="text-white/90">
-                  Get the latest financial tips and debt management strategies delivered to your inbox.
-                </p>
-                <form onSubmit={handleSubscribe} className="space-y-3">
-                  <Input 
-                    type="email" 
-                    name="email" 
-                    placeholder="Enter your email" 
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60" 
-                    required 
-                  />
-                  <Button type="submit" variant="secondary" className="w-full font-medium">
-                    Subscribe
-                  </Button>
-                </form>
-              </div>
-            </motion.div>
-          </div>
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-primary to-primary/90 text-white rounded-2xl p-8"
+          >
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">
+                Subscribe to Our Newsletter
+              </h2>
+              <p className="text-white/90">
+                Get the latest financial tips and debt management strategies delivered to your inbox.
+              </p>
+              <form onSubmit={handleSubscribe} className="space-y-3">
+                <Input 
+                  type="email" 
+                  name="email" 
+                  placeholder="Enter your email" 
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60" 
+                  required 
+                />
+                <Button type="submit" variant="secondary" className="w-full font-medium">
+                  Subscribe
+                </Button>
+              </form>
+            </div>
+          </motion.div>
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -419,17 +374,6 @@ export const BlogPost = () => {
                 <p className="text-gray-600 text-lg leading-relaxed">
                   Get a personalized debt payoff strategy that helps you become debt-free faster.
                 </p>
-              </div>
-              
-              <div className="mt-6 flex-1 relative">
-                <img 
-                  src="/lovable-uploads/ea38c424-d2a8-4e46-8673-4c5953d279a6.png" 
-                  alt="Your Path to Debt Freedom" 
-                  className="w-full h-48 object-cover rounded-xl shadow-md transform transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-
-              <div className="mt-6 space-y-4">
                 <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-6 text-lg">
                   Start Your Free Plan
                 </Button>
