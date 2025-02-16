@@ -48,53 +48,6 @@ const CreditCardCalculatorPage = () => {
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
               <CreditCardCalculator />
             </div>
-
-            <div className="mt-12 prose prose-gray max-w-none">
-              <h2 className="text-2xl font-semibold text-gray-800">Credit Card Debt Freedom Planning</h2>
-              
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Why Use This Calculator?</h3>
-              <p>
-                Understanding how long it will take to pay off your credit card debt is crucial for financial planning. This calculator helps you visualize your path to becoming debt-free and explore different payment strategies.
-              </p>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Features and Benefits</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Calculate exact payoff dates</li>
-                <li>Compare different payment strategies</li>
-                <li>See total interest savings</li>
-                <li>Understand minimum payment traps</li>
-                <li>Plan debt-free milestones</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Payment Strategies</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Fixed payment approach</li>
-                <li>Accelerated payoff plan</li>
-                <li>Debt avalanche method</li>
-                <li>Debt snowball method</li>
-                <li>Balance transfer optimization</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Understanding Your Results</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Monthly payment breakdown</li>
-                <li>Interest cost analysis</li>
-                <li>Payoff timeline visualization</li>
-                <li>Payment strategy comparison</li>
-                <li>Debt-free date projection</li>
-              </ul>
-
-              <div className="bg-primary/5 p-6 rounded-lg mt-6">
-                <h3 className="text-xl font-semibold text-gray-800">Tips for Success</h3>
-                <ul className="list-disc pl-6 space-y-2 mt-3">
-                  <li>Stop using credit cards while paying off debt</li>
-                  <li>Pay more than the minimum whenever possible</li>
-                  <li>Consider balance transfer opportunities</li>
-                  <li>Track your progress regularly</li>
-                  <li>Celebrate debt payoff milestones</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </motion.div>
       </div>
@@ -105,7 +58,7 @@ const CreditCardCalculatorPage = () => {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">About</h4>
               <p className="text-gray-600">
-                Plan your path to credit card debt freedom with our comprehensive calculator.
+                Calculate your credit card payoff timeline and total interest costs.
               </p>
             </div>
             <div>
