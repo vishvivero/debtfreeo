@@ -21,6 +21,7 @@ const Blog = () => {
         .from("blogs")
         .select("*")
         .eq("is_published", true)
+        .eq("staff_pick", true)
         .order("created_at", { ascending: false })
         .limit(3);
 
