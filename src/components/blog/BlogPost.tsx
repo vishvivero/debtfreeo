@@ -251,9 +251,7 @@ export const BlogPost = () => {
           <ReactMarkdown>{blog.content}</ReactMarkdown>
         </div>
 
-        <div className="mt-8 pt-6 border-t">
-          
-        </div>
+        
 
         {blog.tags && blog.tags.length > 0 && <div className="mt-8 pt-4 border-t">
             <div className="flex flex-wrap gap-2">
@@ -302,24 +300,7 @@ export const BlogPost = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto p-6 my-8 bg-[#f4fdf9] rounded-xl">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="w-full md:w-1/2">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Save more. Spend better. Budget confidently.
-            </h2>
-            <p className="text-gray-600">
-              Get EveryDollar: the free app that makes creating—and keeping—a budget <span className="italic">simple</span>. (Yes, please.)
-            </p>
-            <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
-              Create Your Free Budget
-            </Button>
-          </div>
-          <div className="w-full md:w-1/2">
-            <img src="/lovable-uploads/d3b492e9-c9ff-4186-9dbe-113e5937683e.png" alt="Budget App Preview" className="w-full h-auto" />
-          </div>
-        </div>
-      </div>
+      
 
       <div className="max-w-4xl mx-auto p-6 my-8 border-t border-b">
         <div className="text-center space-y-6">
