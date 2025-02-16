@@ -1,11 +1,10 @@
-
 import { BlogList } from "@/components/blog/BlogList";
 import { motion } from "framer-motion";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { SharedFooter } from "@/components/layout/SharedFooter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Star, Clock } from "lucide-react";
+import { Search, Star, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
 const Blog = () => {
-  // Query for staff picks (showing only published posts marked as staff picks)
+  // Query for staff picks (showing only published posts)
   const { data: staffPicks = [] } = useQuery({
     queryKey: ["staffPicks"],
     queryFn: async () => {
@@ -118,58 +117,44 @@ const Blog = () => {
                 <BlogList />
               </motion.div>
 
-              {/* Modernized Staff Picks Sidebar */}
+              {/* Minimalist Staff Picks Sidebar */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
-                className="lg:w-96 space-y-6"
+                className="lg:w-80 space-y-6"
               >
-                <div className="bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-md rounded-3xl shadow-lg overflow-hidden">
-                  <div className="p-6 space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 p-2 rounded-xl">
-                        <Star className="h-5 w-5 text-primary" />
-                      </div>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-sm">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-primary" />
+                      <h2 className="text-lg font-medium text-gray-900">
                         Staff Picks
                       </h2>
                     </div>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       {staffPicks.map((post) => (
-                        <Link key={post.id} to={`/blog/post/${post.slug}`}>
-                          <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-white overflow-hidden">
-                            <CardContent className="p-0">
-                              {post.image_url && (
-                                <div className="relative h-48 overflow-hidden">
-                                  <img 
-                                    src={post.image_url} 
-                                    alt={post.title}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                  <Badge variant="secondary" className="absolute top-4 left-4 bg-white/90 text-primary shadow-lg">
-                                    {post.category}
-                                  </Badge>
-                                </div>
-                              )}
-                              <div className="p-4 space-y-3">
-                                <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                                  {post.title}
-                                </h3>
-                                <p className="text-sm text-gray-600 line-clamp-2">
-                                  {post.excerpt}
-                                </p>
-                                <div className="flex items-center gap-2 text-sm text-gray-500">
-                                  <Clock className="w-4 h-4" />
-                                  <span>{post.read_time_minutes} min read</span>
-                                  <span className="text-gray-300">•</span>
-                                  <span>{new Date(post.published_at || post.created_at).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
+                        <Link 
+                          key={post.id} 
+                          to={`/blog/post/${post.slug}`}
+                          className="block group"
+                        >
+                          <div className="space-y-2">
+                            <Badge 
+                              variant="secondary" 
+                              className="bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                            >
+                              {post.category}
+                            </Badge>
+                            <h3 className="text-base font-medium text-gray-800 group-hover:text-primary transition-colors line-clamp-2">
+                              {post.title}
+                            </h3>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <span>{new Date(post.published_at || post.created_at).toLocaleDateString()}</span>
+                              <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                            </div>
+                          </div>
                         </Link>
                       ))}
                     </div>
