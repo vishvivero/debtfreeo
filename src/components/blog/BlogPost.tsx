@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, X, Linkedin, Link2, Share2 } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, X, Linkedin, Link2, Share2, Instagram, Youtube } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -356,6 +355,62 @@ export const BlogPost = () => {
             </div>
           </div>
         </motion.article>
+
+        <div className="max-w-4xl mx-auto px-4 my-12">
+          <div className="flex items-start gap-6">
+            <div className="h-16 w-16 rounded-lg bg-[#82D1AC] flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-medium text-2xl">V</span>
+            </div>
+            <div className="space-y-6 flex-1">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">ABOUT THE AUTHOR</h3>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Vishnu Raj</h2>
+                <p className="text-gray-600">
+                  Helping people take control of their debts, achieve financial freedom, and build a stress-free future with smart repayment strategies and personal growth.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <a 
+                    href="#" 
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                  <a 
+                    href="#" 
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Twitter"
+                  >
+                    <X className="h-5 w-5" />
+                  </a>
+                  <a 
+                    href="#" 
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                  <a 
+                    href="#" 
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="YouTube"
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                </div>
+                <Link 
+                  to="/blog" 
+                  className="inline-flex items-center text-primary hover:text-primary/90 font-medium"
+                >
+                  More Articles From Vishnu Raj
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="w-full bg-primary text-white py-16">
           <div className="max-w-4xl mx-auto px-4">
