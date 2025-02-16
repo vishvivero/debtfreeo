@@ -113,6 +113,15 @@ const BlogPost = () => {
         throw new Error("Blog post not available");
       }
 
+      // Get public URL for image if it exists
+      if (blogData.image_url && !blogData.image_url.startsWith('http')) {
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from('blog-images')
+          .getPublicUrl(blogData.image_url);
+        blogData.image_url = publicUrl;
+      }
+
       // Set meta tags
       document.title = blogData.meta_title || blogData.title;
       const metaDescription = document.querySelector('meta[name="description"]');

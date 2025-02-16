@@ -4,11 +4,9 @@ import { motion } from "framer-motion";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { SharedFooter } from "@/components/layout/SharedFooter";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search, Star, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -28,7 +26,20 @@ const Blog = () => {
         .limit(3);
 
       if (error) throw error;
-      return data || [];
+
+      // Get public URLs for images if they exist
+      const processedData = data?.map(post => {
+        if (post.image_url && !post.image_url.startsWith('http')) {
+          const { data: { publicUrl } } = supabase
+            .storage
+            .from('blog-images')
+            .getPublicUrl(post.image_url);
+          return { ...post, image_url: publicUrl };
+        }
+        return post;
+      });
+
+      return processedData || [];
     },
   });
 
