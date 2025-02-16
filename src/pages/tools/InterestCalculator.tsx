@@ -1,13 +1,35 @@
+
 import { InterestCalculator } from "@/components/tools/InterestCalculator";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ChevronRight } from "lucide-react";
 
 const InterestCalculatorPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4 pt-28 pb-20">
+      <div className="container mx-auto px-4 pt-8 pb-20">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-2 text-sm mb-8"
+        >
+          <Link 
+            to="/tools" 
+            className="text-primary hover:underline"
+          >
+            Tools
+          </Link>
+          <ChevronRight className="h-4 w-4 text-gray-400" />
+          <Link 
+            to="/tools/loan-interest-payment-calculator" 
+            className="text-gray-600"
+          >
+            Interest Calculator
+          </Link>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
