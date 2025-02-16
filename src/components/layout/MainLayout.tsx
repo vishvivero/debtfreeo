@@ -17,9 +17,12 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  // Scroll to top on route change
+  // Global scroll to top on route change
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }, [location.pathname]);
 
   return (
