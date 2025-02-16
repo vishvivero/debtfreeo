@@ -47,9 +47,9 @@ const SharedSignup = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="space-y-10 px-8 md:px-16 lg:px-24 flex flex-col justify-center"
+            className="space-y-8 px-8 md:px-16 lg:px-24 flex flex-col justify-center max-w-2xl mx-auto"
           >
-            <div className="space-y-6">
+            <div className="space-y-4">
               <motion.span 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -63,52 +63,45 @@ const SharedSignup = () => {
                 Journey to <br className="hidden sm:block" />
                 Financial Freedom
               </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-xl text-gray-600">
                 Join thousands of others who are taking control of their financial future
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="grid grid-cols-2 gap-6">
               {[
                 {
-                  icon: <CheckCircle2 className="h-6 w-6 text-primary" />,
-                  title: "Personalized Debt Strategy",
-                  description: "Get a customized plan to become debt-free faster",
+                  icon: <CheckCircle2 className="h-5 w-5 text-primary" />,
+                  title: "Personalized Strategy",
                   delay: 0.3
                 },
                 {
-                  icon: <Newspaper className="h-6 w-6 text-primary" />,
-                  title: "Expert Financial Content",
-                  description: "Access our library of financial tips and strategies",
+                  icon: <Newspaper className="h-5 w-5 text-primary" />,
+                  title: "Expert Content",
                   delay: 0.4
                 },
                 {
-                  icon: <Clock className="h-6 w-6 text-primary" />,
+                  icon: <Clock className="h-5 w-5 text-primary" />,
                   title: "Time-Saving Tools",
-                  description: "Use our calculators and tracking tools to manage your finances",
                   delay: 0.5
                 },
                 {
-                  icon: <Share2 className="h-6 w-6 text-primary" />,
+                  icon: <Share2 className="h-5 w-5 text-primary" />,
                   title: "Community Support",
-                  description: "Connect with others on their debt-free journey",
                   delay: 0.6
                 }
               ].map((feature, index) => (
                 <motion.div 
                   key={index}
-                  className="flex items-start gap-4 group"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center gap-2 group"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: feature.delay, duration: 0.5 }}
                 >
-                  <div className="rounded-full p-2 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-200">
+                  <div className="rounded-full p-1.5 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-200">
                     {feature.icon}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg text-gray-900">{feature.title}</h3>
-                    <p className="text-gray-600 mt-1">{feature.description}</p>
-                  </div>
+                  <span className="font-medium text-sm text-gray-700">{feature.title}</span>
                 </motion.div>
               ))}
             </div>
