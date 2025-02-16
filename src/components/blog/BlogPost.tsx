@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, ChevronRight, Facebook, Twitter, Mail } from "lucide-react";
+import { AlertCircle, Clock, ChevronRight, Facebook, Twitter, Mail, X, Linkedin, Copy, Link2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -122,11 +121,27 @@ export const BlogPost = () => {
     const shareUrls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
-      pinterest: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&description=${encodeURIComponent(title)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
       reddit: `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`
     };
 
     window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Success",
+        description: "Link copied to clipboard!",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSubscribe = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -144,7 +159,6 @@ export const BlogPost = () => {
     }
 
     try {
-      // Since we can't use the table directly, we'll create a serverless function to handle this
       const { error } = await supabase.functions.invoke('subscribe-newsletter', {
         body: { email }
       });
@@ -195,48 +209,91 @@ export const BlogPost = () => {
     );
   }
 
-  return (
-    <>
-      <div className="w-full bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <nav className="flex items-center gap-2 text-sm">
-            <Link to="/blog" className="text-primary hover:text-primary/80 transition-colors">
-              Blog
-            </Link>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-            <Link to={`/blog?category=${blog.category}`} className="text-primary hover:text-primary/80 transition-colors">
-              {blog.category}
-            </Link>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-            <span className="text-gray-600 truncate">{blog.title}</span>
-          </nav>
+  if (blog) {
+    return (
+      <>
+        <div className="w-full bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <nav className="flex items-center gap-2 text-sm">
+              <Link to="/blog" className="text-primary hover:text-primary/80 transition-colors">
+                Blog
+              </Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <Link to={`/blog?category=${blog.category}`} className="text-primary hover:text-primary/80 transition-colors">
+                {blog.category}
+              </Link>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-600 truncate">{blog.title}</span>
+            </nav>
+          </div>
         </div>
-      </div>
 
-      <div className="w-full bg-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-6 space-y-6">
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                {blog.title}
-              </h1>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4" />
-                  <span>{blog.read_time_minutes} MIN READ</span>
+        <div className="w-full bg-white py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-6 space-y-6">
+                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                  {blog.title}
+                </h1>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    <span>{blog.read_time_minutes} MIN READ</span>
+                  </div>
+                  <span className="mx-2">•</span>
+                  <time dateTime={blog.published_at || blog.created_at}>
+                    {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </time>
                 </div>
-                <span className="mx-2">•</span>
-                <time dateTime={blog.published_at || blog.created_at}>
-                  {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </time>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary font-medium text-lg">
+                      {blog.profiles?.email?.[0].toUpperCase() || 'A'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Written on {new Date(blog.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
               </div>
+              {blog.image_url && (
+                <div className="lg:col-span-6">
+                  <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-100">
+                    <img 
+                      src={blog.image_url} 
+                      alt={blog.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <motion.article 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto bg-white p-6 my-8"
+        >
+          <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary hover:prose-a:text-primary/80 prose-a:transition-colors prose-strong:text-gray-900 prose-em:text-gray-800 prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-blockquote:border-l-primary prose-blockquote:text-gray-700 prose-img:rounded-lg prose-hr:border-gray-200">
+            <ReactMarkdown>{blog.content}</ReactMarkdown>
+          </div>
+
+          <div className="mt-8 pt-6 border-t">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-medium text-lg">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary font-medium text-xl">
                     {blog.profiles?.email?.[0].toUpperCase() || 'A'}
                   </span>
                 </div>
@@ -249,138 +306,79 @@ export const BlogPost = () => {
                   </p>
                 </div>
               </div>
-            </div>
-            {blog.image_url && (
-              <div className="lg:col-span-6">
-                <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-100">
-                  <img 
-                    src={blog.image_url} 
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                  />
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Share on social:</p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare('facebook')}
+                    className="h-10 w-10 rounded-full border hover:bg-[#1877f2]/10 hover:border-[#1877f2]/30"
+                  >
+                    <Facebook className="h-4 w-4 text-[#1877f2]" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare('twitter')}
+                    className="h-10 w-10 rounded-full border hover:bg-black/10 hover:border-black/30"
+                  >
+                    <X className="h-4 w-4 text-black" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare('linkedin')}
+                    className="h-10 w-10 rounded-full border hover:bg-[#0a66c2]/10 hover:border-[#0a66c2]/30"
+                  >
+                    <Linkedin className="h-4 w-4 text-[#0a66c2]" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopyLink}
+                    className="h-10 w-10 rounded-full border hover:bg-gray-100 hover:border-gray-300"
+                  >
+                    <Link2 className="h-4 w-4 text-gray-600" />
+                  </Button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </div>
+        </motion.article>
 
-      <motion.article 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto bg-white p-6 my-8"
-      >
-        <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary hover:prose-a:text-primary/80 prose-a:transition-colors prose-strong:text-gray-900 prose-em:text-gray-800 prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-blockquote:border-l-primary prose-blockquote:text-gray-700 prose-img:rounded-lg prose-hr:border-gray-200">
-          <ReactMarkdown>{blog.content}</ReactMarkdown>
-        </div>
-
-        <div className="mt-8 pt-6 border-t">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary font-medium text-lg">
-                  {blog.profiles?.email?.[0].toUpperCase() || 'A'}
-                </span>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">
-                  {blog.profiles?.email?.split('@')[0] || 'Anonymous'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Written on {new Date(blog.created_at).toLocaleDateString()}
+        <div className="w-full bg-primary text-white py-16">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 space-y-4">
+                <h2 className="text-3xl font-bold">
+                  Subscribe to Our Newsletter
+                </h2>
+                <p className="text-primary-50">
+                  Get the latest financial tips, debt management strategies, and exclusive content delivered directly to your inbox.
                 </p>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">Share on social:</p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleShare('facebook')}
-                  className="hover:text-blue-600 hover:border-blue-600"
-                >
-                  <Facebook className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleShare('twitter')}
-                  className="hover:text-sky-500 hover:border-sky-500"
-                >
-                  <Twitter className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleShare('pinterest')}
-                  className="hover:text-red-600 hover:border-red-600"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0c-6.627 0-12 5.373-12 12 0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
-                  </svg>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleShare('reddit')}
-                  className="hover:text-orange-600 hover:border-orange-600"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 11.779c0-1.459-1.192-2.645-2.657-2.645-.715 0-1.363.286-1.84.746-1.81-1.191-4.259-1.949-6.971-2.046l1.483-4.669 4.016.941-.006.058c0 1.193.975 2.163 2.174 2.163 1.198 0 2.172-.97 2.172-2.163s-.975-2.164-2.172-2.164c-.92 0-1.704.574-2.021 1.379l-4.329-1.015c-.189-.046-.381.063-.44.249l-1.654 5.207c-2.838.034-5.409.798-7.3 2.025-.474-.438-1.103-.712-1.799-.712-1.465 0-2.656 1.187-2.656 2.646 0 .97.533 1.811 1.317 2.271-.052.282-.086.567-.086.857 0 3.911 4.808 7.093 10.719 7.093s10.72-3.182 10.72-7.093c0-.274-.029-.544-.075-.81.832-.447 1.405-1.312 1.405-2.318zm-17.224 1.816c0-.868.71-1.575 1.582-1.575.872 0 1.581.707 1.581 1.575s-.709 1.574-1.581 1.574-1.582-.706-1.582-1.574zm9.061 4.669c-.797.793-2.048 1.179-3.824 1.179l-.013-.003-.013.003c-1.777 0-3.028-.386-3.824-1.179-.145-.144-.145-.379 0-.523.145-.145.381-.145.526 0 .65.647 1.729.961 3.298.961l.013.003.013-.003c1.569 0 2.648-.315 3.298-.962.145-.145.381-.144.526 0 .145.145.145.379 0 .524zm-.189-3.095c-.872 0-1.581-.706-1.581-1.574 0-.868.709-1.575 1.581-1.575s1.581.707 1.581 1.575-.709 1.574-1.581 1.574z"/>
-                  </svg>
-                </Button>
+              <div className="w-full md:w-auto">
+                <form onSubmit={handleSubscribe} className="flex gap-2">
+                  <Input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    required
+                  />
+                  <Button type="submit" variant="secondary" className="whitespace-nowrap">
+                    Subscribe
+                  </Button>
+                </form>
               </div>
             </div>
           </div>
         </div>
+      </>
+    );
+  }
 
-        {blog.tags && blog.tags.length > 0 && (
-          <div className="mt-8 pt-4 border-t">
-            <div className="flex flex-wrap gap-2">
-              {blog.tags.map((tag: string) => (
-                <Badge 
-                  key={tag} 
-                  variant="outline"
-                  className="bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-      </motion.article>
-
-      <div className="w-full bg-primary text-white py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-1 space-y-4">
-              <h2 className="text-3xl font-bold">
-                Subscribe to Our Newsletter
-              </h2>
-              <p className="text-primary-50">
-                Get the latest financial tips, debt management strategies, and exclusive content delivered directly to your inbox.
-              </p>
-            </div>
-            <div className="w-full md:w-auto">
-              <form onSubmit={handleSubscribe} className="flex gap-2">
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  required
-                />
-                <Button type="submit" variant="secondary" className="whitespace-nowrap">
-                  Subscribe
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+  return null;
 };
