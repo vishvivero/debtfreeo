@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
@@ -143,9 +144,10 @@ export const BlogPost = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('newsletter_subscribers')
-        .insert([{ email }]);
+      // Since we can't use the table directly, we'll create a serverless function to handle this
+      const { error } = await supabase.functions.invoke('subscribe-newsletter', {
+        body: { email }
+      });
 
       if (error) throw error;
 
