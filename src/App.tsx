@@ -1,3 +1,4 @@
+
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -7,6 +8,7 @@ import { AuthProvider } from "@/lib/auth";
 import { publicRoutes } from "@/routes/publicRoutes";
 import { protectedRoutes } from "@/routes/protectedRoutes";
 import { adminRoutes } from "@/routes/adminRoutes";
+import { useScrollTop } from "./hooks/use-scroll-top";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +25,7 @@ function App() {
       <AuthProvider>
         <SidebarProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               {publicRoutes}
               {protectedRoutes}
@@ -34,6 +37,12 @@ function App() {
       </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+// Separate component to use the hook
+function ScrollToTop() {
+  useScrollTop();
+  return null;
 }
 
 export default App;
