@@ -48,6 +48,53 @@ const CreditCardCalculatorPage = () => {
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
               <CreditCardCalculator />
             </div>
+
+            <div className="mt-12 prose prose-gray max-w-none">
+              <h2 className="text-2xl font-semibold text-gray-800">Planning Your Credit Card Debt Freedom</h2>
+              
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">How This Calculator Helps</h3>
+              <p>
+                Our credit card payoff calculator helps you understand exactly how long it will take to become debt-free and shows you how different payment strategies can accelerate your journey to financial freedom.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Key Features</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Calculate your debt-free date</li>
+                <li>View total interest savings</li>
+                <li>Compare different payment strategies</li>
+                <li>See monthly payment breakdowns</li>
+                <li>Track payoff milestones</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Payment Strategies</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Fixed monthly payments</li>
+                <li>Accelerated payment plans</li>
+                <li>Minimum payment consequences</li>
+                <li>Extra payment impact</li>
+                <li>Balance transfer scenarios</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Making the Most of Results</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Create a realistic payment plan</li>
+                <li>Identify potential savings</li>
+                <li>Set achievable payoff goals</li>
+                <li>Track your progress</li>
+                <li>Adjust strategies as needed</li>
+              </ul>
+
+              <div className="bg-primary/5 p-6 rounded-lg mt-6">
+                <h3 className="text-xl font-semibold text-gray-800">Smart Payoff Tips</h3>
+                <ul className="list-disc pl-6 space-y-2 mt-3">
+                  <li>Always pay more than the minimum when possible</li>
+                  <li>Consider balance transfer opportunities</li>
+                  <li>Avoid new credit card charges</li>
+                  <li>Track your spending to find extra payment money</li>
+                  <li>Celebrate each milestone towards debt freedom</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
