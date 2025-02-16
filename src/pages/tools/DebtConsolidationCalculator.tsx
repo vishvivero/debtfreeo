@@ -36,13 +36,37 @@ const DebtConsolidationCalculatorPage = () => {
           className="space-y-8"
         >
           <div className="max-w-4xl mx-auto">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] bg-clip-text text-transparent">
                 Debt Consolidation Calculator
               </h1>
-              <p className="text-gray-600 text-lg">
-                Compare debt consolidation options and potential savings.
-              </p>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-600 text-lg">
+                  Evaluate whether debt consolidation could help you save money and simplify your payments.
+                </p>
+                <h2 className="text-2xl font-semibold text-gray-800 mt-6">Is Debt Consolidation Right for You?</h2>
+                <p className="text-gray-600">
+                  Our debt consolidation calculator helps you determine if consolidating your debts could lead to savings and simpler debt management. Compare your current situation with potential consolidation options.
+                </p>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">What This Calculator Shows You:</h3>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Potential monthly payment savings</li>
+                  <li>Total interest savings over the loan term</li>
+                  <li>New single monthly payment amount</li>
+                  <li>Time to become debt-free</li>
+                  <li>Comparison of current vs. consolidated payments</li>
+                </ul>
+                <h3 className="text-xl font-semibold text-gray-800 mt-4">Benefits of Debt Consolidation</h3>
+                <p className="text-gray-600">
+                  Use this calculator to understand if consolidation could help you:
+                </p>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Lower your monthly payments</li>
+                  <li>Reduce total interest costs</li>
+                  <li>Simplify debt management</li>
+                  <li>Pay off debt faster</li>
+                </ul>
+              </div>
             </div>
 
             <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
