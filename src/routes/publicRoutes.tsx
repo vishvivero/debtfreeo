@@ -6,7 +6,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Pricing from "@/pages/Pricing";
 import Blog from "@/pages/Blog";
-import { BlogPost } from "@/components/blog/BlogPost";
+import BlogPost from "@/components/blog/BlogPost";
 import FreeTools from "@/pages/FreeTools";
 import FAQ from "@/pages/FAQ";
 import PrivacyPolicy from "@/components/legal/PrivacyPolicy";
