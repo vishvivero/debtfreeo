@@ -1,10 +1,10 @@
 
 import { EmergencyFundCalculator } from "@/components/tools/EmergencyFundCalculator";
 import { CookieConsent } from "@/components/legal/CookieConsent";
-import { LegalFooter } from "@/components/legal/LegalFooter";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
+import { SharedFooter } from "@/components/layout/SharedFooter";
 
 const EmergencyFundCalculatorPage = () => {
   return (
@@ -50,85 +50,55 @@ const EmergencyFundCalculatorPage = () => {
             </div>
 
             <div className="mt-12 prose prose-gray max-w-none">
-              <h2 className="text-2xl font-semibold text-gray-800">Planning Your Emergency Fund</h2>
+              <h2 className="text-2xl font-semibold text-gray-800">Building Your Emergency Fund</h2>
               
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Why Have an Emergency Fund?</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Why Emergency Funds Matter</h3>
               <p>
-                An emergency fund is your financial safety net for unexpected expenses or income loss. This calculator helps you determine how much you should save based on your personal circumstances.
+                An emergency fund is your financial safety net, providing peace of mind and security during unexpected situations.
               </p>
 
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Key Components</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Recommended Fund Size</h3>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Monthly living expenses</li>
-                <li>Job stability factors</li>
-                <li>Family size considerations</li>
-                <li>Insurance deductibles</li>
-                <li>Lifestyle requirements</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-gray-800 mt-6">Recommended Coverage</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>3-6 months: Stable dual income</li>
-                <li>6-9 months: Single income household</li>
-                <li>9-12 months: Self-employed</li>
-                <li>12+ months: Variable income</li>
+                <li>3-6 months of essential expenses</li>
+                <li>Additional savings for variable income</li>
+                <li>Coverage for insurance deductibles</li>
+                <li>Allowance for unexpected repairs</li>
+                <li>Buffer for medical emergencies</li>
               </ul>
 
               <h3 className="text-xl font-semibold text-gray-800 mt-6">Building Your Fund</h3>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Set realistic monthly savings goals</li>
+                <li>Start with a realistic monthly savings goal</li>
                 <li>Automate your savings</li>
-                <li>Start small and increase over time</li>
                 <li>Keep funds easily accessible</li>
-                <li>Monitor and adjust as needed</li>
+                <li>Consider high-yield savings accounts</li>
+                <li>Review and adjust regularly</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">When to Use Your Fund</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Job loss or income reduction</li>
+                <li>Medical emergencies</li>
+                <li>Essential home repairs</li>
+                <li>Vehicle repairs</li>
+                <li>Unexpected travel needs</li>
               </ul>
 
               <div className="bg-primary/5 p-6 rounded-lg mt-6">
-                <h3 className="text-xl font-semibold text-gray-800">Smart Saving Tips</h3>
+                <h3 className="text-xl font-semibold text-gray-800">Fund Maintenance Tips</h3>
                 <ul className="list-disc pl-6 space-y-2 mt-3">
-                  <li>Use high-yield savings accounts</li>
-                  <li>Review and cut unnecessary expenses</li>
-                  <li>Consider part-time income opportunities</li>
-                  <li>Keep emergency funds separate</li>
-                  <li>Replenish after using</li>
+                  <li>Regularly review your expenses</li>
+                  <li>Update savings goals as needed</li>
+                  <li>Replenish after withdrawals</li>
+                  <li>Keep separate from other savings</li>
+                  <li>Monitor account interest rates</li>
                 </ul>
               </div>
             </div>
           </div>
         </motion.div>
       </div>
-
-      <footer className="bg-white border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">About</h4>
-              <p className="text-gray-600">
-                Plan your emergency fund and strengthen your financial security.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
-              <ul className="space-y-2 text-gray-600">
-                <li>
-                  <Link to="/tools" className="hover:text-[#9b87f5] transition-colors">
-                    All Calculators
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="hover:text-[#9b87f5] transition-colors">
-                    Financial Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-              <LegalFooter />
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
       <CookieConsent />
     </div>
   );
