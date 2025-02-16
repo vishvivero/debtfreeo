@@ -26,16 +26,12 @@ export const BlogPostForm = ({
   image,
   setImage,
   imagePreview,
-  keyTakeaways,
-  setKeyTakeaways,
-  metaTitle,
-  setMetaTitle,
-  metaDescription,
-  setMetaDescription,
-  keywords,
-  setKeywords,
 }: BlogFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keyTakeaways, setKeyTakeaways] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -50,7 +46,7 @@ export const BlogPostForm = ({
       return;
     }
 
-    if (!title || !content || !metaDescription) {
+    if (!title || !content || !excerpt) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -83,21 +79,21 @@ export const BlogPostForm = ({
 
       // Create the blog post with SEO fields and key takeaways
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
+      const keywordsArray = keywords.length > 0 ? keywords : title.toLowerCase().split(' ');
 
       const { error: postError } = await supabase
         .from('blogs')
         .insert({
           title,
           content,
-          excerpt: metaDescription, // Use metaDescription as excerpt
+          excerpt,
           category: category || 'uncategorized',
           author_id: user.id,
           is_published: !isDraft,
           image_url: imageUrl,
           slug,
           meta_title: metaTitle || title,
-          meta_description: metaDescription,
+          meta_description: metaDescription || excerpt,
           keywords: keywordsArray,
           key_takeaways: keyTakeaways,
         });
@@ -123,10 +119,8 @@ export const BlogPostForm = ({
   };
 
   const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (setKeywords) {
-      const keywordsString = e.target.value;
-      setKeywords(keywordsString.split(',').map(k => k.trim()));
-    }
+    const keywordsString = e.target.value;
+    setKeywords(keywordsString.split(',').map(k => k.trim()));
   };
 
   return (
@@ -149,7 +143,7 @@ export const BlogPostForm = ({
               id="metaTitle"
               placeholder="Meta title for search engines"
               value={metaTitle}
-              onChange={(e) => setMetaTitle && setMetaTitle(e.target.value)}
+              onChange={(e) => setMetaTitle(e.target.value)}
               className="max-w-2xl"
             />
             <p className="text-sm text-gray-500 mt-1">
@@ -163,14 +157,11 @@ export const BlogPostForm = ({
               id="metaDescription"
               placeholder="Brief description for search engines"
               value={metaDescription}
-              onChange={(e) => {
-                setMetaDescription && setMetaDescription(e.target.value);
-                setExcerpt(e.target.value); // Update excerpt with meta description
-              }}
+              onChange={(e) => setMetaDescription(e.target.value)}
               className="max-w-2xl"
             />
             <p className="text-sm text-gray-500 mt-1">
-              This will be used as both the meta description and excerpt
+              Leave blank to use the post excerpt
             </p>
           </div>
 
@@ -179,7 +170,6 @@ export const BlogPostForm = ({
             <Input
               id="keywords"
               placeholder="e.g., debt management, financial planning, savings"
-              value={keywords?.join(', ')}
               onChange={handleKeywordsChange}
               className="max-w-2xl"
             />
@@ -193,6 +183,8 @@ export const BlogPostForm = ({
       />
 
       <BlogContent
+        excerpt={excerpt}
+        setExcerpt={setExcerpt}
         content={content}
         setContent={setContent}
         keyTakeaways={keyTakeaways}
