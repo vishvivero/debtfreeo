@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, RouteObject } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth";
 import { publicRoutes } from "@/routes/publicRoutes";
 import { protectedRoutes } from "@/routes/protectedRoutes";
@@ -19,13 +19,15 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const allRoutes: RouteObject[] = [...publicRoutes, ...protectedRoutes, ...adminRoutes];
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SidebarProvider>
           <BrowserRouter>
             <Routes>
-              {[...publicRoutes, ...protectedRoutes, ...adminRoutes].map((route) => (
+              {allRoutes.map((route) => (
                 <Route
                   key={route.path}
                   path={route.path}
