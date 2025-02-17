@@ -1,3 +1,4 @@
+
 import { AuthForm } from "@/components/AuthForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Newspaper, CheckCircle2, Clock, Share2 } from "lucide-react";
@@ -41,7 +42,7 @@ const SharedSignup = () => {
       </div>
 
       <main className="flex-grow">
-        <div className="relative min-h-[calc(100vh-5rem)] flex items-center z-10 pt-16">
+        <div className="relative min-h-[calc(100vh-5rem)] flex items-center z-10 pt-16 mt-0">
           <div className="w-full grid md:grid-cols-2 gap-0">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
