@@ -63,6 +63,28 @@ const Header = () => {
     navigate("/overview");
   };
 
+  const handleSignupClick = () => {
+    // First navigate to the new route
+    navigate("/signup");
+    
+    // Use a slightly longer timeout and ensure we're at the root document
+    setTimeout(() => {
+      // Get the document root element
+      const docElement = document.documentElement;
+      const bodyElement = document.body;
+      
+      // Reset both documentElement and body scroll
+      docElement.scrollTop = 0;
+      bodyElement.scrollTop = 0;
+      
+      // Fallback to window.scrollTo for broader compatibility
+      window.scrollTo({
+        top: 0,
+        behavior: 'instant' // Use instant instead of smooth for more reliable behavior
+      });
+    }, 150); // Increased timeout for better reliability
+  };
+
   return (
     <header className="fixed top-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b w-full">
       <div className="container">
@@ -88,15 +110,14 @@ const Header = () => {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {!isSignupPage && !user && (
-              <Link to="/signup">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-sm"
-                >
-                  Sign Up
-                </Button>
-              </Link>
+              <Button 
+                variant="default" 
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-sm"
+                onClick={handleSignupClick}
+              >
+                Sign Up
+              </Button>
             )}
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
