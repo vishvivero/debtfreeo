@@ -10,6 +10,7 @@ import { Loader2, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ThemeToggle } from "./theme/ThemeToggle";
+import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 
 const Header = () => {
   const { user } = useAuth();
@@ -74,14 +75,14 @@ const Header = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-64 p-0">
-                <Navigation />
+                {user ? <SidebarNavigation /> : <Navigation />}
               </SheetContent>
             </Sheet>
             <Link to="/" className="font-bold text-xl text-primary">
               Debtfreeo
             </Link>
             <div className="hidden lg:block">
-              <Navigation />
+              {user ? <SidebarNavigation /> : <Navigation />}
             </div>
           </div>
           <div className="flex items-center gap-2">
