@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -64,31 +65,31 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-20 max-w-7xl">
-        <div className="flex flex-col py-16">
+      <div className="container mx-auto px-4 pt-12 md:pt-20 max-w-7xl">
+        <div className="flex flex-col py-8 md:py-16">
           <div className="max-w-3xl z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
+              className="space-y-4 md:space-y-6"
             >
-              <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <span className="inline-block px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
                 Beta Release
               </span>
               
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight text-gray-900">
+              <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold leading-tight text-gray-900">
                 Eliminate debt <br />
                 <span className="text-primary">intelligently</span>
               </h1>
               
-              <p className="text-xl text-gray-600 max-w-xl">
+              <p className="text-lg md:text-xl text-gray-600 max-w-xl">
                 Take charge of your financial future with personalized debt repayment strategies. Plan smarter, live debt-free.
               </p>
 
               <div className="flex flex-wrap gap-4">
                 <Button 
                   size="lg" 
-                  className="bg-primary hover:bg-primary/90 gap-2"
+                  className="bg-primary hover:bg-primary/90 gap-2 w-full sm:w-auto"
                   onClick={handleGetStarted}
                 >
                   {user ? "Dashboard" : "Get Started"} <ArrowRight className="w-4 h-4" />
@@ -96,17 +97,17 @@ const HeroSection = () => {
               </div>
 
               {/* Feature highlights */}
-              <div className="space-y-3 mt-6">
+              <div className="space-y-3 mt-4 md:mt-6">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                  <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>Free Pro Features During Beta</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Shield className="w-4 h-4 text-primary" />
+                  <Shield className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>Founded in the United Kingdom: Trust Built-In</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="w-4 h-4 text-primary" />
+                  <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>By pressing 'Get Started' you agree to our Legal Policies</span>
                 </div>
               </div>
