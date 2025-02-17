@@ -27,6 +27,9 @@ import InvestmentCalculatorPage from "@/pages/tools/InvestmentCalculator";
 import MortgageCalculatorPage from "@/pages/tools/MortgageCalculator";
 import StudentLoanCalculatorPage from "@/pages/tools/StudentLoanCalculator";
 import NetWorthCalculatorPage from "@/pages/tools/NetWorthCalculator";
+import LifeInsuranceCalculatorPage from "@/pages/tools/LifeInsuranceCalculator";
+import DownPaymentCalculatorPage from "@/pages/tools/DownPaymentCalculator";
+import CollegeSavingsCalculatorPage from "@/pages/tools/CollegeSavingsCalculator";
 import SharedSignup from "@/pages/SharedSignup";
 
 export const publicRoutes = [
@@ -51,6 +54,9 @@ export const publicRoutes = [
   <Route key="/tools/mortgage-payment-calculator" path="/tools/mortgage-payment-calculator" element={<Layout><MortgageCalculatorPage /></Layout>} />,
   <Route key="/tools/student-loan-calculator" path="/tools/student-loan-calculator" element={<Layout><StudentLoanCalculatorPage /></Layout>} />,
   <Route key="/tools/net-worth-calculator" path="/tools/net-worth-calculator" element={<Layout><NetWorthCalculatorPage /></Layout>} />,
+  <Route key="/tools/term-life-insurance-calculator" path="/tools/term-life-insurance-calculator" element={<Layout><LifeInsuranceCalculatorPage /></Layout>} />,
+  <Route key="/tools/down-payment-savings-calculator" path="/tools/down-payment-savings-calculator" element={<Layout><DownPaymentCalculatorPage /></Layout>} />,
+  <Route key="/tools/college-savings-calculator" path="/tools/college-savings-calculator" element={<Layout><CollegeSavingsCalculatorPage /></Layout>} />,
   <Route key="/faq" path="/faq" element={<Layout><FAQ /></Layout>} />,
   <Route key="/privacy" path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />,
   <Route key="/terms" path="/terms" element={<Layout><TermsOfService /></Layout>} />,

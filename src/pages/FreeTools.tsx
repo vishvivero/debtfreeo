@@ -1,4 +1,4 @@
-import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3, Home, GraduationCap, Scale } from "lucide-react";
+import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3, Home, GraduationCap, Scale, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -110,6 +110,30 @@ const FreeTools = () => {
       category: "wealth",
       comingSoon: false,
     },
+    {
+      title: "Term Life Insurance Calculator",
+      description: "Calculate your life insurance needs based on your financial situation.",
+      icon: Shield,
+      url: "/tools/term-life-insurance-calculator",
+      category: "insurance",
+      comingSoon: false,
+    },
+    {
+      title: "Down Payment Calculator",
+      description: "Plan your savings for a home down payment.",
+      icon: Home,
+      url: "/tools/down-payment-savings-calculator",
+      category: "mortgage",
+      comingSoon: false,
+    },
+    {
+      title: "College Savings Calculator",
+      description: "Plan for your children's education expenses.",
+      icon: GraduationCap,
+      url: "/tools/college-savings-calculator",
+      category: "education",
+      comingSoon: false,
+    }
   ];
 
   const filteredTools = tools.filter(tool => 

@@ -59,4 +59,41 @@ const CollegeSavingsCalculatorPage = () => {
               </p>
 
               <h3 className="text-xl font-semibold text-gray-800 mt-6">Savings Options</h3>
-              <ul
+              <ul className="list-disc pl-6 space-y-2">
+                <li>529 College Savings Plans</li>
+                <li>Coverdell Education Savings Accounts</li>
+                <li>UGMA/UTMA Accounts</li>
+                <li>Traditional Savings Accounts</li>
+                <li>Investment Accounts</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-6">Important Considerations</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>College cost inflation rates</li>
+                <li>Investment return expectations</li>
+                <li>Time horizon until college</li>
+                <li>Financial aid possibilities</li>
+                <li>Tax implications of different savings vehicles</li>
+              </ul>
+
+              <div className="bg-primary/5 p-6 rounded-lg mt-6">
+                <h3 className="text-xl font-semibold text-gray-800">College Savings Tips</h3>
+                <ul className="list-disc pl-6 space-y-2 mt-3">
+                  <li>Start saving early to benefit from compound growth</li>
+                  <li>Consider tax-advantaged savings options</li>
+                  <li>Research scholarship and grant opportunities</li>
+                  <li>Review and adjust your savings plan regularly</li>
+                  <li>Explore state-specific 529 plan benefits</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+      <SharedFooter />
+      <CookieConsent />
+    </div>
+  );
+};
+
+export default CollegeSavingsCalculatorPage;
