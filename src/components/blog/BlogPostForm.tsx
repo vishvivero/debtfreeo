@@ -214,6 +214,14 @@ export const BlogPostForm = ({
         setContent={setContent}
         keyTakeaways={keyTakeaways}
         setKeyTakeaways={setKeyTakeaways}
+        title={title}
+        setTitle={setTitle}
+        metaTitle={metaTitle}
+        setMetaTitle={setMetaTitle}
+        metaDescription={metaDescription}
+        setMetaDescription={setMetaDescription}
+        keywords={keywords}
+        setKeywords={setKeywords}
       />
 
       <div className="flex justify-end gap-4">

@@ -11,6 +11,9 @@ export const NewPost = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [keyTakeaways, setKeyTakeaways] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -33,6 +36,12 @@ export const NewPost = () => {
             imagePreview={setImagePreview}
             keyTakeaways={keyTakeaways}
             setKeyTakeaways={setKeyTakeaways}
+            metaTitle={metaTitle}
+            setMetaTitle={setMetaTitle}
+            metaDescription={metaDescription}
+            setMetaDescription={setMetaDescription}
+            keywords={keywords}
+            setKeywords={setKeywords}
           />
         </CardContent>
       </Card>
