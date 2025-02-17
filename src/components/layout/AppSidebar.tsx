@@ -10,7 +10,7 @@ export function AppSidebar() {
   return (
     <Sidebar 
       className="h-full border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      collapsible={false}
+      collapsible="none"
     >
       <SidebarRail className="lg:flex hidden">
         <ArrowLeft className="h-4 w-4" />
