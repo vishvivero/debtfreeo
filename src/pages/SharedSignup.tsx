@@ -1,50 +1,43 @@
-
 import { AuthForm } from "@/components/AuthForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Newspaper, CheckCircle2, Clock, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
-import { useEffect } from "react";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 const SharedSignup = () => {
-  // Add useEffect to scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useScrollTop();
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex flex-col">
       <Header />
       
-      {/* Elegant animated background pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0">
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute opacity-[0.05] bg-gradient-to-br from-primary/80 to-secondary/80"
-              style={{
-                width: '50%',
-                height: '50%',
-                borderRadius: '50%',
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                x: [0, 40, 0],
-                y: [0, 30, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 12,
-                repeat: Infinity,
-                delay: i * 1.2,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </div>
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute opacity-[0.05] bg-gradient-to-br from-primary/80 to-secondary/80"
+            style={{
+              width: '50%',
+              height: '50%',
+              borderRadius: '50%',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              x: [0, 40, 0],
+              y: [0, 30, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              delay: i * 1.2,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
       <main className="flex-grow">
