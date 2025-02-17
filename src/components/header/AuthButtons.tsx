@@ -63,12 +63,13 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   };
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4">
+    <div className="flex items-center gap-2">
       {user ? (
         <>
           <Link to="/overview">
             <Button 
               variant="ghost"
+              size="sm"
               className="bg-primary hover:bg-primary/90 text-white gap-2 hidden sm:flex"
             >
               <LayoutDashboard className="h-4 w-4" />
@@ -79,6 +80,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
             <Link to="/admin">
               <Button 
                 variant="ghost"
+                size="sm"
                 className="bg-primary hover:bg-primary/90 text-white gap-2 hidden sm:flex"
               >
                 <Settings className="h-4 w-4" />
@@ -88,6 +90,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
           )}
           <Button
             variant="ghost"
+            size="sm"
             onClick={handleSignOut}
             className="bg-primary hover:bg-primary/90 text-white gap-2"
           >
@@ -98,7 +101,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       ) : (
         <Dialog>
           <DialogTrigger asChild>
-            <Button>Sign In</Button>
+            <Button size="sm" className="text-sm">Sign In</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-xl p-8">
             <DialogHeader>

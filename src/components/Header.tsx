@@ -84,11 +84,15 @@ const Header = () => {
               <Navigation />
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             {!isSignupPage && !user && (
               <Link to="/signup">
-                <Button variant="default" className="bg-primary hover:bg-primary/90">
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90 text-sm"
+                >
                   Sign Up
                 </Button>
               </Link>
