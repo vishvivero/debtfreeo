@@ -2,13 +2,38 @@
 import { AuthForm } from "@/components/AuthForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Newspaper, CheckCircle2, Clock, Share2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { useScrollTop } from "@/hooks/use-scroll-top";
 
 const SharedSignup = () => {
   useScrollTop();
+  const navigate = useNavigate();
+
+  const handleLinkClick = (path: string) => async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // First navigate to the new route
+    navigate(path);
+    
+    // Use a slightly longer timeout and ensure we're at the root document
+    setTimeout(() => {
+      // Get the document root element
+      const docElement = document.documentElement;
+      const bodyElement = document.body;
+      
+      // Reset both documentElement and body scroll
+      docElement.scrollTop = 0;
+      bodyElement.scrollTop = 0;
+      
+      // Fallback to window.scrollTo for broader compatibility
+      window.scrollTo({
+        top: 0,
+        behavior: 'instant' // Use instant instead of smooth for more reliable behavior
+      });
+    }, 150); // Increased timeout for better reliability
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex flex-col">
@@ -123,11 +148,11 @@ const SharedSignup = () => {
               <div className="text-center text-sm text-gray-600 mt-6">
                 <p>
                   By signing up, you agree to our{" "}
-                  <Link to="/terms" className="text-primary hover:text-primary/80 underline-offset-4 underline transition-colors">
+                  <Link onClick={handleLinkClick("/terms")} to="/terms" className="text-primary hover:text-primary/80 underline-offset-4 underline transition-colors">
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link to="/privacy" className="text-primary hover:text-primary/80 underline-offset-4 underline transition-colors">
+                  <Link onClick={handleLinkClick("/privacy")} to="/privacy" className="text-primary hover:text-primary/80 underline-offset-4 underline transition-colors">
                     Privacy Policy
                   </Link>
                 </p>
