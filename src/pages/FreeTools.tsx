@@ -1,4 +1,5 @@
-import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3 } from "lucide-react";
+
+import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -84,6 +85,14 @@ const FreeTools = () => {
       icon: BarChart3,
       url: "/tools/personal-budget-planner-calculator",
       category: "budget",
+      comingSoon: false,
+    },
+    {
+      title: "Mortgage Calculator",
+      description: "Calculate your monthly mortgage payments and total loan costs.",
+      icon: Home,
+      url: "/tools/mortgage-payment-calculator",
+      category: "mortgage",
       comingSoon: false,
     },
   ];

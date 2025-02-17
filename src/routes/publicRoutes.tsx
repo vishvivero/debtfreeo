@@ -23,6 +23,7 @@ import EmergencyFundCalculatorPage from "@/pages/tools/EmergencyFundCalculator";
 import SavingsGoalCalculatorPage from "@/pages/tools/SavingsGoalCalculator";
 import BudgetCalculatorPage from "@/pages/tools/BudgetCalculator";
 import InvestmentCalculatorPage from "@/pages/tools/InvestmentCalculator";
+import MortgageCalculatorPage from "@/pages/tools/MortgageCalculator";
 import SharedSignup from "@/pages/SharedSignup";
 
 export const publicRoutes = [
@@ -44,6 +45,7 @@ export const publicRoutes = [
   <Route key="/tools/savings-goal-planner-calculator" path="/tools/savings-goal-planner-calculator" element={<Layout><SavingsGoalCalculatorPage /></Layout>} />,
   <Route key="/tools/personal-budget-planner-calculator" path="/tools/personal-budget-planner-calculator" element={<Layout><BudgetCalculatorPage /></Layout>} />,
   <Route key="/tools/investment-growth-calculator" path="/tools/investment-growth-calculator" element={<Layout><InvestmentCalculatorPage /></Layout>} />,
+  <Route key="/tools/mortgage-payment-calculator" path="/tools/mortgage-payment-calculator" element={<Layout><MortgageCalculatorPage /></Layout>} />,
   <Route key="/faq" path="/faq" element={<Layout><FAQ /></Layout>} />,
   <Route key="/privacy" path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />,
   <Route key="/terms" path="/terms" element={<Layout><TermsOfService /></Layout>} />,
