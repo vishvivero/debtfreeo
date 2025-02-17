@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -64,25 +63,20 @@ const Header = () => {
   };
 
   const handleSignupClick = () => {
-    // First navigate to the new route
     navigate("/signup");
     
-    // Use a slightly longer timeout and ensure we're at the root document
     setTimeout(() => {
-      // Get the document root element
       const docElement = document.documentElement;
       const bodyElement = document.body;
       
-      // Reset both documentElement and body scroll
       docElement.scrollTop = 0;
       bodyElement.scrollTop = 0;
       
-      // Fallback to window.scrollTo for broader compatibility
       window.scrollTo({
         top: 0,
-        behavior: 'instant' // Use instant instead of smooth for more reliable behavior
+        behavior: 'instant'
       });
-    }, 150); // Increased timeout for better reliability
+    }, 150);
   };
 
   return (
@@ -90,16 +84,6 @@ const Header = () => {
       <div className="container">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                {user ? <SidebarNavigation /> : <Navigation />}
-              </SheetContent>
-            </Sheet>
             <Link to="/" className="font-bold text-xl text-primary">
               Debtfreeo
             </Link>
