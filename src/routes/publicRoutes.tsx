@@ -1,3 +1,4 @@
+
 import { Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import Index from "@/pages/Index";
@@ -24,6 +25,8 @@ import SavingsGoalCalculatorPage from "@/pages/tools/SavingsGoalCalculator";
 import BudgetCalculatorPage from "@/pages/tools/BudgetCalculator";
 import InvestmentCalculatorPage from "@/pages/tools/InvestmentCalculator";
 import MortgageCalculatorPage from "@/pages/tools/MortgageCalculator";
+import StudentLoanCalculatorPage from "@/pages/tools/StudentLoanCalculator";
+import NetWorthCalculatorPage from "@/pages/tools/NetWorthCalculator";
 import SharedSignup from "@/pages/SharedSignup";
 
 export const publicRoutes = [
@@ -46,6 +49,8 @@ export const publicRoutes = [
   <Route key="/tools/personal-budget-planner-calculator" path="/tools/personal-budget-planner-calculator" element={<Layout><BudgetCalculatorPage /></Layout>} />,
   <Route key="/tools/investment-growth-calculator" path="/tools/investment-growth-calculator" element={<Layout><InvestmentCalculatorPage /></Layout>} />,
   <Route key="/tools/mortgage-payment-calculator" path="/tools/mortgage-payment-calculator" element={<Layout><MortgageCalculatorPage /></Layout>} />,
+  <Route key="/tools/student-loan-calculator" path="/tools/student-loan-calculator" element={<Layout><StudentLoanCalculatorPage /></Layout>} />,
+  <Route key="/tools/net-worth-calculator" path="/tools/net-worth-calculator" element={<Layout><NetWorthCalculatorPage /></Layout>} />,
   <Route key="/faq" path="/faq" element={<Layout><FAQ /></Layout>} />,
   <Route key="/privacy" path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />,
   <Route key="/terms" path="/terms" element={<Layout><TermsOfService /></Layout>} />,

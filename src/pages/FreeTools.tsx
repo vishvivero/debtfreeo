@@ -1,5 +1,4 @@
-
-import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3, Home } from "lucide-react";
+import { Calculator, LineChart, PiggyBank, Percent, CreditCard, Wallet, DollarSign, Target, BarChart3, Home, GraduationCap, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -93,6 +92,22 @@ const FreeTools = () => {
       icon: Home,
       url: "/tools/mortgage-payment-calculator",
       category: "mortgage",
+      comingSoon: false,
+    },
+    {
+      title: "Student Loan Calculator",
+      description: "Plan your student loan repayment and understand the total cost of your education.",
+      icon: GraduationCap,
+      url: "/tools/student-loan-calculator",
+      category: "education",
+      comingSoon: false,
+    },
+    {
+      title: "Net Worth Calculator",
+      description: "Calculate your total assets minus liabilities to track your financial health.",
+      icon: Scale,
+      url: "/tools/net-worth-calculator",
+      category: "wealth",
       comingSoon: false,
     },
   ];
