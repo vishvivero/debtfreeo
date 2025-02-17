@@ -2,9 +2,9 @@
 import Header from "@/components/Header";
 import { useTrackVisit } from "@/hooks/use-track-visit";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { useScrollTop } from "@/hooks/use-scroll-top";
+import { useEffect } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,9 +12,27 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   useTrackVisit();
-  useScrollTop(); // Add the scroll to top hook here
   const location = useLocation();
   const isBlogPost = location.pathname.startsWith('/blog/post/');
+
+  useEffect(() => {
+    // Use a slightly longer timeout and ensure we're at the root document
+    setTimeout(() => {
+      // Get the document root element
+      const docElement = document.documentElement;
+      const bodyElement = document.body;
+      
+      // Reset both documentElement and body scroll
+      docElement.scrollTop = 0;
+      bodyElement.scrollTop = 0;
+      
+      // Fallback to window.scrollTo for broader compatibility
+      window.scrollTo({
+        top: 0,
+        behavior: 'instant' // Use instant instead of smooth for more reliable behavior
+      });
+    }, 150); // Increased timeout for better reliability
+  }, [location.pathname]);
 
   return (
     <div className="flex flex-col min-h-screen w-full">
