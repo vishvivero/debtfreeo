@@ -9,7 +9,7 @@ import { SidebarRail } from "@/components/ui/sidebar";
 export function AppSidebar() {
   return (
     <Sidebar 
-      className="h-full border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="h-full border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 hidden lg:block"
       collapsible="none"
     >
       <SidebarRail className="lg:flex hidden">
