@@ -18,9 +18,16 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full overflow-hidden">
-        {/* Main content wrapper */}
-        <div className="flex flex-1 flex-col">
+      <div className="flex min-h-screen w-full">
+        {/* Sidebar */}
+        {hasSidebar && (
+          <div className="fixed inset-y-0 left-0 z-50 lg:relative lg:flex lg:w-64 transition-transform">
+            {SidebarComponent}
+          </div>
+        )}
+        
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col lg:pl-0">
           <Header />
           <main className="flex-1 pt-16">
             {children}
