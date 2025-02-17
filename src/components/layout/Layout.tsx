@@ -3,7 +3,8 @@ import Header from "@/components/Header";
 import { useTrackVisit } from "@/hooks/use-track-visit";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   useTrackVisit();
+  useScrollTop(); // Add the scroll to top hook here
   const location = useLocation();
   const isBlogPost = location.pathname.startsWith('/blog/post/');
 
