@@ -41,29 +41,30 @@ export const BlogContent = ({
   const [useMarkdownFormat, setUseMarkdownFormat] = useState(false);
   const [markdownContent, setMarkdownContent] = useState("");
 
-  const templateMarkdown = `**Title:** ${title}
+  const templateMarkdown = `**Title:** ${title || ""}
 
-**Meta Title:** ${metaTitle}
+**Meta Title:** ${metaTitle || ""}
 
-**Meta Description:** ${metaDescription}
+**Meta Description:** ${metaDescription || ""}
 
-**Keywords:** ${keywords.join(', ')}
+**Keywords:** ${keywords?.join(', ') || ""}
 
-**Excerpt:** ${excerpt}
+**Excerpt:** ${excerpt || ""}
 
-**Content:** ${content}
+**Content:** 
+${content || ""}
 
-**Key Takeaways:** ${keyTakeaways}`;
+**Key Takeaways:** ${keyTakeaways || ""}`;
 
   useEffect(() => {
     if (useMarkdownFormat) {
       setMarkdownContent(templateMarkdown);
     }
-  }, [useMarkdownFormat]);
+  }, [useMarkdownFormat, title, metaTitle, metaDescription, keywords, excerpt, content, keyTakeaways]);
 
   const parseMarkdownContent = (mdContent: string) => {
     const sections: { [key: string]: string } = {};
-    const regex = /\*\*(.*?):\*\* ([\s\S]*?)(?=\n\*\*|$)/g;
+    const regex = /\*\*(.*?):\*\*\s*([\s\S]*?)(?=\n\*\*|$)/g;
     let match;
 
     while ((match = regex.exec(mdContent)) !== null) {
@@ -71,12 +72,19 @@ export const BlogContent = ({
       sections[key.trim()] = value.trim();
     }
 
+    // Update all fields with parsed content
     setTitle(sections["Title"] || "");
     setMetaTitle(sections["Meta Title"] || "");
     setMetaDescription(sections["Meta Description"] || "");
-    setKeywords(sections["Keywords"]?.split(',').map(k => k.trim()) || []);
+    setKeywords(sections["Keywords"] ? sections["Keywords"].split(',').map(k => k.trim()) : []);
     setExcerpt(sections["Excerpt"] || "");
-    setContent(sections["Content"] || "");
+    
+    // Special handling for Content to preserve formatting
+    const contentMatch = mdContent.match(/\*\*Content:\*\*\s*([\s\S]*?)(?=\n\*\*|$)/);
+    if (contentMatch && contentMatch[1]) {
+      setContent(contentMatch[1].trim());
+    }
+    
     setKeyTakeaways(sections["Key Takeaways"] || "");
   };
 
