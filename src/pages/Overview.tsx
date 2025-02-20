@@ -80,15 +80,18 @@ const Overview = () => {
               try {
                 await addDebt.mutateAsync(debt);
                 toast({
-                  title: "Success",
-                  description: "Debt added successfully",
+                  title: "Debt Added Successfully!",
+                  description: `Your new debt of ${currentCurrencySymbol}${debt.balance} has been added to your account.`,
+                  duration: 5000,
+                  className: "bg-green-50 border-green-200",
                 });
               } catch (error) {
                 console.error("Error adding debt:", error);
                 toast({
-                  title: "Error",
-                  description: "Failed to add debt",
+                  title: "Error Adding Debt",
+                  description: "There was a problem adding your debt. Please try again.",
                   variant: "destructive",
+                  duration: 5000,
                 });
               }
             }}
