@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
 import { formatDate } from './pdf/formatters';
@@ -95,10 +96,10 @@ export const generateDebtOverviewPDF = (
   doc.setFontSize(12);
   doc.setTextColor(128, 128, 128);
   const tips = [
-    "💡 Set up automatic payments to stay on track",
-    "📊 Review your progress monthly",
-    "🎯 Consider adding any windfalls as lump sum payments",
-    "📱 Use our app to track your progress"
+    "• Set up automatic payments to stay on track",
+    "• Review your progress monthly",
+    "• Consider adding any windfalls as lump sum payments",
+    "• Use our app to track your progress"
   ];
   
   currentY += 20;
