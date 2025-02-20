@@ -10,12 +10,14 @@ import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { OverviewMetrics } from "@/components/overview/OverviewMetrics";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
+import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 
 const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { debts, isLoading } = useDebts();
   const { profile, updateProfile } = useProfile();
+  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
 
   const handleCurrencyChange = async (newCurrencySymbol: string) => {
     if (!user?.id) return;
@@ -64,10 +66,33 @@ const Overview = () => {
             <OverviewHeader 
               currencySymbol={currentCurrencySymbol}
               onCurrencyChange={handleCurrencyChange}
+              onAddDebt={() => setIsAddDebtOpen(true)}
             />
             <OverviewMetrics />
           </motion.div>
           <DebtScoreCard />
+          
+          <AddDebtDialog 
+            isOpen={isAddDebtOpen}
+            onClose={() => setIsAddDebtOpen(false)}
+            currencySymbol={currentCurrencySymbol}
+            onAddDebt={async (debt) => {
+              try {
+                await debts.addDebt.mutateAsync(debt);
+                toast({
+                  title: "Success",
+                  description: "Debt added successfully",
+                });
+              } catch (error) {
+                console.error("Error adding debt:", error);
+                toast({
+                  title: "Error",
+                  description: "Failed to add debt",
+                  variant: "destructive",
+                });
+              }
+            }}
+          />
         </div>
       </div>
     </MainLayout>

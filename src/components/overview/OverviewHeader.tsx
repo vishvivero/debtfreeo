@@ -1,31 +1,31 @@
 
-import { CurrencySelector } from "@/components/profile/CurrencySelector";
+import { CurrencyPicker } from "@/components/overview/CurrencyPicker";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface OverviewHeaderProps {
   currencySymbol: string;
   onCurrencyChange: (currency: string) => void;
+  onAddDebt?: () => void;
 }
 
-export const OverviewHeader = ({
-  currencySymbol,
-  onCurrencyChange,
-}: OverviewHeaderProps) => {
+export const OverviewHeader = ({ currencySymbol, onCurrencyChange, onAddDebt }: OverviewHeaderProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold">
-          <span className="text-emerald-600">Your Financial</span>{" "}
-          <span className="text-blue-600">Overview</span>
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Track and optimize your journey to financial freedom
-        </p>
-      </div>
+    <div className="flex items-center justify-between mb-6">
       <div>
-        <CurrencySelector
+        <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
+        <p className="text-gray-600">Track your debt payoff journey</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <CurrencyPicker
           value={currencySymbol}
           onValueChange={onCurrencyChange}
         />
+        {onAddDebt && (
+          <Button onClick={onAddDebt} className="bg-primary hover:bg-primary/90 text-white">
+            <Plus className="mr-2 h-4 w-4" /> Add debt
+          </Button>
+        )}
       </div>
     </div>
   );
