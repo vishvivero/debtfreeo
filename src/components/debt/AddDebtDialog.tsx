@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -19,13 +20,19 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
   const [lastAddedDebt, setLastAddedDebt] = useState<Omit<Debt, "id"> | null>(null);
   
   const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
-  const setIsOpen = typeof controlledIsOpen !== 'undefined' ? onClose : setUncontrolledIsOpen;
+  const closeDialog = () => {
+    if (typeof controlledIsOpen !== 'undefined') {
+      onClose?.();
+    } else {
+      setUncontrolledIsOpen(false);
+    }
+  };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setShowConfirmation(false);
       setLastAddedDebt(null);
-      setIsOpen?.();
+      closeDialog();
     }
   };
 
@@ -46,7 +53,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
     console.log("Finishing debt addition");
     setShowConfirmation(false);
     setLastAddedDebt(null);
-    setIsOpen?.();
+    closeDialog();
   };
 
   const formatCurrency = (amount: number) => {
