@@ -66,7 +66,6 @@ const Overview = () => {
             <OverviewHeader 
               currencySymbol={currentCurrencySymbol}
               onCurrencyChange={handleCurrencyChange}
-              onAddDebt={() => setIsAddDebtOpen(true)}
             />
             <OverviewMetrics />
           </motion.div>
