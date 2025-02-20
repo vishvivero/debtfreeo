@@ -34,14 +34,18 @@ export const generateDebtOverviewPDF = (
   const doc = new jsPDF();
   let currentY = 20;
 
+  // Set consistent text styling
+  const textColor = [128, 128, 128];  // Gray color for all text
+  const titleFontSize = 16;
+  const bodyFontSize = 12;
+
   // Add title and header
-  doc.setFontSize(24);
-  doc.setTextColor(0, 211, 130);
+  doc.setFontSize(titleFontSize);
+  doc.setTextColor(...textColor);
   doc.text('Your Debt Freedom Plan', 14, currentY);
   
   currentY += 10;
-  doc.setFontSize(12);
-  doc.setTextColor(128, 128, 128);
+  doc.setFontSize(bodyFontSize);
   doc.text(`Generated on ${formatDate(new Date())}`, 14, currentY);
   
   currentY += 8;
@@ -49,22 +53,21 @@ export const generateDebtOverviewPDF = (
   
   // Add debt summary section
   currentY += 15;
-  doc.setFontSize(16);
-  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(titleFontSize);
   doc.text('Current Debt Overview', 14, currentY);
   currentY += 10;
   currentY = generateDebtSummaryTable(doc, debts, currentY);
 
   // Add payment details section
   currentY += 15;
-  doc.setFontSize(16);
+  doc.setFontSize(titleFontSize);
   doc.text('Payment Strategy', 14, currentY);
   currentY += 10;
   currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol);
 
   // Add savings summary
   currentY += 15;
-  doc.setFontSize(16);
+  doc.setFontSize(titleFontSize);
   doc.text('Your Savings', 14, currentY);
   currentY += 10;
   currentY = generateSavingsTable(
@@ -80,7 +83,7 @@ export const generateDebtOverviewPDF = (
   // Add next steps section
   doc.addPage();
   currentY = 20;
-  doc.setFontSize(16);
+  doc.setFontSize(titleFontSize);
   doc.text('Next Steps', 14, currentY);
   currentY += 10;
   currentY = generateNextStepsTable(
@@ -93,8 +96,8 @@ export const generateDebtOverviewPDF = (
   );
 
   // Add footer with tips
-  doc.setFontSize(12);
-  doc.setTextColor(128, 128, 128);
+  doc.setFontSize(bodyFontSize);
+  doc.setTextColor(...textColor);
   const tips = [
     "• Set up automatic payments to stay on track",
     "• Review your progress monthly",
