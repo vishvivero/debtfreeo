@@ -7,6 +7,17 @@ import { useAuth } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface DangerZoneCardProps {
   showNotifications: boolean;
@@ -87,14 +98,35 @@ export const DangerZoneCard = ({ showNotifications }: DangerZoneCardProps) => {
           <p className="text-sm text-muted-foreground mb-2">
             All your debts, payments, and preferences will be deleted, but your account will remain active.
           </p>
-          <Button 
-            variant="outline" 
-            className="text-destructive border-destructive hover:bg-destructive/10"
-            onClick={handleResetData}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Resetting..." : "Reset Data"}
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="text-destructive border-destructive hover:bg-destructive/10"
+                disabled={isUpdating}
+              >
+                {isUpdating ? "Resetting..." : "Reset Data"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete all your debts,
+                  payment history, and reset your preferences to default settings.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive hover:bg-destructive/90"
+                  onClick={handleResetData}
+                >
+                  Reset Data
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>
