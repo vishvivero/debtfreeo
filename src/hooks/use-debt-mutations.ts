@@ -58,7 +58,13 @@ export function useDebtMutations() {
         throw error;
       }
 
-      await updateDebtAndProfile(updatedDebt);
+      // Ensure status is of correct type before passing to updateDebtAndProfile
+      const typedDebt: Debt = {
+        ...updatedDebt,
+        status: updatedDebt.status as 'active' | 'paid'
+      };
+
+      await updateDebtAndProfile(typedDebt);
       return data;
     },
     onSuccess: () => {
@@ -95,7 +101,13 @@ export function useDebtMutations() {
         throw error;
       }
 
-      await updateDebtAndProfile(data);
+      // Ensure data is properly typed before passing to updateDebtAndProfile
+      const typedDebt: Debt = {
+        ...data,
+        status: data.status as 'active' | 'paid'
+      };
+
+      await updateDebtAndProfile(typedDebt);
       return data;
     },
     onSuccess: () => {
@@ -141,7 +153,13 @@ export function useDebtMutations() {
       }
 
       if (debt) {
-        await updateDebtAndProfile({ ...debt, minimum_payment: 0 });
+        // Create a properly typed debt object for the update
+        const typedDebt: Debt = {
+          ...debt,
+          status: debt.status as 'active' | 'paid',
+          minimum_payment: 0
+        };
+        await updateDebtAndProfile(typedDebt);
       }
     },
     onSuccess: () => {
