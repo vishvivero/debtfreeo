@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
 import { formatCurrency, formatDate, formatPercentage, formatMonths } from './formatters';
@@ -47,9 +46,9 @@ export const generatePaymentDetailsTable = (
   currencySymbol: string
 ) => {
   const tableData = [
-    ['Regular Monthly Payment', formatCurrency(monthlyPayment - extraPayment, currencySymbol)],
-    ['Extra Payment', formatCurrency(extraPayment, currencySymbol)],
-    ['Total Monthly Commitment', formatCurrency(monthlyPayment, currencySymbol)]
+    [`• Regular Monthly Payment: ${formatCurrency(monthlyPayment - extraPayment, currencySymbol)}`],
+    [`• Extra Payment: ${formatCurrency(extraPayment, currencySymbol)}`],
+    [`• Total Monthly Commitment: ${formatCurrency(monthlyPayment, currencySymbol)}`]
   ];
 
   autoTable(doc, {
@@ -57,13 +56,12 @@ export const generatePaymentDetailsTable = (
     body: tableData,
     theme: 'plain',
     styles: { 
-      fontSize: 11,
+      fontSize: 12,
       cellPadding: 4,
-      minCellHeight: 4
+      textColor: [128, 128, 128]
     },
     columnStyles: {
-      0: { fontStyle: 'bold', cellWidth: 100 },
-      1: { halign: 'right', cellWidth: 80 }
+      0: { cellWidth: 180 }
     }
   });
 
