@@ -38,9 +38,9 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
   };
 
   const handleAddMore = () => {
+    console.log("Adding another debt");
     setShowConfirmation(false);
     setLastAddedDebt(null);
-    setShowDebtForm(true);
   };
 
   const handleFinish = () => {
@@ -69,7 +69,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
 
   const dialogContent = (
     <>
-      {showDebtForm && (
+      {!showConfirmation && (
         <DialogContent className="sm:max-w-[500px] p-6 bg-white">
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
