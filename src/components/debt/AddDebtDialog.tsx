@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -21,23 +21,28 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
   
   const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
 
+  // Reset states when dialog is opened
+  useEffect(() => {
+    if (isOpen) {
+      setShowConfirmation(false);
+      setLastAddedDebt(null);
+    }
+  }, [isOpen]);
+
   const closeDialog = () => {
     if (typeof controlledIsOpen !== 'undefined') {
       onClose?.();
     } else {
       setUncontrolledIsOpen(false);
     }
+    // Reset states when dialog is closed
+    setShowConfirmation(false);
+    setLastAddedDebt(null);
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      if (!showConfirmation) {
-        setShowConfirmation(false);
-        setLastAddedDebt(null);
-        closeDialog();
-      }
-    } else {
-      setUncontrolledIsOpen(true);
+    if (!open && !showConfirmation) {
+      closeDialog();
     }
   };
 
@@ -60,8 +65,6 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
 
   const handleFinish = () => {
     console.log("Finishing debt addition");
-    setShowConfirmation(false);
-    setLastAddedDebt(null);
     closeDialog();
   };
 
