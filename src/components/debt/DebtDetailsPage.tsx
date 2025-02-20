@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
 import { strategies } from "@/lib/strategies";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -18,12 +18,15 @@ import {
 } from "@/lib/utils/payment/standardizedCalculations";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Ban } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
   const { debts } = useDebts();
   const { profile } = useProfile();
+  const navigate = useNavigate();
   const debt = debts?.find(d => d.id === debtId);
   
   const [totalPaid, setTotalPaid] = useState(0);
@@ -79,24 +82,48 @@ export const DebtDetailsPage = () => {
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
+  if (!isPayable) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-2xl mx-auto p-6 space-y-6">
+            <div className="flex items-center justify-center text-red-500 mb-4">
+              <Ban size={48} />
+            </div>
+            <h1 className="text-2xl font-bold text-center text-gray-900">
+              Cannot View Debt Details
+            </h1>
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Invalid Minimum Payment</AlertTitle>
+              <AlertDescription>
+                The current minimum payment of {currencySymbol}{debt.minimum_payment} is insufficient 
+                to cover the monthly interest. A minimum payment of at least {currencySymbol}{minimumViablePayment} 
+                is required to make progress on this debt.
+              </AlertDescription>
+            </Alert>
+            <div className="text-center">
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/overview/debts')}
+                className="mt-4"
+              >
+                Return to Debts Overview
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {!isPayable && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Insufficient Minimum Payment</AlertTitle>
-            <AlertDescription>
-              The current minimum payment of {currencySymbol}{debt.minimum_payment} is less than the monthly interest.
-              A minimum payment of at least {currencySymbol}{minimumViablePayment} is needed to start paying off this debt.
-            </AlertDescription>
-          </Alert>
-        )}
-
         <DebtHeroSection 
           debt={debt}
           totalPaid={totalPaid}
-          payoffDate={isPayable ? calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate : null}
+          payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
         />
 
@@ -113,22 +140,18 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        {isPayable && (
-          <>
-            <PayoffTimeline 
-              debts={[debt]}
-              extraPayment={monthlyPayment - debt.minimum_payment}
-            />
+        <PayoffTimeline 
+          debts={[debt]}
+          extraPayment={monthlyPayment - debt.minimum_payment}
+        />
 
-            <Separator className="my-8" />
+        <Separator className="my-8" />
 
-            <AmortizationTable 
-              debt={debt} 
-              amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
-              currencySymbol={currencySymbol}
-            />
-          </>
-        )}
+        <AmortizationTable 
+          debt={debt} 
+          amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
+          currencySymbol={currencySymbol}
+        />
       </div>
     </MainLayout>
   );
