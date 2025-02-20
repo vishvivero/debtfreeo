@@ -21,9 +21,22 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
   
   const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
 
+  // Reset all dialogs when component unmounts
   useEffect(() => {
-    console.log("Dialog state changed:", { isOpen, showConfirmation, lastAddedDebt });
-  }, [isOpen, showConfirmation, lastAddedDebt]);
+    return () => {
+      setShowConfirmation(false);
+      setUncontrolledIsOpen(false);
+      setLastAddedDebt(null);
+    };
+  }, []);
+
+  // Close confirmation dialog when main dialog state changes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowConfirmation(false);
+      setLastAddedDebt(null);
+    }
+  }, [isOpen]);
 
   const closeDialog = () => {
     console.log("Closing dialog");
@@ -40,6 +53,8 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
     console.log("Dialog open state changing:", { open, showConfirmation });
     if (!open) {
       closeDialog();
+    } else if (typeof controlledIsOpen === 'undefined') {
+      setUncontrolledIsOpen(true);
     }
   };
 
@@ -51,6 +66,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
       setShowConfirmation(true);
     } catch (error) {
       console.error("Error adding debt:", error);
+      closeDialog();
     }
   };
 
@@ -83,7 +99,10 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
 
   return (
     <>
-      <Dialog open={isOpen && !showConfirmation} onOpenChange={handleOpenChange}>
+      <Dialog 
+        open={isOpen && !showConfirmation} 
+        onOpenChange={handleOpenChange}
+      >
         {typeof controlledIsOpen === 'undefined' && (
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90 text-white">
@@ -103,7 +122,10 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
         open={showConfirmation} 
         onOpenChange={(open) => {
           console.log("Confirmation dialog state changing:", { open });
-          if (!open) handleFinish();
+          if (!open) {
+            setShowConfirmation(false);
+            handleFinish();
+          }
         }}
       >
         <AlertDialogContent className="max-w-[500px]">
