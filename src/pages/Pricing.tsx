@@ -23,6 +23,52 @@ const Pricing = () => {
     navigate("/planner");
   };
 
+  const getFeaturesForPlan = () => {
+    if (planType === "personal") {
+      return {
+        basic: basicFeatures,
+        pro: proFeatures
+      };
+    } else {
+      return {
+        basic: familyBasicFeatures,
+        pro: familyProFeatures
+      };
+    }
+  };
+
+  const getPricing = () => {
+    if (planType === "personal") {
+      return {
+        basic: { price: "Free", interval: "/forever" },
+        pro: { price: "£4.99", interval: "/month" }
+      };
+    } else {
+      return {
+        basic: { price: "£6.99", interval: "/month" },
+        pro: { price: "£9.99", interval: "/month" }
+      };
+    }
+  };
+
+  const getDescription = () => {
+    if (planType === "personal") {
+      return {
+        basic: "Perfect for getting started",
+        pro: "For serious debt management"
+      };
+    } else {
+      return {
+        basic: "Perfect for couples (2 members)",
+        pro: "Ideal for families (4 members)"
+      };
+    }
+  };
+
+  const pricing = getPricing();
+  const descriptions = getDescription();
+  const features = getFeaturesForPlan();
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 py-16 flex items-center">
@@ -61,26 +107,26 @@ const Pricing = () => {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <PricingPlan
-              title="Basic"
-              description="Perfect for getting started"
-              badge="Current"
-              price="Free"
-              interval="/forever"
-              features={basicFeatures}
-              buttonText="Get Started"
+              title={planType === "personal" ? "Basic" : "2 Members"}
+              description={descriptions.basic}
+              badge={planType === "personal" ? "Current" : "Popular"}
+              price={pricing.basic.price}
+              interval={pricing.basic.interval}
+              features={features.basic}
+              buttonText={planType === "personal" ? "Get Started" : "Start Family Plan"}
               buttonVariant="outline"
               onAuthSuccess={handleAuthSuccess}
               isAuthenticated={!!user}
             />
 
             <PricingPlan
-              title="Pro"
-              description="For serious debt management"
+              title={planType === "personal" ? "Pro" : "4 Members"}
+              description={descriptions.pro}
               badge="Free during Beta"
-              price="£4.99"
-              interval="/month"
-              features={proFeatures}
-              buttonText="Try Pro for Free"
+              price={pricing.pro.price}
+              interval={pricing.pro.interval}
+              features={features.pro}
+              buttonText={planType === "personal" ? "Try Pro for Free" : "Start Family Pro"}
               badgeVariant="secondary"
               onAuthSuccess={handleAuthSuccess}
               isAuthenticated={!!user}
@@ -122,6 +168,23 @@ const proFeatures = [
   { text: "Save currency preferences" },
   { text: "Advanced debt strategies" },
   { text: "Priority email support" },
+];
+
+const familyBasicFeatures = [
+  { text: "Everything in Basic Personal plan" },
+  { text: "2 member accounts" },
+  { text: "Shared household debt tracking" },
+  { text: "Family payment planning" },
+  { text: "Basic family reports" },
+];
+
+const familyProFeatures = [
+  { text: "Everything in Pro Personal plan" },
+  { text: "4 member accounts" },
+  { text: "Advanced family debt strategies" },
+  { text: "Family payment automation" },
+  { text: "Comprehensive family reports" },
+  { text: "Priority family support" },
 ];
 
 export default Pricing;

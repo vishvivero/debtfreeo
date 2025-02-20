@@ -9,33 +9,69 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 export default function MyPlan() {
   const [planType, setPlanType] = useState("personal");
 
-  const plans = {
-    basic: {
-      name: "Basic",
-      price: "Free",
-      interval: "/forever",
-      description: "Perfect for getting started",
-      features: [
-        "Basic debt tracking (cannot save debts)",
-        "Simple payment calculator",
-        "Standard charts and graphs",
-      ]
-    },
-    pro: {
-      name: "Pro",
-      price: "£4.99",
-      interval: "/month",
-      description: "For serious debt management",
-      features: [
-        "Everything in Basic",
-        "Save debts in your profile",
-        "Save monthly payment preferences",
-        "Save currency preferences",
-        "Advanced debt strategies",
-        "Priority email support",
-      ]
+  const getPlans = () => {
+    if (planType === "personal") {
+      return {
+        basic: {
+          name: "Basic",
+          price: "Free",
+          interval: "/forever",
+          description: "Perfect for getting started",
+          features: [
+            "Basic debt tracking (cannot save debts)",
+            "Simple payment calculator",
+            "Standard charts and graphs",
+          ]
+        },
+        pro: {
+          name: "Pro",
+          price: "£4.99",
+          interval: "/month",
+          description: "For serious debt management",
+          features: [
+            "Everything in Basic",
+            "Save debts in your profile",
+            "Save monthly payment preferences",
+            "Save currency preferences",
+            "Advanced debt strategies",
+            "Priority email support",
+          ]
+        }
+      };
+    } else {
+      return {
+        basic: {
+          name: "2 Members",
+          price: "£6.99",
+          interval: "/month",
+          description: "Perfect for couples",
+          features: [
+            "Everything in Basic Personal plan",
+            "2 member accounts",
+            "Shared household debt tracking",
+            "Family payment planning",
+            "Basic family reports",
+          ]
+        },
+        pro: {
+          name: "4 Members",
+          price: "£9.99",
+          interval: "/month",
+          description: "Ideal for families",
+          features: [
+            "Everything in Pro Personal plan",
+            "4 member accounts",
+            "Advanced family debt strategies",
+            "Family payment automation",
+            "Comprehensive family reports",
+            "Priority family support",
+          ]
+        }
+      };
     }
   };
+
+  const plans = getPlans();
 
   return (
     <MainLayout>
