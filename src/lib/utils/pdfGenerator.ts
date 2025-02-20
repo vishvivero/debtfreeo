@@ -34,18 +34,14 @@ export const generateDebtOverviewPDF = (
   const doc = new jsPDF();
   let currentY = 20;
 
-  // Set consistent text styling
-  const textColor = [128, 128, 128] as [number, number, number];  // Gray color for all text
-  const titleFontSize = 16;
-  const bodyFontSize = 12;
-
   // Add title and header
-  doc.setFontSize(titleFontSize);
-  doc.setTextColor(...textColor);
+  doc.setFontSize(24);
+  doc.setTextColor(0, 211, 130);
   doc.text('Your Debt Freedom Plan', 14, currentY);
   
   currentY += 10;
-  doc.setFontSize(bodyFontSize);
+  doc.setFontSize(12);
+  doc.setTextColor(128, 128, 128);
   doc.text(`Generated on ${formatDate(new Date())}`, 14, currentY);
   
   currentY += 8;
@@ -53,24 +49,22 @@ export const generateDebtOverviewPDF = (
   
   // Add debt summary section
   currentY += 15;
-  doc.setFontSize(titleFontSize);
+  doc.setFontSize(16);
+  doc.setTextColor(0, 0, 0);
   doc.text('Current Debt Overview', 14, currentY);
   currentY += 10;
   currentY = generateDebtSummaryTable(doc, debts, currentY);
 
   // Add payment details section
   currentY += 15;
-  doc.setFontSize(titleFontSize);
+  doc.setFontSize(16);
   doc.text('Payment Strategy', 14, currentY);
   currentY += 10;
   currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol);
 
-  // Start a new page for savings section
-  doc.addPage();
-  currentY = 20;
-  
-  // Add savings summary on new page
-  doc.setFontSize(titleFontSize);
+  // Add savings summary
+  currentY += 15;
+  doc.setFontSize(16);
   doc.text('Your Savings', 14, currentY);
   currentY += 10;
   currentY = generateSavingsTable(
@@ -83,9 +77,10 @@ export const generateDebtOverviewPDF = (
     currencySymbol
   );
 
-  // Add next steps section on the same page
-  currentY += 15;
-  doc.setFontSize(titleFontSize);
+  // Add next steps section
+  doc.addPage();
+  currentY = 20;
+  doc.setFontSize(16);
   doc.text('Next Steps', 14, currentY);
   currentY += 10;
   currentY = generateNextStepsTable(
@@ -98,8 +93,8 @@ export const generateDebtOverviewPDF = (
   );
 
   // Add footer with tips
-  doc.setFontSize(bodyFontSize);
-  doc.setTextColor(...textColor);
+  doc.setFontSize(12);
+  doc.setTextColor(128, 128, 128);
   const tips = [
     "• Set up automatic payments to stay on track",
     "• Review your progress monthly",

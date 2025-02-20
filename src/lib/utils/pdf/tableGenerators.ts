@@ -58,8 +58,7 @@ export const generatePaymentDetailsTable = (
     theme: 'plain',
     styles: { 
       fontSize: 11,
-      cellPadding: 4,
-      minCellHeight: 4
+      cellPadding: 8,
     },
     columnStyles: {
       0: { fontStyle: 'bold', cellWidth: 100 },
@@ -91,22 +90,15 @@ export const generateSavingsTable = (
 
   autoTable(doc, {
     startY,
-    head: [['Metric', 'Value']],
     body: tableData,
-    theme: 'grid',
+    theme: 'striped',
     styles: { 
-      fontSize: 10,
-      cellPadding: 6,
-    },
-    headStyles: {
-      fillColor: [0, 211, 130],
-      textColor: [255, 255, 255],
-      fontSize: 10,
-      fontStyle: 'bold',
+      fontSize: 11,
+      cellPadding: 8,
     },
     columnStyles: {
-      0: { cellWidth: 130 },
-      1: { cellWidth: 50, halign: 'center' }
+      0: { fontStyle: 'bold', cellWidth: 100 },
+      1: { halign: 'right', cellWidth: 80, textColor: [0, 211, 130] }
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252]
