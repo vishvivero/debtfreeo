@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
 import { formatCurrency, formatDate, formatPercentage, formatMonths } from './formatters';
@@ -58,7 +57,8 @@ export const generatePaymentDetailsTable = (
     theme: 'plain',
     styles: { 
       fontSize: 11,
-      cellPadding: 8,
+      cellPadding: 4,
+      rowHeight: 4
     },
     columnStyles: {
       0: { fontStyle: 'bold', cellWidth: 100 },
@@ -90,15 +90,22 @@ export const generateSavingsTable = (
 
   autoTable(doc, {
     startY,
+    head: [['Metric', 'Value']],
     body: tableData,
-    theme: 'striped',
+    theme: 'grid',
     styles: { 
-      fontSize: 11,
-      cellPadding: 8,
+      fontSize: 10,
+      cellPadding: 6,
+    },
+    headStyles: {
+      fillColor: [0, 211, 130],
+      textColor: [255, 255, 255],
+      fontSize: 10,
+      fontStyle: 'bold',
     },
     columnStyles: {
-      0: { fontStyle: 'bold', cellWidth: 100 },
-      1: { halign: 'right', cellWidth: 80, textColor: [0, 211, 130] }
+      0: { cellWidth: 130 },
+      1: { cellWidth: 50, halign: 'center' }
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252]
