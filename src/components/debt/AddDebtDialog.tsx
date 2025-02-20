@@ -13,43 +13,40 @@ interface AddDebtDialogProps {
   onClose?: () => void;
 }
 
-export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: AddDebtDialogProps) => {
+export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsOpen, onClose }: AddDebtDialogProps) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
   const [lastAddedDebt, setLastAddedDebt] = useState<Omit<Debt, "id"> | null>(null);
-  const [showDebtForm, setShowDebtForm] = useState(true);
+  
+  const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
+  const setIsOpen = typeof controlledIsOpen !== 'undefined' ? onClose : setUncontrolledIsOpen;
 
   const handleOpenChange = (open: boolean) => {
-    setDialogOpen(open);
     if (!open) {
       setShowConfirmation(false);
       setLastAddedDebt(null);
-      setShowDebtForm(true);
-      onClose?.();
+      setIsOpen?.();
     }
   };
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
+    console.log("Adding debt:", debt);
     await onAddDebt(debt);
     setLastAddedDebt(debt);
     setShowConfirmation(true);
-    setShowDebtForm(false);
   };
 
   const handleAddMore = () => {
-    console.log("Adding another debt");
+    console.log("Adding another debt - dialog should stay open");
     setShowConfirmation(false);
     setLastAddedDebt(null);
-    setDialogOpen(true);
-    setShowDebtForm(true);
   };
 
   const handleFinish = () => {
+    console.log("Finishing debt addition");
     setShowConfirmation(false);
     setLastAddedDebt(null);
-    setShowDebtForm(true);
-    setDialogOpen(false);
-    onClose?.();
+    setIsOpen?.();
   };
 
   const formatCurrency = (amount: number) => {
@@ -70,7 +67,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
 
   const dialogContent = (
     <>
-      {!showConfirmation && showDebtForm && (
+      {!showConfirmation && (
         <DialogContent className="sm:max-w-[500px] p-6 bg-white">
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
@@ -123,18 +120,16 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
     </>
   );
 
-  // If isOpen is provided, render controlled dialog
-  if (typeof isOpen !== 'undefined') {
+  if (typeof controlledIsOpen !== 'undefined') {
     return (
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <Dialog open={controlledIsOpen} onOpenChange={handleOpenChange}>
         {dialogContent}
       </Dialog>
     );
   }
 
-  // Otherwise render uncontrolled dialog with trigger
   return (
-    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={uncontrolledIsOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90 text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
