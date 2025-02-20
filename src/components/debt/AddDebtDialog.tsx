@@ -18,12 +18,14 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [lastAddedDebt, setLastAddedDebt] = useState<Omit<Debt, "id"> | null>(null);
+  const [showDebtForm, setShowDebtForm] = useState(true);
 
   const handleOpenChange = (open: boolean) => {
     setDialogOpen(open);
     if (!open) {
       setShowConfirmation(false);
       setLastAddedDebt(null);
+      setShowDebtForm(true);
       onClose?.();
     }
   };
@@ -32,16 +34,19 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
     await onAddDebt(debt);
     setLastAddedDebt(debt);
     setShowConfirmation(true);
+    setShowDebtForm(false);
   };
 
   const handleAddMore = () => {
     setShowConfirmation(false);
     setLastAddedDebt(null);
+    setShowDebtForm(true);
   };
 
   const handleFinish = () => {
     setShowConfirmation(false);
     setLastAddedDebt(null);
+    setShowDebtForm(true);
     setDialogOpen(false);
     onClose?.();
   };
@@ -64,12 +69,14 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
 
   const dialogContent = (
     <>
-      <DialogContent className="sm:max-w-[500px] p-6 bg-white">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
-        </DialogHeader>
-        <AddDebtForm onAddDebt={handleAddDebt} currencySymbol={currencySymbol} />
-      </DialogContent>
+      {showDebtForm && (
+        <DialogContent className="sm:max-w-[500px] p-6 bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
+          </DialogHeader>
+          <AddDebtForm onAddDebt={handleAddDebt} currencySymbol={currencySymbol} />
+        </DialogContent>
+      )}
 
       <AlertDialog open={showConfirmation}>
         <AlertDialogContent className="max-w-[500px]">
