@@ -58,8 +58,8 @@ export const generatePaymentDetailsTable = (
     theme: 'plain',
     styles: { 
       fontSize: 11,
-      cellPadding: 4, // Reduced from 8 to 4
-      lineHeight: 1.2, // Added to reduce vertical spacing
+      cellPadding: 4,
+      rowHeight: 4
     },
     columnStyles: {
       0: { fontStyle: 'bold', cellWidth: 100 },

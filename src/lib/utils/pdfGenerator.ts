@@ -65,8 +65,11 @@ export const generateDebtOverviewPDF = (
   currentY += 10;
   currentY = generatePaymentDetailsTable(doc, monthlyPayment, extraPayment, currentY, currencySymbol);
 
-  // Add savings summary
-  currentY += 15;
+  // Start a new page for savings section
+  doc.addPage();
+  currentY = 20;
+  
+  // Add savings summary on new page
   doc.setFontSize(titleFontSize);
   doc.text('Your Savings', 14, currentY);
   currentY += 10;
@@ -80,9 +83,8 @@ export const generateDebtOverviewPDF = (
     currencySymbol
   );
 
-  // Add next steps section
-  doc.addPage();
-  currentY = 20;
+  // Add next steps section on the same page
+  currentY += 15;
   doc.setFontSize(titleFontSize);
   doc.text('Next Steps', 14, currentY);
   currentY += 10;
