@@ -15,7 +15,7 @@ import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading } = useDebts();
+  const { debts, isLoading, addDebt } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
 
@@ -78,7 +78,7 @@ const Overview = () => {
             currencySymbol={currentCurrencySymbol}
             onAddDebt={async (debt) => {
               try {
-                await debts.addDebt.mutateAsync(debt);
+                await addDebt.mutateAsync(debt);
                 toast({
                   title: "Success",
                   description: "Debt added successfully",

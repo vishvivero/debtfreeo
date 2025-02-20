@@ -1,5 +1,5 @@
 
-import { CurrencyPicker } from "@/components/overview/CurrencyPicker";
+import { CurrencySelector } from "@/components/profile/CurrencySelector";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -17,7 +17,7 @@ export const OverviewHeader = ({ currencySymbol, onCurrencyChange, onAddDebt }: 
         <p className="text-gray-600">Track your debt payoff journey</p>
       </div>
       <div className="flex items-center gap-4">
-        <CurrencyPicker
+        <CurrencySelector
           value={currencySymbol}
           onValueChange={onCurrencyChange}
         />
