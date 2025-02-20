@@ -1,15 +1,12 @@
 
 import { CurrencySelector } from "@/components/profile/CurrencySelector";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface OverviewHeaderProps {
   currencySymbol: string;
   onCurrencyChange: (currency: string) => void;
-  onAddDebt?: () => void;
 }
 
-export const OverviewHeader = ({ currencySymbol, onCurrencyChange, onAddDebt }: OverviewHeaderProps) => {
+export const OverviewHeader = ({ currencySymbol, onCurrencyChange }: OverviewHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
@@ -21,11 +18,6 @@ export const OverviewHeader = ({ currencySymbol, onCurrencyChange, onAddDebt }: 
           value={currencySymbol}
           onValueChange={onCurrencyChange}
         />
-        {onAddDebt && (
-          <Button onClick={onAddDebt} className="bg-primary hover:bg-primary/90 text-white">
-            <Plus className="mr-2 h-4 w-4" /> Add debt
-          </Button>
-        )}
       </div>
     </div>
   );
