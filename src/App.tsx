@@ -24,7 +24,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SidebarProvider>
-          <BrowserRouter>
+          <BrowserRouter basename="/">
             <ScrollToTop />
             <Routes>
               {publicRoutes}
