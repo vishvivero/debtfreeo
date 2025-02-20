@@ -98,10 +98,10 @@ export const DebtDetailsPage = () => {
           <div className="space-y-6">
             <Alert variant="destructive" className="bg-red-50 border-red-200">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Invalid Minimum Payment</AlertTitle>
+              <AlertTitle>Minimum Payment Insufficient</AlertTitle>
               <AlertDescription className="mt-2">
                 Your current minimum payment of {currencySymbol}{debt.minimum_payment.toLocaleString()} is insufficient 
-                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{minimumViablePayment.toLocaleString()} 
+                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{minimumViablePayment.toLocaleString()} &nbsp;
                 to make progress on this debt.
               </AlertDescription>
             </Alert>
