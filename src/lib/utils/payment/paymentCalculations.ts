@@ -16,7 +16,21 @@ export interface DebtStatus {
   isPayable: boolean;
 }
 
-// Calculate payoff details for a single debt
+// Add the missing calculateMonthlyInterest function
+const calculateMonthlyInterest = (balance: number, annualRate: number): number => {
+  return (balance * annualRate) / 1200;
+};
+
+export const isDebtPayable = (debt: Debt): boolean => {
+  const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
+  return debt.minimum_payment > monthlyInterest;
+};
+
+export const getMinimumViablePayment = (debt: Debt): number => {
+  const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
+  return Math.ceil(monthlyInterest + 1); // At least $1 more than monthly interest
+};
+
 export const calculatePayoffDetails = (
   debts: Debt[],
   monthlyPayment: number,
@@ -31,23 +45,40 @@ export const calculatePayoffDetails = (
 
   const results: { [key: string]: DebtStatus } = {};
   const balances = new Map<string, number>();
+  const minimumPayments = new Map<string, number>();
   let remainingDebts = [...debts];
   let currentMonth = 0;
   const maxMonths = 1200;
   const startDate = new Date();
-  let availableExtraPayment = 0;
+  let releasedPayments = 0;
 
   // Initialize tracking
   debts.forEach(debt => {
+    balances.set(debt.id, debt.balance);
+    minimumPayments.set(debt.id, debt.minimum_payment);
+    
+    // Check if debt is payable
+    if (!isDebtPayable(debt)) {
+      console.log(`Debt ${debt.name} is not payable with current minimum payment`);
+      results[debt.id] = {
+        months: Infinity,
+        totalInterest: Infinity,
+        payoffDate: new Date(8640000000000000), // Max date
+        redistributionHistory: [],
+        isPayable: false,
+        minimumViablePayment: getMinimumViablePayment(debt)
+      };
+      return;
+    }
+
     results[debt.id] = {
       months: 0,
       totalInterest: 0,
       payoffDate: new Date(),
       redistributionHistory: [],
-      minimumViablePayment: 0,
-      isPayable: false
+      isPayable: true,
+      minimumViablePayment: debt.minimum_payment
     };
-    balances.set(debt.id, debt.balance);
   });
 
   // Calculate total minimum payments
@@ -64,8 +95,8 @@ export const calculatePayoffDetails = (
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     remainingDebts = strategy.calculate([...remainingDebts]);
-    let monthlyAvailable = monthlyPayment + availableExtraPayment;
-    availableExtraPayment = 0;
+    let monthlyAvailable = monthlyPayment + releasedPayments;
+    releasedPayments = 0;
 
     // Process minimum payments
     for (const debt of remainingDebts) {
@@ -101,7 +132,7 @@ export const calculatePayoffDetails = (
       
       if (currentBalance <= 0.01) {
         const releasedPayment = debt.minimum_payment;
-        availableExtraPayment += releasedPayment;
+        releasedPayments += releasedPayment;
         
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = addMonths(startDate, currentMonth + 1);
