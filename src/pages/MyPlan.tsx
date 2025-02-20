@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card } from "@/components/ui/card";
@@ -9,32 +10,29 @@ export default function MyPlan() {
   const [planType, setPlanType] = useState("personal");
 
   const plans = {
-    plus: {
-      name: "Plus",
-      price: "$20",
-      interval: "USD/month",
-      description: "Level up productivity and creativity with expanded access",
+    basic: {
+      name: "Basic",
+      price: "Free",
+      interval: "/forever",
+      description: "Perfect for getting started",
       features: [
-        "Everything in Free",
-        "Extended limits on messaging, file uploads, advanced data analysis, and image generation",
-        "Access to advanced voice and video inputs",
-        "Limited access to o1 and o1-mini",
-        "Opportunities to test new features",
-        "Create and use projects and custom GPTs",
-        "Limited access to Sora video generation"
+        "Basic debt tracking (cannot save debts)",
+        "Simple payment calculator",
+        "Standard charts and graphs",
       ]
     },
     pro: {
       name: "Pro",
-      price: "$200",
-      interval: "USD/month",
-      description: "Get the best of OpenAI with the highest level of access",
+      price: "£4.99",
+      interval: "/month",
+      description: "For serious debt management",
       features: [
-        "Everything in Plus",
-        "Unlimited access to o1, o1-mini, GPT-4o, and advanced voice (audio only)",
-        "Higher limits for video and screensharing in advanced voice",
-        "Access to o1 pro mode, which uses more compute for the best answers to the hardest questions",
-        "Extended access to Sora video generation"
+        "Everything in Basic",
+        "Save debts in your profile",
+        "Save monthly payment preferences",
+        "Save currency preferences",
+        "Advanced debt strategies",
+        "Priority email support",
       ]
     }
   };
@@ -81,7 +79,7 @@ export default function MyPlan() {
                 className="w-full mb-8" 
                 variant={key === "pro" ? "default" : "secondary"}
               >
-                {key === "plus" ? "Your current plan" : `Get ${plan.name}`}
+                {key === "basic" ? "Your current plan" : `Get ${plan.name}`}
               </Button>
 
               <ul className="space-y-4">
