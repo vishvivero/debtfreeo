@@ -8,14 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AmortizationTable } from "@/components/debt/AmortizationTable";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
-
-interface AmortizationEntry {
-  date: Date;
-  payment: number;
-  principal: number;
-  interest: number;
-  remainingBalance: number;
-}
+import { AmortizationEntry } from "@/lib/utils/payment/standardizedCalculations";
 
 export const AmortizationCalculator = () => {
   const { profile } = useProfile();
@@ -43,14 +36,18 @@ export const AmortizationCalculator = () => {
     for (let i = 0; i < months; i++) {
       const interest = balance * monthlyRate;
       const principalPaid = monthlyPayment - interest;
+      const startingBalance = balance;
       balance -= principalPaid;
+      const endingBalance = Math.max(0, balance);
 
       schedule.push({
         date: new Date(currentDate.setMonth(currentDate.getMonth() + 1)),
+        startingBalance,
         payment: monthlyPayment,
         principal: principalPaid,
         interest: interest,
-        remainingBalance: Math.max(0, balance)
+        endingBalance,
+        remainingBalance: endingBalance
       });
     }
 
@@ -129,16 +126,7 @@ export const AmortizationCalculator = () => {
           {amortizationSchedule.length > 0 && (
             <div className="mt-8">
               <AmortizationTable
-                debt={{
-                  id: "calculator",
-                  name: "Calculator",
-                  banker_name: "Calculator",
-                  balance: parseFloat(loanAmount),
-                  interest_rate: parseFloat(interestRate),
-                  minimum_payment: 0,
-                  currency_symbol: currency,
-                  status: "active"
-                }}
+                debt={{ name: "Calculator" }}
                 amortizationData={amortizationSchedule}
                 currencySymbol={currency}
               />
