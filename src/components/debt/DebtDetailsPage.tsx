@@ -12,9 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { 
   calculateAmortizationSchedule, 
-  calculateSingleDebtPayoff 
+  calculateSingleDebtPayoff,
+  isDebtPayable,
+  getMinimumViablePayment
 } from "@/lib/utils/payment/standardizedCalculations";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -25,6 +29,15 @@ export const DebtDetailsPage = () => {
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
   const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
+
+  if (!debt || !profile) {
+    console.log('Debt not found for id:', debtId);
+    return <div>Debt not found</div>;
+  }
+
+  const isPayable = isDebtPayable(debt);
+  const minimumViablePayment = getMinimumViablePayment(debt);
+  const currencySymbol = profile.preferred_currency || '£';
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -46,7 +59,6 @@ export const DebtDetailsPage = () => {
       const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
       setTotalPaid(total);
 
-      // Calculate interest based on this specific debt's interest rate
       const interest = payments.reduce((sum, payment) => {
         const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
         return sum + interestPortion;
@@ -63,33 +75,28 @@ export const DebtDetailsPage = () => {
     fetchPaymentHistory();
   }, [debt]);
 
-  if (!debt || !profile) {
-    console.log('Debt not found for id:', debtId);
-    return <div>Debt not found</div>;
-  }
-
   // Use the selected strategy from profile, defaulting to 'avalanche' if not set
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
-  const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
-  
-  const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment).map(entry => ({
-    date: entry.date,
-    payment: entry.payment,
-    principal: entry.principal,
-    interest: entry.interest,
-    remainingBalance: entry.endingBalance
-  }));
-
-  const currencySymbol = profile.preferred_currency || '£';
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {!isPayable && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Insufficient Minimum Payment</AlertTitle>
+            <AlertDescription>
+              The current minimum payment of {currencySymbol}{debt.minimum_payment} is less than the monthly interest.
+              A minimum payment of at least {currencySymbol}{minimumViablePayment} is needed to start paying off this debt.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <DebtHeroSection 
           debt={debt}
           totalPaid={totalPaid}
-          payoffDate={payoffDetails.payoffDate}
+          payoffDate={isPayable ? calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate : null}
           currencySymbol={currencySymbol}
         />
 
@@ -100,23 +107,27 @@ export const DebtDetailsPage = () => {
           totalPaid={totalPaid}
           totalInterest={totalInterest}
           currencySymbol={currencySymbol}
+          isPayable={isPayable}
+          minimumViablePayment={minimumViablePayment}
         />
 
         <Separator className="my-8" />
 
-        <PayoffTimeline 
-          debts={[debt]}
-          extraPayment={monthlyPayment - debt.minimum_payment}
-        />
+        {isPayable && (
+          <>
+            <PayoffTimeline 
+              debts={[debt]}
+              extraPayment={monthlyPayment - debt.minimum_payment}
+            />
 
-        <Separator className="my-8" />
+            <Separator className="my-8" />
 
-        {amortizationData && amortizationData.length > 0 && (
-          <AmortizationTable 
-            debt={debt} 
-            amortizationData={amortizationData}
-            currencySymbol={currencySymbol}
-          />
+            <AmortizationTable 
+              debt={debt} 
+              amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
+              currencySymbol={currencySymbol}
+            />
+          </>
         )}
       </div>
     </MainLayout>

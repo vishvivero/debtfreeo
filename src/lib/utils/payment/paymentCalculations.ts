@@ -6,6 +6,16 @@ import { addMonths } from "date-fns";
 import { trackRedistribution } from "./redistributionTracking";
 import { calculateMonthlyInterest } from "./calculations/interestCalculator";
 
+export const isDebtPayable = (debt: Debt): boolean => {
+  const monthlyInterest = (debt.balance * debt.interest_rate) / 1200;
+  return debt.minimum_payment > monthlyInterest;
+};
+
+export const getMinimumViablePayment = (debt: Debt): number => {
+  const monthlyInterest = (debt.balance * debt.interest_rate) / 1200;
+  return Math.ceil(monthlyInterest + 1); // At least $1 more than monthly interest
+};
+
 export const calculatePayoffDetails = (
   debts: Debt[],
   monthlyPayment: number,
@@ -32,20 +42,40 @@ export const calculatePayoffDetails = (
   debts.forEach(debt => {
     balances.set(debt.id, debt.balance);
     minimumPayments.set(debt.id, debt.minimum_payment);
+    
+    // Check if debt is payable
+    if (!isDebtPayable(debt)) {
+      console.log(`Debt ${debt.name} is not payable with current minimum payment`);
+      results[debt.id] = {
+        months: Infinity,
+        totalInterest: Infinity,
+        payoffDate: new Date(8640000000000000), // Max date
+        redistributionHistory: [],
+        isPayable: false,
+        minimumViablePayment: getMinimumViablePayment(debt)
+      };
+      return;
+    }
+
     results[debt.id] = {
       months: 0,
       totalInterest: 0,
       payoffDate: new Date(),
-      redistributionHistory: []
+      redistributionHistory: [],
+      isPayable: true,
+      minimumViablePayment: debt.minimum_payment
     };
   });
 
-  // Calculate total minimum payments required
-  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  // Filter out unpayable debts from calculation
+  remainingDebts = remainingDebts.filter(debt => isDebtPayable(debt));
+
+  // Calculate total minimum payments required for payable debts
+  const totalMinimumPayments = remainingDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   
   if (monthlyPayment < totalMinimumPayments) {
     console.warn('Monthly payment insufficient to cover minimum payments');
-    debts.forEach(debt => {
+    remainingDebts.forEach(debt => {
       results[debt.id].months = maxMonths;
       results[debt.id].payoffDate = addMonths(startDate, maxMonths);
     });
