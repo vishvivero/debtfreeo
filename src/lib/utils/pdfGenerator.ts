@@ -35,7 +35,7 @@ export const generateDebtOverviewPDF = (
   let currentY = 20;
 
   // Set consistent text styling
-  const textColor = [128, 128, 128];  // Gray color for all text
+  const textColor = [128, 128, 128] as [number, number, number];  // Gray color for all text
   const titleFontSize = 16;
   const bodyFontSize = 12;
 
