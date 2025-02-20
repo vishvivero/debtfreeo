@@ -25,7 +25,7 @@ export function useDebtMutations() {
     // Calculate total minimum payment including the new/updated debt
     const totalMinimumPayment = (debts || []).reduce(
       (sum, d) => sum + (d.minimum_payment || 0),
-      debt.minimum_payment
+      debt.minimum_payment || 0 // Ensure we handle null/undefined minimum_payment
     );
 
     console.log("Updating total minimum payment to:", totalMinimumPayment);
@@ -89,10 +89,23 @@ export function useDebtMutations() {
     mutationFn: async (newDebt: Omit<Debt, "id">) => {
       if (!user?.id) throw new Error("No user ID available");
 
-      console.log("Adding new debt:", newDebt);
+      // Ensure minimum_payment is a valid number
+      if (typeof newDebt.minimum_payment !== 'number' || isNaN(newDebt.minimum_payment)) {
+        console.error("Invalid minimum payment:", newDebt.minimum_payment);
+        throw new Error("Invalid minimum payment amount");
+      }
+
+      console.log("Adding new debt with minimum payment:", newDebt.minimum_payment);
+      
+      const debtToInsert = {
+        ...newDebt,
+        user_id: user.id,
+        minimum_payment: Number(newDebt.minimum_payment) // Ensure it's a number
+      };
+
       const { data, error } = await supabase
         .from("debts")
-        .insert([{ ...newDebt, user_id: user.id }])
+        .insert([debtToInsert])
         .select()
         .single();
 
@@ -104,9 +117,11 @@ export function useDebtMutations() {
       // Ensure data is properly typed before passing to updateDebtAndProfile
       const typedDebt: Debt = {
         ...data,
-        status: data.status as 'active' | 'paid'
+        status: data.status as 'active' | 'paid',
+        minimum_payment: Number(data.minimum_payment) // Ensure it's a number
       };
 
+      console.log("Successfully added debt with minimum payment:", typedDebt.minimum_payment);
       await updateDebtAndProfile(typedDebt);
       return data;
     },
