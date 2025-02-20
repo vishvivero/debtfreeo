@@ -1,5 +1,5 @@
 
-import { ScoreComponents } from "@/lib/utils/scoring/debtScoreCalculator";
+import { ScoreComponents } from "@/lib/types";
 
 interface ScoreBreakdownProps {
   scoreDetails: ScoreComponents;
