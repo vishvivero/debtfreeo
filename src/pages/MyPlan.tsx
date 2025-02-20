@@ -55,10 +55,10 @@ export default function MyPlan() {
               Personal
             </ToggleGroupItem>
             <ToggleGroupItem 
-              value="business"
+              value="family"
               className="px-4 py-2 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
             >
-              Business
+              Family
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

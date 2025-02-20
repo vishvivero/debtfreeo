@@ -6,11 +6,14 @@ import { useAuth } from "@/lib/auth";
 import { PricingPlan } from "@/components/pricing/PricingPlan";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { SharedFooter } from "@/components/layout/SharedFooter";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useState } from "react";
 
 const Pricing = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const [planType, setPlanType] = useState("personal");
 
   const handleAuthSuccess = () => {
     toast({
@@ -32,9 +35,28 @@ const Pricing = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Simple, Transparent Pricing
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               Start your journey to financial freedom with our straightforward pricing plans
             </p>
+            <ToggleGroup 
+              type="single" 
+              value={planType}
+              onValueChange={(value) => value && setPlanType(value)}
+              className="inline-flex bg-muted p-1 rounded-lg"
+            >
+              <ToggleGroupItem 
+                value="personal" 
+                className="px-4 py-2 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
+              >
+                Personal
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="family"
+                className="px-4 py-2 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
+              >
+                Family
+              </ToggleGroupItem>
+            </ToggleGroup>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
