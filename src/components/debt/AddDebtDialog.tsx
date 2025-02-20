@@ -17,28 +17,49 @@ interface AddDebtDialogProps {
 export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: AddDebtDialogProps) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [lastAddedDebt, setLastAddedDebt] = useState<Omit<Debt, "id"> | null>(null);
 
   const handleOpenChange = (open: boolean) => {
     setDialogOpen(open);
     if (!open) {
       setShowConfirmation(false);
+      setLastAddedDebt(null);
       onClose?.();
     }
   };
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     await onAddDebt(debt);
+    setLastAddedDebt(debt);
     setShowConfirmation(true);
   };
 
   const handleAddMore = () => {
     setShowConfirmation(false);
+    setLastAddedDebt(null);
   };
 
   const handleFinish = () => {
     setShowConfirmation(false);
+    setLastAddedDebt(null);
     setDialogOpen(false);
     onClose?.();
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      currencyDisplay: 'symbol'
+    }).format(amount).replace('£', currencySymbol);
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   };
 
   const dialogContent = (
@@ -51,14 +72,30 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
       </DialogContent>
 
       <AlertDialog open={showConfirmation}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[500px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Debt Added Successfully!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Would you like to add another debt or finish?
-            </AlertDialogDescription>
+            <AlertDialogTitle className="text-xl font-semibold text-green-600">
+              Debt Added Successfully!
+            </AlertDialogTitle>
+            {lastAddedDebt && (
+              <div className="mt-4 space-y-3 text-left">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                  <h3 className="font-medium text-gray-900">{lastAddedDebt.name}</h3>
+                  <div className="mt-2 space-y-2 text-sm text-gray-600">
+                    <p>Balance: {formatCurrency(lastAddedDebt.balance)}</p>
+                    <p>Interest Rate: {lastAddedDebt.interest_rate}%</p>
+                    <p>Minimum Payment: {formatCurrency(lastAddedDebt.minimum_payment)}</p>
+                    <p>Category: {lastAddedDebt.category}</p>
+                    <p>Next Payment: {formatDate(lastAddedDebt.next_payment_date || '')}</p>
+                  </div>
+                </div>
+                <AlertDialogDescription className="text-center mt-4">
+                  Would you like to add another debt?
+                </AlertDialogDescription>
+              </div>
+            )}
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex gap-2">
+          <AlertDialogFooter className="flex gap-2 mt-4">
             <Button
               variant="outline"
               onClick={handleAddMore}
@@ -68,7 +105,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
             </Button>
             <Button
               onClick={handleFinish}
-              className="flex-1"
+              className="flex-1 bg-green-600 hover:bg-green-700"
             >
               Finish
             </Button>
