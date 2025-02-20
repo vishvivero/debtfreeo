@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
 import { formatCurrency, formatDate, formatPercentage, formatMonths } from './formatters';
@@ -58,7 +59,7 @@ export const generatePaymentDetailsTable = (
     styles: { 
       fontSize: 11,
       cellPadding: 4,
-      rowHeight: 4
+      minCellHeight: 4
     },
     columnStyles: {
       0: { fontStyle: 'bold', cellWidth: 100 },
