@@ -17,10 +17,10 @@ import {
   getMinimumViablePayment
 } from "@/lib/utils/payment/standardizedCalculations";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -84,36 +84,39 @@ export const DebtDetailsPage = () => {
 
   if (!isPayable) {
     return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <Card className="max-w-2xl mx-auto p-6 space-y-6">
+      <Dialog open={true} onOpenChange={() => navigate('/overview/debts')}>
+        <DialogContent className="sm:max-w-[425px] bg-white p-6">
+          <DialogHeader>
             <div className="flex items-center justify-center text-red-500 mb-4">
-              <Ban size={48} />
+              <Ban size={48} className="animate-pulse" />
             </div>
-            <h1 className="text-2xl font-bold text-center text-gray-900">
+            <DialogTitle className="text-2xl font-bold text-center text-gray-900">
               Cannot View Debt Details
-            </h1>
-            <Alert variant="destructive">
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <Alert variant="destructive" className="bg-red-50 border-red-200">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Invalid Minimum Payment</AlertTitle>
-              <AlertDescription>
-                The current minimum payment of {currencySymbol}{debt.minimum_payment} is insufficient 
-                to cover the monthly interest. A minimum payment of at least {currencySymbol}{minimumViablePayment} 
-                is required to make progress on this debt.
+              <AlertDescription className="mt-2">
+                Your current minimum payment of {currencySymbol}{debt.minimum_payment.toLocaleString()} is insufficient 
+                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{minimumViablePayment.toLocaleString()} 
+                to make progress on this debt.
               </AlertDescription>
             </Alert>
-            <div className="text-center">
+
+            <div className="flex justify-center">
               <Button 
-                variant="outline"
                 onClick={() => navigate('/overview/debts')}
-                className="mt-4"
+                className="bg-primary hover:bg-primary/90 text-white"
               >
                 Return to Debts Overview
               </Button>
             </div>
-          </Card>
-        </div>
-      </MainLayout>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 
