@@ -4,21 +4,32 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { DollarSign, Percent, MinusCircle } from "lucide-react";
 
-interface PaymentOverviewProps {
+export interface PaymentOverviewProps {
   debt: Debt;
   totalPaid: number;
   totalInterest: number;
   currencySymbol: string;
+  isPayable: boolean;
+  minimumViablePayment: number;
 }
 
-export const PaymentOverview = ({ debt, totalPaid, totalInterest, currencySymbol }: PaymentOverviewProps) => {
+export const PaymentOverview = ({ 
+  debt, 
+  totalPaid, 
+  totalInterest, 
+  currencySymbol,
+  isPayable,
+  minimumViablePayment 
+}: PaymentOverviewProps) => {
   const principalReduction = totalPaid - totalInterest;
 
   console.log('Payment overview calculations:', {
     totalPaid,
     totalInterest,
     principalReduction,
-    debtId: debt.id
+    debtId: debt.id,
+    isPayable,
+    minimumViablePayment
   });
 
   const cards = [
@@ -71,6 +82,17 @@ export const PaymentOverview = ({ debt, totalPaid, totalInterest, currencySymbol
           </motion.div>
         ))}
       </div>
+      
+      {!isPayable && (
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="p-6">
+            <p className="text-red-600">
+              This debt requires a minimum payment of at least {currencySymbol}{minimumViablePayment} 
+              to begin reducing the principal balance.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

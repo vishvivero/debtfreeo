@@ -20,12 +20,24 @@ export interface AmortizationEntry {
   principal: number;
   interest: number;
   endingBalance: number;
+  remainingBalance: number; // Added for compatibility
 }
 
 // Calculate monthly interest for a given balance and annual rate
 export const calculateMonthlyInterest = (balance: number, annualRate: number): number => {
   const monthlyRate = annualRate / 1200;
   return Number((balance * monthlyRate).toFixed(2));
+};
+
+// Add the new utility functions
+export const isDebtPayable = (debt: Debt): boolean => {
+  const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
+  return debt.minimum_payment > monthlyInterest;
+};
+
+export const getMinimumViablePayment = (debt: Debt): number => {
+  const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
+  return Math.ceil(monthlyInterest + 1); // At least $1 more than monthly interest
 };
 
 // Calculate amortization schedule for a single debt
@@ -56,7 +68,8 @@ export const calculateAmortizationSchedule = (
       payment,
       principal,
       interest: monthlyInterest,
-      endingBalance
+      endingBalance,
+      remainingBalance: endingBalance // Added for compatibility
     });
 
     if (endingBalance === 0) break;
