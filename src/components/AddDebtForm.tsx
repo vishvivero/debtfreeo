@@ -1,13 +1,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Percent, Wallet, Coins, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 import { useToast } from "@/components/ui/use-toast";
+import { DebtNameInput } from "@/components/debt/form/DebtNameInput";
+import { BalanceInput } from "@/components/debt/form/BalanceInput";
+import { InterestRateInput } from "@/components/debt/form/InterestRateInput";
+import { MinimumPaymentInput } from "@/components/debt/form/MinimumPaymentInput";
+import { validateDebtForm } from "@/lib/utils/validation";
 import type { Debt } from "@/lib/types/debt";
 
 export interface AddDebtFormProps {
@@ -35,52 +38,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     }));
   };
 
-  const validateForm = () => {
-    if (!formData.name.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a debt name",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    const numberFields = {
-      balance: formData.balance,
-      interestRate: formData.interestRate,
-      minimumPayment: formData.minimumPayment
-    };
-
-    for (const [field, value] of Object.entries(numberFields)) {
-      const numValue = Number(value);
-      if (isNaN(numValue) || numValue <= 0) {
-        toast({
-          title: "Error",
-          description: `Please enter a valid ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`,
-          variant: "destructive",
-        });
-        return false;
-      }
-    }
-
-    if (Number(formData.interestRate) > 100) {
-      toast({
-        title: "Error",
-        description: "Interest rate cannot be greater than 100%",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (isSubmitting) return;
     
-    if (!validateForm()) return;
+    if (!validateDebtForm(formData)) return;
 
     setIsSubmitting(true);
     console.log("Form submitted with date:", formData.date);
@@ -139,83 +102,29 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           onChange={(value) => handleInputChange("category", value)} 
         />
 
-        <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Debt Name</Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <CreditCard className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="Credit Card, Personal Loan, etc."
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
+        <DebtNameInput
+          value={formData.name}
+          onChange={(value) => handleInputChange("name", value)}
+          disabled={isSubmitting}
+        />
 
-        <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Outstanding Debt Balance</Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Wallet className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="number"
-              value={formData.balance}
-              onChange={(e) => handleInputChange("balance", e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="10000"
-              required
-              min="0"
-              step="0.01"
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
+        <BalanceInput
+          value={formData.balance}
+          onChange={(value) => handleInputChange("balance", value)}
+          disabled={isSubmitting}
+        />
 
-        <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Percent className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="number"
-              value={formData.interestRate}
-              onChange={(e) => handleInputChange("interestRate", e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="5.5"
-              required
-              min="0"
-              max="100"
-              step="0.1"
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
+        <InterestRateInput
+          value={formData.interestRate}
+          onChange={(value) => handleInputChange("interestRate", value)}
+          disabled={isSubmitting}
+        />
 
-        <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Minimum Payment / EMI</Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Coins className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="number"
-              value={formData.minimumPayment}
-              onChange={(e) => handleInputChange("minimumPayment", e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="250"
-              required
-              min="0"
-              step="0.01"
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
+        <MinimumPaymentInput
+          value={formData.minimumPayment}
+          onChange={(value) => handleInputChange("minimumPayment", value)}
+          disabled={isSubmitting}
+        />
 
         <DebtDateSelect 
           date={formData.date} 

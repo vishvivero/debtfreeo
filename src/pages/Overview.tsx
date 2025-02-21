@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
-import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
@@ -17,7 +16,7 @@ import { countryCurrencies } from "@/lib/utils/currency-data";
 const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading, error } = useDebts();
+  const { debts, isLoading } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -67,22 +66,6 @@ const Overview = () => {
       setIsUpdating(false);
     }
   };
-
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="container py-8">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              There was an error loading your overview. Please try refreshing the page.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </MainLayout>
-    );
-  }
 
   if (isLoading) {
     return (
