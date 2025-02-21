@@ -1,22 +1,21 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Target } from "lucide-react";
 import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
-import { PaymentOverviewSection } from "./PaymentOverviewSection";
-import { OneTimeFundingSection } from "./OneTimeFundingSection";
-import { ScoreInsightsSection } from "./sections/ScoreInsightsSection";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
-import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
-import { ResultsDialog } from "./ResultsDialog";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { StrategySelector } from "@/components/StrategySelector";
 import { strategies } from "@/lib/strategies";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DecimalToggle } from "@/components/DecimalToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
+import { ResultsDialog } from "./ResultsDialog";
+import { ExtraPaymentSection } from "./sections/ExtraPaymentSection";
+import { OneTimeFundingSection } from "./sections/OneTimeFundingSection";
+import { StrategySection } from "./sections/StrategySection";
+import { ResultsSection } from "./sections/ResultsSection";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -49,7 +48,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const { toast } = useToast();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
 
-  // Initialize strategy from profile only once when component mounts
   useEffect(() => {
     if (profile?.selected_strategy) {
       const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
@@ -59,9 +57,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         parentOnSelectStrategy(savedStrategy);
       }
     }
-  }, [profile?.selected_strategy]); // Only depend on profile.selected_strategy
+  }, [profile?.selected_strategy]);
 
-  // Initialize UI preferences from profile
   useEffect(() => {
     if (profile) {
       setShowExtraPayment(profile.show_extra_payments || false);
@@ -79,7 +76,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     
     if (strategy.id === selectedStrategy.id) {
       setIsStrategyDialogOpen(false);
-      return; // Don't update if it's the same strategy
+      return;
     }
 
     setSelectedStrategy(strategy);
@@ -153,66 +150,26 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         className="space-y-6"
       >
         <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 space-y-6 border shadow-sm">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Want to pay off debt faster?</h3>
-              <DecimalToggle
-                showDecimals={showExtraPayment}
-                onToggle={handleExtraPaymentToggle}
-                label="Add Extra Payments"
-                resetOnDisable={true}
-              />
-            </div>
-            
-            {showExtraPayment && (
-              <PaymentOverviewSection
-                totalMinimumPayments={minimumPayment}
-                extraPayment={extraPayment}
-                onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
-                onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
-                currencySymbol={preferredCurrency}
-                totalDebtValue={totalDebtValue}
-              />
-            )}
-          </div>
+          <ExtraPaymentSection
+            showExtraPayment={showExtraPayment}
+            onToggleExtraPayment={handleExtraPaymentToggle}
+            minimumPayment={minimumPayment}
+            extraPayment={extraPayment}
+            updateMonthlyPayment={updateMonthlyPayment}
+            onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
+            preferredCurrency={preferredCurrency}
+            totalDebtValue={totalDebtValue}
+          />
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Expecting any lump sum payments?</h3>
-              <DecimalToggle
-                showDecimals={showOneTimeFunding}
-                onToggle={handleOneTimeFundingToggle}
-                label="Add Lump Sum Payments"
-              />
-            </div>
-            
-            {showOneTimeFunding && <OneTimeFundingSection />}
-          </div>
+          <OneTimeFundingSection
+            showOneTimeFunding={showOneTimeFunding}
+            onToggleOneTimeFunding={handleOneTimeFundingToggle}
+          />
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Current Strategy</h3>
-              <Button 
-                variant="outline"
-                onClick={() => setIsStrategyDialogOpen(true)}
-              >
-                Change Strategy
-              </Button>
-            </div>
-            <div className="p-4 border rounded-lg bg-white">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <Target className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold">{selectedStrategy.name}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Add extra monthly payments to accelerate your debt payoff
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <StrategySection
+            selectedStrategy={selectedStrategy}
+            onOpenStrategyDialog={() => setIsStrategyDialogOpen(true)}
+          />
 
           <Button 
             className="w-full"
@@ -223,31 +180,11 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         </div>
       </motion.div>
 
-      {hasViewedResults && (
-        <>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <ScoreInsightsSection />
-          </motion.div>
-
-          {debts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="w-full"
-            >
-              <PayoffTimeline
-                debts={debts}
-                extraPayment={extraPayment}
-              />
-            </motion.div>
-          )}
-        </>
-      )}
+      <ResultsSection
+        hasViewedResults={hasViewedResults}
+        debts={debts}
+        extraPayment={extraPayment}
+      />
 
       <Dialog open={isStrategyDialogOpen} onOpenChange={setIsStrategyDialogOpen}>
         <DialogContent className="sm:max-w-xl">
