@@ -143,11 +143,6 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
         )}
         <DialogContent 
           className="sm:max-w-[500px] p-6 bg-white"
-          onInteractOutside={(e) => {
-            if (dialogState.isSubmitting) {
-              e.preventDefault();
-            }
-          }}
         >
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
@@ -155,7 +150,6 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
           <AddDebtForm 
             onAddDebt={handleAddDebt} 
             currencySymbol={currencySymbol}
-            disabled={dialogState.isSubmitting}
           />
         </DialogContent>
       </Dialog>
@@ -169,14 +163,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
           }
         }}
       >
-        <AlertDialogContent 
-          className="max-w-[500px]"
-          onInteractOutside={(e) => {
-            if (dialogState.isSubmitting) {
-              e.preventDefault();
-            }
-          }}
-        >
+        <AlertDialogContent className="max-w-[500px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-semibold text-green-600">
               Debt Added Successfully!
