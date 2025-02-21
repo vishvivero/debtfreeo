@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -21,7 +21,18 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
   
   const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
 
-  const resetState = () => {
+  // Cleanup function for component unmount
+  useEffect(() => {
+    return () => {
+      setConfirmationOpen(false);
+      setUncontrolledIsOpen(false);
+      setLastAddedDebt(null);
+    };
+  }, []);
+
+  // Reset state synchronously to prevent race conditions
+  const resetState = useCallback(() => {
+    console.log('Resetting dialog state');
     setConfirmationOpen(false);
     setLastAddedDebt(null);
     if (typeof controlledIsOpen !== 'undefined') {
@@ -29,31 +40,41 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
     } else {
       setUncontrolledIsOpen(false);
     }
-  };
+  }, [controlledIsOpen, onClose]);
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  // Handle main dialog state changes
+  const handleOpenChange = useCallback((open: boolean) => {
+    console.log('Main dialog state changing:', { open, confirmationOpen });
+    if (!open && !confirmationOpen) {
       resetState();
     } else if (typeof controlledIsOpen === 'undefined') {
       setUncontrolledIsOpen(true);
     }
-  };
+  }, [confirmationOpen, controlledIsOpen, resetState]);
 
-  const handleAddDebt = async (debt: Omit<Debt, "id">) => {
+  // Handle debt addition with state batching
+  const handleAddDebt = useCallback(async (debt: Omit<Debt, "id">) => {
+    console.log('Adding debt:', debt);
     try {
       await onAddDebt(debt);
+      // Batch state updates
       setLastAddedDebt(debt);
-      setConfirmationOpen(true);
+      // Use setTimeout to ensure state updates are processed in order
+      setTimeout(() => {
+        setConfirmationOpen(true);
+      }, 0);
     } catch (error) {
       console.error("Error adding debt:", error);
       resetState();
     }
-  };
+  }, [onAddDebt, resetState]);
 
-  const handleAddMore = () => {
+  // Handle "Add More" action
+  const handleAddMore = useCallback(() => {
+    console.log('Adding another debt');
     setConfirmationOpen(false);
     setLastAddedDebt(null);
-  };
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-GB', {
@@ -95,6 +116,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
       <AlertDialog 
         open={confirmationOpen}
         onOpenChange={(open) => {
+          console.log('Confirmation dialog state changing:', { open });
           if (!open) {
             resetState();
           }
