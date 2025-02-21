@@ -1,9 +1,8 @@
-
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { PayoffDetails } from "@/lib/services/UnifiedDebtCalculationService";
 
-export interface ScoreComponents {
+interface ScoreComponents {
   interestScore: number;
   durationScore: number;
   behaviorScore: {
