@@ -6,6 +6,20 @@ import { InterestCalculator } from "./calculations/InterestCalculator";
 import { PaymentAllocator } from "./calculations/PaymentAllocator";
 import { FundingManager, OneTimeFunding } from "./calculations/FundingManager";
 
+export interface UnifiedTimelineResult {
+  baselineMonths: number;
+  acceleratedMonths: number;
+  baselineInterest: number;
+  acceleratedInterest: number;
+  monthsSaved: number;
+  interestSaved: number;
+  payoffDate: Date;
+  monthlyPayments: {
+    debtId: string;
+    amount: number;
+  }[];
+}
+
 export interface PayoffDetails {
   months: number;
   totalInterest: number;
