@@ -592,10 +592,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      update_all_profiles_monthly_payments: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
