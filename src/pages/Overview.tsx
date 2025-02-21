@@ -41,6 +41,28 @@ const Overview = () => {
     }
   };
 
+  const handleAddDebt = async (debt: any) => {
+    try {
+      await addDebt.mutateAsync(debt);
+      toast({
+        title: "Debt Added Successfully!",
+        description: `Your new debt of ${profile?.preferred_currency || '£'}${debt.balance} has been added to your account.`,
+        duration: 5000,
+        className: "bg-green-50 border-green-200",
+      });
+      return true; // Return true to indicate success
+    } catch (error) {
+      console.error("Error adding debt:", error);
+      toast({
+        title: "Error Adding Debt",
+        description: "There was a problem adding your debt. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      throw error; // Re-throw the error to be caught by the dialog
+    }
+  };
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -75,25 +97,7 @@ const Overview = () => {
             isOpen={isAddDebtOpen}
             onClose={() => setIsAddDebtOpen(false)}
             currencySymbol={currentCurrencySymbol}
-            onAddDebt={async (debt) => {
-              try {
-                await addDebt.mutateAsync(debt);
-                toast({
-                  title: "Debt Added Successfully!",
-                  description: `Your new debt of ${currentCurrencySymbol}${debt.balance} has been added to your account.`,
-                  duration: 5000,
-                  className: "bg-green-50 border-green-200",
-                });
-              } catch (error) {
-                console.error("Error adding debt:", error);
-                toast({
-                  title: "Error Adding Debt",
-                  description: "There was a problem adding your debt. Please try again.",
-                  variant: "destructive",
-                  duration: 5000,
-                });
-              }
-            }}
+            onAddDebt={handleAddDebt}
           />
         </div>
       </div>
