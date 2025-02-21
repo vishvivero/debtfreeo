@@ -1,43 +1,101 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Percent, Wallet, Coins } from "lucide-react";
+import { CreditCard, Percent, Wallet, Coins, Loader2 } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 import { useToast } from "@/components/ui/use-toast";
+import type { Debt } from "@/lib/types/debt";
 
 export interface AddDebtFormProps {
-  onAddDebt?: (debt: any) => void;
+  onAddDebt?: (debt: Omit<Debt, "id">) => Promise<void>;
   currencySymbol?: string;
 }
 
 export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormProps) => {
   const { addDebt } = useDebts();
   const { toast } = useToast();
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("Credit Card");
-  const [balance, setBalance] = useState("");
-  const [interestRate, setInterestRate] = useState("");
-  const [minimumPayment, setMinimumPayment] = useState("");
-  const [date, setDate] = useState<Date>(new Date());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "Credit Card",
+    balance: "",
+    interestRate: "",
+    minimumPayment: "",
+    date: new Date()
+  });
+
+  const handleInputChange = (field: keyof typeof formData, value: string | Date) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a debt name",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const numberFields = {
+      balance: formData.balance,
+      interestRate: formData.interestRate,
+      minimumPayment: formData.minimumPayment
+    };
+
+    for (const [field, value] of Object.entries(numberFields)) {
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue <= 0) {
+        toast({
+          title: "Error",
+          description: `Please enter a valid ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`,
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
+    if (Number(formData.interestRate) > 100) {
+      toast({
+        title: "Error",
+        description: "Interest rate cannot be greater than 100%",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted with date:", date);
+    
+    if (isSubmitting) return;
+    
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    console.log("Form submitted with date:", formData.date);
     
     try {
-      const newDebt = {
-        name,
-        balance: Number(balance),
-        interest_rate: Number(interestRate),
-        minimum_payment: Number(minimumPayment),
+      const newDebt: Omit<Debt, "id"> = {
+        name: formData.name,
+        balance: Number(formData.balance),
+        interest_rate: Number(formData.interestRate),
+        minimum_payment: Number(formData.minimumPayment),
         banker_name: "Not specified",
         currency_symbol: currencySymbol,
-        next_payment_date: date.toISOString(),
-        category,
-        status: 'active' as const // Add status field
+        next_payment_date: formData.date.toISOString(),
+        category: formData.category,
+        status: 'active'
       };
 
       console.log("Submitting debt:", newDebt);
@@ -46,20 +104,21 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         await onAddDebt(newDebt);
       } else {
         await addDebt.mutateAsync(newDebt);
+        toast({
+          title: "Success",
+          description: "Debt added successfully",
+        });
       }
 
-      toast({
-        title: "Success",
-        description: "Debt added successfully",
+      // Reset form
+      setFormData({
+        name: "",
+        category: "Credit Card",
+        balance: "",
+        interestRate: "",
+        minimumPayment: "",
+        date: new Date()
       });
-
-      // Reset form fields
-      setName("");
-      setCategory("Credit Card");
-      setBalance("");
-      setInterestRate("");
-      setMinimumPayment("");
-      setDate(new Date());
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -67,13 +126,18 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         description: "Failed to add debt. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6">
-        <DebtCategorySelect value={category} onChange={setCategory} />
+        <DebtCategorySelect 
+          value={formData.category} 
+          onChange={(value) => handleInputChange("category", value)} 
+        />
 
         <div className="relative space-y-2">
           <Label className="text-sm font-medium text-gray-700">Debt Name</Label>
@@ -82,11 +146,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               <CreditCard className="h-5 w-5 text-gray-400" />
             </div>
             <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
               className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="Credit Card, Personal Loan, etc."
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -99,13 +164,14 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
             </div>
             <Input
               type="number"
-              value={balance}
-              onChange={(e) => setBalance(e.target.value)}
+              value={formData.balance}
+              onChange={(e) => handleInputChange("balance", e.target.value)}
               className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="10000"
               required
               min="0"
               step="0.01"
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -118,14 +184,15 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
             </div>
             <Input
               type="number"
-              value={interestRate}
-              onChange={(e) => setInterestRate(e.target.value)}
+              value={formData.interestRate}
+              onChange={(e) => handleInputChange("interestRate", e.target.value)}
               className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="5.5"
               required
               min="0"
               max="100"
               step="0.1"
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -138,22 +205,23 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
             </div>
             <Input
               type="number"
-              value={minimumPayment}
-              onChange={(e) => setMinimumPayment(e.target.value)}
+              value={formData.minimumPayment}
+              onChange={(e) => handleInputChange("minimumPayment", e.target.value)}
               className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="250"
               required
               min="0"
               step="0.01"
+              disabled={isSubmitting}
             />
           </div>
         </div>
 
         <DebtDateSelect 
-          date={date} 
+          date={formData.date} 
           onSelect={(newDate) => {
             console.log("Date selected in form:", newDate);
-            newDate && setDate(newDate);
+            newDate && handleInputChange("date", newDate);
           }} 
         />
       </div>
@@ -161,8 +229,16 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       <Button 
         type="submit" 
         className="w-full bg-primary hover:bg-primary/90 text-white transition-colors"
+        disabled={isSubmitting}
       >
-        Add Debt
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Adding Debt...
+          </>
+        ) : (
+          'Add Debt'
+        )}
       </Button>
     </form>
   );
