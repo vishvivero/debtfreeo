@@ -44,10 +44,10 @@ export const PayoffTimelineContainer = ({
     debts,
     totalMonthlyPayment,
     strategy,
-    formattedFundings
+    oneTimeFundings
   );
 
-  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, strategy, formattedFundings);
+  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, strategy, oneTimeFundings);
 
   const currencySymbol = profile?.preferred_currency || '£';
 
@@ -89,7 +89,7 @@ export const PayoffTimelineContainer = ({
           <TimelineChart 
             data={timelineData}
             debts={debts}
-            formattedFundings={formattedFundings}
+            formattedFundings={oneTimeFundings}
           />
         </CardContent>
       </Card>
