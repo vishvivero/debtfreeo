@@ -8,17 +8,44 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { OverviewMetrics } from "@/components/overview/OverviewMetrics";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { countryCurrencies } from "@/lib/utils/currency-data";
 
 const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading } = useDebts();
+  const { debts, isLoading, error } = useDebts();
   const { profile, updateProfile } = useProfile();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Validate currency support
+  const validateCurrency = (currencySymbol: string) => {
+    return countryCurrencies.some(currency => currency.symbol === currencySymbol);
+  };
 
   const handleCurrencyChange = async (newCurrencySymbol: string) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to change currency preferences",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateCurrency(newCurrencySymbol)) {
+      toast({
+        title: "Error",
+        description: "Selected currency is not supported",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdating(true);
 
     try {
       await updateProfile.mutateAsync({
@@ -33,11 +60,29 @@ const Overview = () => {
       console.error("Error saving currency preference:", error);
       toast({
         title: "Error",
-        description: "Failed to save currency preference",
+        description: "Failed to save currency preference. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              There was an error loading your overview. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -55,19 +100,29 @@ const Overview = () => {
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container py-8 space-y-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.5 }}
+              className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg"
+            >
+              <OverviewHeader 
+                currencySymbol={currentCurrencySymbol}
+                onCurrencyChange={handleCurrencyChange}
+              />
+              <OverviewMetrics />
+            </motion.div>
+          </AnimatePresence>
+
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg"
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <OverviewHeader 
-              currencySymbol={currentCurrencySymbol}
-              onCurrencyChange={handleCurrencyChange}
-            />
-            <OverviewMetrics />
+            <DebtScoreCard />
           </motion.div>
-          <DebtScoreCard />
         </div>
       </div>
     </MainLayout>

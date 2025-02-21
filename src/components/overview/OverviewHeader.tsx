@@ -3,7 +3,7 @@ import { CurrencySelector } from "@/components/profile/CurrencySelector";
 
 interface OverviewHeaderProps {
   currencySymbol: string;
-  onCurrencyChange: (currency: string) => void;
+  onCurrencyChange: (currency: string) => Promise<void>;
 }
 
 export const OverviewHeader = ({
