@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -18,23 +18,15 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
   const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [lastAddedDebt, setLastAddedDebt] = useState<Omit<Debt, "id"> | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
 
-  // Cleanup function for component unmount
-  useEffect(() => {
-    return () => {
-      setConfirmationOpen(false);
-      setUncontrolledIsOpen(false);
-      setLastAddedDebt(null);
-    };
-  }, []);
-
-  // Reset state synchronously to prevent race conditions
   const resetState = useCallback(() => {
-    console.log('Resetting dialog state');
+    console.log('AddDebtDialog: Resetting state');
     setConfirmationOpen(false);
     setLastAddedDebt(null);
+    setIsSubmitting(false);
     if (typeof controlledIsOpen !== 'undefined') {
       onClose?.();
     } else {
@@ -42,36 +34,34 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
     }
   }, [controlledIsOpen, onClose]);
 
-  // Handle main dialog state changes
   const handleOpenChange = useCallback((open: boolean) => {
-    console.log('Main dialog state changing:', { open, confirmationOpen });
-    if (!open && !confirmationOpen) {
+    console.log('AddDebtDialog: Dialog state changing:', { open, confirmationOpen, isSubmitting });
+    if (!open && !confirmationOpen && !isSubmitting) {
       resetState();
     } else if (typeof controlledIsOpen === 'undefined') {
       setUncontrolledIsOpen(true);
     }
-  }, [confirmationOpen, controlledIsOpen, resetState]);
+  }, [confirmationOpen, controlledIsOpen, isSubmitting, resetState]);
 
-  // Handle debt addition with state batching
   const handleAddDebt = useCallback(async (debt: Omit<Debt, "id">) => {
-    console.log('Adding debt:', debt);
+    console.log('AddDebtDialog: Starting debt addition');
+    setIsSubmitting(true);
+    
     try {
       await onAddDebt(debt);
-      // Batch state updates
+      console.log('AddDebtDialog: Debt added successfully');
       setLastAddedDebt(debt);
-      // Use setTimeout to ensure state updates are processed in order
-      setTimeout(() => {
-        setConfirmationOpen(true);
-      }, 0);
+      setConfirmationOpen(true);
     } catch (error) {
-      console.error("Error adding debt:", error);
+      console.error("AddDebtDialog: Error adding debt:", error);
       resetState();
+    } finally {
+      setIsSubmitting(false);
     }
   }, [onAddDebt, resetState]);
 
-  // Handle "Add More" action
   const handleAddMore = useCallback(() => {
-    console.log('Adding another debt');
+    console.log('AddDebtDialog: Adding another debt');
     setConfirmationOpen(false);
     setLastAddedDebt(null);
   }, []);
@@ -116,7 +106,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
       <AlertDialog 
         open={confirmationOpen}
         onOpenChange={(open) => {
-          console.log('Confirmation dialog state changing:', { open });
+          console.log('AddDebtDialog: Confirmation dialog changing:', { open });
           if (!open) {
             resetState();
           }
@@ -150,12 +140,14 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
               variant="outline"
               onClick={handleAddMore}
               className="flex-1"
+              disabled={isSubmitting}
             >
               Add Another Debt
             </Button>
             <Button
               onClick={resetState}
               className="flex-1 bg-green-600 hover:bg-green-700"
+              disabled={isSubmitting}
             >
               Finish
             </Button>

@@ -42,24 +42,20 @@ const Overview = () => {
   };
 
   const handleAddDebt = async (debt: any) => {
+    console.log('Overview: Starting debt addition');
     try {
       await addDebt.mutateAsync(debt);
-      toast({
-        title: "Debt Added Successfully!",
-        description: `Your new debt of ${profile?.preferred_currency || '£'}${debt.balance} has been added to your account.`,
-        duration: 5000,
-        className: "bg-green-50 border-green-200",
-      });
-      return true; // Return true to indicate success
+      console.log('Overview: Debt added successfully');
+      return true;
     } catch (error) {
-      console.error("Error adding debt:", error);
+      console.error("Overview: Error adding debt:", error);
       toast({
         title: "Error Adding Debt",
         description: "There was a problem adding your debt. Please try again.",
         variant: "destructive",
         duration: 5000,
       });
-      throw error; // Re-throw the error to be caught by the dialog
+      throw error;
     }
   };
 
