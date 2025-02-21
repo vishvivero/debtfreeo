@@ -55,6 +55,16 @@ export class StandardizedDebtCalculator {
     const monthsSaved = Math.max(0, baselineResult.months - acceleratedResult.months);
     const interestSaved = InterestCalculator.ensurePrecision(baselineResult.totalInterest - acceleratedResult.totalInterest);
 
+    // Calculate payoff date from current date
+    const today = new Date();
+    const payoffDate = new Date(today.getFullYear(), today.getMonth() + acceleratedResult.months);
+
+    console.log('StandardizedDebtCalculator final date calculation:', {
+      startDate: today,
+      monthsToAdd: acceleratedResult.months,
+      calculatedPayoffDate: payoffDate
+    });
+
     return {
       baselineMonths: baselineResult.months,
       acceleratedMonths: acceleratedResult.months,
@@ -62,7 +72,7 @@ export class StandardizedDebtCalculator {
       acceleratedInterest: InterestCalculator.ensurePrecision(acceleratedResult.totalInterest),
       monthsSaved,
       interestSaved,
-      payoffDate: acceleratedResult.finalPayoffDate,
+      payoffDate,
       monthlyPayments: acceleratedResult.payments
     };
   }

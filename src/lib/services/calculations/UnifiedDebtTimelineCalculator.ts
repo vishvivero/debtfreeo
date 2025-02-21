@@ -39,13 +39,20 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings
     );
 
-    console.log('Unified calculation complete:', {
-      baselineInterest: results.baselineInterest,
-      acceleratedInterest: results.acceleratedInterest,
-      interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved
+    // Add logging to trace the payoff date calculation
+    console.log('Unified calculation payoff date:', {
+      payoffDate: results.payoffDate,
+      baselineMonths: results.baselineMonths,
+      acceleratedMonths: results.acceleratedMonths
     });
 
-    return results;
+    // Ensure we're using current date as starting point
+    const today = new Date();
+    const payoffDate = new Date(today.getFullYear(), today.getMonth() + results.acceleratedMonths);
+
+    return {
+      ...results,
+      payoffDate // Use the correctly calculated payoff date
+    };
   }
 }
