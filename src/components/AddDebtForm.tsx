@@ -1,17 +1,15 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Percent, Wallet, Coins, Loader2 } from "lucide-react";
+import { CreditCard, Percent, Wallet, Coins } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 import { useToast } from "@/components/ui/use-toast";
-import { Debt } from "@/lib/types/debt";
 
 export interface AddDebtFormProps {
-  onAddDebt?: (debt: Omit<Debt, "id">) => Promise<void>;
+  onAddDebt?: (debt: any) => void;
   currencySymbol?: string;
 }
 
@@ -24,20 +22,13 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const [interestRate, setInterestRate] = useState("");
   const [minimumPayment, setMinimumPayment] = useState("");
   const [date, setDate] = useState<Date>(new Date());
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted with date:", date);
     
-    if (isSubmitting) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    
     try {
-      const newDebt: Omit<Debt, "id"> = {
+      const newDebt = {
         name,
         balance: Number(balance),
         interest_rate: Number(interestRate),
@@ -46,7 +37,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         currency_symbol: currencySymbol,
         next_payment_date: date.toISOString(),
         category,
-        status: 'active'
+        status: 'active' as const // Add status field
       };
 
       console.log("Submitting debt:", newDebt);
@@ -57,6 +48,11 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         await addDebt.mutateAsync(newDebt);
       }
 
+      toast({
+        title: "Success",
+        description: "Debt added successfully",
+      });
+
       // Reset form fields
       setName("");
       setCategory("Credit Card");
@@ -64,11 +60,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       setInterestRate("");
       setMinimumPayment("");
       setDate(new Date());
-
-      toast({
-        title: "Success",
-        description: "Debt added successfully",
-      });
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -76,8 +67,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         description: "Failed to add debt. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -98,7 +87,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="Credit Card, Personal Loan, etc."
               required
-              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -118,7 +106,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               required
               min="0"
               step="0.01"
-              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -139,7 +126,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               min="0"
               max="100"
               step="0.1"
-              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -159,7 +145,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               required
               min="0"
               step="0.01"
-              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -176,16 +161,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       <Button 
         type="submit" 
         className="w-full bg-primary hover:bg-primary/90 text-white transition-colors"
-        disabled={isSubmitting}
       >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Adding Debt...
-          </>
-        ) : (
-          'Add Debt'
-        )}
+        Add Debt
       </Button>
     </form>
   );

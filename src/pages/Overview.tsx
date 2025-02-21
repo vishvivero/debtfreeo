@@ -10,14 +10,12 @@ import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { OverviewMetrics } from "@/components/overview/OverviewMetrics";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
-import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 
 const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading, addDebt } = useDebts();
+  const { debts, isLoading } = useDebts();
   const { profile, updateProfile } = useProfile();
-  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
 
   const handleCurrencyChange = async (newCurrencySymbol: string) => {
     if (!user?.id) return;
@@ -38,24 +36,6 @@ const Overview = () => {
         description: "Failed to save currency preference",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleAddDebt = async (debt: any) => {
-    console.log('Overview: Starting debt addition');
-    try {
-      await addDebt.mutateAsync(debt);
-      console.log('Overview: Debt added successfully');
-      return true;
-    } catch (error) {
-      console.error("Overview: Error adding debt:", error);
-      toast({
-        title: "Error Adding Debt",
-        description: "There was a problem adding your debt. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
-      throw error;
     }
   };
 
@@ -88,13 +68,6 @@ const Overview = () => {
             <OverviewMetrics />
           </motion.div>
           <DebtScoreCard />
-          
-          <AddDebtDialog 
-            isOpen={isAddDebtOpen}
-            onClose={() => setIsAddDebtOpen(false)}
-            currencySymbol={currentCurrencySymbol}
-            onAddDebt={handleAddDebt}
-          />
         </div>
       </div>
     </MainLayout>
