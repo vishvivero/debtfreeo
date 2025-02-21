@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -15,70 +15,44 @@ interface AddDebtDialogProps {
 }
 
 export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsOpen, onClose }: AddDebtDialogProps) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [lastAddedDebt, setLastAddedDebt] = useState<Omit<Debt, "id"> | null>(null);
   
   const isOpen = typeof controlledIsOpen !== 'undefined' ? controlledIsOpen : uncontrolledIsOpen;
 
-  // Reset all dialogs when component unmounts
-  useEffect(() => {
-    return () => {
-      setShowConfirmation(false);
-      setUncontrolledIsOpen(false);
-      setLastAddedDebt(null);
-    };
-  }, []);
-
-  // Close confirmation dialog when main dialog state changes
-  useEffect(() => {
-    if (!isOpen) {
-      setShowConfirmation(false);
-      setLastAddedDebt(null);
-    }
-  }, [isOpen]);
-
-  const closeDialog = () => {
-    console.log("Closing dialog");
+  const resetState = () => {
+    setConfirmationOpen(false);
+    setLastAddedDebt(null);
     if (typeof controlledIsOpen !== 'undefined') {
       onClose?.();
     } else {
       setUncontrolledIsOpen(false);
     }
-    setShowConfirmation(false);
-    setLastAddedDebt(null);
   };
 
   const handleOpenChange = (open: boolean) => {
-    console.log("Dialog open state changing:", { open, showConfirmation });
     if (!open) {
-      closeDialog();
+      resetState();
     } else if (typeof controlledIsOpen === 'undefined') {
       setUncontrolledIsOpen(true);
     }
   };
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
-    console.log("Adding debt:", debt);
     try {
       await onAddDebt(debt);
       setLastAddedDebt(debt);
-      setShowConfirmation(true);
+      setConfirmationOpen(true);
     } catch (error) {
       console.error("Error adding debt:", error);
-      closeDialog();
+      resetState();
     }
   };
 
   const handleAddMore = () => {
-    console.log("Adding another debt");
-    setShowConfirmation(false);
+    setConfirmationOpen(false);
     setLastAddedDebt(null);
-  };
-
-  const handleFinish = () => {
-    console.log("Finishing debt addition");
-    closeDialog();
   };
 
   const formatCurrency = (amount: number) => {
@@ -100,7 +74,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
   return (
     <>
       <Dialog 
-        open={isOpen && !showConfirmation} 
+        open={isOpen && !confirmationOpen} 
         onOpenChange={handleOpenChange}
       >
         {typeof controlledIsOpen === 'undefined' && (
@@ -119,12 +93,10 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
       </Dialog>
 
       <AlertDialog 
-        open={showConfirmation} 
+        open={confirmationOpen}
         onOpenChange={(open) => {
-          console.log("Confirmation dialog state changing:", { open });
           if (!open) {
-            setShowConfirmation(false);
-            handleFinish();
+            resetState();
           }
         }}
       >
@@ -160,7 +132,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen: controlledIsO
               Add Another Debt
             </Button>
             <Button
-              onClick={handleFinish}
+              onClick={resetState}
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
               Finish
