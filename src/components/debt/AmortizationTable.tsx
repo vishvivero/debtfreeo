@@ -18,40 +18,60 @@ interface AmortizationTableProps {
 
 export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: AmortizationTableProps) => {
   const calculateGoldLoanAmortization = (): AmortizationEntry[] => {
-    if (!debt.loan_term_months || !debt.final_payment_date) {
+    // Create a default schedule if required fields are missing
+    if (!debt.loan_term_months) {
+      console.log('No loan term months specified for gold loan, using default amortization');
       return amortizationData;
     }
 
     const schedule: AmortizationEntry[] = [];
     const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
     let currentDate = new Date();
-    const finalPaymentDate = new Date(debt.final_payment_date);
+    
+    // If final_payment_date is not provided, calculate it based on loan term
+    const finalPaymentDate = debt.final_payment_date 
+      ? new Date(debt.final_payment_date)
+      : new Date(currentDate.setMonth(currentDate.getMonth() + debt.loan_term_months));
 
-    // Generate monthly interest-only payments
-    for (let month = 0; month < debt.loan_term_months; month++) {
-      const date = new Date(currentDate);
-      const isLastPayment = month === debt.loan_term_months - 1;
+    currentDate = new Date(); // Reset current date after potentially modifying it
 
-      schedule.push({
-        date,
-        payment: isLastPayment ? monthlyInterest + debt.balance : monthlyInterest,
-        principal: isLastPayment ? debt.balance : 0,
-        interest: monthlyInterest,
-        remainingBalance: isLastPayment ? 0 : debt.balance,
-        startingBalance: debt.balance,
-        endingBalance: isLastPayment ? 0 : debt.balance
+    try {
+      // Generate monthly interest-only payments
+      for (let month = 0; month < debt.loan_term_months; month++) {
+        const date = new Date(currentDate);
+        date.setMonth(date.getMonth() + month);
+        const isLastPayment = month === debt.loan_term_months - 1;
+
+        schedule.push({
+          date,
+          payment: isLastPayment ? monthlyInterest + debt.balance : monthlyInterest,
+          principal: isLastPayment ? debt.balance : 0,
+          interest: monthlyInterest,
+          remainingBalance: isLastPayment ? 0 : debt.balance,
+          startingBalance: debt.balance,
+          endingBalance: isLastPayment ? 0 : debt.balance
+        });
+
+        // Stop if we've reached or passed the final payment date
+        if (date >= finalPaymentDate) break;
+      }
+
+      console.log('Generated gold loan amortization schedule:', {
+        loanAmount: debt.balance,
+        monthlyInterest,
+        numberOfPayments: schedule.length
       });
 
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      
-      // Stop if we've reached or passed the final payment date
-      if (date >= finalPaymentDate) break;
+      return schedule;
+    } catch (error) {
+      console.error('Error generating gold loan amortization schedule:', error);
+      return amortizationData; // Fallback to standard amortization if there's an error
     }
-
-    return schedule;
   };
 
-  const displayData = debt.is_gold_loan ? calculateGoldLoanAmortization() : amortizationData;
+  const displayData = debt.is_gold_loan 
+    ? calculateGoldLoanAmortization() 
+    : amortizationData;
 
   return (
     <div>
