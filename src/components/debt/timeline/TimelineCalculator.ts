@@ -42,7 +42,17 @@ export const calculateTimelineData = (
     acceleratedBalances.set(debt.id, debt.balance);
   });
 
-  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const calculateMonthlyGoldLoanPayment = (debt: Debt): number => {
+    return (debt.balance * debt.interest_rate) / 100 / 12;
+  };
+
+  const totalMinimumPayment = debts.reduce((sum, debt) => {
+    if (debt.is_gold_loan) {
+      return sum + calculateMonthlyGoldLoanPayment(debt);
+    }
+    return sum + debt.minimum_payment;
+  }, 0);
+
   let month = 0;
   const maxMonths = 360; // 30 years cap
 
@@ -67,12 +77,21 @@ export const calculateTimelineData = (
         const monthlyRate = debt.interest_rate / 1200;
         const baselineInterest = baselineBalance * monthlyRate;
         monthlyBaselineInterest += baselineInterest;
-        const payment = Math.min(remainingBaselinePayment, debt.minimum_payment);
-        const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - payment);
-        
-        remainingBaselinePayment = Math.max(0, remainingBaselinePayment - payment);
-        balances.set(debt.id, newBaselineBalance);
-        totalBaselineBalance += newBaselineBalance;
+
+        if (debt.is_gold_loan) {
+          const monthlyInterest = calculateMonthlyGoldLoanPayment(debt);
+          const isLastMonth = debt.loan_term_months && month === debt.loan_term_months - 1;
+          const payment = isLastMonth ? monthlyInterest + baselineBalance : monthlyInterest;
+          const newBaselineBalance = isLastMonth ? 0 : baselineBalance;
+          balances.set(debt.id, newBaselineBalance);
+          totalBaselineBalance += newBaselineBalance;
+        } else {
+          const payment = Math.min(remainingBaselinePayment, debt.minimum_payment);
+          const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - payment);
+          remainingBaselinePayment = Math.max(0, remainingBaselinePayment - payment);
+          balances.set(debt.id, newBaselineBalance);
+          totalBaselineBalance += newBaselineBalance;
+        }
       }
     });
 
@@ -83,8 +102,23 @@ export const calculateTimelineData = (
     let monthlyAcceleratedInterest = 0;
     let remainingAcceleratedPayment = totalMonthlyPayment + oneTimeFundingAmount;
 
-    // First apply minimum payments
-    debts.forEach(debt => {
+    // First handle gold loans
+    debts.filter(d => d.is_gold_loan).forEach(debt => {
+      const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
+      if (acceleratedBalance > 0) {
+        const monthlyInterest = calculateMonthlyGoldLoanPayment(debt);
+        monthlyAcceleratedInterest += monthlyInterest;
+        const isLastMonth = debt.loan_term_months && month === debt.loan_term_months - 1;
+        const payment = isLastMonth ? monthlyInterest + acceleratedBalance : monthlyInterest;
+        remainingAcceleratedPayment -= payment;
+        const newBalance = isLastMonth ? 0 : acceleratedBalance;
+        acceleratedBalances.set(debt.id, newBalance);
+        totalAcceleratedBalance += newBalance;
+      }
+    });
+
+    // Then handle regular loans
+    debts.filter(d => !d.is_gold_loan).forEach(debt => {
       const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
       if (acceleratedBalance > 0) {
         const monthlyRate = debt.interest_rate / 1200;
@@ -93,31 +127,21 @@ export const calculateTimelineData = (
         const minPayment = Math.min(debt.minimum_payment, acceleratedBalance + acceleratedInterest);
         remainingAcceleratedPayment -= minPayment;
         
-        const newBalance = acceleratedBalance + acceleratedInterest - minPayment;
-        acceleratedBalances.set(debt.id, newBalance);
+        let newBalance = acceleratedBalance + acceleratedInterest - minPayment;
+        
+        // Apply extra payment if available
+        if (remainingAcceleratedPayment > 0 && strategy.calculate(debts)[0].id === debt.id) {
+          const extraPayment = Math.min(remainingAcceleratedPayment, newBalance);
+          newBalance -= extraPayment;
+          remainingAcceleratedPayment -= extraPayment;
+        }
+        
+        acceleratedBalances.set(debt.id, Math.max(0, newBalance));
+        totalAcceleratedBalance += Math.max(0, newBalance);
       }
     });
 
     totalAcceleratedInterest += monthlyAcceleratedInterest;
-
-    // Then apply extra payments according to strategy
-    if (remainingAcceleratedPayment > 0) {
-      const sortedDebts = strategy.calculate(debts);
-      for (const debt of sortedDebts) {
-        const currentBalance = acceleratedBalances.get(debt.id) || 0;
-        if (currentBalance > 0) {
-          const extraPayment = Math.min(remainingAcceleratedPayment, currentBalance);
-          const newBalance = Math.max(0, currentBalance - extraPayment);
-          acceleratedBalances.set(debt.id, newBalance);
-          remainingAcceleratedPayment = Math.max(0, remainingAcceleratedPayment - extraPayment);
-          
-          if (remainingAcceleratedPayment <= 0) break;
-        }
-      }
-    }
-
-    totalAcceleratedBalance = Array.from(acceleratedBalances.values())
-      .reduce((sum, balance) => sum + balance, 0);
 
     // Add data point
     data.push({
