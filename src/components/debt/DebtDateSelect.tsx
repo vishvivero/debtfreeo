@@ -21,7 +21,7 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
   };
 
   return (
-    <div className="relative space-y-2">
+    <div className="relative space-y-2 pl-1">
       <Label className="text-sm font-medium text-gray-700">Next Payment Date</Label>
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
