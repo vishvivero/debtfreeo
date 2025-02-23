@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDebts } from "@/hooks/use-debts";
@@ -51,7 +50,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     
     const isGoldLoan = formData.category === "Gold Loan";
     
-    // Modify validation based on whether we're using loan term or minimum payment
     if (isGoldLoan && useLoanTerm) {
       if (!formData.loanTermMonths || Number(formData.loanTermMonths) <= 0) {
         toast({
@@ -66,7 +64,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     }
 
     setIsSubmitting(true);
-    console.log("Form submitted with date:", formData.date);
     
     try {
       const loanTermMonths = isGoldLoan && useLoanTerm ? parseInt(formData.loanTermMonths) : undefined;
@@ -101,7 +98,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         });
       }
 
-      // Reset form
       setFormData({
         name: "",
         category: "Credit Card",

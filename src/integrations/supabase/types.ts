@@ -254,8 +254,11 @@ export type Database = {
           closed_date: string | null
           created_at: string
           currency_symbol: string
+          final_payment_date: string | null
           id: string
           interest_rate: number
+          is_gold_loan: boolean | null
+          loan_term_months: number | null
           minimum_payment: number
           name: string
           next_payment_date: string | null
@@ -270,8 +273,11 @@ export type Database = {
           closed_date?: string | null
           created_at?: string
           currency_symbol?: string
+          final_payment_date?: string | null
           id?: string
           interest_rate: number
+          is_gold_loan?: boolean | null
+          loan_term_months?: number | null
           minimum_payment: number
           name: string
           next_payment_date?: string | null
@@ -286,8 +292,11 @@ export type Database = {
           closed_date?: string | null
           created_at?: string
           currency_symbol?: string
+          final_payment_date?: string | null
           id?: string
           interest_rate?: number
+          is_gold_loan?: boolean | null
+          loan_term_months?: number | null
           minimum_payment?: number
           name?: string
           next_payment_date?: string | null
