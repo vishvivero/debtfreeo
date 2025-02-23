@@ -21,9 +21,9 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
   };
 
   return (
-    <div className="relative space-y-2">
+    <div className="relative space-y-2 w-full">
       <Label className="text-sm font-medium text-gray-700">Next Payment Date</Label>
-      <div className="relative">
+      <div className="relative w-full">
         <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
           <CalendarIcon className="h-4 w-4 text-gray-400" />
         </div>
@@ -31,7 +31,7 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
           type="date"
           value={formatDateForInput(date)}
           onChange={handleDateChange}
-          className="pl-8 bg-white hover:border-primary/50 transition-colors w-full"
+          className="pl-8 bg-white hover:border-primary/50 transition-colors w-full block"
           min={formatDateForInput(new Date())}
           required
         />
