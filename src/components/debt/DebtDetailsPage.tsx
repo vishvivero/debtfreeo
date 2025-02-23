@@ -8,6 +8,7 @@ import { AmortizationTable } from "./AmortizationTable";
 import { DebtHeroSection } from "./details/DebtHeroSection";
 import { PaymentOverview } from "./details/PaymentOverview";
 import { GoldLoanWarning } from "./GoldLoanWarning";
+import { GoldLoanChart } from "./chart/GoldLoanChart";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { 
@@ -144,12 +145,22 @@ export const DebtDetailsPage = () => {
         />
 
         {debt.is_gold_loan && debt.loan_term_months && (
-          <GoldLoanWarning
-            principalAmount={debt.balance}
-            currencySymbol={currencySymbol}
-            paymentDate={debt.final_payment_date || ''}
-            monthlyInterest={calculateMonthlyInterest(debt.balance, debt.interest_rate)}
-          />
+          <>
+            <GoldLoanWarning
+              principalAmount={debt.balance}
+              currencySymbol={currencySymbol}
+              paymentDate={debt.final_payment_date || ''}
+              monthlyInterest={calculateMonthlyInterest(debt.balance, debt.interest_rate)}
+            />
+
+            <GoldLoanChart 
+              balance={debt.balance}
+              interestRate={debt.interest_rate}
+              loanTerm={debt.loan_term_months}
+              currencySymbol={currencySymbol}
+              finalPaymentDate={debt.final_payment_date || ''}
+            />
+          </>
         )}
 
         <Separator className="my-8" />
