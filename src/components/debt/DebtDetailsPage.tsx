@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
@@ -87,7 +88,7 @@ export const DebtDetailsPage = () => {
     );
   }
 
-  const isPayable = isDebtPayable(debt);
+  const isPayable = debt.is_gold_loan ? true : isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
