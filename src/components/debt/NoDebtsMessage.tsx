@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
@@ -30,6 +31,10 @@ export const NoDebtsMessage = () => {
     }
   };
 
+  const handleIconClick = () => {
+    setIsDialogOpen(true);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +44,8 @@ export const NoDebtsMessage = () => {
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="inline-block p-4 bg-emerald-50 rounded-full"
+        className="inline-block p-4 bg-emerald-50 rounded-full cursor-pointer hover:bg-emerald-100 transition-colors"
+        onClick={handleIconClick}
       >
         <Plus className="w-12 h-12 text-emerald-600" />
       </motion.div>
