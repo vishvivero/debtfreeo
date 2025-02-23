@@ -28,25 +28,34 @@ export const DebtDetailsPage = () => {
   const { debts } = useDebts();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const debt = debts?.find(d => d.id === debtId);
-  
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
-  const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
+  const [monthlyPayment, setMonthlyPayment] = useState(0);
 
+  const debt = debts?.find(d => d.id === debtId);
+  const currencySymbol = profile?.preferred_currency || '£';
+
+  // Early return if data is not available
   if (!debt || !profile) {
-    console.log('Debt not found for id:', debtId);
-    return <div>Debt not found</div>;
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div>Debt not found</div>
+        </div>
+      </MainLayout>
+    );
   }
 
   const isPayable = isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
-  const currencySymbol = profile.preferred_currency || '£';
+
+  // Always initialize monthlyPayment with debt's minimum payment
+  useEffect(() => {
+    setMonthlyPayment(debt.minimum_payment);
+  }, [debt.minimum_payment]);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
-      if (!debt) return;
-
       console.log('Fetching payment history for debt:', debt.id);
 
       const { data: payments, error } = await supabase
@@ -77,7 +86,7 @@ export const DebtDetailsPage = () => {
     };
 
     fetchPaymentHistory();
-  }, [debt]);
+  }, [debt.id, debt.user_id, debt.interest_rate]);
 
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
