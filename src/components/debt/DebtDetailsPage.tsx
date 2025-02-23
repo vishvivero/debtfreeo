@@ -37,9 +37,16 @@ export const DebtDetailsPage = () => {
   const debt = debts?.find(d => d.id === debtId);
   const currencySymbol = profile?.preferred_currency || '£';
 
+  const formatNumber = (num: number): string => {
+    return Number(num.toFixed(2)).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   useEffect(() => {
     if (debt?.minimum_payment) {
-      setMonthlyPayment(debt.minimum_payment);
+      setMonthlyPayment(Number(debt.minimum_payment.toFixed(2)));
     }
   }, [debt?.minimum_payment]);
 
@@ -47,8 +54,6 @@ export const DebtDetailsPage = () => {
     const fetchPaymentHistory = async () => {
       if (!debt?.id || !debt.user_id) return;
       
-      console.log('Fetching payment history for debt:', debt.id);
-
       const { data: payments, error } = await supabase
         .from('payment_history')
         .select('*')
@@ -60,20 +65,15 @@ export const DebtDetailsPage = () => {
         return;
       }
 
-      const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
+      const total = Number(payments.reduce((sum, payment) => 
+        sum + Number(payment.total_payment), 0).toFixed(2));
       setTotalPaid(total);
 
-      const interest = payments.reduce((sum, payment) => {
-        const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
+      const interest = Number(payments.reduce((sum, payment) => {
+        const interestPortion = Number(((Number(payment.total_payment) * (debt.interest_rate / 100)) / 12).toFixed(2));
         return sum + interestPortion;
-      }, 0);
+      }, 0).toFixed(2));
       setTotalInterest(interest);
-
-      console.log('Payment history summary:', {
-        totalPaid: total,
-        totalInterest: interest,
-        paymentCount: payments.length
-      });
     };
 
     fetchPaymentHistory();
@@ -90,7 +90,7 @@ export const DebtDetailsPage = () => {
   }
 
   const isPayable = debt.is_gold_loan ? true : isDebtPayable(debt);
-  const minimumViablePayment = getMinimumViablePayment(debt);
+  const minimumViablePayment = Number(getMinimumViablePayment(debt).toFixed(2));
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
@@ -112,8 +112,8 @@ export const DebtDetailsPage = () => {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Minimum Payment Insufficient</AlertTitle>
               <AlertDescription className="mt-2">
-                Your current minimum payment of {currencySymbol}{debt.minimum_payment.toLocaleString()} is insufficient 
-                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{minimumViablePayment.toLocaleString()} &nbsp;
+                Your current minimum payment of {currencySymbol}{formatNumber(debt.minimum_payment)} is insufficient 
+                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{formatNumber(minimumViablePayment)} &nbsp;
                 to make progress on this debt.
               </AlertDescription>
             </Alert>
@@ -134,9 +134,8 @@ export const DebtDetailsPage = () => {
 
   const getAmortizationData = (): AmortizationEntry[] => {
     if (debt.is_gold_loan) {
-      // For gold loans, create a simple schedule of interest-only payments
-      const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
-      const loanTermMonths = debt.loan_term_months || 12; // Default to 12 months if not specified
+      const monthlyInterest = Number(((debt.balance * debt.interest_rate) / 100 / 12).toFixed(2));
+      const loanTermMonths = debt.loan_term_months || 12;
       const schedule: AmortizationEntry[] = [];
       let currentDate = new Date();
 
@@ -144,18 +143,17 @@ export const DebtDetailsPage = () => {
         const isLastMonth = i === loanTermMonths - 1;
         schedule.push({
           date: new Date(currentDate.setMonth(currentDate.getMonth() + 1)),
-          payment: isLastMonth ? monthlyInterest + debt.balance : monthlyInterest,
-          principal: isLastMonth ? debt.balance : 0,
+          payment: Number(isLastMonth ? (monthlyInterest + debt.balance).toFixed(2) : monthlyInterest.toFixed(2)),
+          principal: Number(isLastMonth ? debt.balance.toFixed(2) : "0"),
           interest: monthlyInterest,
-          remainingBalance: isLastMonth ? 0 : debt.balance,
-          startingBalance: debt.balance,
-          endingBalance: isLastMonth ? 0 : debt.balance
+          remainingBalance: Number(isLastMonth ? "0" : debt.balance.toFixed(2)),
+          startingBalance: Number(debt.balance.toFixed(2)),
+          endingBalance: Number(isLastMonth ? "0" : debt.balance.toFixed(2))
         });
       }
       return schedule;
     }
 
-    // For regular loans, use the standard amortization calculation
     return calculateAmortizationSchedule(debt, monthlyPayment);
   };
 
@@ -172,15 +170,15 @@ export const DebtDetailsPage = () => {
         {debt.is_gold_loan && debt.loan_term_months && (
           <>
             <GoldLoanWarning
-              principalAmount={debt.balance}
+              principalAmount={Number(debt.balance.toFixed(2))}
               currencySymbol={currencySymbol}
               paymentDate={debt.final_payment_date || ''}
-              monthlyInterest={(debt.balance * debt.interest_rate) / 100 / 12}
+              monthlyInterest={Number(((debt.balance * debt.interest_rate) / 100 / 12).toFixed(2))}
             />
 
             <GoldLoanChart 
-              balance={debt.balance}
-              interestRate={debt.interest_rate}
+              balance={Number(debt.balance.toFixed(2))}
+              interestRate={Number(debt.interest_rate.toFixed(2))}
               loanTerm={debt.loan_term_months}
               currencySymbol={currencySymbol}
               finalPaymentDate={debt.final_payment_date || ''}
@@ -205,7 +203,7 @@ export const DebtDetailsPage = () => {
           <>
             <PayoffTimeline 
               debts={[debt]}
-              extraPayment={monthlyPayment - debt.minimum_payment}
+              extraPayment={Number((monthlyPayment - debt.minimum_payment).toFixed(2))}
             />
             <Separator className="my-8" />
           </>
