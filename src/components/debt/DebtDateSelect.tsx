@@ -24,17 +24,16 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
     <div className="relative space-y-2">
       <Label className="text-sm font-medium text-gray-700">Next Payment Date</Label>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <CalendarIcon className="h-5 w-5 text-gray-400" />
+        <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+          <CalendarIcon className="h-4 w-4 text-gray-400" />
         </div>
         <Input
           type="date"
           value={formatDateForInput(date)}
           onChange={handleDateChange}
-          className="pl-10 bg-white hover:border-primary/50 transition-colors w-full sm:w-auto"
+          className="pl-8 bg-white hover:border-primary/50 transition-colors w-full"
           min={formatDateForInput(new Date())}
           required
-          style={{ maxWidth: '100%' }}
         />
       </div>
     </div>
