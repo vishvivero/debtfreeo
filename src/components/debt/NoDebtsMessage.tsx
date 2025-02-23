@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
@@ -15,15 +14,12 @@ export const NoDebtsMessage = () => {
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     try {
-      console.log("Starting debt addition...");
       await addDebt.mutateAsync(debt);
-      console.log("Debt added successfully");
+      setIsDialogOpen(false);
       toast({
         title: "Success",
         description: "Debt added successfully",
       });
-      setIsDialogOpen(false); // Close the dialog after successful addition
-      return true;
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -31,7 +27,6 @@ export const NoDebtsMessage = () => {
         description: "Failed to add debt. Please try again.",
         variant: "destructive",
       });
-      throw error;
     }
   };
 
@@ -53,10 +48,7 @@ export const NoDebtsMessage = () => {
         Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
       </p>
       <Button 
-        onClick={() => {
-          console.log("Opening add debt dialog...");
-          setIsDialogOpen(true);
-        }}
+        onClick={() => setIsDialogOpen(true)}
         className="bg-emerald-600 hover:bg-emerald-700"
       >
         Add Your First Debt
@@ -64,10 +56,7 @@ export const NoDebtsMessage = () => {
 
       <AddDebtDialog
         isOpen={isDialogOpen}
-        onClose={() => {
-          console.log("Closing add debt dialog...");
-          setIsDialogOpen(false);
-        }}
+        onClose={() => setIsDialogOpen(false)}
         onAddDebt={handleAddDebt}
         currencySymbol={profile?.preferred_currency || "£"}
       />
