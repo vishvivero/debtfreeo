@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
@@ -15,11 +16,11 @@ export const NoDebtsMessage = () => {
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     try {
       await addDebt.mutateAsync(debt);
-      setIsDialogOpen(false);
       toast({
         title: "Success",
         description: "Debt added successfully",
       });
+      return true; // Return true to indicate success
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -27,6 +28,7 @@ export const NoDebtsMessage = () => {
         description: "Failed to add debt. Please try again.",
         variant: "destructive",
       });
+      throw error; // Rethrow the error to be handled by the form
     }
   };
 
