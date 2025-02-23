@@ -23,6 +23,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const calculateMonthlyGoldLoanPayment = (debt: any) => {
+  if (!debt.is_gold_loan || !debt.loan_term_months) return debt.minimum_payment;
+
+  // For gold loans, we calculate monthly interest payment
+  const monthlyInterestRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+  const monthlyInterestPayment = debt.balance * monthlyInterestRate;
+
+  // On the final month, we'll pay the full principal + interest
+  // For other months, we only pay interest
+  return monthlyInterestPayment;
+};
+
 export const DebtDetailsPage = () => {
   // 1. Hooks at the top
   const { debtId } = useParams();
@@ -39,10 +51,16 @@ export const DebtDetailsPage = () => {
 
   // 3. Effects
   useEffect(() => {
-    if (debt?.minimum_payment) {
-      setMonthlyPayment(debt.minimum_payment);
+    if (debt) {
+      const payment = calculateMonthlyGoldLoanPayment(debt);
+      setMonthlyPayment(payment);
+      console.log('Monthly payment calculated:', {
+        payment,
+        isGoldLoan: debt.is_gold_loan,
+        loanTerm: debt.loan_term_months
+      });
     }
-  }, [debt?.minimum_payment]);
+  }, [debt]);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
