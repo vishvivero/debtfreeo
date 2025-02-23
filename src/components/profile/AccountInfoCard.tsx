@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -89,16 +90,13 @@ export function AccountInfoCard({ profile }: AccountInfoCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex items-start space-x-4">
+        <div className="flex items-start">
           <Avatar className="h-20 w-20">
             <AvatarImage src={user?.user_metadata?.avatar_url} />
             <AvatarFallback>
               <User className="h-10 w-10" />
             </AvatarFallback>
           </Avatar>
-          <Button variant="outline" size="sm" disabled={isUpdating}>
-            Change Avatar
-          </Button>
         </div>
 
         <div className="space-y-6">
