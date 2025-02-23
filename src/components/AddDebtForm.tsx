@@ -12,6 +12,7 @@ import { InterestRateInput } from "@/components/debt/form/InterestRateInput";
 import { MinimumPaymentInput } from "@/components/debt/form/MinimumPaymentInput";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { validateDebtForm } from "@/lib/utils/validation";
 import { addMonths } from "date-fns";
 import type { Debt } from "@/lib/types/debt";
@@ -25,6 +26,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const { addDebt } = useDebts();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useLoanTerm, setUseLoanTerm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     category: "Credit Card",
@@ -32,7 +34,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     interestRate: "",
     minimumPayment: "",
     date: new Date(),
-    loanTermMonths: "", // Added for gold loans
+    loanTermMonths: "",
   });
 
   const handleInputChange = (field: keyof typeof formData, value: string | Date) => {
@@ -47,14 +49,27 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     
     if (isSubmitting) return;
     
-    if (!validateDebtForm(formData)) return;
+    const isGoldLoan = formData.category === "Gold Loan";
+    
+    // Modify validation based on whether we're using loan term or minimum payment
+    if (isGoldLoan && useLoanTerm) {
+      if (!formData.loanTermMonths || Number(formData.loanTermMonths) <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid loan term",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else if (!validateDebtForm(formData)) {
+      return;
+    }
 
     setIsSubmitting(true);
     console.log("Form submitted with date:", formData.date);
     
     try {
-      const isGoldLoan = formData.category === "Gold Loan";
-      const loanTermMonths = isGoldLoan ? parseInt(formData.loanTermMonths) : undefined;
+      const loanTermMonths = isGoldLoan && useLoanTerm ? parseInt(formData.loanTermMonths) : undefined;
       const finalPaymentDate = isGoldLoan && loanTermMonths 
         ? addMonths(formData.date, loanTermMonths).toISOString()
         : undefined;
@@ -63,7 +78,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         name: formData.name,
         balance: Number(formData.balance),
         interest_rate: Number(formData.interestRate),
-        minimum_payment: Number(formData.minimumPayment),
+        minimum_payment: useLoanTerm ? 0 : Number(formData.minimumPayment),
         banker_name: "Not specified",
         currency_symbol: currencySymbol,
         next_payment_date: formData.date.toISOString(),
@@ -96,6 +111,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         date: new Date(),
         loanTermMonths: ""
       });
+      setUseLoanTerm(false);
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -115,7 +131,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       <div className="grid gap-6">
         <DebtCategorySelect 
           value={formData.category} 
-          onChange={(value) => handleInputChange("category", value)} 
+          onChange={(value) => {
+            handleInputChange("category", value);
+            if (value !== "Gold Loan") {
+              setUseLoanTerm(false);
+            }
+          }} 
         />
 
         <DebtNameInput
@@ -136,13 +157,20 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           disabled={isSubmitting}
         />
 
-        <MinimumPaymentInput
-          value={formData.minimumPayment}
-          onChange={(value) => handleInputChange("minimumPayment", value)}
-          disabled={isSubmitting}
-        />
-
         {isGoldLoan && (
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="payment-type" className="text-sm font-medium text-gray-700">
+              Use Loan Term Instead of Minimum Payment
+            </Label>
+            <Switch
+              id="payment-type"
+              checked={useLoanTerm}
+              onCheckedChange={setUseLoanTerm}
+            />
+          </div>
+        )}
+
+        {isGoldLoan && useLoanTerm ? (
           <div className="space-y-2">
             <Label htmlFor="loanTermMonths" className="text-sm font-medium text-gray-700">
               Loan Term (Months)
@@ -156,9 +184,15 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               onChange={(e) => handleInputChange("loanTermMonths", e.target.value)}
               placeholder="Enter loan term in months"
               className="w-full"
-              required={isGoldLoan}
+              required
             />
           </div>
+        ) : (
+          <MinimumPaymentInput
+            value={formData.minimumPayment}
+            onChange={(value) => handleInputChange("minimumPayment", value)}
+            disabled={isSubmitting}
+          />
         )}
 
         <DebtDateSelect 
