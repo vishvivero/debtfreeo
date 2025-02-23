@@ -10,7 +10,10 @@ import { DebtNameInput } from "@/components/debt/form/DebtNameInput";
 import { BalanceInput } from "@/components/debt/form/BalanceInput";
 import { InterestRateInput } from "@/components/debt/form/InterestRateInput";
 import { MinimumPaymentInput } from "@/components/debt/form/MinimumPaymentInput";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { validateDebtForm } from "@/lib/utils/validation";
+import { addMonths } from "date-fns";
 import type { Debt } from "@/lib/types/debt";
 
 export interface AddDebtFormProps {
@@ -28,7 +31,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     balance: "",
     interestRate: "",
     minimumPayment: "",
-    date: new Date()
+    date: new Date(),
+    loanTermMonths: "", // Added for gold loans
   });
 
   const handleInputChange = (field: keyof typeof formData, value: string | Date) => {
@@ -49,6 +53,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     console.log("Form submitted with date:", formData.date);
     
     try {
+      const isGoldLoan = formData.category === "Gold Loan";
+      const loanTermMonths = isGoldLoan ? parseInt(formData.loanTermMonths) : undefined;
+      const finalPaymentDate = isGoldLoan && loanTermMonths 
+        ? addMonths(formData.date, loanTermMonths).toISOString()
+        : undefined;
+
       const newDebt: Omit<Debt, "id"> = {
         name: formData.name,
         balance: Number(formData.balance),
@@ -58,7 +68,10 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         currency_symbol: currencySymbol,
         next_payment_date: formData.date.toISOString(),
         category: formData.category,
-        status: 'active'
+        status: 'active',
+        is_gold_loan: isGoldLoan,
+        loan_term_months: loanTermMonths,
+        final_payment_date: finalPaymentDate
       };
 
       console.log("Submitting debt:", newDebt);
@@ -80,7 +93,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         balance: "",
         interestRate: "",
         minimumPayment: "",
-        date: new Date()
+        date: new Date(),
+        loanTermMonths: ""
       });
     } catch (error) {
       console.error("Error adding debt:", error);
@@ -93,6 +107,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       setIsSubmitting(false);
     }
   };
+
+  const isGoldLoan = formData.category === "Gold Loan";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,6 +141,25 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           onChange={(value) => handleInputChange("minimumPayment", value)}
           disabled={isSubmitting}
         />
+
+        {isGoldLoan && (
+          <div className="space-y-2">
+            <Label htmlFor="loanTermMonths" className="text-sm font-medium text-gray-700">
+              Loan Term (Months)
+            </Label>
+            <Input
+              id="loanTermMonths"
+              type="number"
+              min="1"
+              max="240"
+              value={formData.loanTermMonths}
+              onChange={(e) => handleInputChange("loanTermMonths", e.target.value)}
+              placeholder="Enter loan term in months"
+              className="w-full"
+              required={isGoldLoan}
+            />
+          </div>
+        )}
 
         <DebtDateSelect 
           date={formData.date} 
