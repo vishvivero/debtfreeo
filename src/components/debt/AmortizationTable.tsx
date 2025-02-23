@@ -17,30 +17,26 @@ interface AmortizationTableProps {
 }
 
 export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: AmortizationTableProps) => {
-  const formatNumber = (num: number): string => {
-    return Number(num.toFixed(2)).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
-
   const calculateGoldLoanAmortization = (): AmortizationEntry[] => {
+    // Create a default schedule if required fields are missing
     if (!debt.loan_term_months) {
       console.log('No loan term months specified for gold loan, using default amortization');
       return amortizationData;
     }
 
     const schedule: AmortizationEntry[] = [];
-    const monthlyInterest = Number(((debt.balance * debt.interest_rate) / 100 / 12).toFixed(2));
+    const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
     let currentDate = new Date();
     
+    // If final_payment_date is not provided, calculate it based on loan term
     const finalPaymentDate = debt.final_payment_date 
       ? new Date(debt.final_payment_date)
       : new Date(currentDate.setMonth(currentDate.getMonth() + debt.loan_term_months));
 
-    currentDate = new Date();
+    currentDate = new Date(); // Reset current date after potentially modifying it
 
     try {
+      // Generate monthly interest-only payments
       for (let month = 0; month < debt.loan_term_months; month++) {
         const date = new Date(currentDate);
         date.setMonth(date.getMonth() + month);
@@ -48,21 +44,28 @@ export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: Am
 
         schedule.push({
           date,
-          payment: Number(isLastPayment ? (monthlyInterest + debt.balance).toFixed(2) : monthlyInterest.toFixed(2)),
-          principal: Number(isLastPayment ? debt.balance.toFixed(2) : "0"),
+          payment: isLastPayment ? monthlyInterest + debt.balance : monthlyInterest,
+          principal: isLastPayment ? debt.balance : 0,
           interest: monthlyInterest,
-          remainingBalance: Number(isLastPayment ? "0" : debt.balance.toFixed(2)),
-          startingBalance: Number(debt.balance.toFixed(2)),
-          endingBalance: Number(isLastPayment ? "0" : debt.balance.toFixed(2))
+          remainingBalance: isLastPayment ? 0 : debt.balance,
+          startingBalance: debt.balance,
+          endingBalance: isLastPayment ? 0 : debt.balance
         });
 
+        // Stop if we've reached or passed the final payment date
         if (date >= finalPaymentDate) break;
       }
+
+      console.log('Generated gold loan amortization schedule:', {
+        loanAmount: debt.balance,
+        monthlyInterest,
+        numberOfPayments: schedule.length
+      });
 
       return schedule;
     } catch (error) {
       console.error('Error generating gold loan amortization schedule:', error);
-      return amortizationData;
+      return amortizationData; // Fallback to standard amortization if there's an error
     }
   };
 
@@ -90,10 +93,10 @@ export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: Am
             {displayData.map((entry, index) => (
               <TableRow key={index} className={entry.remainingBalance === 0 ? "bg-green-50" : ""}>
                 <TableCell>{format(entry.date, 'MMM d, yyyy')}</TableCell>
-                <TableCell>{currencySymbol}{formatNumber(entry.payment)}</TableCell>
-                <TableCell>{currencySymbol}{formatNumber(entry.principal)}</TableCell>
-                <TableCell>{currencySymbol}{formatNumber(entry.interest)}</TableCell>
-                <TableCell>{currencySymbol}{formatNumber(entry.remainingBalance)}</TableCell>
+                <TableCell>{currencySymbol}{entry.payment.toFixed(2)}</TableCell>
+                <TableCell>{currencySymbol}{entry.principal.toFixed(2)}</TableCell>
+                <TableCell>{currencySymbol}{entry.interest.toFixed(2)}</TableCell>
+                <TableCell>{currencySymbol}{entry.remainingBalance.toFixed(2)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
