@@ -16,7 +16,8 @@ import {
   calculateAmortizationSchedule, 
   calculateSingleDebtPayoff,
   isDebtPayable,
-  getMinimumViablePayment
+  getMinimumViablePayment,
+  AmortizationEntry
 } from "@/lib/utils/payment/standardizedCalculations";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -131,8 +132,31 @@ export const DebtDetailsPage = () => {
     );
   }
 
-  const calculateMonthlyInterest = (balance: number, interestRate: number): number => {
-    return Number(((balance * interestRate) / 100 / 12).toFixed(2));
+  const getAmortizationData = (): AmortizationEntry[] => {
+    if (debt.is_gold_loan) {
+      // For gold loans, create a simple schedule of interest-only payments
+      const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
+      const loanTermMonths = debt.loan_term_months || 12; // Default to 12 months if not specified
+      const schedule: AmortizationEntry[] = [];
+      let currentDate = new Date();
+
+      for (let i = 0; i < loanTermMonths; i++) {
+        const isLastMonth = i === loanTermMonths - 1;
+        schedule.push({
+          date: new Date(currentDate.setMonth(currentDate.getMonth() + 1)),
+          payment: isLastMonth ? monthlyInterest + debt.balance : monthlyInterest,
+          principal: isLastMonth ? debt.balance : 0,
+          interest: monthlyInterest,
+          remainingBalance: isLastMonth ? 0 : debt.balance,
+          startingBalance: debt.balance,
+          endingBalance: isLastMonth ? 0 : debt.balance
+        });
+      }
+      return schedule;
+    }
+
+    // For regular loans, use the standard amortization calculation
+    return calculateAmortizationSchedule(debt, monthlyPayment);
   };
 
   return (
@@ -151,7 +175,7 @@ export const DebtDetailsPage = () => {
               principalAmount={debt.balance}
               currencySymbol={currencySymbol}
               paymentDate={debt.final_payment_date || ''}
-              monthlyInterest={calculateMonthlyInterest(debt.balance, debt.interest_rate)}
+              monthlyInterest={(debt.balance * debt.interest_rate) / 100 / 12}
             />
 
             <GoldLoanChart 
@@ -177,16 +201,19 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        <PayoffTimeline 
-          debts={[debt]}
-          extraPayment={monthlyPayment - debt.minimum_payment}
-        />
-
-        <Separator className="my-8" />
+        {!debt.is_gold_loan && (
+          <>
+            <PayoffTimeline 
+              debts={[debt]}
+              extraPayment={monthlyPayment - debt.minimum_payment}
+            />
+            <Separator className="my-8" />
+          </>
+        )}
 
         <AmortizationTable 
           debt={debt} 
-          amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
+          amortizationData={getAmortizationData()}
           currencySymbol={currencySymbol}
         />
       </div>
