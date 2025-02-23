@@ -26,12 +26,17 @@ import { Button } from "@/components/ui/button";
 const calculateMonthlyGoldLoanPayment = (debt: any) => {
   if (!debt.is_gold_loan || !debt.loan_term_months) return debt.minimum_payment;
 
-  // For gold loans, we calculate monthly interest payment
-  const monthlyInterestRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+  // For gold loans, calculate the monthly interest payment
+  const monthlyInterestRate = debt.interest_rate / 100 / 12; // Convert annual percentage to monthly decimal
   const monthlyInterestPayment = debt.balance * monthlyInterestRate;
 
-  // On the final month, we'll pay the full principal + interest
-  // For other months, we only pay interest
+  console.log('Gold loan payment calculation:', {
+    balance: debt.balance,
+    annualRate: debt.interest_rate,
+    monthlyRate: monthlyInterestRate,
+    monthlyPayment: monthlyInterestPayment
+  });
+
   return monthlyInterestPayment;
 };
 
@@ -53,12 +58,14 @@ export const DebtDetailsPage = () => {
   useEffect(() => {
     if (debt) {
       const payment = calculateMonthlyGoldLoanPayment(debt);
-      setMonthlyPayment(payment);
       console.log('Monthly payment calculated:', {
         payment,
         isGoldLoan: debt.is_gold_loan,
-        loanTerm: debt.loan_term_months
+        loanTerm: debt.loan_term_months,
+        interestRate: debt.interest_rate,
+        balance: debt.balance
       });
+      setMonthlyPayment(payment);
     }
   }, [debt]);
 
