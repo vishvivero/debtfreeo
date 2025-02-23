@@ -3,8 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
-import { DebtConfirmationDialog } from "./DebtConfirmationDialog";
-import { useState } from "react";
 import { Debt } from "@/lib/types/debt";
 
 interface AddDebtDialogProps {
@@ -15,40 +13,22 @@ interface AddDebtDialogProps {
 }
 
 export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: AddDebtDialogProps) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [addedDebt, setAddedDebt] = useState<Debt | null>(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(isOpen || false);
-
   const handleOpenChange = (open: boolean) => {
-    setIsAddDialogOpen(open);
-    if (!open) {
-      onClose?.();
+    if (!open && onClose) {
+      onClose();
     }
   };
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     try {
       await onAddDebt(debt);
-      // Close the add dialog and show confirmation
-      setIsAddDialogOpen(false);
-      // We need to cast the debt to include an ID since it was just added
-      setAddedDebt(debt as Debt);
-      setShowConfirmation(true);
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       console.error("Error in AddDebtDialog:", error);
-      throw error;
+      throw error; // Let the form handle the error
     }
-  };
-
-  const handleAddAnother = () => {
-    setShowConfirmation(false);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleFinish = () => {
-    setShowConfirmation(false);
-    setIsAddDialogOpen(false); // Ensure the add dialog is also closed
-    onClose?.();
   };
 
   const dialogContent = (
@@ -60,31 +40,24 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
     </DialogContent>
   );
 
-  return (
-    <>
-      {typeof isOpen !== 'undefined' ? (
-        <Dialog open={isAddDialogOpen} onOpenChange={handleOpenChange}>
-          {dialogContent}
-        </Dialog>
-      ) : (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white">
-              <Plus className="mr-2 h-4 w-4" /> Add debt
-            </Button>
-          </DialogTrigger>
-          {dialogContent}
-        </Dialog>
-      )}
+  // If isOpen is provided, render controlled dialog
+  if (typeof isOpen !== 'undefined') {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        {dialogContent}
+      </Dialog>
+    );
+  }
 
-      {addedDebt && (
-        <DebtConfirmationDialog
-          debt={addedDebt}
-          isOpen={showConfirmation}
-          onClose={handleFinish}
-          onAddAnother={handleAddAnother}
-        />
-      )}
-    </>
+  // Otherwise render uncontrolled dialog with trigger
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="bg-primary hover:bg-primary/90 text-white">
+          <Plus className="mr-2 h-4 w-4" /> Add debt
+        </Button>
+      </DialogTrigger>
+      {dialogContent}
+    </Dialog>
   );
 };
