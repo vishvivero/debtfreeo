@@ -32,7 +32,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
   };
 
   const dialogContent = (
-    <DialogContent className="sm:max-w-[500px] p-6 bg-white">
+    <DialogContent className="sm:max-w-[500px] p-4 sm:p-6 bg-white overflow-y-auto max-h-[90vh]">
       <DialogHeader>
         <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
       </DialogHeader>

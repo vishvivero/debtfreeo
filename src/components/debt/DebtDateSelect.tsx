@@ -1,3 +1,4 @@
+
 import { CalendarIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -30,9 +31,10 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
           type="date"
           value={formatDateForInput(date)}
           onChange={handleDateChange}
-          className="pl-10 bg-white hover:border-primary/50 transition-colors"
+          className="pl-10 bg-white hover:border-primary/50 transition-colors w-full sm:w-auto"
           min={formatDateForInput(new Date())}
           required
+          style={{ maxWidth: '100%' }}
         />
       </div>
     </div>
