@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types";
 import { Payment } from "@/lib/types/payment";
 import { addMonths } from "date-fns";
@@ -12,7 +13,8 @@ export const calculatePaymentSchedule = (
     initialBalance: debt.balance,
     monthlyAllocation,
     isHighPriorityDebt,
-    minimumPayment: debt.minimum_payment
+    minimumPayment: debt.minimum_payment,
+    isGoldLoan: debt.is_gold_loan
   });
 
   const schedule: Payment[] = [];
@@ -23,40 +25,41 @@ export const calculatePaymentSchedule = (
   let remainingBalance = Number(debt.balance);
   const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   
+  // For gold loans, we only pay interest until the final payment
+  const isGoldLoan = debt.is_gold_loan && debt.loan_term_months;
+  const finalPaymentDate = isGoldLoan ? debt.final_payment_date : undefined;
+  
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
-    // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
-    
-    // Determine payment amount - for non-high priority debts, use at least minimum payment
-    // but allow for full monthly allocation if available
     let paymentAmount = monthlyAllocation;
+    let principalPaid = 0;
 
-    // Ensure we don't overpay
-    const totalRequired = remainingBalance + monthlyInterest;
-    if (paymentAmount > totalRequired) {
-      paymentAmount = Number(totalRequired.toFixed(2));
+    if (isGoldLoan) {
+      // For gold loans, only pay interest until final payment
+      const currentDateStr = currentDate.toISOString().split('T')[0];
+      const isFinalPayment = finalPaymentDate && currentDateStr >= finalPaymentDate;
+      
+      if (isFinalPayment) {
+        // On final payment date, pay remaining balance
+        paymentAmount = remainingBalance + monthlyInterest;
+        principalPaid = remainingBalance;
+      } else {
+        // Regular month - only pay interest
+        paymentAmount = monthlyInterest;
+        principalPaid = 0;
+      }
+    } else {
+      // Regular loan payment calculation
+      paymentAmount = Math.min(monthlyAllocation, remainingBalance + monthlyInterest);
+      principalPaid = Number((paymentAmount - monthlyInterest).toFixed(2));
     }
-
-    // Calculate principal portion of payment
-    const principalPaid = Number((paymentAmount - monthlyInterest).toFixed(2));
     
-    // Update remaining balance
     remainingBalance = Number((remainingBalance - principalPaid).toFixed(2));
-    
     const isLastPayment = remainingBalance <= 0.01;
+    
     if (isLastPayment) {
       remainingBalance = 0;
     }
-
-    console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
-      startingBalance: (remainingBalance + principalPaid).toFixed(2),
-      monthlyInterest: monthlyInterest.toFixed(2),
-      payment: paymentAmount.toFixed(2),
-      principalPaid: principalPaid.toFixed(2),
-      remainingBalance: remainingBalance.toFixed(2),
-      isLastPayment,
-      isFirstMonth: month === 0
-    });
 
     schedule.push({
       date: new Date(currentDate),

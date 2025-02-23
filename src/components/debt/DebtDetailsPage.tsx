@@ -8,6 +8,7 @@ import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
 import { DebtHeroSection } from "./details/DebtHeroSection";
 import { PaymentOverview } from "./details/PaymentOverview";
+import { GoldLoanWarning } from "./GoldLoanWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { 
@@ -78,7 +79,6 @@ export const DebtDetailsPage = () => {
     fetchPaymentHistory();
   }, [debt]);
 
-  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
@@ -129,6 +129,14 @@ export const DebtDetailsPage = () => {
           payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
         />
+
+        {debt.is_gold_loan && debt.loan_term_months && (
+          <GoldLoanWarning
+            principalAmount={debt.balance}
+            currencySymbol={currencySymbol}
+            paymentDate={debt.final_payment_date || ''}
+          />
+        )}
 
         <Separator className="my-8" />
 
