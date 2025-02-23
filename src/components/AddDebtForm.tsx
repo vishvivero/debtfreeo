@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useDebts } from "@/hooks/use-debts";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { validateDebtForm } from "@/lib/utils/validation";
 import { addMonths } from "date-fns";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Debt } from "@/lib/types/debt";
 
 export interface AddDebtFormProps {
@@ -27,6 +28,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [useLoanTerm, setUseLoanTerm] = useState(false);
+  const [calculatedInterest, setCalculatedInterest] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "Credit Card",
@@ -48,6 +50,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     const monthlyInterestRate = interestRate / 100 / 12;
     return Number((balance * monthlyInterestRate).toFixed(2));
   };
+
+  // Calculate interest whenever balance or interest rate changes
+  useEffect(() => {
+    if (formData.category === "Gold Loan" && useLoanTerm && formData.balance && formData.interestRate) {
+      const interest = calculateGoldLoanMinimumPayment(
+        Number(formData.balance),
+        Number(formData.interestRate)
+      );
+      setCalculatedInterest(interest);
+    } else {
+      setCalculatedInterest(null);
+    }
+  }, [formData.balance, formData.interestRate, formData.category, useLoanTerm]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -172,36 +187,52 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         />
 
         {isGoldLoan && (
-          <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="payment-type" className="text-sm font-medium text-gray-700">
-              Use Loan Term Instead of Minimum Payment
-            </Label>
-            <Switch
-              id="payment-type"
-              checked={useLoanTerm}
-              onCheckedChange={setUseLoanTerm}
-            />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between space-x-2">
+              <Label htmlFor="payment-type" className="text-sm font-medium text-gray-700">
+                Use Loan Term Instead of Minimum Payment
+              </Label>
+              <Switch
+                id="payment-type"
+                checked={useLoanTerm}
+                onCheckedChange={setUseLoanTerm}
+              />
+            </div>
+
+            {useLoanTerm && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="loanTermMonths" className="text-sm font-medium text-gray-700">
+                    Loan Term (Months)
+                  </Label>
+                  <Input
+                    id="loanTermMonths"
+                    type="number"
+                    min="1"
+                    max="240"
+                    value={formData.loanTermMonths}
+                    onChange={(e) => handleInputChange("loanTermMonths", e.target.value)}
+                    placeholder="Enter loan term in months"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                {calculatedInterest !== null && (
+                  <Alert className="bg-blue-50 border-blue-200">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    <AlertDescription className="text-blue-700">
+                      Your monthly interest-only payment will be {currencySymbol}{calculatedInterest.toLocaleString()}. 
+                      The full principal amount of {currencySymbol}{Number(formData.balance).toLocaleString()} will be due at the end of the loan term.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </>
+            )}
           </div>
         )}
 
-        {isGoldLoan && useLoanTerm ? (
-          <div className="space-y-2">
-            <Label htmlFor="loanTermMonths" className="text-sm font-medium text-gray-700">
-              Loan Term (Months)
-            </Label>
-            <Input
-              id="loanTermMonths"
-              type="number"
-              min="1"
-              max="240"
-              value={formData.loanTermMonths}
-              onChange={(e) => handleInputChange("loanTermMonths", e.target.value)}
-              placeholder="Enter loan term in months"
-              className="w-full"
-              required
-            />
-          </div>
-        ) : (
+        {(!isGoldLoan || !useLoanTerm) && (
           <MinimumPaymentInput
             value={formData.minimumPayment}
             onChange={(value) => handleInputChange("minimumPayment", value)}
