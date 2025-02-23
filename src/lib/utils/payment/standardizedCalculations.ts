@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { addMonths } from "date-fns";
@@ -27,7 +26,6 @@ export interface AmortizationEntry {
   remainingBalance: number;
 }
 
-// Gold loan specific calculations
 export const validateGoldLoan = (debt: Debt): boolean => {
   if (!debt.is_gold_loan) return true;
   
@@ -84,12 +82,10 @@ export const calculateGoldLoanSchedule = (debt: Debt): AmortizationEntry[] => {
   return schedule;
 };
 
-// Calculate monthly interest for a given balance and annual rate
 export const calculateMonthlyInterest = (balance: number, annualRate: number): number => {
   return InterestCalculator.calculateMonthlyInterest(balance, annualRate);
 };
 
-// Add the new utility functions
 export const isDebtPayable = (debt: Debt): boolean => {
   if (debt.is_gold_loan) return true; // Gold loans are always payable as they're interest-only
   const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
@@ -104,7 +100,6 @@ export const getMinimumViablePayment = (debt: Debt): number => {
   return Math.ceil(monthlyInterest + 1);
 };
 
-// Calculate amortization schedule for a single debt
 export const calculateAmortizationSchedule = (
   debt: Debt,
   monthlyPayment: number
@@ -115,7 +110,6 @@ export const calculateAmortizationSchedule = (
     monthlyPayment
   });
 
-  // For gold loans, use specialized schedule calculation
   if (debt.is_gold_loan) {
     return calculateGoldLoanSchedule(debt);
   }
@@ -153,4 +147,78 @@ export const calculateAmortizationSchedule = (
   });
 
   return schedule;
+};
+
+export const calculateSingleDebtPayoff = (
+  debt: Debt,
+  monthlyPayment: number,
+  strategy: Strategy
+): PayoffDetails => {
+  console.log('Calculating single debt payoff:', {
+    debtName: debt.name,
+    isGoldLoan: debt.is_gold_loan,
+    monthlyPayment
+  });
+
+  if (debt.is_gold_loan && debt.final_payment_date) {
+    const maturityDate = new Date(debt.final_payment_date);
+    const today = new Date();
+    const monthsUntilMaturity = 
+      (maturityDate.getFullYear() - today.getFullYear()) * 12 + 
+      (maturityDate.getMonth() - today.getMonth());
+    
+    const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
+    const totalInterest = monthlyInterest * monthsUntilMaturity;
+
+    return {
+      months: monthsUntilMaturity,
+      totalInterest,
+      payoffDate: maturityDate,
+      redistributionHistory: []
+    };
+  }
+
+  const result = StandardizedDebtCalculator.calculateTimeline([debt], monthlyPayment, strategy);
+  return {
+    months: result.acceleratedMonths,
+    totalInterest: result.acceleratedInterest,
+    payoffDate: result.payoffDate,
+    redistributionHistory: []
+  };
+};
+
+export const calculateMultiDebtPayoff = (
+  debts: Debt[],
+  totalMonthlyPayment: number,
+  strategy: Strategy
+): { [key: string]: PayoffDetails } => {
+  console.log('Calculating multi-debt payoff:', {
+    totalDebts: debts.length,
+    goldLoans: debts.filter(d => d.is_gold_loan).length,
+    totalMonthlyPayment
+  });
+
+  const payoffDetails: { [key: string]: PayoffDetails } = {};
+
+  const goldLoans = debts.filter(d => d.is_gold_loan);
+  const regularLoans = debts.filter(d => !d.is_gold_loan);
+
+  goldLoans.forEach(debt => {
+    payoffDetails[debt.id] = calculateSingleDebtPayoff(debt, 0, strategy);
+  });
+
+  if (regularLoans.length > 0) {
+    const result = StandardizedDebtCalculator.calculateTimeline(regularLoans, totalMonthlyPayment, strategy);
+    
+    regularLoans.forEach(debt => {
+      payoffDetails[debt.id] = {
+        months: result.acceleratedMonths,
+        totalInterest: result.acceleratedInterest,
+        payoffDate: result.payoffDate,
+        redistributionHistory: []
+      };
+    });
+  }
+
+  return payoffDetails;
 };
