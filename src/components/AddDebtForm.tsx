@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDebts } from "@/hooks/use-debts";
@@ -44,11 +43,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     }));
   };
 
-  const calculateGoldLoanInterest = (balance: number, interestRate: number): number => {
-    const monthlyInterestRate = interestRate / 100 / 12; // Convert annual percentage to monthly decimal
-    return Number((balance * monthlyInterestRate).toFixed(2));
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -72,32 +66,16 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     setIsSubmitting(true);
     
     try {
-      const balance = Number(formData.balance);
-      const interestRate = Number(formData.interestRate);
       const loanTermMonths = isGoldLoan && useLoanTerm ? parseInt(formData.loanTermMonths) : undefined;
       const finalPaymentDate = isGoldLoan && loanTermMonths 
         ? addMonths(formData.date, loanTermMonths).toISOString()
         : undefined;
 
-      // Calculate monthly interest for gold loans with loan term
-      const minimumPayment = isGoldLoan && useLoanTerm 
-        ? calculateGoldLoanInterest(balance, interestRate)
-        : Number(formData.minimumPayment);
-
-      console.log('Creating debt with details:', {
-        isGoldLoan,
-        useLoanTerm,
-        balance,
-        interestRate,
-        minimumPayment,
-        loanTermMonths
-      });
-
       const newDebt: Omit<Debt, "id"> = {
         name: formData.name,
-        balance: balance,
-        interest_rate: interestRate,
-        minimum_payment: minimumPayment,
+        balance: Number(formData.balance),
+        interest_rate: Number(formData.interestRate),
+        minimum_payment: useLoanTerm ? 0 : Number(formData.minimumPayment),
         banker_name: "Not specified",
         currency_symbol: currencySymbol,
         next_payment_date: formData.date.toISOString(),
@@ -107,6 +85,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         loan_term_months: loanTermMonths,
         final_payment_date: finalPaymentDate
       };
+
+      console.log("Submitting debt:", newDebt);
 
       if (onAddDebt) {
         await onAddDebt(newDebt);

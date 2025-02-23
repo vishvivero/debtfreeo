@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
@@ -22,36 +23,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const calculateMonthlyGoldLoanPayment = (debt: any) => {
-  console.log('Starting payment calculation for debt:', {
-    name: debt.name,
-    isGoldLoan: debt.is_gold_loan,
-    balance: debt.balance,
-    interestRate: debt.interest_rate
-  });
-
-  // Early return if not a gold loan
-  if (!debt.is_gold_loan) {
-    console.log('Not a gold loan, returning minimum payment:', debt.minimum_payment);
-    return debt.minimum_payment;
-  }
-
-  // For gold loans, calculate the monthly interest payment
-  const monthlyInterestRate = debt.interest_rate / 100 / 12; // Convert annual percentage to monthly decimal
-  const monthlyInterestPayment = Number((debt.balance * monthlyInterestRate).toFixed(2));
-
-  console.log('Gold loan payment calculation details:', {
-    balance: debt.balance,
-    annualRate: debt.interest_rate,
-    monthlyRate: monthlyInterestRate,
-    monthlyPayment: monthlyInterestPayment,
-    isGoldLoan: debt.is_gold_loan,
-    hasLoanTerm: !!debt.loan_term_months
-  });
-
-  return monthlyInterestPayment;
-};
-
 export const DebtDetailsPage = () => {
   // 1. Hooks at the top
   const { debtId } = useParams();
@@ -60,7 +31,7 @@ export const DebtDetailsPage = () => {
   const navigate = useNavigate();
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
-  const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
+  const [monthlyPayment, setMonthlyPayment] = useState(0);
 
   // 2. Data derivation
   const debt = debts?.find(d => d.id === debtId);
@@ -68,30 +39,10 @@ export const DebtDetailsPage = () => {
 
   // 3. Effects
   useEffect(() => {
-    if (debt) {
-      console.log('Debt found, calculating payment:', {
-        debtId,
-        debtName: debt.name,
-        isGoldLoan: debt.is_gold_loan,
-        balance: debt.balance,
-        interestRate: debt.interest_rate
-      });
-
-      const payment = calculateMonthlyGoldLoanPayment(debt);
-      
-      console.log('Monthly payment calculation result:', {
-        calculatedPayment: payment,
-        typeof: typeof payment,
-        isNumber: !isNaN(payment)
-      });
-
-      // Force payment to be a number and ensure it's not NaN
-      const finalPayment = !isNaN(payment) ? Number(payment) : 0;
-      setMonthlyPayment(finalPayment);
-
-      console.log('Final monthly payment set to:', finalPayment);
+    if (debt?.minimum_payment) {
+      setMonthlyPayment(debt.minimum_payment);
     }
-  }, [debt, debtId]);
+  }, [debt?.minimum_payment]);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -131,7 +82,6 @@ export const DebtDetailsPage = () => {
 
   // 4. Early return if data is not available
   if (!debt || !profile) {
-    console.log('Early return - missing data:', { hasDebt: !!debt, hasProfile: !!profile });
     return (
       <MainLayout>
         <div className="container mx-auto px-4 py-8">
@@ -146,14 +96,6 @@ export const DebtDetailsPage = () => {
   const minimumViablePayment = getMinimumViablePayment(debt);
   const selectedStrategyId = profile?.selected_strategy || 'avalanche';
   const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
-
-  console.log('Rendering with payment values:', {
-    monthlyPayment,
-    minimumViablePayment,
-    isPayable,
-    debtBalance: debt.balance,
-    debtInterestRate: debt.interest_rate
-  });
 
   if (!isPayable) {
     return (
