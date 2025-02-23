@@ -47,6 +47,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
 
   const handleFinish = () => {
     setShowConfirmation(false);
+    setIsAddDialogOpen(false); // Ensure the add dialog is also closed
     onClose?.();
   };
 
