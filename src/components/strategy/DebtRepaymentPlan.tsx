@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -38,26 +39,44 @@ export const DebtRepaymentPlan = ({
   const totalMinPayments = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const extraPayment = Math.max(0, totalMonthlyPayment - totalMinPayments);
 
-  // Distribute minimum payments
-  sortedDebts.forEach(debt => {
-    allocations.set(debt.id, debt.minimum_payment);
-  });
-
-  // Add extra payment to highest priority debt
-  if (extraPayment > 0 && sortedDebts.length > 0) {
-    const highestPriorityDebt = sortedDebts[0];
-    allocations.set(
-      highestPriorityDebt.id,
-      (allocations.get(highestPriorityDebt.id) || 0) + extraPayment
-    );
-  }
-
   // Track redistributions from paid off debts
   const redistributionHistory = new Map<string, { fromDebtId: string; amount: number; month: number; }[]>();
   let paidOffDebts = new Set<string>();
   let releasedPayments = new Map<string, number>();
 
-  // Analyze timeline data to track redistributions
+  // Distribute minimum payments first
+  sortedDebts.forEach(debt => {
+    allocations.set(debt.id, debt.minimum_payment);
+  });
+
+  // Handle gold loans first
+  const goldLoans = sortedDebts.filter(d => d.is_gold_loan);
+  const regularLoans = sortedDebts.filter(d => !d.is_gold_loan);
+
+  // Allocate extra payments to gold loans (20% of extra payment)
+  if (goldLoans.length > 0) {
+    const goldLoanExtraPayment = extraPayment * 0.2;
+    const extraPerGoldLoan = goldLoanExtraPayment / goldLoans.length;
+    
+    goldLoans.forEach(debt => {
+      allocations.set(
+        debt.id,
+        (allocations.get(debt.id) || 0) + extraPerGoldLoan
+      );
+    });
+  }
+
+  // Allocate remaining extra payment to regular loans based on strategy
+  const remainingExtra = goldLoans.length > 0 ? extraPayment * 0.8 : extraPayment;
+  if (remainingExtra > 0 && regularLoans.length > 0) {
+    const highestPriorityRegularDebt = regularLoans[0];
+    allocations.set(
+      highestPriorityRegularDebt.id,
+      (allocations.get(highestPriorityRegularDebt.id) || 0) + remainingExtra
+    );
+  }
+
+  // Track redistributions through the timeline
   timelineData.forEach((data, monthIndex) => {
     sortedDebts.forEach((debt, debtIndex) => {
       const prevMonth = monthIndex > 0 ? timelineData[monthIndex - 1] : null;
@@ -67,7 +86,8 @@ export const DebtRepaymentPlan = ({
       // If debt was just paid off this month
       if (wasActive && isPaidOff && !paidOffDebts.has(debt.id)) {
         paidOffDebts.add(debt.id);
-        const releasedAmount = debt.minimum_payment;
+        const releasedAmount = debt.minimum_payment + 
+          (allocations.get(debt.id) || 0) - debt.minimum_payment;
         releasedPayments.set(debt.id, releasedAmount);
 
         // Find next unpaid debt to receive redistribution
@@ -85,6 +105,12 @@ export const DebtRepaymentPlan = ({
               month: monthIndex + 1
             }
           ]);
+
+          // Update allocations for next unpaid debt
+          allocations.set(
+            nextUnpaidDebt.id,
+            (allocations.get(nextUnpaidDebt.id) || 0) + releasedAmount
+          );
         }
       }
     });
@@ -222,8 +248,8 @@ export const DebtRepaymentPlan = ({
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold">Payment Schedule</h4>
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                            {index === 0 ? 'Priority' : 'Upcoming'}
+                          <Badge variant={debt.is_gold_loan ? "secondary" : index === 0 ? "primary" : "outline"} className="bg-blue-100 text-blue-700">
+                            {debt.is_gold_loan ? 'Gold Loan' : index === 0 ? 'Priority' : 'Upcoming'}
                           </Badge>
                         </div>
                         <PaymentSchedule
@@ -235,6 +261,18 @@ export const DebtRepaymentPlan = ({
                           )}
                           currencySymbol={debt.currency_symbol}
                         />
+                        {payoffDetails[debt.id].redistributionHistory.length > 0 && (
+                          <div className="mt-4">
+                            <h5 className="text-sm font-semibold mb-2">Payment Boosts</h5>
+                            <div className="space-y-2">
+                              {payoffDetails[debt.id].redistributionHistory.map((redist, idx) => (
+                                <div key={idx} className="text-xs text-muted-foreground">
+                                  +{debt.currency_symbol}{redist.amount.toLocaleString()} from paid off debt in month {redist.month}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
