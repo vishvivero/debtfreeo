@@ -27,20 +27,18 @@ export const DebtDetailsPage = () => {
   const { debts } = useDebts();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const debt = debts?.find(d => d.id === debtId);
   
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
-  const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
+  const [monthlyPayment, setMonthlyPayment] = useState(0);
 
-  if (!debt || !profile) {
-    console.log('Debt not found for id:', debtId);
-    return <div>Debt not found</div>;
-  }
-
-  const isPayable = isDebtPayable(debt);
-  const minimumViablePayment = getMinimumViablePayment(debt);
-  const currencySymbol = profile.preferred_currency || '£';
+  const debt = debts?.find(d => d.id === debtId);
+  
+  useEffect(() => {
+    if (debt) {
+      setMonthlyPayment(debt.minimum_payment);
+    }
+  }, [debt]);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -78,9 +76,14 @@ export const DebtDetailsPage = () => {
     fetchPaymentHistory();
   }, [debt]);
 
-  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
-  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
-  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
+  if (!debt || !profile) {
+    console.log('Debt not found for id:', debtId);
+    return <div>Debt not found</div>;
+  }
+
+  const isPayable = isDebtPayable(debt);
+  const minimumViablePayment = getMinimumViablePayment(debt);
+  const currencySymbol = profile.preferred_currency || '£';
 
   if (!isPayable) {
     return (
@@ -119,6 +122,10 @@ export const DebtDetailsPage = () => {
       </Dialog>
     );
   }
+
+  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
   return (
     <MainLayout>
