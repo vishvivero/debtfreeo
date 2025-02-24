@@ -248,7 +248,10 @@ export const DebtRepaymentPlan = ({
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold">Payment Schedule</h4>
-                          <Badge variant={debt.is_gold_loan ? "secondary" : index === 0 ? "primary" : "outline"} className="bg-blue-100 text-blue-700">
+                          <Badge 
+                            variant={debt.is_gold_loan ? "secondary" : index === 0 ? "default" : "outline"} 
+                            className="bg-blue-100 text-blue-700"
+                          >
                             {debt.is_gold_loan ? 'Gold Loan' : index === 0 ? 'Priority' : 'Upcoming'}
                           </Badge>
                         </div>
