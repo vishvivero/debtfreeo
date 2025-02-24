@@ -1,6 +1,7 @@
+
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { addMonths } from "date-fns";
+import { addMonths, differenceInMonths } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { PaymentProcessor } from "@/lib/services/calculations/core/PaymentProcessor";
 import { StandardizedDebtCalculator } from "@/lib/services/calculations/StandardizedDebtCalculator";
@@ -163,9 +164,15 @@ export const calculateSingleDebtPayoff = (
   if (debt.is_gold_loan && debt.final_payment_date) {
     const maturityDate = new Date(debt.final_payment_date);
     const today = new Date();
-    const monthsUntilMaturity = 
-      (maturityDate.getFullYear() - today.getFullYear()) * 12 + 
-      (maturityDate.getMonth() - today.getMonth());
+    // Use differenceInMonths for more accurate calculation
+    const monthsUntilMaturity = Math.max(0, differenceInMonths(maturityDate, today));
+    
+    console.log('Gold loan maturity calculation:', {
+      debtName: debt.name,
+      maturityDate,
+      today,
+      monthsUntilMaturity
+    });
     
     const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
     const totalInterest = monthlyInterest * monthsUntilMaturity;
