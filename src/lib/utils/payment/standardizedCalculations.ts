@@ -25,6 +25,7 @@ export interface AmortizationEntry {
   interest: number;
   endingBalance: number;
   remainingBalance: number;
+  isOneTimePayment?: boolean;
 }
 
 export const validateGoldLoan = (debt: Debt): boolean => {
@@ -45,38 +46,79 @@ export const validateGoldLoan = (debt: Debt): boolean => {
   return isValid;
 };
 
-export const calculateGoldLoanSchedule = (debt: Debt): AmortizationEntry[] => {
+export const calculateGoldLoanSchedule = (
+  debt: Debt,
+  monthlyPayment: number,
+  oneTimeFundings: { date: Date; amount: number }[] = []
+): AmortizationEntry[] => {
   if (!debt.is_gold_loan || !validateGoldLoan(debt)) {
     throw new Error(`Invalid gold loan configuration for debt: ${debt.name}`);
   }
 
   const schedule: AmortizationEntry[] = [];
   let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
-  const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
+  let currentBalance = debt.balance;
   const maturityDate = new Date(debt.final_payment_date!);
 
-  console.log('Calculating gold loan schedule:', {
+  console.log('Starting gold loan schedule calculation:', {
     debtName: debt.name,
-    balance: debt.balance,
-    monthlyInterest,
-    maturityDate
+    initialBalance: currentBalance,
+    monthlyPayment,
+    oneTimeFundings: oneTimeFundings.length
   });
 
   while (currentDate <= maturityDate) {
+    const monthlyInterest = (currentBalance * debt.interest_rate) / 100 / 12;
     const isMaturityMonth = currentDate.getMonth() === maturityDate.getMonth() &&
                            currentDate.getFullYear() === maturityDate.getFullYear();
 
+    // Check for one-time payments in this month
+    const oneTimePayment = oneTimeFundings.find(funding => 
+      funding.date.getMonth() === currentDate.getMonth() &&
+      funding.date.getFullYear() === currentDate.getFullYear()
+    );
+
+    let payment = isMaturityMonth ? currentBalance + monthlyInterest : monthlyInterest;
+    let principal = isMaturityMonth ? currentBalance : 0;
+    let endingBalance = currentBalance;
+
+    // Apply one-time payment if available
+    if (oneTimePayment) {
+      const extraPrincipalPayment = Math.min(oneTimePayment.amount, currentBalance);
+      principal += extraPrincipalPayment;
+      payment += extraPrincipalPayment;
+      endingBalance = Math.max(0, currentBalance - extraPrincipalPayment);
+
+      console.log('Applying one-time payment to gold loan:', {
+        debtName: debt.name,
+        date: currentDate,
+        amount: extraPrincipalPayment,
+        newBalance: endingBalance
+      });
+    }
+
     const entry: AmortizationEntry = {
       date: new Date(currentDate),
-      startingBalance: debt.balance,
-      payment: isMaturityMonth ? debt.balance + monthlyInterest : monthlyInterest,
-      principal: isMaturityMonth ? debt.balance : 0,
+      startingBalance: currentBalance,
+      payment,
+      principal,
       interest: monthlyInterest,
-      endingBalance: isMaturityMonth ? 0 : debt.balance,
-      remainingBalance: isMaturityMonth ? 0 : debt.balance
+      endingBalance,
+      remainingBalance: endingBalance,
+      isOneTimePayment: !!oneTimePayment
     };
 
     schedule.push(entry);
+    currentBalance = endingBalance;
+    
+    if (currentBalance === 0) {
+      console.log('Gold loan paid off early:', {
+        debtName: debt.name,
+        finalPaymentDate: currentDate
+      });
+      break;
+    }
+
     currentDate = addMonths(currentDate, 1);
   }
 
@@ -103,16 +145,18 @@ export const getMinimumViablePayment = (debt: Debt): number => {
 
 export const calculateAmortizationSchedule = (
   debt: Debt,
-  monthlyPayment: number
+  monthlyPayment: number,
+  oneTimeFundings: { date: Date; amount: number }[] = []
 ): AmortizationEntry[] => {
   console.log('Calculating amortization schedule for:', {
     debtName: debt.name,
     initialBalance: debt.balance,
-    monthlyPayment
+    monthlyPayment,
+    oneTimeFundings: oneTimeFundings.length
   });
 
   if (debt.is_gold_loan) {
-    return calculateGoldLoanSchedule(debt);
+    return calculateGoldLoanSchedule(debt, monthlyPayment, oneTimeFundings);
   }
 
   const schedule: AmortizationEntry[] = [];
@@ -122,7 +166,18 @@ export const calculateAmortizationSchedule = (
 
   while (currentBalance > 0.01) {
     const monthlyInterest = Number((currentBalance * monthlyRate).toFixed(2));
-    const payment = Math.min(monthlyPayment, currentBalance + monthlyInterest);
+    
+    // Check for one-time payments
+    const oneTimePayment = oneTimeFundings.find(funding => 
+      funding.date.getMonth() === currentDate.getMonth() &&
+      funding.date.getFullYear() === currentDate.getFullYear()
+    );
+
+    let payment = Math.min(monthlyPayment, currentBalance + monthlyInterest);
+    if (oneTimePayment) {
+      payment += oneTimePayment.amount;
+    }
+
     const principal = Number((payment - monthlyInterest).toFixed(2));
     const endingBalance = Math.max(0, Number((currentBalance - principal).toFixed(2)));
 
@@ -133,7 +188,8 @@ export const calculateAmortizationSchedule = (
       principal,
       interest: monthlyInterest,
       endingBalance,
-      remainingBalance: endingBalance
+      remainingBalance: endingBalance,
+      isOneTimePayment: !!oneTimePayment
     });
 
     if (endingBalance === 0) break;
@@ -141,51 +197,42 @@ export const calculateAmortizationSchedule = (
     currentDate = addMonths(currentDate, 1);
   }
 
-  console.log('Amortization schedule calculated:', {
-    debtName: debt.name,
-    totalMonths: schedule.length,
-    finalBalance: schedule[schedule.length - 1].endingBalance
-  });
-
   return schedule;
 };
 
 export const calculateSingleDebtPayoff = (
   debt: Debt,
   monthlyPayment: number,
-  strategy: Strategy
+  strategy: Strategy,
+  oneTimeFundings: { date: Date; amount: number }[] = []
 ): PayoffDetails => {
   console.log('Calculating single debt payoff:', {
     debtName: debt.name,
     isGoldLoan: debt.is_gold_loan,
-    monthlyPayment
+    monthlyPayment,
+    oneTimeFundings: oneTimeFundings.length
   });
 
   if (debt.is_gold_loan && debt.final_payment_date) {
-    const maturityDate = new Date(debt.final_payment_date);
-    const today = new Date();
-    // Use differenceInMonths for more accurate calculation
-    const monthsUntilMaturity = Math.max(0, differenceInMonths(maturityDate, today));
-    
-    console.log('Gold loan maturity calculation:', {
-      debtName: debt.name,
-      maturityDate,
-      today,
-      monthsUntilMaturity
-    });
-    
-    const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
-    const totalInterest = monthlyInterest * monthsUntilMaturity;
+    const schedule = calculateGoldLoanSchedule(debt, monthlyPayment, oneTimeFundings);
+    const lastEntry = schedule[schedule.length - 1];
+    const totalInterest = schedule.reduce((sum, entry) => sum + entry.interest, 0);
 
     return {
-      months: monthsUntilMaturity,
+      months: schedule.length,
       totalInterest,
-      payoffDate: maturityDate,
+      payoffDate: lastEntry.date,
       redistributionHistory: []
     };
   }
 
-  const result = StandardizedDebtCalculator.calculateTimeline([debt], monthlyPayment, strategy);
+  const result = StandardizedDebtCalculator.calculateTimeline(
+    [debt], 
+    monthlyPayment, 
+    strategy, 
+    oneTimeFundings.map(f => ({ amount: f.amount, payment_date: f.date }))
+  );
+
   return {
     months: result.acceleratedMonths,
     totalInterest: result.acceleratedInterest,
@@ -197,12 +244,14 @@ export const calculateSingleDebtPayoff = (
 export const calculateMultiDebtPayoff = (
   debts: Debt[],
   totalMonthlyPayment: number,
-  strategy: Strategy
+  strategy: Strategy,
+  oneTimeFundings: { date: Date; amount: number }[] = []
 ): { [key: string]: PayoffDetails } => {
   console.log('Calculating multi-debt payoff:', {
     totalDebts: debts.length,
     goldLoans: debts.filter(d => d.is_gold_loan).length,
-    totalMonthlyPayment
+    totalMonthlyPayment,
+    oneTimeFundings: oneTimeFundings.length
   });
 
   const payoffDetails: { [key: string]: PayoffDetails } = {};
@@ -210,12 +259,27 @@ export const calculateMultiDebtPayoff = (
   const goldLoans = debts.filter(d => d.is_gold_loan);
   const regularLoans = debts.filter(d => !d.is_gold_loan);
 
+  // Handle gold loans first
   goldLoans.forEach(debt => {
-    payoffDetails[debt.id] = calculateSingleDebtPayoff(debt, 0, strategy);
+    payoffDetails[debt.id] = calculateSingleDebtPayoff(
+      debt, 
+      debt.minimum_payment, 
+      strategy,
+      oneTimeFundings
+    );
   });
 
+  // Calculate remaining payment for regular loans
+  const goldLoanPayments = goldLoans.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const remainingPayment = totalMonthlyPayment - goldLoanPayments;
+
   if (regularLoans.length > 0) {
-    const result = StandardizedDebtCalculator.calculateTimeline(regularLoans, totalMonthlyPayment, strategy);
+    const result = StandardizedDebtCalculator.calculateTimeline(
+      regularLoans, 
+      remainingPayment, 
+      strategy,
+      oneTimeFundings.map(f => ({ amount: f.amount, payment_date: f.date }))
+    );
     
     regularLoans.forEach(debt => {
       payoffDetails[debt.id] = {
