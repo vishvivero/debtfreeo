@@ -61,19 +61,29 @@ export class PaymentCalculationService {
       const months = payoffMonth !== -1 ? payoffMonth + 1 : timelineData.length;
       const payoffDate = new Date();
       payoffDate.setMonth(payoffDate.getMonth() + months);
+      const totalInterest = timelineData[months - 1]?.acceleratedInterest || 0;
 
-      acc[debt.id] = {
+      // Create a complete PayoffDetails object
+      const details: PayoffDetails = {
         months,
         payoffDate,
-        totalInterest: timelineData[months - 1]?.acceleratedInterest || 0,
+        totalInterest,
         payments: calculatePaymentSchedule(
           debt,
-          { months, payoffDate, totalInterest: 0, redistributionHistory: [] },
+          { 
+            months, 
+            payoffDate, 
+            totalInterest,
+            payments: [],
+            redistributionHistory: redistributionHistory.get(debt.id) || []
+          },
           allocations.get(debt.id) || debt.minimum_payment,
           sortedDebts.indexOf(debt) === 0
         ),
         redistributionHistory: redistributionHistory.get(debt.id) || []
       };
+
+      acc[debt.id] = details;
       return acc;
     }, {} as { [key: string]: PayoffDetails });
   }
