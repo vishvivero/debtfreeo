@@ -70,13 +70,7 @@ export class PaymentCalculationService {
         totalInterest,
         payments: calculatePaymentSchedule(
           debt,
-          { 
-            months, 
-            payoffDate, 
-            totalInterest,
-            payments: [],
-            redistributionHistory: redistributionHistory.get(debt.id) || []
-          },
+          { months }, // Only pass the required months property
           allocations.get(debt.id) || debt.minimum_payment,
           sortedDebts.indexOf(debt) === 0
         ),
