@@ -1,10 +1,10 @@
-
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { addMonths, differenceInMonths } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { PaymentProcessor } from "@/lib/services/calculations/core/PaymentProcessor";
 import { StandardizedDebtCalculator } from "@/lib/services/calculations/StandardizedDebtCalculator";
+import { OneTimeFunding } from "@/lib/types/payment";
 
 export interface PayoffDetails {
   months: number;
@@ -27,6 +27,20 @@ export interface AmortizationEntry {
   remainingBalance: number;
   isOneTimePayment?: boolean;
 }
+
+const convertToOneTimeFunding = (
+  funding: { date: Date; amount: number },
+  userId: string,
+  currencySymbol: string
+): OneTimeFunding => ({
+  id: `temp-${Date.now()}-${Math.random()}`,
+  user_id: userId,
+  amount: funding.amount,
+  payment_date: funding.date.toISOString(),
+  notes: null,
+  is_applied: false,
+  currency_symbol: currencySymbol
+});
 
 export const validateGoldLoan = (debt: Debt): boolean => {
   if (!debt.is_gold_loan) return true;
@@ -72,7 +86,6 @@ export const calculateGoldLoanSchedule = (
     const isMaturityMonth = currentDate.getMonth() === maturityDate.getMonth() &&
                            currentDate.getFullYear() === maturityDate.getFullYear();
 
-    // Check for one-time payments in this month
     const oneTimePayment = oneTimeFundings.find(funding => 
       funding.date.getMonth() === currentDate.getMonth() &&
       funding.date.getFullYear() === currentDate.getFullYear()
@@ -82,7 +95,6 @@ export const calculateGoldLoanSchedule = (
     let principal = isMaturityMonth ? currentBalance : 0;
     let endingBalance = currentBalance;
 
-    // Apply one-time payment if available
     if (oneTimePayment) {
       const extraPrincipalPayment = Math.min(oneTimePayment.amount, currentBalance);
       principal += extraPrincipalPayment;
@@ -167,7 +179,6 @@ export const calculateAmortizationSchedule = (
   while (currentBalance > 0.01) {
     const monthlyInterest = Number((currentBalance * monthlyRate).toFixed(2));
     
-    // Check for one-time payments
     const oneTimePayment = oneTimeFundings.find(funding => 
       funding.date.getMonth() === currentDate.getMonth() &&
       funding.date.getFullYear() === currentDate.getFullYear()
@@ -226,11 +237,15 @@ export const calculateSingleDebtPayoff = (
     };
   }
 
+  const formattedFundings: OneTimeFunding[] = oneTimeFundings.map(funding =>
+    convertToOneTimeFunding(funding, debt.user_id, debt.currency_symbol)
+  );
+
   const result = StandardizedDebtCalculator.calculateTimeline(
     [debt], 
     monthlyPayment, 
-    strategy, 
-    oneTimeFundings.map(f => ({ amount: f.amount, payment_date: f.date }))
+    strategy,
+    formattedFundings
   );
 
   return {
@@ -259,7 +274,16 @@ export const calculateMultiDebtPayoff = (
   const goldLoans = debts.filter(d => d.is_gold_loan);
   const regularLoans = debts.filter(d => !d.is_gold_loan);
 
-  // Handle gold loans first
+  const referenceDebt = debts[0];
+  
+  const formattedFundings: OneTimeFunding[] = oneTimeFundings.map(funding =>
+    convertToOneTimeFunding(
+      funding,
+      referenceDebt.user_id,
+      referenceDebt.currency_symbol
+    )
+  );
+
   goldLoans.forEach(debt => {
     payoffDetails[debt.id] = calculateSingleDebtPayoff(
       debt, 
@@ -269,7 +293,6 @@ export const calculateMultiDebtPayoff = (
     );
   });
 
-  // Calculate remaining payment for regular loans
   const goldLoanPayments = goldLoans.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const remainingPayment = totalMonthlyPayment - goldLoanPayments;
 
@@ -278,7 +301,7 @@ export const calculateMultiDebtPayoff = (
       regularLoans, 
       remainingPayment, 
       strategy,
-      oneTimeFundings.map(f => ({ amount: f.amount, payment_date: f.date }))
+      formattedFundings
     );
     
     regularLoans.forEach(debt => {
