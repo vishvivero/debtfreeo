@@ -10,9 +10,19 @@ export class PaymentCalculationService {
     sortedDebts: Debt[],
     totalMonthlyPayment: number
   ): Map<string, number> {
+    console.log('Calculating payment allocations:', {
+      totalMonthlyPayment,
+      debtsCount: sortedDebts.length
+    });
+
     const allocations = new Map<string, number>();
     const totalMinPayments = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
     const extraPayment = Math.max(0, totalMonthlyPayment - totalMinPayments);
+
+    console.log('Payment breakdown:', {
+      totalMinPayments,
+      extraPayment
+    });
 
     // Initialize with minimum payments
     sortedDebts.forEach(debt => {
@@ -24,27 +34,42 @@ export class PaymentCalculationService {
     const regularLoans = sortedDebts.filter(d => !d.is_gold_loan);
 
     // Allocate extra payments to gold loans (20% of extra payment)
-    if (goldLoans.length > 0) {
+    if (goldLoans.length > 0 && extraPayment > 0) {
       const goldLoanExtraPayment = extraPayment * 0.2;
       const extraPerGoldLoan = goldLoanExtraPayment / goldLoans.length;
       
       goldLoans.forEach(debt => {
-        allocations.set(
-          debt.id,
-          (allocations.get(debt.id) || 0) + extraPerGoldLoan
-        );
+        const currentAllocation = allocations.get(debt.id) || 0;
+        const newAllocation = currentAllocation + extraPerGoldLoan;
+        console.log(`Allocating to gold loan ${debt.name}:`, {
+          current: currentAllocation,
+          extra: extraPerGoldLoan,
+          new: newAllocation
+        });
+        allocations.set(debt.id, newAllocation);
       });
     }
 
     // Allocate remaining extra payment to regular loans
-    const remainingExtra = goldLoans.length > 0 ? extraPayment * 0.8 : extraPayment;
+    const remainingExtra = extraPayment * (goldLoans.length > 0 ? 0.8 : 1);
     if (remainingExtra > 0 && regularLoans.length > 0) {
-      const highestPriorityRegularDebt = regularLoans[0];
-      allocations.set(
-        highestPriorityRegularDebt.id,
-        (allocations.get(highestPriorityRegularDebt.id) || 0) + remainingExtra
-      );
+      const highestPriorityDebt = regularLoans[0];
+      const currentAllocation = allocations.get(highestPriorityDebt.id) || 0;
+      const newAllocation = currentAllocation + remainingExtra;
+      
+      console.log(`Allocating remaining extra to priority debt ${highestPriorityDebt.name}:`, {
+        current: currentAllocation,
+        extra: remainingExtra,
+        new: newAllocation
+      });
+      
+      allocations.set(highestPriorityDebt.id, newAllocation);
     }
+
+    // Log final allocations
+    sortedDebts.forEach(debt => {
+      console.log(`Final allocation for ${debt.name}:`, allocations.get(debt.id));
+    });
 
     return allocations;
   }
@@ -54,6 +79,8 @@ export class PaymentCalculationService {
     timelineData: any[],
     allocations: Map<string, number>
   ): { [key: string]: PayoffDetails } {
+    console.log('Calculating payoff details for debts:', sortedDebts.length);
+    
     const redistributionHistory = this.trackRedistributions(sortedDebts, timelineData);
     
     return sortedDebts.reduce((acc, debt) => {
@@ -62,6 +89,14 @@ export class PaymentCalculationService {
       const payoffDate = new Date();
       payoffDate.setMonth(payoffDate.getMonth() + months);
       const totalInterest = timelineData[months - 1]?.acceleratedInterest || 0;
+      const allocation = allocations.get(debt.id) || debt.minimum_payment;
+
+      console.log(`Calculating details for ${debt.name}:`, {
+        months,
+        payoffDate: payoffDate.toISOString(),
+        totalInterest,
+        monthlyPayment: allocation
+      });
 
       // Create a complete PayoffDetails object
       const details: PayoffDetails = {
@@ -71,7 +106,7 @@ export class PaymentCalculationService {
         payments: calculatePaymentSchedule(
           debt,
           { months }, // Only pass the required months property
-          allocations.get(debt.id) || debt.minimum_payment,
+          allocation,
           sortedDebts.indexOf(debt) === 0
         ),
         redistributionHistory: redistributionHistory.get(debt.id) || []
@@ -86,6 +121,8 @@ export class PaymentCalculationService {
     const redistributionHistory = new Map<string, { fromDebtId: string; amount: number; month: number; }[]>();
     const paidOffDebts = new Set<string>();
 
+    console.log('Starting redistribution tracking');
+
     timelineData.forEach((data, monthIndex) => {
       sortedDebts.forEach((debt, debtIndex) => {
         const prevMonth = monthIndex > 0 ? timelineData[monthIndex - 1] : null;
@@ -93,6 +130,7 @@ export class PaymentCalculationService {
         const isPaidOff = data.acceleratedBalance === 0;
 
         if (wasActive && isPaidOff && !paidOffDebts.has(debt.id)) {
+          console.log(`Debt ${debt.name} paid off in month ${monthIndex + 1}`);
           this.handleDebtPayoff(
             debt,
             debtIndex,
@@ -103,6 +141,12 @@ export class PaymentCalculationService {
           );
         }
       });
+    });
+
+    // Log redistribution summary
+    redistributionHistory.forEach((history, debtId) => {
+      const debt = sortedDebts.find(d => d.id === debtId);
+      console.log(`Redistribution history for ${debt?.name}:`, history);
     });
 
     return redistributionHistory;
@@ -124,6 +168,8 @@ export class PaymentCalculationService {
     );
 
     if (nextUnpaidDebt) {
+      console.log(`Redistributing ${releasedAmount} from ${debt.name} to ${nextUnpaidDebt.name} in month ${monthIndex + 1}`);
+      
       const currentRedistributions = redistributionHistory.get(nextUnpaidDebt.id) || [];
       redistributionHistory.set(nextUnpaidDebt.id, [
         ...currentRedistributions,
