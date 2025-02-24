@@ -126,13 +126,7 @@ export const AmortizationCalculator = () => {
           {amortizationSchedule.length > 0 && (
             <div className="mt-8">
               <AmortizationTable
-                debt={{
-                  name: "Calculator",
-                  balance: parseFloat(loanAmount),
-                  interest_rate: parseFloat(interestRate),
-                  is_gold_loan: false,
-                  loan_term_months: parseInt(loanTerm) * 12
-                }}
+                debt={{ name: "Calculator" }}
                 amortizationData={amortizationSchedule}
                 currencySymbol={currency}
               />
