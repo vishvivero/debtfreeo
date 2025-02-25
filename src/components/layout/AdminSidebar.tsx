@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard, 
   FileEdit, 
@@ -99,14 +98,7 @@ const menuItems = [
 
 export function AdminSidebar() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user, signOut } = useAuth();
-
-  const handleBulkUpload = () => {
-    const searchParams = new URLSearchParams();
-    searchParams.set('mode', 'simple');
-    navigate(`/admin/new-post?${searchParams.toString()}`);
-  };
 
   return (
     <Sidebar className="border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -138,12 +130,15 @@ export function AdminSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={handleBulkUpload}
+                  asChild
+                  isActive={location.pathname === '/admin/bulk-upload'}
                   tooltip="Bulk Upload Blogs"
                   className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
                 >
-                  <Upload className="h-4 w-4" />
-                  <span className="font-medium">Bulk Upload</span>
+                  <Link to="/admin/bulk-upload" className="flex items-center gap-3 px-4 py-2">
+                    <Upload className="h-4 w-4" />
+                    <span className="font-medium">Bulk Upload</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {menuItems.map((item) => (
