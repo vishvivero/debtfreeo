@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 interface BlogImageUploadProps {
   setImage: (file: File | null) => void;
   imagePreview: string | null;
+  setImagePreview: (preview: string | null) => void;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -19,7 +20,7 @@ const SUPPORTED_FORMATS = [
   'image/gif'
 ];
 
-export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps) => {
+export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: BlogImageUploadProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
@@ -71,11 +72,20 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
     try {
       if (!validateFile(file)) {
         setImage(null);
+        setImagePreview(null);
         setUploadProgress(0);
         return;
       }
 
-      // Simulate upload progress (this will be replaced by actual upload progress)
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const preview = reader.result as string;
+        setImagePreview(preview);
+      };
+      reader.readAsDataURL(file);
+
+      // Simulate upload progress
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 90) {
@@ -103,6 +113,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         description: "Failed to process image. Please try again."
       });
       setImage(null);
+      setImagePreview(null);
     } finally {
       setIsLoading(false);
     }
