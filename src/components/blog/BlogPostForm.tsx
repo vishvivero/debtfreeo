@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { BlogFormHeader } from "./form/BlogFormHeader";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { BlogContent } from "./form/BlogContent";
+import { BlogBulkUpload } from "./form/BlogBulkUpload";
 import { BlogFormProps } from "./types";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
@@ -14,12 +15,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-// Improved word count utility function with detailed logging
 const calculateReadTime = (content: string): number => {
   console.log("Starting read time calculation");
   console.log("Original content length:", content.length);
   
-  // Strip HTML tags and markdown formatting
   const strippedContent = content
     .replace(/<[^>]*>/g, '') // Remove HTML tags
     .replace(/[#*_~`]/g, '') // Remove markdown symbols
@@ -28,7 +27,6 @@ const calculateReadTime = (content: string): number => {
   
   console.log("Content after stripping HTML/markdown:", strippedContent);
   
-  // Split into words and filter empty strings
   const words = strippedContent
     .split(/\s+/)
     .filter(word => word.length > 0);
@@ -36,15 +34,12 @@ const calculateReadTime = (content: string): number => {
   console.log("Word count:", words.length);
   console.log("Words:", words);
   
-  // Average reading speed (words per minute)
   const wordsPerMinute = 225;
   console.log("Words per minute:", wordsPerMinute);
   
-  // Calculate reading time
   const readTime = Math.ceil(words.length / wordsPerMinute);
   console.log("Calculated read time (minutes):", readTime);
   
-  // Ensure minimum of 1 minute
   const finalReadTime = Math.max(1, readTime);
   console.log("Final read time (minutes):", finalReadTime);
   
@@ -102,18 +97,15 @@ export const BlogPostForm = ({
     fetchBlogData();
   }, [postId, setImagePreview]);
 
-  // Parse markdown content when in simple mode
   const parseMarkdownContent = (markdownContent: string) => {
     console.log("Parsing markdown content...");
 
-    // Extract title (first h1)
     const titleMatch = markdownContent.match(/^#\s*([^\n]+)/);
     if (titleMatch && setTitle) {
       console.log("Found title:", titleMatch[1]);
       setTitle(titleMatch[1].trim());
     }
 
-    // Extract meta information
     const metaTitleMatch = markdownContent.match(/\*\*Meta Title:\*\*\s*([^\n]+)/);
     if (metaTitleMatch && setMetaTitle) {
       console.log("Found meta title:", metaTitleMatch[1]);
@@ -133,21 +125,18 @@ export const BlogPostForm = ({
       setKeywords(keywordsArray);
     }
 
-    // Extract excerpt (between **Excerpt:** and the next section)
     const excerptMatch = markdownContent.match(/\*\*Excerpt:\*\*\s*\n\n([^#]+)/);
     if (excerptMatch && setExcerpt) {
       console.log("Found excerpt:", excerptMatch[1]);
       setExcerpt(excerptMatch[1].trim());
     }
 
-    // Extract key takeaways
     const keyTakeawaysMatch = markdownContent.match(/## Key Takeaways\n\n([\s\S]+?)(?=\n##|$)/);
     if (keyTakeawaysMatch && setKeyTakeaways) {
       console.log("Found key takeaways:", keyTakeawaysMatch[1]);
       setKeyTakeaways(keyTakeawaysMatch[1].trim());
     }
 
-    // The main content will be everything between the first ## and ## Key Takeaways
     const mainContentMatch = markdownContent.match(/^(?:.*\n)*?##\s*[^\n]+\n\n([\s\S]+?)(?=\n##\s*Key Takeaways|$)/);
     if (mainContentMatch && setContent) {
       console.log("Found main content");
@@ -155,7 +144,6 @@ export const BlogPostForm = ({
     }
   };
 
-  // Handle markdown content changes
   const handleMarkdownChange = (value: string) => {
     console.log("Markdown content changed");
     parseMarkdownContent(value);
@@ -186,7 +174,6 @@ export const BlogPostForm = ({
     try {
       let imageUrl = existingImageUrl;
 
-      // Only upload new image if one is selected
       if (image) {
         console.log("Processing new image upload...");
         const fileExt = image.name.split('.').pop();
@@ -289,7 +276,11 @@ export const BlogPostForm = ({
   if (isSimpleMode) {
     return (
       <div className="space-y-6">
-        {/* Simplified Category Selection */}
+        <BlogBulkUpload 
+          categories={categories || []} 
+          userId={user?.id || ''}
+        />
+        
         <Card className="p-6">
           <Label htmlFor="category">Category</Label>
           <select
@@ -307,7 +298,6 @@ export const BlogPostForm = ({
           </select>
         </Card>
 
-        {/* Image Upload */}
         <BlogImageUpload
           setImage={setImage}
           imagePreview={imagePreview}
@@ -315,7 +305,6 @@ export const BlogPostForm = ({
           existingImageUrl={existingImageUrl}
         />
 
-        {/* Markdown Content */}
         <Card className="p-6">
           <Label htmlFor="markdownContent">Blog Content (Markdown)</Label>
           <Textarea
