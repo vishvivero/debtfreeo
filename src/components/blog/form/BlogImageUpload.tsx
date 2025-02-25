@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 
 interface BlogImageUploadProps {
   setImage: (file: File | null) => void;
-  imagePreview: string | null | ((preview: string) => void);
+  imagePreview: string | null;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -75,25 +75,6 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         return;
       }
 
-      // Create preview before upload
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        console.log('Preview generated');
-        const preview = reader.result as string;
-        if (typeof imagePreview === 'function') {
-          imagePreview(preview);
-        }
-      };
-      reader.onerror = (error) => {
-        console.error('Error generating preview:', error);
-        toast({
-          variant: "destructive",
-          title: "Preview Error",
-          description: "Failed to generate image preview"
-        });
-      };
-      reader.readAsDataURL(file);
-
       // Simulate upload progress (this will be replaced by actual upload progress)
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -156,7 +137,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         )}
       </div>
       
-      {typeof imagePreview === 'string' && imagePreview && (
+      {imagePreview && (
         <div className="relative w-full max-w-[200px]">
           <img
             src={imagePreview}
