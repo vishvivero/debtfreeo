@@ -27,7 +27,9 @@ export const BlogImageUpload = ({
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("BlogImageUpload: Existing image URL changed:", existingImageUrl);
     if (existingImageUrl && !imagePreview) {
+      console.log("Setting image preview from existing URL");
       setImagePreview(existingImageUrl);
     }
   }, [existingImageUrl, setImagePreview, imagePreview]);
@@ -45,7 +47,9 @@ export const BlogImageUpload = ({
     console.log('Validating file:', {
       name: file.name,
       type: file.type,
-      size: file.size
+      size: file.size,
+      maxSize: MAX_FILE_SIZE,
+      supported: SUPPORTED_FORMATS.includes(file.type)
     });
 
     if (file.size > MAX_FILE_SIZE) {
@@ -69,31 +73,62 @@ export const BlogImageUpload = ({
     return true;
   };
 
+  const createPreview = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('Failed to create preview'));
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
 
-    console.log('File selected:', file.name);
+    console.log('File selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+
     setIsLoading(true);
     setUploadProgress(0);
 
     try {
       if (!validateFile(file)) {
+        console.log('File validation failed');
         setImage(null);
         setImagePreview(null);
-        setUploadProgress(0);
         return;
       }
 
-      // Create preview immediately
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const preview = reader.result as string;
+      // Create preview
+      try {
+        const preview = await createPreview(file);
+        console.log('Preview created successfully');
         setImagePreview(preview);
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error creating preview:', error);
+        toast({
+          variant: "destructive",
+          title: "Preview Error",
+          description: "Failed to create image preview"
+        });
+        return;
+      }
 
       // Set the file for later upload
+      console.log('Setting file for upload');
       setImage(file);
 
       // Simulate upload progress
@@ -107,17 +142,20 @@ export const BlogImageUpload = ({
         });
       }, 100);
 
-      setUploadProgress(100);
-      
+      // Complete the progress
       setTimeout(() => {
+        setUploadProgress(100);
         clearInterval(progressInterval);
-        setUploadProgress(0);
-      }, 500);
+        
+        setTimeout(() => {
+          setUploadProgress(0);
+        }, 500);
 
-      toast({
-        title: "Image selected",
-        description: "Image will be uploaded when you save the post",
-      });
+        toast({
+          title: "Image ready",
+          description: "Image will be uploaded when you save the post",
+        });
+      }, 1000);
 
     } catch (error) {
       console.error("Error processing image:", error);
@@ -134,6 +172,7 @@ export const BlogImageUpload = ({
   };
 
   const handleRemoveImage = () => {
+    console.log('Removing image');
     setImage(null);
     setImagePreview(null);
     setUploadProgress(0);
@@ -164,7 +203,7 @@ export const BlogImageUpload = ({
               className="w-full sm:w-auto"
             >
               <ImagePlus className="w-4 h-4 mr-2" />
-              Upload Image
+              {isLoading ? 'Processing...' : 'Upload Image'}
             </Button>
           </div>
         </div>
@@ -174,7 +213,7 @@ export const BlogImageUpload = ({
         <div className="w-full">
           <Progress value={uploadProgress} className="h-1" />
           <p className="text-sm text-muted-foreground mt-1">
-            Uploading... {uploadProgress}%
+            Processing... {uploadProgress}%
           </p>
         </div>
       )}
@@ -186,6 +225,11 @@ export const BlogImageUpload = ({
               src={imagePreview}
               alt="Preview"
               className="w-full h-auto object-cover"
+              onError={(e) => {
+                console.error('Image preview failed to load');
+                const target = e.target as HTMLImageElement;
+                target.src = 'placeholder.svg';
+              }}
             />
             <Button
               variant="destructive"
@@ -201,4 +245,3 @@ export const BlogImageUpload = ({
     </Card>
   );
 };
-
