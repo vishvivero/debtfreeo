@@ -14,23 +14,41 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-// Add word count utility function
+// Improved word count utility function with detailed logging
 const calculateReadTime = (content: string): number => {
-  // Strip HTML tags if any
-  const strippedContent = content.replace(/<[^>]*>/g, '');
+  console.log("Starting read time calculation");
+  console.log("Original content length:", content.length);
   
-  // Count words (split by spaces and filter empty strings)
-  const words = strippedContent.split(/\s+/).filter(word => word.length > 0);
+  // Strip HTML tags and markdown formatting
+  const strippedContent = content
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/[#*_~`]/g, '') // Remove markdown symbols
+    .replace(/\[\[.*?\]\]/g, '') // Remove markdown links
+    .replace(/\(.*?\)/g, ''); // Remove parentheses content
   
-  // Average reading speed is 200-250 words per minute
-  // We'll use 225 as a middle ground
+  console.log("Content after stripping HTML/markdown:", strippedContent);
+  
+  // Split into words and filter empty strings
+  const words = strippedContent
+    .split(/\s+/)
+    .filter(word => word.length > 0);
+  
+  console.log("Word count:", words.length);
+  console.log("Words:", words);
+  
+  // Average reading speed (words per minute)
   const wordsPerMinute = 225;
+  console.log("Words per minute:", wordsPerMinute);
   
-  // Calculate reading time and round up to the nearest minute
+  // Calculate reading time
   const readTime = Math.ceil(words.length / wordsPerMinute);
+  console.log("Calculated read time (minutes):", readTime);
   
-  // Return at least 1 minute
-  return Math.max(1, readTime);
+  // Ensure minimum of 1 minute
+  const finalReadTime = Math.max(1, readTime);
+  console.log("Final read time (minutes):", finalReadTime);
+  
+  return finalReadTime;
 };
 
 export const BlogPostForm = ({
