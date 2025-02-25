@@ -2,22 +2,35 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BlogImageUploadProps {
   setImage: (file: File | null) => void;
   imagePreview: string | null;
   setImagePreview: (preview: string | null) => void;
+  existingImageUrl?: string | null;
 }
 
-export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: BlogImageUploadProps) => {
+export const BlogImageUpload = ({ 
+  setImage, 
+  imagePreview, 
+  setImagePreview,
+  existingImageUrl 
+}: BlogImageUploadProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (existingImageUrl && !imagePreview) {
+      setImagePreview(existingImageUrl);
+    }
+  }, [existingImageUrl, setImagePreview, imagePreview]);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const SUPPORTED_FORMATS = [
@@ -35,9 +48,7 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
       size: file.size
     });
 
-    // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      console.log('File too large:', file.size);
       toast({
         variant: "destructive",
         title: "File too large",
@@ -46,9 +57,7 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
       return false;
     }
 
-    // Check file type
     if (!SUPPORTED_FORMATS.includes(file.type)) {
-      console.log('Unsupported format:', file.type);
       toast({
         variant: "destructive",
         title: "Unsupported format",
@@ -57,16 +66,12 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
       return false;
     }
 
-    console.log('File validation successful');
     return true;
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) {
-      console.log('No file selected');
-      return;
-    }
+    if (!file) return;
 
     console.log('File selected:', file.name);
     setIsLoading(true);
@@ -80,13 +85,16 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
         return;
       }
 
-      // Create preview
+      // Create preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
         const preview = reader.result as string;
         setImagePreview(preview);
       };
       reader.readAsDataURL(file);
+
+      // Set the file for later upload
+      setImage(file);
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -99,14 +107,17 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
         });
       }, 100);
 
-      setImage(file);
       setUploadProgress(100);
       
-      // Clear the progress interval
       setTimeout(() => {
         clearInterval(progressInterval);
         setUploadProgress(0);
       }, 500);
+
+      toast({
+        title: "Image selected",
+        description: "Image will be uploaded when you save the post",
+      });
 
     } catch (error) {
       console.error("Error processing image:", error);
@@ -170,11 +181,11 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
       
       {imagePreview && (
         <div className="relative">
-          <div className="relative w-full max-w-[300px] rounded-lg overflow-hidden">
+          <div className="relative w-full max-w-[300px] rounded-lg overflow-hidden border border-gray-200">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full h-auto"
+              className="w-full h-auto object-cover"
             />
             <Button
               variant="destructive"
@@ -190,3 +201,4 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
     </Card>
   );
 };
+

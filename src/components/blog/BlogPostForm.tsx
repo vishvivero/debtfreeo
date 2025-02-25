@@ -43,7 +43,6 @@ export const BlogPostForm = ({
   const { user } = useAuth();
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
-  // Fetch existing blog data if editing
   useEffect(() => {
     const fetchBlogData = async () => {
       if (postId) {
@@ -54,6 +53,7 @@ export const BlogPostForm = ({
           .single();
 
         if (!error && data?.image_url) {
+          console.log("Found existing image URL:", data.image_url);
           setExistingImageUrl(data.image_url);
           setImagePreview(data.image_url);
         }
@@ -88,8 +88,9 @@ export const BlogPostForm = ({
     try {
       let imageUrl = existingImageUrl;
 
+      // Only upload new image if one is selected
       if (image) {
-        console.log("Processing image upload...");
+        console.log("Processing new image upload...");
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
@@ -113,7 +114,7 @@ export const BlogPostForm = ({
           .getPublicUrl(fileName);
 
         imageUrl = publicUrl;
-        console.log("Image URL saved:", imageUrl);
+        console.log("New image URL saved:", imageUrl);
       }
 
       const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
@@ -249,6 +250,7 @@ export const BlogPostForm = ({
         setImage={setImage}
         imagePreview={imagePreview}
         setImagePreview={setImagePreview}
+        existingImageUrl={existingImageUrl}
       />
 
       <BlogContent
