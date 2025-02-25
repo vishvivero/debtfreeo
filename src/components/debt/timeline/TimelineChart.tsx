@@ -2,7 +2,7 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { format, parseISO, addMonths } from "date-fns";
+import { format, parseISO, addMonths, isEqual } from "date-fns";
 
 interface TimelineChartProps {
   debts: Debt[];
@@ -45,12 +45,22 @@ export const TimelineChart = ({
     let acceleratedBalance = totalInitialBalance;
 
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
-      const date = addMonths(startDate, index);
+      const currentDate = addMonths(startDate, index);
+      
+      // Check for one-time fundings that occur on this date
+      const fundingsForMonth = oneTimeFundings.filter(funding => {
+        const fundingDate = new Date(funding.payment_date);
+        return fundingDate.getMonth() === currentDate.getMonth() && 
+               fundingDate.getFullYear() === currentDate.getFullYear();
+      });
+      
+      const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => 
+        sum + Number(funding.amount), 0);
 
       // First data point should show initial balance
       if (index === 0) {
         return {
-          date: format(date, 'yyyy-MM-dd'),
+          date: format(currentDate, 'yyyy-MM-dd'),
           baselineBalance: totalInitialBalance,
           acceleratedBalance: totalInitialBalance
         };
@@ -61,10 +71,11 @@ export const TimelineChart = ({
       baselineBalance = Math.max(0, baselineBalance + baselineInterest - baselineMonthlyPayment);
 
       const acceleratedInterest = acceleratedBalance * monthlyInterestRate;
-      acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedMonthlyPayment);
+      // Apply both monthly payment and any one-time funding
+      acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedMonthlyPayment - totalFundingAmount);
 
       return {
-        date: format(date, 'yyyy-MM-dd'),
+        date: format(currentDate, 'yyyy-MM-dd'),
         baselineBalance: Math.round(baselineBalance * 100) / 100,
         acceleratedBalance: Math.round(acceleratedBalance * 100) / 100
       };
