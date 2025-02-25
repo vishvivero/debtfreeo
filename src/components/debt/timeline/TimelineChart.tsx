@@ -5,7 +5,6 @@ import { OneTimeFunding } from "@/lib/types/payment";
 import { format, parseISO, addMonths } from "date-fns";
 
 interface TimelineChartProps {
-  data?: any[];
   debts: Debt[];
   baselineMonths: number;
   acceleratedMonths: number;
@@ -29,10 +28,8 @@ export const TimelineChart = ({
     const startDate = new Date();
     const maxMonths = Math.max(baselineMonths, acceleratedMonths);
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
-    const monthlyInterestRate = avgInterestRate / 1200; // Convert annual rate to monthly
-
-    // Calculate monthly payments
+    
+    // Calculate monthly payments without interest for simplicity
     const baselineMonthlyPayment = totalInitialBalance / baselineMonths;
     const acceleratedMonthlyPayment = totalInitialBalance / acceleratedMonths;
 
@@ -42,22 +39,16 @@ export const TimelineChart = ({
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const date = addMonths(startDate, index);
 
-      // Calculate baseline path with interest
-      if (index > 0 && baselineBalance > 0) {
-        const interest = baselineBalance * monthlyInterestRate;
-        baselineBalance = Math.max(0, baselineBalance + interest - baselineMonthlyPayment);
-      }
-
-      // Calculate accelerated path with interest
-      if (index > 0 && acceleratedBalance > 0) {
-        const interest = acceleratedBalance * monthlyInterestRate;
-        acceleratedBalance = Math.max(0, acceleratedBalance + interest - acceleratedMonthlyPayment);
+      // Calculate remaining balances
+      if (index > 0) {
+        baselineBalance = Math.max(0, baselineBalance - baselineMonthlyPayment);
+        acceleratedBalance = Math.max(0, acceleratedBalance - acceleratedMonthlyPayment);
       }
 
       return {
         date: format(date, 'yyyy-MM-dd'),
-        baselineBalance: Math.max(0, baselineBalance),
-        acceleratedBalance: Math.max(0, acceleratedBalance)
+        baselineBalance: Math.round(baselineBalance * 100) / 100,
+        acceleratedBalance: Math.round(acceleratedBalance * 100) / 100
       };
     });
 
