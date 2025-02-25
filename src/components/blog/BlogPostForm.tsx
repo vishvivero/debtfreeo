@@ -34,6 +34,7 @@ export const BlogPostForm = ({
   setMetaDescription,
   keywords,
   setKeywords,
+  postId, // Add postId prop for identifying existing posts
 }: BlogFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -91,52 +92,73 @@ export const BlogPostForm = ({
           .from('blog-images')
           .getPublicUrl(fileName);
 
-        imageUrl = publicUrl; // Store the full public URL in the database
+        imageUrl = publicUrl;
         console.log("Image URL saved:", imageUrl);
       }
 
-      // Generate a unique slug by appending a timestamp
-      const timestamp = new Date().getTime();
-      const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
-      
       const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
+      const updateData = {
+        title,
+        content,
+        excerpt,
+        category: category || 'uncategorized',
+        is_published: !isDraft,
+        meta_title: metaTitle || title,
+        meta_description: metaDescription || excerpt,
+        keywords: keywordsArray,
+        key_takeaways: keyTakeaways || '',
+        updated_at: new Date().toISOString(),
+        ...(imageUrl && { image_url: imageUrl }), // Only include image_url if a new image was uploaded
+      };
 
-      console.log("Creating blog post entry...");
-      const { error: postError } = await supabase
-        .from('blogs')
-        .insert({
-          title,
-          content,
-          excerpt,
-          category: category || 'uncategorized',
-          author_id: user.id,
-          is_published: !isDraft,
-          image_url: imageUrl,
-          slug,
-          meta_title: metaTitle || title,
-          meta_description: metaDescription || excerpt,
-          keywords: keywordsArray,
-          key_takeaways: keyTakeaways || '',
-        });
-
-      if (postError) {
-        console.error("Blog post creation error:", postError);
-        throw postError;
+      let error;
+      
+      if (postId) {
+        // Update existing post
+        console.log("Updating existing blog post:", postId);
+        const { error: updateError } = await supabase
+          .from('blogs')
+          .update(updateData)
+          .eq('id', postId);
+        error = updateError;
+      } else {
+        // Create new post
+        console.log("Creating new blog post");
+        const timestamp = new Date().getTime();
+        const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
+        
+        const { error: insertError } = await supabase
+          .from('blogs')
+          .insert({
+            ...updateData,
+            author_id: user.id,
+            slug,
+          });
+        error = insertError;
       }
 
-      console.log("Blog post created successfully");
+      if (error) {
+        console.error("Blog post operation error:", error);
+        throw error;
+      }
+
+      console.log("Blog post operation completed successfully");
       toast({
         title: "Success",
-        description: isDraft ? "Draft saved successfully" : "Post published successfully",
+        description: postId 
+          ? "Post updated successfully" 
+          : (isDraft ? "Draft saved successfully" : "Post published successfully"),
       });
 
       navigate('/admin/blogs');
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error('Error with blog post operation:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create post. Please try again.",
+        description: postId 
+          ? "Failed to update post. Please try again." 
+          : "Failed to create post. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -236,7 +258,7 @@ export const BlogPostForm = ({
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : null}
-          Save as Draft
+          {postId ? "Update as Draft" : "Save as Draft"}
         </Button>
         <Button
           onClick={() => handleSubmit(false)}
@@ -245,7 +267,7 @@ export const BlogPostForm = ({
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : null}
-          Publish
+          {postId ? "Update & Publish" : "Publish"}
         </Button>
       </div>
     </div>
