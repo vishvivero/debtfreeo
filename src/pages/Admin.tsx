@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -185,11 +186,17 @@ const NewBlogPost = () => {
 
 const Admin = () => {
   const { user } = useAuth();
+  console.log("Admin page - Current user:", user?.id);
   
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.id) {
+        console.log("No user ID available for profile check");
+        return null;
+      }
+
+      console.log("Checking admin status for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -200,13 +207,23 @@ const Admin = () => {
         console.error("Error fetching profile:", error);
         throw error;
       }
+
+      console.log("Profile data received:", data);
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 60 * 5,
+    retry: false
+  });
+
+  console.log("Admin access check:", {
+    isLoading: profileLoading,
+    hasError: !!profileError,
+    isAdmin: profile?.is_admin
   });
 
   if (!user) {
+    console.log("No user found, redirecting to home");
     return <Navigate to="/" replace />;
   }
 
@@ -219,6 +236,7 @@ const Admin = () => {
   }
 
   if (profileError || !profile?.is_admin) {
+    console.log("Access denied:", { error: profileError, isAdmin: profile?.is_admin });
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
