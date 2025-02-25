@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -10,8 +9,10 @@ import { BlogContent } from "./form/BlogContent";
 import { BlogFormProps } from "./types";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export const BlogPostForm = ({
   title,
@@ -36,7 +37,8 @@ export const BlogPostForm = ({
   keywords,
   setKeywords,
   postId,
-}: BlogFormProps) => {
+  isSimpleMode,
+}: BlogFormProps & { isSimpleMode: boolean }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -184,12 +186,83 @@ export const BlogPostForm = ({
     }
   };
 
-  const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (setKeywords) {
-      const keywordsString = e.target.value;
-      setKeywords(keywordsString.split(',').map(k => k.trim()));
-    }
-  };
+  if (isSimpleMode) {
+    return (
+      <div className="space-y-6">
+        {/* Simplified Category Selection */}
+        <Card className="p-6">
+          <Label htmlFor="category">Category</Label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full p-2 border rounded-md mt-2"
+          >
+            <option value="">Select a category</option>
+            {categories?.map((cat) => (
+              <option key={cat.id} value={cat.slug}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </Card>
+
+        {/* Image Upload */}
+        <BlogImageUpload
+          setImage={setImage}
+          imagePreview={imagePreview}
+          setImagePreview={setImagePreview}
+          existingImageUrl={existingImageUrl}
+        />
+
+        {/* Markdown Content */}
+        <Card className="p-6">
+          <Label htmlFor="markdownContent">Blog Content (Markdown)</Label>
+          <Textarea
+            id="markdownContent"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={`# Title
+
+**Meta Title:** Your SEO title
+
+**Meta Description:** Your SEO description
+
+**Keywords:** keyword1, keyword2, keyword3
+
+**Excerpt:** Brief summary of your post
+
+## Content
+
+Your blog post content here...`}
+            className="h-[500px] font-mono mt-2"
+          />
+        </Card>
+
+        <div className="flex justify-end gap-4">
+          <Button
+            variant="outline"
+            onClick={() => handleSubmit(true)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : null}
+            Save as Draft
+          </Button>
+          <Button
+            onClick={() => handleSubmit(false)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : null}
+            Publish
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -239,7 +312,12 @@ export const BlogPostForm = ({
               id="keywords"
               placeholder="e.g., debt management, financial planning, savings"
               value={keywords?.join(', ')}
-              onChange={handleKeywordsChange}
+              onChange={(e) => {
+                if (setKeywords) {
+                  const keywordsString = e.target.value;
+                  setKeywords(keywordsString.split(',').map(k => k.trim()));
+                }
+              }}
               className="max-w-2xl"
             />
           </div>
