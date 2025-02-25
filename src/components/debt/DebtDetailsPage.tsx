@@ -33,16 +33,21 @@ export const DebtDetailsPage = () => {
   const [monthlyPayment, setMonthlyPayment] = useState(0);
 
   const debt = debts?.find(d => d.id === debtId);
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
   
+  // Set initial monthly payment when debt is loaded
   useEffect(() => {
     if (debt) {
+      console.log('Setting initial monthly payment:', debt.minimum_payment);
       setMonthlyPayment(debt.minimum_payment);
     }
   }, [debt]);
 
+  // Fetch payment history
   useEffect(() => {
     const fetchPaymentHistory = async () => {
-      if (!debt) return;
+      if (!debt?.user_id || !debt?.id) return;
 
       console.log('Fetching payment history for debt:', debt.id);
 
@@ -76,9 +81,25 @@ export const DebtDetailsPage = () => {
     fetchPaymentHistory();
   }, [debt]);
 
+  // Early return if debt or profile is not loaded
   if (!debt || !profile) {
-    console.log('Debt not found for id:', debtId);
-    return <div>Debt not found</div>;
+    console.log('Required data not loaded:', { hasDebt: !!debt, hasProfile: !!profile, debtId });
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Debt not found</h2>
+            <p className="mt-2 text-gray-600">The requested debt could not be found.</p>
+            <Button 
+              onClick={() => navigate('/overview/debts')}
+              className="mt-4 bg-primary hover:bg-primary/90 text-white"
+            >
+              Return to Debts Overview
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    );
   }
 
   const isPayable = isDebtPayable(debt);
@@ -122,10 +143,6 @@ export const DebtDetailsPage = () => {
       </Dialog>
     );
   }
-
-  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
-  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
-  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
   return (
     <MainLayout>
