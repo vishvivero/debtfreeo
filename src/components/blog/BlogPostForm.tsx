@@ -65,6 +65,29 @@ export const BlogPostForm = ({
     fetchBlogData();
   }, [postId, setImagePreview]);
 
+  // Parse markdown content when in simple mode
+  const parseMarkdownContent = (markdownContent: string) => {
+    const metaTitleMatch = markdownContent.match(/\*\*Meta Title:\*\*\s*([^\n]*)/);
+    const metaDescriptionMatch = markdownContent.match(/\*\*Meta Description:\*\*\s*([^\n]*)/);
+    const keywordsMatch = markdownContent.match(/\*\*Keywords:\*\*\s*([^\n]*)/);
+    const excerptMatch = markdownContent.match(/\*\*Excerpt:\*\*\s*([^\n]*)/);
+    const titleMatch = markdownContent.match(/^#\s*([^\n]*)/);
+    const contentMatch = markdownContent.match(/## Content\s*\n\n([\s\S]*?)$/);
+
+    if (titleMatch && setTitle) setTitle(titleMatch[1].trim());
+    if (metaTitleMatch && setMetaTitle) setMetaTitle(metaTitleMatch[1].trim());
+    if (metaDescriptionMatch && setMetaDescription) setMetaDescription(metaDescriptionMatch[1].trim());
+    if (keywordsMatch && setKeywords) setKeywords(keywordsMatch[1].split(',').map(k => k.trim()));
+    if (excerptMatch && setExcerpt) setExcerpt(excerptMatch[1].trim());
+    if (contentMatch && setContent) setContent(contentMatch[1].trim());
+  };
+
+  // Handle markdown content changes
+  const handleMarkdownChange = (value: string) => {
+    setContent(value);
+    parseMarkdownContent(value);
+  };
+
   const handleSubmit = async (isDraft: boolean = true) => {
     if (!user) {
       toast({
@@ -221,7 +244,7 @@ export const BlogPostForm = ({
           <Textarea
             id="markdownContent"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => handleMarkdownChange(e.target.value)}
             placeholder={`# Title
 
 **Meta Title:** Your SEO title
