@@ -2,6 +2,9 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { MarkdownToggle } from "./MarkdownToggle";
 
 interface BlogContentProps {
   excerpt: string;
@@ -20,6 +23,8 @@ export const BlogContent = ({
   keyTakeaways,
   setKeyTakeaways,
 }: BlogContentProps) => {
+  const [isPreview, setIsPreview] = useState(false);
+
   return (
     <Card className="p-6">
       <div className="space-y-4">
@@ -35,14 +40,30 @@ export const BlogContent = ({
         </div>
         
         <div>
-          <Label htmlFor="content">Content</Label>
-          <Textarea
-            id="content"
-            placeholder="Write your blog post content here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="h-64"
-          />
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="content">Content</Label>
+            <MarkdownToggle 
+              isPreview={isPreview} 
+              onToggle={() => setIsPreview(!isPreview)} 
+            />
+          </div>
+          
+          {isPreview ? (
+            <div className="prose max-w-none p-4 border rounded-md bg-white min-h-[256px]">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+          ) : (
+            <Textarea
+              id="content"
+              placeholder="Write your blog post content here... (Markdown supported)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="h-64 font-mono"
+            />
+          )}
+          <p className="text-sm text-muted-foreground mt-2">
+            Markdown formatting is supported
+          </p>
         </div>
         
         <div>
