@@ -33,7 +33,8 @@ export const NewPost = () => {
             setCategory={setCategory}
             image={image}
             setImage={setImage}
-            imagePreview={setImagePreview}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
             keyTakeaways={keyTakeaways}
             setKeyTakeaways={setKeyTakeaways}
             metaTitle={metaTitle}

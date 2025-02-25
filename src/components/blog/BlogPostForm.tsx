@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ export const BlogPostForm = ({
   image,
   setImage,
   imagePreview,
+  setImagePreview,
   keyTakeaways,
   setKeyTakeaways,
   metaTitle,
@@ -66,7 +66,6 @@ export const BlogPostForm = ({
     try {
       let imageUrl = null;
 
-      // Handle image upload if an image is selected
       if (image) {
         console.log("Processing image upload...");
         const fileExt = image.name.split('.').pop();
@@ -87,7 +86,6 @@ export const BlogPostForm = ({
 
         console.log("Image upload successful:", data);
         
-        // Get the public URL for the uploaded image
         const { data: { publicUrl } } = supabase.storage
           .from('blog-images')
           .getPublicUrl(fileName);
@@ -108,13 +106,12 @@ export const BlogPostForm = ({
         keywords: keywordsArray,
         key_takeaways: keyTakeaways || '',
         updated_at: new Date().toISOString(),
-        ...(imageUrl && { image_url: imageUrl }), // Only include image_url if a new image was uploaded
+        ...(imageUrl && { image_url: imageUrl }),
       };
 
       let error;
       
       if (postId) {
-        // Update existing post
         console.log("Updating existing blog post:", postId);
         const { error: updateError } = await supabase
           .from('blogs')
@@ -122,7 +119,6 @@ export const BlogPostForm = ({
           .eq('id', postId);
         error = updateError;
       } else {
-        // Create new post
         console.log("Creating new blog post");
         const timestamp = new Date().getTime();
         const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
@@ -230,6 +226,7 @@ export const BlogPostForm = ({
       <BlogImageUpload
         setImage={setImage}
         imagePreview={imagePreview}
+        setImagePreview={setImagePreview}
       />
 
       <BlogContent
@@ -239,14 +236,6 @@ export const BlogPostForm = ({
         setContent={setContent}
         keyTakeaways={keyTakeaways}
         setKeyTakeaways={setKeyTakeaways}
-        title={title}
-        setTitle={setTitle}
-        metaTitle={metaTitle}
-        setMetaTitle={setMetaTitle}
-        metaDescription={metaDescription}
-        setMetaDescription={setMetaDescription}
-        keywords={keywords}
-        setKeywords={setKeywords}
       />
 
       <div className="flex justify-end gap-4">
