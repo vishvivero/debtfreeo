@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ const EditBlogPost = () => {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [isSimpleMode, setIsSimpleMode] = useState(false);
 
   const { data: blog, isLoading: blogLoading } = useQuery({
     queryKey: ["blog", id],
@@ -116,6 +118,7 @@ const EditBlogPost = () => {
       keywords={keywords}
       setKeywords={setKeywords}
       postId={id}
+      isSimpleMode={isSimpleMode}
     />
   );
 };
@@ -131,6 +134,7 @@ const NewBlogPost = () => {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [isSimpleMode, setIsSimpleMode] = useState(false);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["blog-categories"],
@@ -179,6 +183,7 @@ const NewBlogPost = () => {
       setMetaDescription={setMetaDescription}
       keywords={keywords}
       setKeywords={setKeywords}
+      isSimpleMode={isSimpleMode}
     />
   );
 };

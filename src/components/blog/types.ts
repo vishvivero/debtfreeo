@@ -22,4 +22,5 @@ export interface BlogFormProps {
   keywords?: string[];
   setKeywords?: (value: string[]) => void;
   postId?: string;
+  isSimpleMode: boolean;
 }
