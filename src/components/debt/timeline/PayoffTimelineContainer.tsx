@@ -103,7 +103,6 @@ export const PayoffTimelineContainer = ({
 
       <TimelineChart
         debts={debts}
-        extraPayment={extraPayment}
         baselineMonths={timelineResults.baselineMonths}
         acceleratedMonths={timelineResults.acceleratedMonths}
         currencySymbol={currencySymbol}

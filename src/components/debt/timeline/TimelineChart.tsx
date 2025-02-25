@@ -1,20 +1,74 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { format, parseISO } from "date-fns";
-import { TimelineTooltip } from "./TimelineTooltip";
+import { Debt } from "@/lib/types";
+import { OneTimeFunding } from "@/lib/types/payment";
+import { format, parseISO, addMonths } from "date-fns";
 
 interface TimelineChartProps {
-  data: any[];
-  debts: any[];
-  formattedFundings: OneTimeFunding[];
+  data?: any[];
+  debts: Debt[];
+  baselineMonths: number;
+  acceleratedMonths: number;
+  currencySymbol: string;
+  oneTimeFundings: OneTimeFunding[];
+  customTooltip: any;
 }
 
-export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartProps) => {
+export const TimelineChart = ({ 
+  debts,
+  baselineMonths,
+  acceleratedMonths,
+  currencySymbol,
+  oneTimeFundings,
+  customTooltip: TooltipComponent 
+}: TimelineChartProps) => {
+  // Generate timeline data
+  const generateTimelineData = () => {
+    if (!debts.length) return [];
+
+    const startDate = new Date();
+    const maxMonths = Math.max(baselineMonths, acceleratedMonths);
+    const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
+
+    const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
+      const date = addMonths(startDate, index);
+      const baselineBalance = index <= baselineMonths 
+        ? totalInitialBalance * (1 - index / baselineMonths)
+        : 0;
+      const acceleratedBalance = index <= acceleratedMonths 
+        ? totalInitialBalance * (1 - index / acceleratedMonths)
+        : 0;
+
+      return {
+        date: format(date, 'yyyy-MM-dd'),
+        baselineBalance: Math.max(0, baselineBalance),
+        acceleratedBalance: Math.max(0, acceleratedBalance)
+      };
+    });
+
+    return data;
+  };
+
+  // Format one-time fundings for display
+  const formattedFundings = oneTimeFundings.map(funding => ({
+    ...funding,
+    payment_date: format(new Date(funding.payment_date), 'yyyy-MM-dd')
+  }));
+
+  const chartData = generateTimelineData();
+
+  if (!chartData.length) {
+    return (
+      <div className="h-[400px] flex items-center justify-center text-gray-500">
+        No data available for timeline chart
+      </div>
+    );
+  }
+
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
+        <AreaChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
@@ -43,11 +97,11 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
             minTickGap={30}
           />
           <YAxis 
-            tickFormatter={(value) => `${debts[0].currency_symbol}${value.toLocaleString()}`}
+            tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
             tick={{ fontSize: 12, fill: '#6B7280' }}
             tickLine={{ stroke: '#9CA3AF' }}
           />
-          <Tooltip content={<TimelineTooltip />} />
+          <Tooltip content={<TooltipComponent />} />
           <Legend />
           
           {formattedFundings.map((funding, index) => (
@@ -57,7 +111,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               stroke="#9333EA"
               strokeDasharray="3 3"
               label={{
-                value: `${debts[0].currency_symbol}${funding.amount}`,
+                value: `${currencySymbol}${funding.amount}`,
                 position: 'top',
                 fill: '#9333EA',
                 fontSize: 12
