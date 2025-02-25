@@ -27,36 +27,19 @@ export const TimelineChart = ({
 
     const startDate = new Date();
     const maxMonths = Math.max(baselineMonths, acceleratedMonths);
+    
+    // Initialize balances for each debt
+    const debtBalances = new Map(debts.map(debt => [debt.id, debt.balance]));
+    const acceleratedDebtBalances = new Map(debts.map(debt => [debt.id, debt.balance]));
+    
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
     
-    // Calculate weighted average interest rate based on debt balances
-    const weightedInterestRate = debts.reduce((sum, debt) => {
-      return sum + (debt.interest_rate * (debt.balance / totalInitialBalance));
-    }, 0);
-    const monthlyInterestRate = weightedInterestRate / 1200; // Convert annual rate to monthly
-
-    // Calculate required monthly payments to fully amortize the debt
-    const baselineMonthlyPayment = (totalInitialBalance * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, baselineMonths)) / 
-      (Math.pow(1 + monthlyInterestRate, baselineMonths) - 1);
-    const acceleratedMonthlyPayment = (totalInitialBalance * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, acceleratedMonths)) / 
-      (Math.pow(1 + monthlyInterestRate, acceleratedMonths) - 1);
-
-    let baselineBalance = totalInitialBalance;
-    let acceleratedBalance = totalInitialBalance;
+    // Sort debts by interest rate (highest first) for avalanche strategy
+    const sortedDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
 
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const currentDate = addMonths(startDate, index);
       
-      // Check for one-time fundings that occur on this date
-      const fundingsForMonth = oneTimeFundings.filter(funding => {
-        const fundingDate = new Date(funding.payment_date);
-        return fundingDate.getMonth() === currentDate.getMonth() && 
-               fundingDate.getFullYear() === currentDate.getFullYear();
-      });
-      
-      const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => 
-        sum + Number(funding.amount), 0);
-
       // First data point should show initial balance
       if (index === 0) {
         return {
@@ -66,18 +49,56 @@ export const TimelineChart = ({
         };
       }
 
-      // Calculate remaining balance with amortization
-      const baselineInterest = baselineBalance * monthlyInterestRate;
-      baselineBalance = Math.max(0, baselineBalance + baselineInterest - baselineMonthlyPayment);
+      // Process baseline scenario (minimum payments only)
+      let totalBaselineBalance = 0;
+      debtBalances.forEach((balance, debtId) => {
+        const debt = debts.find(d => d.id === debtId)!;
+        const monthlyInterest = (balance * debt.interest_rate) / 1200;
+        const newBalance = Math.max(0, balance + monthlyInterest - debt.minimum_payment);
+        debtBalances.set(debtId, newBalance);
+        totalBaselineBalance += newBalance;
+      });
 
-      const acceleratedInterest = acceleratedBalance * monthlyInterestRate;
-      // Apply both monthly payment and any one-time funding
-      acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedMonthlyPayment - totalFundingAmount);
+      // Process accelerated scenario with one-time fundings
+      let totalAcceleratedBalance = 0;
+      let availablePayment = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+
+      // Add one-time fundings for this month
+      const fundingsForMonth = oneTimeFundings.filter(funding => {
+        const fundingDate = new Date(funding.payment_date);
+        return fundingDate.getMonth() === currentDate.getMonth() && 
+               fundingDate.getFullYear() === currentDate.getFullYear();
+      });
+      
+      const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => 
+        sum + Number(funding.amount), 0);
+      availablePayment += totalFundingAmount;
+
+      // Apply payments according to strategy (highest interest first)
+      for (const debt of sortedDebts) {
+        const currentBalance = acceleratedDebtBalances.get(debt.id)!;
+        const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
+        
+        // First apply minimum payment
+        let payment = Math.min(debt.minimum_payment, availablePayment);
+        availablePayment -= payment;
+
+        // If there's extra payment available and this is highest priority debt
+        if (availablePayment > 0 && debt.id === sortedDebts[0].id) {
+          const extraPayment = Math.min(availablePayment, currentBalance);
+          payment += extraPayment;
+          availablePayment -= extraPayment;
+        }
+
+        const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
+        acceleratedDebtBalances.set(debt.id, newBalance);
+        totalAcceleratedBalance += newBalance;
+      }
 
       return {
         date: format(currentDate, 'yyyy-MM-dd'),
-        baselineBalance: Math.round(baselineBalance * 100) / 100,
-        acceleratedBalance: Math.round(acceleratedBalance * 100) / 100
+        baselineBalance: Math.round(totalBaselineBalance * 100) / 100,
+        acceleratedBalance: Math.round(totalAcceleratedBalance * 100) / 100
       };
     });
 
