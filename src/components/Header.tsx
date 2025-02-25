@@ -98,11 +98,9 @@ const Header = () => {
             <Link to="/" className="font-bold text-xl text-primary">
               Debtfreeo
             </Link>
-            {!user && (
-              <div className="hidden lg:block">
-                <Navigation />
-              </div>
-            )}
+            <div className="hidden lg:block">
+              <Navigation />
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
