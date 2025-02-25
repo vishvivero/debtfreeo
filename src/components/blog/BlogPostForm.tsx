@@ -67,24 +67,60 @@ export const BlogPostForm = ({
 
   // Parse markdown content when in simple mode
   const parseMarkdownContent = (markdownContent: string) => {
-    const metaTitleMatch = markdownContent.match(/\*\*Meta Title:\*\*\s*([^\n]*)/);
-    const metaDescriptionMatch = markdownContent.match(/\*\*Meta Description:\*\*\s*([^\n]*)/);
-    const keywordsMatch = markdownContent.match(/\*\*Keywords:\*\*\s*([^\n]*)/);
-    const excerptMatch = markdownContent.match(/\*\*Excerpt:\*\*\s*([^\n]*)/);
-    const titleMatch = markdownContent.match(/^#\s*([^\n]*)/);
-    const contentMatch = markdownContent.match(/## Content\s*\n\n([\s\S]*?)$/);
+    console.log("Parsing markdown content...");
 
-    if (titleMatch && setTitle) setTitle(titleMatch[1].trim());
-    if (metaTitleMatch && setMetaTitle) setMetaTitle(metaTitleMatch[1].trim());
-    if (metaDescriptionMatch && setMetaDescription) setMetaDescription(metaDescriptionMatch[1].trim());
-    if (keywordsMatch && setKeywords) setKeywords(keywordsMatch[1].split(',').map(k => k.trim()));
-    if (excerptMatch && setExcerpt) setExcerpt(excerptMatch[1].trim());
-    if (contentMatch && setContent) setContent(contentMatch[1].trim());
+    // Extract title (first h1)
+    const titleMatch = markdownContent.match(/^#\s*([^\n]+)/);
+    if (titleMatch && setTitle) {
+      console.log("Found title:", titleMatch[1]);
+      setTitle(titleMatch[1].trim());
+    }
+
+    // Extract meta information
+    const metaTitleMatch = markdownContent.match(/\*\*Meta Title:\*\*\s*([^\n]+)/);
+    if (metaTitleMatch && setMetaTitle) {
+      console.log("Found meta title:", metaTitleMatch[1]);
+      setMetaTitle(metaTitleMatch[1].trim());
+    }
+
+    const metaDescriptionMatch = markdownContent.match(/\*\*Meta Description:\*\*\s*([^\n]+)/);
+    if (metaDescriptionMatch && setMetaDescription) {
+      console.log("Found meta description:", metaDescriptionMatch[1]);
+      setMetaDescription(metaDescriptionMatch[1].trim());
+    }
+
+    const keywordsMatch = markdownContent.match(/\*\*Keywords:\*\*\s*([^\n]+)/);
+    if (keywordsMatch && setKeywords) {
+      const keywordsArray = keywordsMatch[1].split(',').map(k => k.trim());
+      console.log("Found keywords:", keywordsArray);
+      setKeywords(keywordsArray);
+    }
+
+    // Extract excerpt (between **Excerpt:** and the next section)
+    const excerptMatch = markdownContent.match(/\*\*Excerpt:\*\*\s*\n\n([^#]+)/);
+    if (excerptMatch && setExcerpt) {
+      console.log("Found excerpt:", excerptMatch[1]);
+      setExcerpt(excerptMatch[1].trim());
+    }
+
+    // Extract key takeaways
+    const keyTakeawaysMatch = markdownContent.match(/## Key Takeaways\n\n([\s\S]+?)(?=\n##|$)/);
+    if (keyTakeawaysMatch && setKeyTakeaways) {
+      console.log("Found key takeaways:", keyTakeawaysMatch[1]);
+      setKeyTakeaways(keyTakeawaysMatch[1].trim());
+    }
+
+    // The main content will be everything between the first ## and ## Key Takeaways
+    const mainContentMatch = markdownContent.match(/^(?:.*\n)*?##\s*[^\n]+\n\n([\s\S]+?)(?=\n##\s*Key Takeaways|$)/);
+    if (mainContentMatch && setContent) {
+      console.log("Found main content");
+      setContent(mainContentMatch[1].trim());
+    }
   };
 
   // Handle markdown content changes
   const handleMarkdownChange = (value: string) => {
-    setContent(value);
+    console.log("Markdown content changed");
     parseMarkdownContent(value);
   };
 
@@ -253,11 +289,19 @@ export const BlogPostForm = ({
 
 **Keywords:** keyword1, keyword2, keyword3
 
-**Excerpt:** Brief summary of your post
+**Excerpt:**
+
+Brief summary of your post
 
 ## Content
 
-Your blog post content here...`}
+Your blog post content here...
+
+## Key Takeaways
+
+* Key point 1
+* Key point 2
+* Key point 3`}
             className="h-[500px] font-mono mt-2"
           />
         </Card>
