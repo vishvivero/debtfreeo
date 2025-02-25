@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -73,7 +74,10 @@ export const BlogPostForm = ({
         console.log("Uploading image to storage:", fileName);
         const { error: uploadError, data } = await supabase.storage
           .from('blog-images')
-          .upload(fileName, image);
+          .upload(fileName, image, {
+            upsert: false,
+            contentType: image.type
+          });
 
         if (uploadError) {
           console.error("Image upload error:", uploadError);
