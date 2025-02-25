@@ -4,6 +4,7 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useProfile } from "@/hooks/use-profile";
 import { strategies } from "@/lib/strategies";
 import { PayoffTimelineContainer } from "./timeline/PayoffTimelineContainer";
+import { Loader2 } from "lucide-react";
 
 interface PayoffTimelineProps {
   debts: Debt[];
@@ -12,10 +13,18 @@ interface PayoffTimelineProps {
 
 export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => {
   const { oneTimeFundings } = useOneTimeFunding();
-  const { profile } = useProfile();
+  const { profile, isLoading: isProfileLoading } = useProfile();
   
-  if (!debts?.length || !profile) {
-    console.log('No debts or profile available:', { 
+  if (isProfileLoading || !profile) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!debts?.length) {
+    console.log('No debts available:', { 
       debtCount: debts?.length, 
       hasProfile: !!profile 
     });
@@ -23,6 +32,11 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   }
 
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
+  console.log('PayoffTimeline render:', {
+    debtsCount: debts.length,
+    extraPayment,
+    selectedStrategy: selectedStrategy.name
+  });
 
   return (
     <PayoffTimelineContainer
