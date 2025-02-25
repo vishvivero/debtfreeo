@@ -15,9 +15,10 @@ import {
   BarChart,
   ScrollText,
   Activity,
-  Flag
+  Flag,
+  Upload
 } from "lucide-react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import {
   Sidebar,
@@ -98,7 +99,14 @@ const menuItems = [
 
 export function AdminSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  const handleBulkUpload = () => {
+    const searchParams = new URLSearchParams();
+    searchParams.set('mode', 'simple');
+    navigate(`/admin/new-post?${searchParams.toString()}`);
+  };
 
   return (
     <Sidebar className="border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -128,6 +136,16 @@ export function AdminSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleBulkUpload}
+                  tooltip="Bulk Upload Blogs"
+                  className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="font-medium">Bulk Upload</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
