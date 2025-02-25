@@ -35,17 +35,51 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings: oneTimeFundings.length
     });
 
-    // Input validation
-    if (!debts.length || monthlyPayment <= 0) {
-      console.error('Invalid calculation inputs:', { debts: debts.length, monthlyPayment });
-      throw new Error('Invalid calculation inputs');
+    // Input validation with detailed error messages
+    if (!Array.isArray(debts) || debts.length === 0) {
+      console.error('Invalid or empty debts array:', debts);
+      throw new Error('No valid debts provided for calculation');
+    }
+
+    if (typeof monthlyPayment !== 'number' || monthlyPayment <= 0) {
+      console.error('Invalid monthly payment:', monthlyPayment);
+      throw new Error(`Invalid monthly payment amount: ${monthlyPayment}`);
+    }
+
+    if (!strategy || !strategy.name) {
+      console.error('Invalid strategy:', strategy);
+      throw new Error('Invalid debt repayment strategy');
     }
 
     // Ensure we don't exceed memory limits
     const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
-    if (totalBalance <= 0 || totalBalance > Number.MAX_SAFE_INTEGER) {
-      console.error('Invalid total balance:', totalBalance);
-      throw new Error('Invalid total balance');
+    if (totalBalance <= 0) {
+      console.log('All debts are already paid off');
+      return {
+        baselineMonths: 0,
+        acceleratedMonths: 0,
+        baselineInterest: 0,
+        acceleratedInterest: 0,
+        monthsSaved: 0,
+        interestSaved: 0,
+        payoffDate: new Date(),
+        monthlyPayments: []
+      };
+    }
+
+    if (totalBalance > Number.MAX_SAFE_INTEGER) {
+      console.error('Total balance exceeds safe calculation limits:', totalBalance);
+      throw new Error('Total debt amount is too large for accurate calculations');
+    }
+
+    // Validate minimum payments
+    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+    if (monthlyPayment < totalMinimumPayment) {
+      console.error('Monthly payment is less than total minimum payments required:', {
+        provided: monthlyPayment,
+        required: totalMinimumPayment
+      });
+      throw new Error(`Monthly payment (${monthlyPayment}) must be at least equal to total minimum payments (${totalMinimumPayment})`);
     }
 
     try {
