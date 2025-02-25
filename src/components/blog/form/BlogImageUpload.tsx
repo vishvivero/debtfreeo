@@ -4,6 +4,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { ImagePlus, X } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface BlogImageUploadProps {
   setImage: (file: File | null) => void;
@@ -11,19 +14,19 @@ interface BlogImageUploadProps {
   setImagePreview: (preview: string | null) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const SUPPORTED_FORMATS = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp',
-  'image/gif'
-];
-
 export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: BlogImageUploadProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
+
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const SUPPORTED_FORMATS = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif'
+  ];
 
   const validateFile = (file: File): boolean => {
     console.log('Validating file:', {
@@ -49,7 +52,7 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
       toast({
         variant: "destructive",
         title: "Unsupported format",
-        description: `File type ${file.type} is not supported. Please upload a JPEG, PNG, WebP, or GIF file`
+        description: "Please upload a JPEG, PNG, WebP, or GIF file"
       });
       return false;
     }
@@ -119,44 +122,71 @@ export const BlogImageUpload = ({ setImage, imagePreview, setImagePreview }: Blo
     }
   };
 
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImagePreview(null);
+    setUploadProgress(0);
+  };
+
   return (
-    <div className="space-y-4">
+    <Card className="p-6 space-y-4">
       <div>
-        <Label htmlFor="image">Featured Image</Label>
-        <p className="text-sm text-muted-foreground mb-2">
-          Supported formats: JPEG, PNG, WebP, GIF (max 5MB)
+        <Label className="text-lg font-semibold">Featured Image</Label>
+        <p className="text-sm text-muted-foreground mb-4">
+          Upload a featured image for your blog post (JPEG, PNG, WebP, GIF - max 5MB)
         </p>
-        <div className="mt-1 flex items-center space-x-4">
-          <Input
-            id="image"
-            type="file"
-            accept={SUPPORTED_FORMATS.join(',')}
-            onChange={handleImageChange}
-            className="flex-1"
-            disabled={isLoading}
-          />
-          {isLoading && (
-            <div className="text-sm text-muted-foreground">
-              Processing...
-            </div>
-          )}
-        </div>
-        {uploadProgress > 0 && (
-          <div className="mt-2">
-            <Progress value={uploadProgress} className="h-1" />
+        
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <Input
+              type="file"
+              accept={SUPPORTED_FORMATS.join(',')}
+              onChange={handleImageChange}
+              className="hidden"
+              id="image-upload"
+              disabled={isLoading}
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById('image-upload')?.click()}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              <ImagePlus className="w-4 h-4 mr-2" />
+              Upload Image
+            </Button>
           </div>
-        )}
+        </div>
       </div>
       
-      {imagePreview && (
-        <div className="relative w-full max-w-[200px]">
-          <img
-            src={imagePreview}
-            alt="Preview"
-            className="w-full h-auto rounded-lg shadow-md"
-          />
+      {uploadProgress > 0 && (
+        <div className="w-full">
+          <Progress value={uploadProgress} className="h-1" />
+          <p className="text-sm text-muted-foreground mt-1">
+            Uploading... {uploadProgress}%
+          </p>
         </div>
       )}
-    </div>
+      
+      {imagePreview && (
+        <div className="relative">
+          <div className="relative w-full max-w-[300px] rounded-lg overflow-hidden">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-full h-auto"
+            />
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={handleRemoveImage}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </Card>
   );
 };
