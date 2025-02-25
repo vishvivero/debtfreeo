@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +19,9 @@ import { AnalyticsReporting } from "@/components/admin/AnalyticsReporting";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const EditBlogPost = () => {
   const { id } = useParams();
@@ -161,30 +163,49 @@ const NewBlogPost = () => {
   }
 
   return (
-    <BlogPostForm
-      title={title}
-      setTitle={setTitle}
-      content={content}
-      setContent={setContent}
-      excerpt={excerpt}
-      setExcerpt={setExcerpt}
-      category={category}
-      setCategory={setCategory}
-      categories={categories}
-      image={image}
-      setImage={setImage}
-      imagePreview={imagePreview}
-      setImagePreview={setImagePreview}
-      keyTakeaways={keyTakeaways}
-      setKeyTakeaways={setKeyTakeaways}
-      metaTitle={metaTitle}
-      setMetaTitle={setMetaTitle}
-      metaDescription={metaDescription}
-      setMetaDescription={setMetaDescription}
-      keywords={keywords}
-      setKeywords={setKeywords}
-      isSimpleMode={isSimpleMode}
-    />
+    <div className="container mx-auto px-4 py-8">
+      <Card>
+        <CardHeader className="space-y-6">
+          <div className="flex items-center justify-between">
+            <CardTitle>Create New Blog Post</CardTitle>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="simple-mode">Simple Mode</Label>
+              <Switch
+                id="simple-mode"
+                checked={isSimpleMode}
+                onCheckedChange={setIsSimpleMode}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <BlogPostForm
+            title={title}
+            setTitle={setTitle}
+            content={content}
+            setContent={setContent}
+            excerpt={excerpt}
+            setExcerpt={setExcerpt}
+            category={category}
+            setCategory={setCategory}
+            categories={categories}
+            image={image}
+            setImage={setImage}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
+            keyTakeaways={keyTakeaways}
+            setKeyTakeaways={setKeyTakeaways}
+            metaTitle={metaTitle}
+            setMetaTitle={setMetaTitle}
+            metaDescription={metaDescription}
+            setMetaDescription={setMetaDescription}
+            keywords={keywords}
+            setKeywords={setKeywords}
+            isSimpleMode={isSimpleMode}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
