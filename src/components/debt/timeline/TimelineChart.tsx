@@ -37,10 +37,13 @@ export const TimelineChart = ({
     // Sort debts by interest rate (highest first) for avalanche strategy
     const sortedDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
 
+    // Calculate total minimum payment
+    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const currentDate = addMonths(startDate, index);
       
-      // First data point should show initial balance
+      // First data point should show initial balance for both scenarios
       if (index === 0) {
         return {
           date: format(currentDate, 'yyyy-MM-dd'),
@@ -53,15 +56,18 @@ export const TimelineChart = ({
       let totalBaselineBalance = 0;
       debtBalances.forEach((balance, debtId) => {
         const debt = debts.find(d => d.id === debtId)!;
-        const monthlyInterest = (balance * debt.interest_rate) / 1200;
-        const newBalance = Math.max(0, balance + monthlyInterest - debt.minimum_payment);
-        debtBalances.set(debtId, newBalance);
-        totalBaselineBalance += newBalance;
+        if (balance > 0) {
+          const monthlyInterest = (balance * debt.interest_rate) / 1200;
+          const payment = Math.min(balance + monthlyInterest, debt.minimum_payment);
+          const newBalance = Math.max(0, balance + monthlyInterest - payment);
+          debtBalances.set(debtId, newBalance);
+          totalBaselineBalance += newBalance;
+        }
       });
 
-      // Process accelerated scenario with one-time fundings
+      // Process accelerated scenario
       let totalAcceleratedBalance = 0;
-      let availablePayment = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+      let availablePayment = totalMinimumPayment;
 
       // Add one-time fundings for this month
       const fundingsForMonth = oneTimeFundings.filter(funding => {
@@ -74,25 +80,35 @@ export const TimelineChart = ({
         sum + Number(funding.amount), 0);
       availablePayment += totalFundingAmount;
 
-      // Apply payments according to strategy (highest interest first)
+      // First, apply minimum payments to all debts
       for (const debt of sortedDebts) {
         const currentBalance = acceleratedDebtBalances.get(debt.id)!;
-        const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
-        
-        // First apply minimum payment
-        let payment = Math.min(debt.minimum_payment, availablePayment);
-        availablePayment -= payment;
-
-        // If there's extra payment available and this is highest priority debt
-        if (availablePayment > 0 && debt.id === sortedDebts[0].id) {
-          const extraPayment = Math.min(availablePayment, currentBalance);
-          payment += extraPayment;
-          availablePayment -= extraPayment;
+        if (currentBalance > 0) {
+          const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
+          const minimumPayment = Math.min(currentBalance + monthlyInterest, debt.minimum_payment);
+          availablePayment -= minimumPayment;
+          
+          // Apply minimum payment
+          let newBalance = currentBalance + monthlyInterest - minimumPayment;
+          acceleratedDebtBalances.set(debt.id, newBalance);
+          totalAcceleratedBalance += newBalance;
         }
+      }
 
-        const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
-        acceleratedDebtBalances.set(debt.id, newBalance);
-        totalAcceleratedBalance += newBalance;
+      // Then, apply any remaining payment to highest interest debt
+      if (availablePayment > 0) {
+        for (const debt of sortedDebts) {
+          const currentBalance = acceleratedDebtBalances.get(debt.id)!;
+          if (currentBalance > 0) {
+            const extraPayment = Math.min(availablePayment, currentBalance);
+            const newBalance = Math.max(0, currentBalance - extraPayment);
+            acceleratedDebtBalances.set(debt.id, newBalance);
+            availablePayment -= extraPayment;
+            totalAcceleratedBalance = Array.from(acceleratedDebtBalances.values()).reduce((sum, bal) => sum + bal, 0);
+            
+            if (availablePayment <= 0) break;
+          }
+        }
       }
 
       return {
