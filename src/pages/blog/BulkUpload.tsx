@@ -15,7 +15,7 @@ export const BulkUpload = () => {
     const fetchCategories = async () => {
       try {
         const { data, error } = await supabase
-          .from('categories')
+          .from('blog_categories')  // Changed from 'categories' to 'blog_categories'
           .select('id, name, slug')
           .order('name');
 
