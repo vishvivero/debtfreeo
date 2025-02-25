@@ -22,22 +22,37 @@ export const TimelineChart = ({
   oneTimeFundings,
   customTooltip: TooltipComponent 
 }: TimelineChartProps) => {
-  // Generate timeline data
+  // Generate timeline data with compound interest
   const generateTimelineData = () => {
     if (!debts.length) return [];
 
     const startDate = new Date();
     const maxMonths = Math.max(baselineMonths, acceleratedMonths);
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
+    const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
+    const monthlyInterestRate = avgInterestRate / 1200; // Convert annual rate to monthly
+
+    // Calculate monthly payments
+    const baselineMonthlyPayment = totalInitialBalance / baselineMonths;
+    const acceleratedMonthlyPayment = totalInitialBalance / acceleratedMonths;
+
+    let baselineBalance = totalInitialBalance;
+    let acceleratedBalance = totalInitialBalance;
 
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const date = addMonths(startDate, index);
-      const baselineBalance = index <= baselineMonths 
-        ? totalInitialBalance * (1 - index / baselineMonths)
-        : 0;
-      const acceleratedBalance = index <= acceleratedMonths 
-        ? totalInitialBalance * (1 - index / acceleratedMonths)
-        : 0;
+
+      // Calculate baseline path with interest
+      if (index > 0 && baselineBalance > 0) {
+        const interest = baselineBalance * monthlyInterestRate;
+        baselineBalance = Math.max(0, baselineBalance + interest - baselineMonthlyPayment);
+      }
+
+      // Calculate accelerated path with interest
+      if (index > 0 && acceleratedBalance > 0) {
+        const interest = acceleratedBalance * monthlyInterestRate;
+        acceleratedBalance = Math.max(0, acceleratedBalance + interest - acceleratedMonthlyPayment);
+      }
 
       return {
         date: format(date, 'yyyy-MM-dd'),
