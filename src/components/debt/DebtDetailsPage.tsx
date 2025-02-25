@@ -41,8 +41,10 @@ export const DebtDetailsPage = () => {
 
   useEffect(() => {
     if (debt) {
-      console.log('Setting initial monthly payment:', debt.minimum_payment);
-      setMonthlyPayment(debt.minimum_payment);
+      // Ensure we have a valid monthly payment that's at least the minimum payment
+      const validMonthlyPayment = Math.max(debt.minimum_payment, monthlyPayment || debt.minimum_payment);
+      console.log('Setting initial monthly payment:', validMonthlyPayment);
+      setMonthlyPayment(validMonthlyPayment);
     }
   }, [debt]);
 
@@ -132,6 +134,9 @@ export const DebtDetailsPage = () => {
   const minimumViablePayment = getMinimumViablePayment(debt);
   const currencySymbol = profile.preferred_currency || '£';
 
+  // Calculate the extra payment amount
+  const extraPayment = Math.max(0, monthlyPayment - debt.minimum_payment);
+
   if (!isPayable) {
     return (
       <Dialog open={true} onOpenChange={() => navigate('/overview/debts')}>
@@ -195,7 +200,7 @@ export const DebtDetailsPage = () => {
 
         <PayoffTimeline 
           debts={[debt]}
-          extraPayment={monthlyPayment - debt.minimum_payment}
+          extraPayment={extraPayment}
         />
 
         <Separator className="my-8" />
