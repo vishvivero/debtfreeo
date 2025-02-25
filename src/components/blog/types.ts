@@ -20,4 +20,5 @@ export interface BlogFormProps {
   setMetaDescription?: (value: string) => void;
   keywords?: string[];
   setKeywords?: (value: string[]) => void;
+  postId?: string; // Added postId as an optional prop
 }
