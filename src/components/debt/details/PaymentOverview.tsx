@@ -1,10 +1,13 @@
 
-import { Debt } from "@/lib/types/debt";
-import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { DollarSign, Percent, MinusCircle } from "lucide-react";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Debt } from "@/lib/types";
+import { EarlyRepaymentDialog } from "../EarlyRepaymentDialog";
+import { usePaymentHistory } from "@/hooks/use-payment-history";
+import { useToast } from "@/hooks/use-toast";
 
-export interface PaymentOverviewProps {
+interface PaymentOverviewProps {
   debt: Debt;
   totalPaid: number;
   totalInterest: number;
@@ -13,86 +16,79 @@ export interface PaymentOverviewProps {
   minimumViablePayment: number;
 }
 
-export const PaymentOverview = ({ 
-  debt, 
-  totalPaid, 
-  totalInterest, 
+export const PaymentOverview = ({
+  debt,
+  totalPaid,
+  totalInterest,
   currencySymbol,
   isPayable,
-  minimumViablePayment 
+  minimumViablePayment,
 }: PaymentOverviewProps) => {
-  const principalReduction = totalPaid - totalInterest;
+  const [showEarlyRepayment, setShowEarlyRepayment] = useState(false);
+  const { recordPayment } = usePaymentHistory();
+  const { toast } = useToast();
 
-  console.log('Payment overview calculations:', {
-    totalPaid,
-    totalInterest,
-    principalReduction,
-    debtId: debt.id,
-    isPayable,
-    minimumViablePayment
-  });
-
-  const cards = [
-    {
-      title: "Total Paid",
-      amount: totalPaid,
-      icon: DollarSign,
-      color: "emerald"
-    },
-    {
-      title: "Interest Paid",
-      amount: totalInterest,
-      icon: Percent,
-      color: "blue"
-    },
-    {
-      title: "Principal Reduction",
-      amount: principalReduction,
-      icon: MinusCircle,
-      color: "violet"
-    }
-  ];
+  const handlePaymentComplete = () => {
+    toast({
+      title: "Payment Successful",
+      description: "Your payment has been recorded successfully.",
+    });
+  };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-900">Payment Overview</h2>
-      <div className="grid gap-6 md:grid-cols-3">
-        {cards.map((card, index) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className="relative overflow-hidden">
-              <div className={`absolute top-0 left-0 w-1 h-full bg-${card.color}-500`} />
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                  <card.icon className={`h-5 w-5 text-${card.color}-500`} />
-                </div>
-                <p className="mt-2 text-2xl font-bold">
-                  {currencySymbol}{card.amount.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                  })}
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-      
-      {!isPayable && (
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="p-6">
-            <p className="text-red-600">
-              This debt requires a minimum payment of at least {currencySymbol}{minimumViablePayment} 
-              to begin reducing the principal balance.
+    <div className="grid gap-6 md:grid-cols-2">
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Payment Summary</h3>
+        <dl className="space-y-4">
+          <div>
+            <dt className="text-sm text-gray-500">Total Paid</dt>
+            <dd className="text-2xl font-semibold">
+              {currencySymbol}{totalPaid.toLocaleString()}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">Total Interest Paid</dt>
+            <dd className="text-2xl font-semibold">
+              {currencySymbol}{totalInterest.toLocaleString()}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">Remaining Balance</dt>
+            <dd className="text-2xl font-semibold">
+              {currencySymbol}{debt.balance.toLocaleString()}
+            </dd>
+          </div>
+        </dl>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Payment Options</h3>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Monthly Payment</p>
+            <p className="text-2xl font-semibold">
+              {currencySymbol}{debt.minimum_payment.toLocaleString()}
             </p>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          <div className="flex flex-col space-y-4">
+            <Button
+              onClick={() => setShowEarlyRepayment(true)}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              Make Early Repayment
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      <EarlyRepaymentDialog
+        isOpen={showEarlyRepayment}
+        onClose={() => setShowEarlyRepayment(false)}
+        debtId={debt.id}
+        balance={debt.balance}
+        currencySymbol={currencySymbol}
+        onRepaymentComplete={handlePaymentComplete}
+      />
     </div>
   );
 };

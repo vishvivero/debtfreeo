@@ -8,129 +8,91 @@ import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
 import { DebtHeroSection } from "./details/DebtHeroSection";
 import { PaymentOverview } from "./details/PaymentOverview";
+import { GoldLoanWarning } from "./GoldLoanWarning";
+import { GoldLoanChart } from "./chart/GoldLoanChart";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { 
   calculateAmortizationSchedule, 
   calculateSingleDebtPayoff,
   isDebtPayable,
-  getMinimumViablePayment
+  getMinimumViablePayment,
+  AmortizationEntry
 } from "@/lib/utils/payment/standardizedCalculations";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Ban, Loader2 } from "lucide-react";
+import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
-  const { debts, isLoading: isDebtsLoading } = useDebts();
-  const { profile, isLoading: isProfileLoading } = useProfile();
+  const { debts } = useDebts();
+  const { profile } = useProfile();
   const navigate = useNavigate();
-  
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
   const [monthlyPayment, setMonthlyPayment] = useState(0);
-  const [isLoadingPayments, setIsLoadingPayments] = useState(false);
-
-  console.log('DebtDetailsPage render:', { debtId, hasDebts: !!debts, hasProfile: !!profile });
 
   const debt = debts?.find(d => d.id === debtId);
-  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
-  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
+  const currencySymbol = profile?.preferred_currency || '£';
 
   useEffect(() => {
-    if (debt) {
-      console.log('Setting initial monthly payment:', debt.minimum_payment);
+    if (debt?.minimum_payment) {
       setMonthlyPayment(debt.minimum_payment);
     }
-  }, [debt]);
+  }, [debt?.minimum_payment]);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
-      if (!debt?.user_id || !debt?.id) return;
-
-      setIsLoadingPayments(true);
+      if (!debt?.id || !debt.user_id) return;
+      
       console.log('Fetching payment history for debt:', debt.id);
 
-      try {
-        const { data: payments, error } = await supabase
-          .from('payment_history')
-          .select('*')
-          .eq('user_id', debt.user_id)
-          .eq('redistributed_from', debt.id);
+      const { data: payments, error } = await supabase
+        .from('payment_history')
+        .select('*')
+        .eq('user_id', debt.user_id)
+        .eq('redistributed_from', debt.id);
 
-        if (error) {
-          console.error('Error fetching payment history:', error);
-          return;
-        }
-
-        if (!payments) {
-          console.log('No payments found');
-          return;
-        }
-
-        const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
-        setTotalPaid(total);
-
-        const interest = payments.reduce((sum, payment) => {
-          const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
-          return sum + interestPortion;
-        }, 0);
-        setTotalInterest(interest);
-
-        console.log('Payment history summary:', {
-          totalPaid: total,
-          totalInterest: interest,
-          paymentCount: payments.length
-        });
-      } catch (err) {
-        console.error('Error in payment history fetch:', err);
-      } finally {
-        setIsLoadingPayments(false);
+      if (error) {
+        console.error('Error fetching payment history:', error);
+        return;
       }
+
+      const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
+      setTotalPaid(total);
+
+      const interest = payments.reduce((sum, payment) => {
+        const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
+        return sum + interestPortion;
+      }, 0);
+      setTotalInterest(interest);
+
+      console.log('Payment history summary:', {
+        totalPaid: total,
+        totalInterest: interest,
+        paymentCount: payments.length
+      });
     };
 
     fetchPaymentHistory();
-  }, [debt]);
+  }, [debt?.id, debt?.user_id, debt?.interest_rate]);
 
-  // Show loading state while initial data is being fetched
-  if (isDebtsLoading || isProfileLoading) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  // Early return if debt or profile is not loaded
   if (!debt || !profile) {
-    console.log('Required data not loaded:', { hasDebt: !!debt, hasProfile: !!profile, debtId });
     return (
       <MainLayout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Debt not found</h2>
-            <p className="mt-2 text-gray-600">The requested debt could not be found.</p>
-            <Button 
-              onClick={() => navigate('/overview/debts')}
-              className="mt-4 bg-primary hover:bg-primary/90 text-white"
-            >
-              Return to Debts Overview
-            </Button>
-          </div>
+          <div>Debt not found</div>
         </div>
       </MainLayout>
     );
   }
 
-  const isPayable = isDebtPayable(debt);
+  const isPayable = debt.is_gold_loan ? true : isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
-  const currencySymbol = profile.preferred_currency || '£';
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
   if (!isPayable) {
     return (
@@ -170,6 +132,33 @@ export const DebtDetailsPage = () => {
     );
   }
 
+  const getAmortizationData = (): AmortizationEntry[] => {
+    if (debt.is_gold_loan) {
+      // For gold loans, create a simple schedule of interest-only payments
+      const monthlyInterest = (debt.balance * debt.interest_rate) / 100 / 12;
+      const loanTermMonths = debt.loan_term_months || 12; // Default to 12 months if not specified
+      const schedule: AmortizationEntry[] = [];
+      let currentDate = new Date();
+
+      for (let i = 0; i < loanTermMonths; i++) {
+        const isLastMonth = i === loanTermMonths - 1;
+        schedule.push({
+          date: new Date(currentDate.setMonth(currentDate.getMonth() + 1)),
+          payment: isLastMonth ? monthlyInterest + debt.balance : monthlyInterest,
+          principal: isLastMonth ? debt.balance : 0,
+          interest: monthlyInterest,
+          remainingBalance: isLastMonth ? 0 : debt.balance,
+          startingBalance: debt.balance,
+          endingBalance: isLastMonth ? 0 : debt.balance
+        });
+      }
+      return schedule;
+    }
+
+    // For regular loans, use the standard amortization calculation
+    return calculateAmortizationSchedule(debt, monthlyPayment);
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -179,6 +168,25 @@ export const DebtDetailsPage = () => {
           payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
         />
+
+        {debt.is_gold_loan && debt.loan_term_months && (
+          <>
+            <GoldLoanWarning
+              principalAmount={debt.balance}
+              currencySymbol={currencySymbol}
+              paymentDate={debt.final_payment_date || ''}
+              monthlyInterest={(debt.balance * debt.interest_rate) / 100 / 12}
+            />
+
+            <GoldLoanChart 
+              balance={debt.balance}
+              interestRate={debt.interest_rate}
+              loanTerm={debt.loan_term_months}
+              currencySymbol={currencySymbol}
+              finalPaymentDate={debt.final_payment_date || ''}
+            />
+          </>
+        )}
 
         <Separator className="my-8" />
 
@@ -193,24 +201,21 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        <PayoffTimeline 
-          debts={[debt]}
-          extraPayment={monthlyPayment - debt.minimum_payment}
-        />
-
-        <Separator className="my-8" />
-
-        {isLoadingPayments ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : (
-          <AmortizationTable 
-            debt={debt} 
-            amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
-            currencySymbol={currencySymbol}
-          />
+        {!debt.is_gold_loan && (
+          <>
+            <PayoffTimeline 
+              debts={[debt]}
+              extraPayment={monthlyPayment - debt.minimum_payment}
+            />
+            <Separator className="my-8" />
+          </>
         )}
+
+        <AmortizationTable 
+          debt={debt} 
+          amortizationData={getAmortizationData()}
+          currencySymbol={currencySymbol}
+        />
       </div>
     </MainLayout>
   );
