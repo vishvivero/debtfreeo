@@ -1,10 +1,10 @@
-
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { MarkdownToggle } from "./MarkdownToggle";
+import { Switch } from "@/components/ui/switch";
 
 interface BlogContentProps {
   excerpt: string;
@@ -24,10 +24,41 @@ export const BlogContent = ({
   setKeyTakeaways,
 }: BlogContentProps) => {
   const [isPreview, setIsPreview] = useState(false);
+  const [allowComments, setAllowComments] = useState(true);
+  const [isFeaturePost, setIsFeaturePost] = useState(false);
 
   return (
     <Card className="p-6">
-      <div className="space-y-4">
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 pb-4 border-b">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="comments">Allow Comments</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable or disable comments on this post
+              </p>
+            </div>
+            <Switch
+              id="comments"
+              checked={allowComments}
+              onCheckedChange={setAllowComments}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="featured">Featured Post</Label>
+              <p className="text-sm text-muted-foreground">
+                Show this post in featured section
+              </p>
+            </div>
+            <Switch
+              id="featured"
+              checked={isFeaturePost}
+              onCheckedChange={setIsFeaturePost}
+            />
+          </div>
+        </div>
+
         <div>
           <Label htmlFor="excerpt">Excerpt</Label>
           <Textarea
