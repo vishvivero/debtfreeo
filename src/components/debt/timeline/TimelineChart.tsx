@@ -35,8 +35,11 @@ export const TimelineChart = ({
     }, 0);
     const monthlyInterestRate = weightedInterestRate / 1200; // Convert annual rate to monthly
 
-    const baselineMonthlyPayment = totalInitialBalance / baselineMonths;
-    const acceleratedMonthlyPayment = totalInitialBalance / acceleratedMonths;
+    // Calculate required monthly payments to fully amortize the debt
+    const baselineMonthlyPayment = (totalInitialBalance * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, baselineMonths)) / 
+      (Math.pow(1 + monthlyInterestRate, baselineMonths) - 1);
+    const acceleratedMonthlyPayment = (totalInitialBalance * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, acceleratedMonths)) / 
+      (Math.pow(1 + monthlyInterestRate, acceleratedMonths) - 1);
 
     let baselineBalance = totalInitialBalance;
     let acceleratedBalance = totalInitialBalance;
@@ -44,16 +47,21 @@ export const TimelineChart = ({
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const date = addMonths(startDate, index);
 
-      // Calculate balances with compound interest
-      if (index > 0) {
-        // Add interest and subtract payment for baseline
-        const baselineInterest = baselineBalance * monthlyInterestRate;
-        baselineBalance = Math.max(0, baselineBalance + baselineInterest - baselineMonthlyPayment);
-
-        // Add interest and subtract payment for accelerated
-        const acceleratedInterest = acceleratedBalance * monthlyInterestRate;
-        acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedMonthlyPayment);
+      // First data point should show initial balance
+      if (index === 0) {
+        return {
+          date: format(date, 'yyyy-MM-dd'),
+          baselineBalance: totalInitialBalance,
+          acceleratedBalance: totalInitialBalance
+        };
       }
+
+      // Calculate remaining balance with amortization
+      const baselineInterest = baselineBalance * monthlyInterestRate;
+      baselineBalance = Math.max(0, baselineBalance + baselineInterest - baselineMonthlyPayment);
+
+      const acceleratedInterest = acceleratedBalance * monthlyInterestRate;
+      acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedMonthlyPayment);
 
       return {
         date: format(date, 'yyyy-MM-dd'),
