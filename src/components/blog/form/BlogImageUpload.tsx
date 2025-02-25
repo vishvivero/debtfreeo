@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
+import { Progress } from "@/components/ui/progress";
 
 interface BlogImageUploadProps {
   setImage: (file: File | null) => void;
@@ -20,54 +21,98 @@ const SUPPORTED_FORMATS = [
 
 export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
 
   const validateFile = (file: File): boolean => {
+    console.log('Validating file:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
+      console.log('File too large:', file.size);
       toast({
         variant: "destructive",
         title: "File too large",
-        description: "Image must be less than 5MB"
+        description: `Image must be less than 5MB (current size: ${(file.size / 1024 / 1024).toFixed(2)}MB)`
       });
       return false;
     }
 
     // Check file type
     if (!SUPPORTED_FORMATS.includes(file.type)) {
+      console.log('Unsupported format:', file.type);
       toast({
         variant: "destructive",
         title: "Unsupported format",
-        description: "Please upload a JPEG, PNG, WebP, or GIF file"
+        description: `File type ${file.type} is not supported. Please upload a JPEG, PNG, WebP, or GIF file`
       });
       return false;
     }
 
+    console.log('File validation successful');
     return true;
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
 
+    console.log('File selected:', file.name);
     setIsLoading(true);
+    setUploadProgress(0);
+
     try {
       if (!validateFile(file)) {
         setImage(null);
+        setUploadProgress(0);
         return;
       }
 
-      setImage(file);
-      
-      // Create preview
+      // Create preview before upload
       const reader = new FileReader();
       reader.onloadend = () => {
+        console.log('Preview generated');
         const preview = reader.result as string;
         if (typeof imagePreview === 'function') {
           imagePreview(preview);
         }
       };
+      reader.onerror = (error) => {
+        console.error('Error generating preview:', error);
+        toast({
+          variant: "destructive",
+          title: "Preview Error",
+          description: "Failed to generate image preview"
+        });
+      };
       reader.readAsDataURL(file);
+
+      // Simulate upload progress (this will be replaced by actual upload progress)
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 100);
+
+      setImage(file);
+      setUploadProgress(100);
+      
+      // Clear the progress interval
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setUploadProgress(0);
+      }, 500);
 
     } catch (error) {
       console.error("Error processing image:", error);
@@ -104,6 +149,11 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             </div>
           )}
         </div>
+        {uploadProgress > 0 && (
+          <div className="mt-2">
+            <Progress value={uploadProgress} className="h-1" />
+          </div>
+        )}
       </div>
       
       {typeof imagePreview === 'string' && imagePreview && (
