@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth";
@@ -17,48 +17,37 @@ export const AdminBlogList = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  // First check if user is admin
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ["adminProfile", user?.id],
+  // Combined admin check and blog fetch in a single query
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["adminBlogs", user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log("No user ID for admin check");
-        return null;
+        console.log("No user ID available for admin blogs fetch");
+        throw new Error("User ID is required");
       }
 
-      console.log("Checking admin status for blogs page");
-      const { data, error } = await supabase
+      // First check admin status
+      console.log("Checking admin status for user:", user.id);
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("is_admin")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
 
-      if (error) {
-        console.error("Error checking admin status:", error);
-        throw error;
+      if (profileError) {
+        console.error("Error checking admin status:", profileError);
+        throw profileError;
       }
 
-      console.log("Admin status result:", data);
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: false
-  });
-
-  // Only fetch blogs if user is confirmed admin
-  const { data: blogs, isLoading: blogsLoading } = useQuery({
-    queryKey: ["adminBlogs", user?.id],
-    queryFn: async () => {
       if (!profile?.is_admin) {
-        console.log("User is not admin, cannot fetch blogs");
+        console.log("User is not admin, access denied");
         throw new Error("Unauthorized");
       }
 
-      console.log("Fetching admin blogs");
-      
-      // Fetch blogs with visit counts
+      // If admin, fetch blogs
+      console.log("User is admin, fetching blogs");
       const { data: blogData, error: blogsError } = await supabase
         .from("blogs")
         .select(`
@@ -72,7 +61,7 @@ export const AdminBlogList = () => {
         console.error("Error fetching blogs:", blogsError);
         throw blogsError;
       }
-      
+
       // Process the visit counts
       const processedBlogs = blogData?.map(blog => ({
         ...blog,
@@ -80,20 +69,24 @@ export const AdminBlogList = () => {
       }));
 
       console.log("Successfully fetched blogs:", processedBlogs?.length);
-      return processedBlogs;
+      return {
+        blogs: processedBlogs,
+        isAdmin: true
+      };
     },
-    enabled: !!user?.id && !!profile?.is_admin,
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: false
   });
 
-  // Handle loading states
-  if (profileLoading || blogsLoading) {
+  // Handle loading state
+  if (isLoading) {
     return <AdminLoadingSpinner />;
   }
 
   // Handle unauthorized access
-  if (!user || !profile?.is_admin) {
-    console.log("Unauthorized access attempt to admin blogs");
+  if (error || !data?.isAdmin) {
+    console.log("Unauthorized access or error:", error);
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -105,8 +98,9 @@ export const AdminBlogList = () => {
     );
   }
 
-  const publishedPosts = blogs?.filter(blog => blog.is_published === true) || [];
-  const draftPosts = blogs?.filter(blog => blog.is_published === false) || [];
+  const blogs = data?.blogs || [];
+  const publishedPosts = blogs.filter(blog => blog.is_published === true);
+  const draftPosts = blogs.filter(blog => blog.is_published === false);
 
   console.log("Filtered posts:", {
     published: publishedPosts.length,
@@ -129,7 +123,7 @@ export const AdminBlogList = () => {
         <TabsList>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <List className="w-4 h-4" />
-            All Posts ({blogs?.length || 0})
+            All Posts ({blogs.length})
           </TabsTrigger>
           <TabsTrigger value="published" className="flex items-center gap-2">
             <ChartBar className="w-4 h-4" />
