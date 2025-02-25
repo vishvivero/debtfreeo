@@ -115,6 +115,9 @@ export const TimelineChart = ({
             tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
             tick={{ fontSize: 12, fill: '#6B7280' }}
             tickLine={{ stroke: '#9CA3AF' }}
+            orientation="right"
+            domain={['dataMin', 'dataMax']}
+            reversed={false}
           />
           <Tooltip content={<TooltipComponent />} />
           <Legend />
