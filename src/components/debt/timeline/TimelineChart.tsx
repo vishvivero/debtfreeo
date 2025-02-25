@@ -29,7 +29,12 @@ export const TimelineChart = ({
     const maxMonths = Math.max(baselineMonths, acceleratedMonths);
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
     
-    // Calculate monthly payments without interest for simplicity
+    // Calculate weighted average interest rate based on debt balances
+    const weightedInterestRate = debts.reduce((sum, debt) => {
+      return sum + (debt.interest_rate * (debt.balance / totalInitialBalance));
+    }, 0);
+    const monthlyInterestRate = weightedInterestRate / 1200; // Convert annual rate to monthly
+
     const baselineMonthlyPayment = totalInitialBalance / baselineMonths;
     const acceleratedMonthlyPayment = totalInitialBalance / acceleratedMonths;
 
@@ -39,10 +44,15 @@ export const TimelineChart = ({
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const date = addMonths(startDate, index);
 
-      // Calculate remaining balances
+      // Calculate balances with compound interest
       if (index > 0) {
-        baselineBalance = Math.max(0, baselineBalance - baselineMonthlyPayment);
-        acceleratedBalance = Math.max(0, acceleratedBalance - acceleratedMonthlyPayment);
+        // Add interest and subtract payment for baseline
+        const baselineInterest = baselineBalance * monthlyInterestRate;
+        baselineBalance = Math.max(0, baselineBalance + baselineInterest - baselineMonthlyPayment);
+
+        // Add interest and subtract payment for accelerated
+        const acceleratedInterest = acceleratedBalance * monthlyInterestRate;
+        acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedMonthlyPayment);
       }
 
       return {
