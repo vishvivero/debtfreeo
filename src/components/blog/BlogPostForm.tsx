@@ -34,7 +34,7 @@ export const BlogPostForm = ({
   setMetaDescription,
   keywords,
   setKeywords,
-  postId, // Add postId prop for identifying existing posts
+  postId,
 }: BlogFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
