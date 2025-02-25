@@ -11,38 +11,53 @@ import { AdminBlogHeader } from "./AdminBlogHeader";
 import { ChartBar, List, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const AdminBlogList = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { data: blogs, isLoading } = useQuery({
-    queryKey: ["adminBlogs", user?.id],
+  // First check if user is admin
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ["adminProfile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log("No user ID available for admin blogs fetch");
-        throw new Error("User ID is required");
+        console.log("No user ID for admin check");
+        return null;
       }
 
-      console.log("Fetching admin blogs for user:", user.id);
-      
-      const { data: profile, error: profileError } = await supabase
+      console.log("Checking admin status for blogs page");
+      const { data, error } = await supabase
         .from("profiles")
         .select("is_admin")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (profileError) {
-        console.error("Error fetching admin profile:", profileError);
-        throw profileError;
+      if (error) {
+        console.error("Error checking admin status:", error);
+        throw error;
       }
 
+      console.log("Admin status result:", data);
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: false
+  });
+
+  // Only fetch blogs if user is confirmed admin
+  const { data: blogs, isLoading: blogsLoading } = useQuery({
+    queryKey: ["adminBlogs", user?.id],
+    queryFn: async () => {
       if (!profile?.is_admin) {
-        console.log("User is not an admin");
+        console.log("User is not admin, cannot fetch blogs");
         throw new Error("Unauthorized");
       }
 
+      console.log("Fetching admin blogs");
+      
       // Fetch blogs with visit counts
       const { data: blogData, error: blogsError } = await supabase
         .from("blogs")
@@ -67,25 +82,27 @@ export const AdminBlogList = () => {
       console.log("Successfully fetched blogs:", processedBlogs?.length);
       return processedBlogs;
     },
-    enabled: !!user?.id,
-    meta: {
-      errorMessage: "Failed to load blog posts. Please try again."
-    },
-    retry: false,
+    enabled: !!user?.id && !!profile?.is_admin,
+    retry: false
   });
 
-  React.useEffect(() => {
-    if (!isLoading && !blogs) {
-      toast({
-        title: "Error",
-        description: "Failed to load blog posts. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [isLoading, blogs, toast]);
-
-  if (isLoading) {
+  // Handle loading states
+  if (profileLoading || blogsLoading) {
     return <AdminLoadingSpinner />;
+  }
+
+  // Handle unauthorized access
+  if (!user || !profile?.is_admin) {
+    console.log("Unauthorized access attempt to admin blogs");
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            You do not have permission to access this area.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   const publishedPosts = blogs?.filter(blog => blog.is_published === true) || [];
@@ -116,11 +133,11 @@ export const AdminBlogList = () => {
           </TabsTrigger>
           <TabsTrigger value="published" className="flex items-center gap-2">
             <ChartBar className="w-4 h-4" />
-            Published ({blogs?.filter(blog => blog.is_published)?.length || 0})
+            Published ({publishedPosts.length})
           </TabsTrigger>
           <TabsTrigger value="drafts" className="flex items-center gap-2">
             <PenTool className="w-4 h-4" />
-            Drafts ({blogs?.filter(blog => !blog.is_published)?.length || 0})
+            Drafts ({draftPosts.length})
           </TabsTrigger>
         </TabsList>
 
@@ -129,11 +146,11 @@ export const AdminBlogList = () => {
         </TabsContent>
 
         <TabsContent value="published">
-          <AdminBlogTable posts={blogs?.filter(blog => blog.is_published) || null} />
+          <AdminBlogTable posts={publishedPosts} />
         </TabsContent>
 
         <TabsContent value="drafts">
-          <AdminBlogTable posts={blogs?.filter(blog => !blog.is_published) || null} />
+          <AdminBlogTable posts={draftPosts} />
         </TabsContent>
       </Tabs>
     </div>
