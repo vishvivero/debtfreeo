@@ -185,15 +185,15 @@ const NewBlogPost = () => {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
-  console.log("Admin page - Current user:", user?.id);
-  
+  const { user, loading: authLoading } = useAuth();
+  console.log("Admin page - Auth state:", { user: user?.id, authLoading });
+
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ["profile", user?.id],
+    queryKey: ["adminProfile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
         console.log("No user ID available for profile check");
-        return null;
+        throw new Error("No user ID available");
       }
 
       console.log("Checking admin status for user:", user.id);
@@ -201,33 +201,31 @@ const Admin = () => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
         throw error;
       }
 
-      console.log("Profile data received:", data);
+      if (!data?.is_admin) {
+        console.log("User is not an admin:", user.id);
+        throw new Error("Not an admin");
+      }
+
+      console.log("Admin profile confirmed:", data);
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !authLoading,
     staleTime: 1000 * 60 * 5,
-    retry: false
+    retry: false,
+    meta: {
+      errorMessage: "Failed to verify admin status"
+    }
   });
 
-  console.log("Admin access check:", {
-    isLoading: profileLoading,
-    hasError: !!profileError,
-    isAdmin: profile?.is_admin
-  });
-
-  if (!user) {
-    console.log("No user found, redirecting to home");
-    return <Navigate to="/" replace />;
-  }
-
-  if (profileLoading) {
+  // Wait for both auth and profile check to complete
+  if (authLoading || (user && profileLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -235,6 +233,13 @@ const Admin = () => {
     );
   }
 
+  // If no user or auth error, redirect to home
+  if (!user) {
+    console.log("No authenticated user, redirecting to home");
+    return <Navigate to="/" replace />;
+  }
+
+  // If not admin or profile error, show error message
   if (profileError || !profile?.is_admin) {
     console.log("Access denied:", { error: profileError, isAdmin: profile?.is_admin });
     return (
