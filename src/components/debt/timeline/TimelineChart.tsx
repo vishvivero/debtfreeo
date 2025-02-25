@@ -34,10 +34,27 @@ export const TimelineChart = ({
     
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
     
-    // Sort all debts by interest rate for determining priority
-    const allDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
-    const isHighestPriority = debts.length === 1 && 
-      allDebts[0]?.id === debts[0]?.id;
+    // Get the current debt being viewed
+    const currentDebt = debts[0];
+    
+    // Get ALL debts from the system to determine priority
+    const allDebts = [...debts];
+    
+    // Sort by interest rate (highest first) to determine priority
+    allDebts.sort((a, b) => b.interest_rate - a.interest_rate);
+    
+    // Check if current debt is highest priority
+    const isHighestPriority = currentDebt && 
+                            allDebts.length > 0 && 
+                            currentDebt.id === allDebts[0].id;
+
+    console.log('Priority check:', {
+      currentDebtId: currentDebt?.id,
+      currentDebtRate: currentDebt?.interest_rate,
+      highestPriorityDebtId: allDebts[0]?.id,
+      highestPriorityRate: allDebts[0]?.interest_rate,
+      isHighestPriority
+    });
 
     // Calculate total minimum payment
     const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
@@ -70,15 +87,26 @@ export const TimelineChart = ({
       let totalAcceleratedBalance = 0;
       let availablePayment = totalMinimumPayment;
 
-      // Add one-time fundings for this month if this is the highest priority debt
+      // Only apply one-time fundings if this is the highest priority debt
       const fundingsForMonth = oneTimeFundings.filter(funding => {
         const fundingDate = new Date(funding.payment_date);
         return fundingDate.getMonth() === currentDate.getMonth() && 
                fundingDate.getFullYear() === currentDate.getFullYear();
       });
       
+      // Only add funding amount if this is the highest priority debt
       const totalFundingAmount = isHighestPriority ? 
         fundingsForMonth.reduce((sum, funding) => sum + Number(funding.amount), 0) : 0;
+
+      if (totalFundingAmount > 0) {
+        console.log('Applying funding:', {
+          month: format(currentDate, 'MMM yyyy'),
+          amount: totalFundingAmount,
+          isHighestPriority,
+          debtId: currentDebt?.id
+        });
+      }
+
       availablePayment += totalFundingAmount;
 
       // First, apply minimum payments to all debts
@@ -98,11 +126,11 @@ export const TimelineChart = ({
 
       // Then, apply any remaining payment only if this is the highest priority debt
       if (availablePayment > 0 && isHighestPriority) {
-        const currentBalance = acceleratedDebtBalances.get(debts[0].id)!;
+        const currentBalance = acceleratedDebtBalances.get(currentDebt.id)!;
         if (currentBalance > 0) {
           const extraPayment = Math.min(availablePayment, currentBalance);
           const newBalance = Math.max(0, currentBalance - extraPayment);
-          acceleratedDebtBalances.set(debts[0].id, newBalance);
+          acceleratedDebtBalances.set(currentDebt.id, newBalance);
           totalAcceleratedBalance = Array.from(acceleratedDebtBalances.values())
             .reduce((sum, bal) => sum + bal, 0);
         }
@@ -133,6 +161,13 @@ export const TimelineChart = ({
       </div>
     );
   }
+
+  // Only show funding lines if this is the highest priority debt
+  const currentDebt = debts[0];
+  const allDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
+  const isHighestPriority = currentDebt && 
+                           allDebts.length > 0 && 
+                           currentDebt.id === allDebts[0].id;
 
   return (
     <div className="h-[400px]">
@@ -173,7 +208,7 @@ export const TimelineChart = ({
           <Tooltip content={<TooltipComponent />} />
           <Legend />
           
-          {formattedFundings.map((funding, index) => (
+          {isHighestPriority && formattedFundings.map((funding, index) => (
             <ReferenceLine
               key={index}
               x={funding.payment_date}
