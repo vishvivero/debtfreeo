@@ -34,8 +34,10 @@ export const TimelineChart = ({
     
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
     
-    // Sort debts by interest rate (highest first) for avalanche strategy
-    const sortedDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
+    // Sort all debts by interest rate for determining priority
+    const allDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
+    const isHighestPriority = debts.length === 1 && 
+      allDebts[0]?.id === debts[0]?.id;
 
     // Calculate total minimum payment
     const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
@@ -43,7 +45,6 @@ export const TimelineChart = ({
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
       const currentDate = addMonths(startDate, index);
       
-      // First data point should show initial balance for both scenarios
       if (index === 0) {
         return {
           date: format(currentDate, 'yyyy-MM-dd'),
@@ -69,19 +70,19 @@ export const TimelineChart = ({
       let totalAcceleratedBalance = 0;
       let availablePayment = totalMinimumPayment;
 
-      // Add one-time fundings for this month
+      // Add one-time fundings for this month if this is the highest priority debt
       const fundingsForMonth = oneTimeFundings.filter(funding => {
         const fundingDate = new Date(funding.payment_date);
         return fundingDate.getMonth() === currentDate.getMonth() && 
                fundingDate.getFullYear() === currentDate.getFullYear();
       });
       
-      const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => 
-        sum + Number(funding.amount), 0);
+      const totalFundingAmount = isHighestPriority ? 
+        fundingsForMonth.reduce((sum, funding) => sum + Number(funding.amount), 0) : 0;
       availablePayment += totalFundingAmount;
 
       // First, apply minimum payments to all debts
-      for (const debt of sortedDebts) {
+      for (const debt of debts) {
         const currentBalance = acceleratedDebtBalances.get(debt.id)!;
         if (currentBalance > 0) {
           const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
@@ -95,19 +96,15 @@ export const TimelineChart = ({
         }
       }
 
-      // Then, apply any remaining payment to highest interest debt
-      if (availablePayment > 0) {
-        for (const debt of sortedDebts) {
-          const currentBalance = acceleratedDebtBalances.get(debt.id)!;
-          if (currentBalance > 0) {
-            const extraPayment = Math.min(availablePayment, currentBalance);
-            const newBalance = Math.max(0, currentBalance - extraPayment);
-            acceleratedDebtBalances.set(debt.id, newBalance);
-            availablePayment -= extraPayment;
-            totalAcceleratedBalance = Array.from(acceleratedDebtBalances.values()).reduce((sum, bal) => sum + bal, 0);
-            
-            if (availablePayment <= 0) break;
-          }
+      // Then, apply any remaining payment only if this is the highest priority debt
+      if (availablePayment > 0 && isHighestPriority) {
+        const currentBalance = acceleratedDebtBalances.get(debts[0].id)!;
+        if (currentBalance > 0) {
+          const extraPayment = Math.min(availablePayment, currentBalance);
+          const newBalance = Math.max(0, currentBalance - extraPayment);
+          acceleratedDebtBalances.set(debts[0].id, newBalance);
+          totalAcceleratedBalance = Array.from(acceleratedDebtBalances.values())
+            .reduce((sum, bal) => sum + bal, 0);
         }
       }
 
