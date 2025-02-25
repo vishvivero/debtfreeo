@@ -1,4 +1,3 @@
-
 import { FolderIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +8,6 @@ interface DebtCategorySelectProps {
 }
 
 export const debtCategories = [
-  "Gold Loan",
   "Credit Card",
   "Personal Loan",
   "Student Loan",

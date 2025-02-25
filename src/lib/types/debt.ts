@@ -1,4 +1,3 @@
-
 export interface Debt {
   id: string;
   user_id?: string;
@@ -14,9 +13,6 @@ export interface Debt {
   category?: string;
   closed_date?: string;
   status: 'active' | 'paid';
-  loan_term_months?: number; // Added for gold loans
-  final_payment_date?: string; // Added for gold loans
-  is_gold_loan?: boolean; // Added to identify gold loans
 }
 
 export interface PaymentHistory {

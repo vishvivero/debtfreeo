@@ -3,24 +3,14 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { format, parseISO } from "date-fns";
 import { TimelineTooltip } from "./TimelineTooltip";
-import { Debt } from "@/lib/types";
 
 interface TimelineChartProps {
   data: any[];
-  debts: Debt[];
+  debts: any[];
   formattedFundings: OneTimeFunding[];
 }
 
 export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartProps) => {
-  // Add reference lines for gold loan maturity dates
-  const goldLoanMaturityDates = debts
-    .filter(debt => debt.is_gold_loan && debt.final_payment_date)
-    .map(debt => ({
-      date: debt.final_payment_date,
-      name: debt.name,
-      balance: debt.balance
-    }));
-
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -60,10 +50,9 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           <Tooltip content={<TimelineTooltip />} />
           <Legend />
           
-          {/* One-time funding reference lines */}
           {formattedFundings.map((funding, index) => (
             <ReferenceLine
-              key={`funding-${index}`}
+              key={index}
               x={funding.payment_date}
               stroke="#9333EA"
               strokeDasharray="3 3"
@@ -71,22 +60,6 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
                 value: `${debts[0].currency_symbol}${funding.amount}`,
                 position: 'top',
                 fill: '#9333EA',
-                fontSize: 12
-              }}
-            />
-          ))}
-
-          {/* Gold loan maturity reference lines */}
-          {goldLoanMaturityDates.map((maturity, index) => (
-            <ReferenceLine
-              key={`maturity-${index}`}
-              x={maturity.date}
-              stroke="#EAB308"
-              strokeWidth={2}
-              label={{
-                value: `${maturity.name} Maturity`,
-                position: 'top',
-                fill: '#B45309',
                 fontSize: 12
               }}
             />

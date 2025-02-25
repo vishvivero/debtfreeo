@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,8 +20,7 @@ export function usePaymentHistory() {
         .insert([{
           user_id: user.id,
           total_payment: amount,
-          currency_symbol: profile?.preferred_currency || "£",
-          redistributed_from: debtId
+          currency_symbol: profile?.preferred_currency || "£"
         }]);
 
       if (error) {

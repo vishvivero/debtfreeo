@@ -1,17 +1,15 @@
 
 import { toast } from "@/components/ui/use-toast";
 
-interface DebtFormData {
+interface ValidationFields {
   name: string;
   balance: string;
   interestRate: string;
   minimumPayment: string;
-  category: string;
-  loanTermMonths?: string;
 }
 
-export const validateDebtForm = (formData: DebtFormData) => {
-  if (!formData.name.trim()) {
+export const validateDebtForm = (fields: ValidationFields): boolean => {
+  if (!fields.name.trim()) {
     toast({
       title: "Error",
       description: "Please enter a debt name",
@@ -20,31 +18,28 @@ export const validateDebtForm = (formData: DebtFormData) => {
     return false;
   }
 
-  if (!formData.balance || Number(formData.balance) <= 0) {
-    toast({
-      title: "Error",
-      description: "Please enter a valid balance",
-      variant: "destructive",
-    });
-    return false;
+  const numberFields = {
+    balance: fields.balance,
+    interestRate: fields.interestRate,
+    minimumPayment: fields.minimumPayment
+  };
+
+  for (const [field, value] of Object.entries(numberFields)) {
+    const numValue = Number(value);
+    if (isNaN(numValue) || numValue <= 0) {
+      toast({
+        title: "Error",
+        description: `Please enter a valid ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`,
+        variant: "destructive",
+      });
+      return false;
+    }
   }
 
-  if (!formData.interestRate || Number(formData.interestRate) < 0 || Number(formData.interestRate) > 100) {
+  if (Number(fields.interestRate) > 100) {
     toast({
       title: "Error",
-      description: "Please enter a valid interest rate between 0 and 100",
-      variant: "destructive",
-    });
-    return false;
-  }
-
-  // For Gold Loans with loan term, we skip minimum payment validation
-  const isGoldLoan = formData.category === "Gold Loan";
-  
-  if (!isGoldLoan && (!formData.minimumPayment || Number(formData.minimumPayment) <= 0)) {
-    toast({
-      title: "Error",
-      description: "Please enter a valid minimum payment",
+      description: "Interest rate cannot be greater than 100%",
       variant: "destructive",
     });
     return false;
