@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { BlogFormHeader } from "./form/BlogFormHeader";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { BlogContent } from "./form/BlogContent";
 import { BlogFormProps } from "./types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,27 @@ export const BlogPostForm = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+
+  // Fetch existing blog data if editing
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      if (postId) {
+        const { data, error } = await supabase
+          .from('blogs')
+          .select('image_url')
+          .eq('id', postId)
+          .single();
+
+        if (!error && data?.image_url) {
+          setExistingImageUrl(data.image_url);
+          setImagePreview(data.image_url);
+        }
+      }
+    };
+
+    fetchBlogData();
+  }, [postId, setImagePreview]);
 
   const handleSubmit = async (isDraft: boolean = true) => {
     if (!user) {
@@ -64,7 +86,7 @@ export const BlogPostForm = ({
     console.log("Starting blog post submission...");
 
     try {
-      let imageUrl = null;
+      let imageUrl = existingImageUrl;
 
       if (image) {
         console.log("Processing image upload...");
