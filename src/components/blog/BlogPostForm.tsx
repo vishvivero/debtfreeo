@@ -14,6 +14,25 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+// Add word count utility function
+const calculateReadTime = (content: string): number => {
+  // Strip HTML tags if any
+  const strippedContent = content.replace(/<[^>]*>/g, '');
+  
+  // Count words (split by spaces and filter empty strings)
+  const words = strippedContent.split(/\s+/).filter(word => word.length > 0);
+  
+  // Average reading speed is 200-250 words per minute
+  // We'll use 225 as a middle ground
+  const wordsPerMinute = 225;
+  
+  // Calculate reading time and round up to the nearest minute
+  const readTime = Math.ceil(words.length / wordsPerMinute);
+  
+  // Return at least 1 minute
+  return Math.max(1, readTime);
+};
+
 export const BlogPostForm = ({
   title,
   setTitle,
@@ -179,6 +198,9 @@ export const BlogPostForm = ({
       }
 
       const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
+      const readTimeMinutes = calculateReadTime(content);
+      console.log("Calculated read time:", readTimeMinutes, "minutes");
+
       const updateData = {
         title,
         content,
@@ -189,6 +211,7 @@ export const BlogPostForm = ({
         meta_description: metaDescription || excerpt,
         keywords: keywordsArray,
         key_takeaways: keyTakeaways || '',
+        read_time_minutes: readTimeMinutes,
         updated_at: new Date().toISOString(),
         ...(imageUrl && { image_url: imageUrl }),
       };
