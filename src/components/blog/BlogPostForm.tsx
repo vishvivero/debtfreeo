@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -88,7 +87,7 @@ export const BlogPostForm = ({
           .from('blog-images')
           .getPublicUrl(fileName);
 
-        imageUrl = fileName; // Store only the filename in the database
+        imageUrl = publicUrl; // Store the full public URL in the database
         console.log("Image URL saved:", imageUrl);
       }
 
