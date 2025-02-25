@@ -19,6 +19,9 @@ export interface TimelineCalculationResult {
 }
 
 export class DebtTimelineCalculator {
+  private static readonly MAX_ITERATIONS = 1200; // 100 years cap
+  private static readonly MINIMUM_PAYMENT = 0.01;
+
   static calculateTimeline(
     debts: Debt[],
     monthlyPayment: number,
@@ -32,11 +35,40 @@ export class DebtTimelineCalculator {
       oneTimeFundings: oneTimeFundings.length
     });
 
-    return StandardizedDebtCalculator.calculateTimeline(
-      debts,
-      monthlyPayment,
-      strategy,
-      oneTimeFundings
-    );
+    // Input validation
+    if (!debts.length || !monthlyPayment || monthlyPayment < this.MINIMUM_PAYMENT) {
+      console.error('Invalid calculation inputs');
+      throw new Error('Invalid calculation inputs');
+    }
+
+    try {
+      // Deep clone debts to prevent mutations
+      const debtsCopy = debts.map(debt => ({ ...debt }));
+      
+      const results = StandardizedDebtCalculator.calculateTimeline(
+        debtsCopy,
+        monthlyPayment,
+        strategy,
+        oneTimeFundings
+      );
+
+      // Ensure we're using current date as starting point
+      const today = new Date();
+      const payoffDate = new Date(today.getFullYear(), today.getMonth() + results.acceleratedMonths);
+
+      console.log('Timeline calculation complete:', {
+        baselineMonths: results.baselineMonths,
+        acceleratedMonths: results.acceleratedMonths,
+        payoffDate: payoffDate.toISOString()
+      });
+
+      return {
+        ...results,
+        payoffDate
+      };
+    } catch (error) {
+      console.error('Error in timeline calculation:', error);
+      throw error;
+    }
   }
 }
