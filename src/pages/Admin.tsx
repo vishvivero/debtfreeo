@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +20,6 @@ import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
 
-// Create a new component for the edit form
 const EditBlogPost = () => {
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -70,7 +68,6 @@ const EditBlogPost = () => {
     }
   });
 
-  // Update form when blog data is loaded
   useEffect(() => {
     if (blog) {
       setTitle(blog.title);
@@ -108,7 +105,8 @@ const EditBlogPost = () => {
       categories={categories}
       image={image}
       setImage={setImage}
-      imagePreview={setImagePreview}
+      imagePreview={imagePreview}
+      setImagePreview={setImagePreview}
       keyTakeaways={keyTakeaways}
       setKeyTakeaways={setKeyTakeaways}
       metaTitle={metaTitle}
@@ -117,11 +115,11 @@ const EditBlogPost = () => {
       setMetaDescription={setMetaDescription}
       keywords={keywords}
       setKeywords={setKeywords}
+      postId={id}
     />
   );
 };
 
-// Create a new component for the new post form
 const NewBlogPost = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -171,7 +169,8 @@ const NewBlogPost = () => {
       categories={categories}
       image={image}
       setImage={setImage}
-      imagePreview={setImagePreview}
+      imagePreview={imagePreview}
+      setImagePreview={setImagePreview}
       keyTakeaways={keyTakeaways}
       setKeyTakeaways={setKeyTakeaways}
       metaTitle={metaTitle}
@@ -224,7 +223,6 @@ const Admin = () => {
     }
   });
 
-  // Wait for both auth and profile check to complete
   if (authLoading || (user && profileLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -233,13 +231,11 @@ const Admin = () => {
     );
   }
 
-  // If no user or auth error, redirect to home
   if (!user) {
     console.log("No authenticated user, redirecting to home");
     return <Navigate to="/" replace />;
   }
 
-  // If not admin or profile error, show error message
   if (profileError || !profile?.is_admin) {
     console.log("Access denied:", { error: profileError, isAdmin: profile?.is_admin });
     return (
