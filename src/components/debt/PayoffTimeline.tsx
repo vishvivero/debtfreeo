@@ -31,10 +31,16 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     return null;
   }
 
+  // Calculate total minimum payment
+  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const totalMonthlyPayment = Math.max(0, totalMinimumPayment + extraPayment);
+
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
   console.log('PayoffTimeline render:', {
     debtsCount: debts.length,
     extraPayment,
+    totalMinimumPayment,
+    totalMonthlyPayment,
     selectedStrategy: selectedStrategy.name
   });
 
@@ -44,6 +50,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
       extraPayment={extraPayment}
       strategy={selectedStrategy}
       oneTimeFundings={oneTimeFundings}
+      monthlyPayment={totalMonthlyPayment}
     />
   );
 };

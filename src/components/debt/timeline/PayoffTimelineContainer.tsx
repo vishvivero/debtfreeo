@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown } from "lucide-react";
@@ -16,19 +17,22 @@ interface PayoffTimelineContainerProps {
   extraPayment: number;
   strategy: Strategy;
   oneTimeFundings: OneTimeFunding[];
+  monthlyPayment: number;
 }
 
 export const PayoffTimelineContainer = ({ 
   debts, 
   extraPayment,
   strategy,
-  oneTimeFundings
+  oneTimeFundings,
+  monthlyPayment
 }: PayoffTimelineContainerProps) => {
   const { profile } = useProfile();
   
   console.log('PayoffTimelineContainer: Starting calculation for debts:', {
     totalDebts: debts.length,
     extraPayment,
+    monthlyPayment,
     strategy: strategy.name,
     oneTimeFundings: oneTimeFundings.length
   });
@@ -36,18 +40,14 @@ export const PayoffTimelineContainer = ({
   // Keep fundings as is, let TimelineCalculator handle date conversion
   const formattedFundings = [...oneTimeFundings];
 
-  // Calculate total minimum payment required
-  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
-
   const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
     debts,
-    totalMonthlyPayment,
+    monthlyPayment,
     strategy,
     oneTimeFundings
   );
 
-  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, strategy, oneTimeFundings);
+  const timelineData = calculateTimelineData(debts, monthlyPayment, strategy, oneTimeFundings);
 
   const currencySymbol = profile?.preferred_currency || '£';
 
