@@ -61,39 +61,17 @@ export const DebtScoreCard = () => {
   const scoreDetails = calculateScore();
   const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
 
-  const InfoIcon = ({ title, description }: { title: string; description: string }) => (
-    <HoverCard>
-      <HoverCardTrigger asChild>
-        <button className="cursor-help inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors">
-          <Info className="h-4 w-4 text-blue-600" />
-        </button>
-      </HoverCardTrigger>
-      <HoverCardContent className="w-80">
-        <div className="space-y-2">
-          <h5 className="font-semibold text-sm">{title}</h5>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-      </HoverCardContent>
-    </HoverCard>
-  );
-
   const renderActionableInsights = () => {
     if (!scoreDetails || !debts?.length) return null;
 
     if (debts.length === 1) {
       const debt = debts[0];
       const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
-      const totalCostIfMinimum = debt.balance + (monthlyInterest * 24);
+      const totalCostIfMinimum = debt.balance + (monthlyInterest * 24); // Rough 2-year estimate
 
       return (
         <div className="mt-6 space-y-6">
-          <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
-            <InfoIcon 
-              title="Your Journey to Financial Freedom"
-              description="Follow these steps to effectively manage and eliminate your debt while building better financial habits."
-            />
-          </div>
+          <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
           
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="p-4 bg-white/50 backdrop-blur-sm">
@@ -103,11 +81,22 @@ export const DebtScoreCard = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <InfoIcon 
-                      title="Monthly Interest Explained"
-                      description="Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction."
-                    />
                     <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Monthly Interest Explained</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Monthly Interest: {profile?.preferred_currency || '£'}
@@ -127,11 +116,22 @@ export const DebtScoreCard = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <InfoIcon 
-                      title="Extra Payment Benefits"
-                      description="Extra payments can significantly reduce your total repayment time and interest costs. Even small additional amounts can make a big difference over time."
-                    />
                     <h4 className="font-semibold text-gray-900">Payment Impact</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Extra Payment Benefits</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Extra payments can significantly reduce your total repayment time and interest costs. Even small additional amounts can make a big difference over time.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Adding just {profile?.preferred_currency || '£'}50 extra monthly could save you months
@@ -150,11 +150,22 @@ export const DebtScoreCard = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <InfoIcon 
-                      title="Understanding Total Cost"
-                      description="This 2-year projection shows the total amount you'll pay if you only make minimum payments. It includes both principal and accumulated interest, highlighting why paying more than the minimum is beneficial."
-                    />
                     <h4 className="font-semibold text-gray-900">Total Cost Warning</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Understanding Total Cost</h5>
+                          <p className="text-sm text-muted-foreground">
+                            This 2-year projection shows the total amount you'll pay if you only make minimum payments. It includes both principal and accumulated interest, highlighting why paying more than the minimum is beneficial.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Paying minimum only: ~{profile?.preferred_currency || '£'}
@@ -174,11 +185,22 @@ export const DebtScoreCard = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <InfoIcon 
-                      title="Why These Tips Matter"
-                      description="These proven strategies help ensure consistent progress towards becoming debt-free. Automatic payments prevent missed payments, tracking helps maintain motivation, and celebrating milestones reinforces positive financial habits."
-                    />
                     <h4 className="font-semibold text-gray-900">Success Tips</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Why These Tips Matter</h5>
+                          <p className="text-sm text-muted-foreground">
+                            These proven strategies help ensure consistent progress towards becoming debt-free. Automatic payments prevent missed payments, tracking helps maintain motivation, and celebrating milestones reinforces positive financial habits.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <div className="space-y-2 mt-2">
                     <p className="text-xs text-gray-600 flex items-center gap-2">
@@ -201,17 +223,31 @@ export const DebtScoreCard = () => {
 
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">
             <div className="flex items-start gap-3">
-              <div className="flex items-center gap-2">
-                <InfoIcon 
-                  title="Advanced Payment Strategy"
-                  description="This advanced strategy helps you save money on interest while accelerating your debt payoff. By applying extra payments directly to principal, you reduce both the balance and future interest charges."
-                />
-                <h5 className="font-medium text-blue-800">Pro Tip</h5>
+              <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h5 className="font-medium text-blue-800">Pro Tip</h5>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <button className="cursor-help">
+                        <Info className="h-4 w-4 text-blue-400 hover:text-blue-500 transition-colors" />
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-2">
+                        <h5 className="font-semibold text-sm">Advanced Payment Strategy</h5>
+                        <p className="text-sm text-muted-foreground">
+                          This advanced strategy helps you save money on interest while accelerating your debt payoff. By applying extra payments directly to principal, you reduce both the balance and future interest charges.
+                        </p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+                <p className="text-sm text-blue-700 mt-1">
+                  Every extra payment you make reduces both your balance and the amount of interest you'll pay over time.
+                  Consider setting aside any unexpected income for debt payments.
+                </p>
               </div>
-              <p className="text-sm text-blue-700">
-                Every extra payment you make reduces both your balance and the amount of interest you'll pay over time.
-                Consider setting aside any unexpected income for debt payments.
-              </p>
             </div>
           </div>
         </div>
