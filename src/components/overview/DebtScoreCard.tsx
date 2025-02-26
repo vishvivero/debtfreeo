@@ -84,7 +84,7 @@ export const DebtScoreCard = () => {
                     <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
                     <HoverCard>
                       <HoverCardTrigger asChild>
-                        <button className="cursor-help">
+                        <button>
                           <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                         </button>
                       </HoverCardTrigger>
