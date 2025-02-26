@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -21,7 +20,6 @@ const Overview = () => {
   const { profile, updateProfile } = useProfile();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Validate currency support
   const validateCurrency = (currencySymbol: string) => {
     return countryCurrencies.some(currency => currency.symbol === currencySymbol);
   };
@@ -104,7 +102,6 @@ const Overview = () => {
 
   const currentCurrencySymbol = profile?.preferred_currency || '£';
 
-  // Calculate metrics for ActionPlan
   const highestAprDebt = debts?.length
     ? [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0]
     : undefined;
@@ -141,19 +138,12 @@ const Overview = () => {
                 transition={{ duration: 0.5 }}
                 className="space-y-6"
               >
-                <div className="relative">
-                  {isUpdating && (
-                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-xl z-50">
-                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                    </div>
-                  )}
-                  <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg">
-                    <OverviewHeader
-                      currencySymbol={currentCurrencySymbol}
-                      onCurrencyChange={handleCurrencyChange}
-                    />
-                    <DebtOverview />
-                  </div>
+                <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg">
+                  <OverviewHeader
+                    currencySymbol={currentCurrencySymbol}
+                    onCurrencyChange={handleCurrencyChange}
+                  />
+                  <DebtOverview />
                 </div>
 
                 <motion.div
@@ -164,7 +154,6 @@ const Overview = () => {
                   <DebtScoreCard />
                 </motion.div>
 
-                {/* Action Plan moved to bottom */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
