@@ -342,54 +342,6 @@ export const DebtScoreCard = () => {
     return (
       <>
         <div className="flex flex-col md:flex-row items-start gap-8">
-          <div className="flex-shrink-0 w-full md:w-auto">
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">DEBT FREEDOM SCORE</h3>
-              </div>
-              <div className="relative w-48 h-48 mx-auto">
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
-                  <div className="text-6xl font-bold text-gray-900">
-                    {Math.round(scoreDetails?.totalScore || 0)}
-                  </div>
-                  <div className={`font-medium text-lg ${scoreCategory?.color}`}>
-                    {scoreCategory?.label}
-                  </div>
-                </div>
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="16"
-                    fill="none"
-                    className="text-gray-100"
-                  />
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="url(#scoreGradient)"
-                    strokeWidth="16"
-                    fill="none"
-                    strokeDasharray="553"
-                    strokeDashoffset={553 - (553 * (scoreDetails?.totalScore || 0)) / 100}
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                <defs>
-                  <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#ef4444" />
-                    <stop offset="25%" stopColor="#f97316" />
-                    <stop offset="50%" stopColor="#facc15" />
-                    <stop offset="75%" stopColor="#84cc16" />
-                    <stop offset="100%" stopColor="#22c55e" />
-                  </linearGradient>
-                </defs>
-              </div>
-            </div>
-          </div>
           <div className="flex-grow w-full">
             {renderActionableInsights()}
           </div>
