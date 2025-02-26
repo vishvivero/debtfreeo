@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -87,8 +88,10 @@ export const useVisitorMetrics = () => {
         geoData: visits?.map(visit => ({
           latitude: visit.latitude,
           longitude: visit.longitude,
+          country: visit.country,
+          city: visit.city,
           value: 1
-        })) || []
+        })).filter(location => location.latitude && location.longitude) || []
       };
     }
   });

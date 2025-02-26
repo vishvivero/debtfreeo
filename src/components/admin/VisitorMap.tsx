@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { useState } from "react";
@@ -33,6 +34,15 @@ export const VisitorMap = ({ geoData }: VisitorMapProps) => {
   const handleMoveEnd = (position: any) => {
     setPosition(position);
   };
+
+  // If no geoData is provided, show a message
+  if (!geoData || geoData.length === 0) {
+    return (
+      <div className="h-[300px] w-full rounded-lg bg-gray-50 flex items-center justify-center">
+        <p className="text-muted-foreground">No visitor location data available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[300px] w-full rounded-lg relative">
