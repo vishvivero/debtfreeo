@@ -12,17 +12,14 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { InterestCalculator } from "@/lib/services/calculations/InterestCalculator";
+
 export const DebtComparison = () => {
-  const {
-    debts,
-    profile
-  } = useDebts();
-  const {
-    oneTimeFundings
-  } = useOneTimeFunding();
+  const { debts, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
+
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       return {
@@ -44,11 +41,9 @@ export const DebtComparison = () => {
       };
     }
 
-    // Calculate current monthly interest correctly
     const monthlyInterestCost = debts.reduce((total, debt) => {
       if (debt.status === 'active') {
-        // Only include active debts
-        const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+        const monthlyRate = debt.interest_rate / 1200;
         const monthlyInterest = debt.balance * monthlyRate;
         console.log(`Monthly interest for ${debt.name}:`, {
           balance: debt.balance,
@@ -94,32 +89,28 @@ export const DebtComparison = () => {
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
-      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
+      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100
     };
   };
+
   const comparison = calculateComparison();
   const totalMonthlyInterest = debts?.reduce((total, debt) => {
     if (debt.status === 'active') {
       const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
-      console.log(`Monthly interest for ${debt.name}:`, {
-        balance: debt.balance,
-        rate: debt.interest_rate,
-        monthlyInterest
-      });
       return total + monthlyInterest;
     }
     return total;
   }, 0) || 0;
-  console.log('Monthly interest calculation:', {
-    debts: debts?.length,
-    totalMonthlyInterest
-  });
+
   const renderActionableInsights = () => {
     if (!comparison || !debts?.length) return null;
+
     if (debts.length === 1) {
       const debt = debts[0];
       const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
-      return <div className="mt-6 space-y-6">
+
+      return (
+        <div className="mt-6 space-y-6">
           <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
           
           <div className="grid gap-4 md:grid-cols-2">
@@ -156,14 +147,16 @@ export const DebtComparison = () => {
                 </div>
               </div>
             </Card>
-            
-            {/* ... keep existing code (other cards in the grid) */}
           </div>
-        </div>;
+        </div>
+      );
     }
+
     const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
     const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
-    return <div className="mt-6 space-y-6">
+
+    return (
+      <div className="mt-6 space-y-6">
         <h3 className="text-2xl font-bold text-gray-900">Action Plan</h3>
         
         <div className="grid gap-4 md:grid-cols-2">
@@ -198,20 +191,18 @@ export const DebtComparison = () => {
               </div>
             </div>
           </Card>
-
-          {/* ... keep existing code (other cards in grid) */}
         </div>
-      </div>;
+      </div>
+    );
   };
-  return <motion.div initial={{
-    opacity: 0,
-    y: 20
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} transition={{
-    duration: 0.5
-  }} className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0">
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
@@ -219,21 +210,10 @@ export const DebtComparison = () => {
             <CardTitle className="flex items-center gap-2 text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" />
               Your Debt Overview
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    A comprehensive view of your current debt situation and how it's structured.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
             <div className="grid gap-3 sm:gap-4">
-              {/* Debt-Free Date */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
@@ -271,7 +251,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Payment Efficiency */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
@@ -333,7 +312,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Total Debts */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
@@ -397,21 +375,10 @@ export const DebtComparison = () => {
               <span className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
                 What Debtfreeo Can Save You
               </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    See how much you could save with our optimized strategy.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
             <div className="grid gap-3 sm:gap-4">
-              {/* Optimized Debt-Free Date */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
@@ -462,7 +429,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Total Interest (Optimized) */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
@@ -526,11 +492,9 @@ export const DebtComparison = () => {
                       You save {(comparison.moneySaved / comparison.originalTotalInterest * 100).toFixed(1)}% on interest payments
                     </div>
                   </div>
-                  
                 </div>
               </div>
 
-              {/* Savings Section */}
               <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
@@ -582,19 +546,22 @@ export const DebtComparison = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Monthly Interest Cost */}
-              
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {renderActionableInsights()}
+
       <div className="flex justify-center mt-4 sm:mt-8">
-        <Button onClick={() => navigate("/strategy")} className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base">
+        <Button 
+          onClick={() => navigate("/strategy")} 
+          className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+        >
           Start Optimizing Your Debt Now
           <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
       </div>
-    </motion.div>;
+    </motion.div>
+  );
 };
