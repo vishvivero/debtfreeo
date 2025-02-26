@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,61 +39,52 @@ export const PaymentOverviewSection = ({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex justify-between items-center flex-wrap gap-2">
             <span className="text-sm text-gray-600">Minimum Payments</span>
             <span className="font-medium">
               {formatCurrency(totalMinimumPayments, currencySymbol)}
             </span>
           </div>
-          
-          {/* Redesigned Extra Payment Input */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Extra Payment</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                className="text-xs text-gray-500 hover:text-primary"
-              >
-                <RotateCw className="h-3 w-3 mr-1" />
-                Reset
-              </Button>
-            </div>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                {currencySymbol}
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <span className="text-sm text-gray-600">Extra Payment</span>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={extraPayment || ''}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    const maxValue = totalDebtValue;
+                    onExtraPaymentChange(Math.min(value, maxValue));
+                  }}
+                  max={totalDebtValue}
+                  className="w-32 pl-3 pr-10 text-left"
+                />
+                {extraPayment > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleReset}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-gray-100"
+                  >
+                    <RotateCw className="h-4 w-4 text-gray-500" />
+                  </Button>
+                )}
               </div>
-              <Input
-                type="number"
-                value={extraPayment || ''}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  const maxValue = totalDebtValue;
-                  onExtraPaymentChange(Math.min(value, maxValue));
-                }}
-                max={totalDebtValue}
-                className="pl-7 pr-24 h-12 text-lg font-medium bg-gray-50 border-gray-200 focus:border-primary focus:ring-primary transition-colors"
-              />
               <Button
                 variant="ghost"
                 onClick={onOpenExtraPaymentDialog}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 text-primary hover:text-primary/90 hover:bg-primary/10"
+                className="text-primary hover:text-primary/90 min-w-[100px] text-center"
               >
-                Customize
-                <ArrowRight className="w-4 h-4 ml-1" />
+                {formatCurrency(extraPayment, currencySymbol)}
               </Button>
             </div>
-            <p className="text-xs text-gray-500">
-              Maximum allowed: {formatCurrency(totalDebtValue, currencySymbol)}
-            </p>
           </div>
-
-          <div className="pt-4 border-t">
-            <div className="flex justify-between items-center">
+          <div className="pt-2 border-t">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <span className="font-medium">Total Monthly Payment</span>
-              <span className="text-lg font-bold text-primary">
+              <span className="font-medium text-primary">
                 {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
               </span>
             </div>
