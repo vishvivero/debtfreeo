@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
@@ -106,7 +106,7 @@ const Overview = () => {
   const currentCurrencySymbol = profile?.preferred_currency || '£';
 
   // Calculate metrics for ActionPlan with memoization
-  const metrics = React.useMemo(() => {
+  const metrics = useMemo(() => {
     if (!debts?.length) return {
       highestAprDebt: undefined,
       lowestBalanceDebt: undefined,
