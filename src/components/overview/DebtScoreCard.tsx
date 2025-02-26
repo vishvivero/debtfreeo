@@ -1,17 +1,7 @@
+
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { 
-  CheckCircle2, 
-  TrendingUp, 
-  PiggyBank, 
-  Calendar, 
-  Info, 
-  Target, 
-  AlertTriangle,
-  Clock,
-  Lightbulb,
-  ArrowRight
-} from "lucide-react";
+import { CheckCircle2, TrendingUp, PiggyBank, Calendar, Info, Target, AlertTriangle } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -24,12 +14,9 @@ import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtSc
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 export const DebtScoreCard = () => {
   const { debts, profile } = useDebts();
-  const navigate = useNavigate();
   
   console.log('Rendering DebtScoreCard with:', {
     debtCount: debts?.length,
@@ -74,123 +61,8 @@ export const DebtScoreCard = () => {
     );
   };
 
-  const renderFirstTimeUserContent = () => {
-    if (!debts || debts.length !== 1) return null;
-    const debt = debts[0];
-
-    const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
-    const timeToPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
-      [debt],
-      debt.minimum_payment,
-      strategies[0],
-      []
-    );
-    
-    // Extract months from the payoff details of the first debt
-    const payoffMonths = Object.values(timeToPayoff)[0]?.months || 0;
-
-    return (
-      <div className="space-y-8">
-        <div className="bg-blue-50/50 p-6 rounded-lg border border-blue-100">
-          <h3 className="text-xl font-semibold text-blue-800 flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            Welcome to Your Debt-Free Journey!
-          </h3>
-          <p className="mt-2 text-blue-700">
-            We'll help you create a clear path to becoming debt-free. Here's what you need to know about your debt:
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="p-6 bg-white/50">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-emerald-600">
-                <Clock className="h-5 w-5" />
-                <h4 className="font-semibold">Current Situation</h4>
-              </div>
-              <ul className="space-y-3 text-sm text-gray-600">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 mt-1 text-emerald-500" />
-                  <span>Your monthly payment: {profile?.preferred_currency || '£'}{debt.minimum_payment.toLocaleString()}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 mt-1 text-emerald-500" />
-                  <span>Monthly interest cost: {profile?.preferred_currency || '£'}{monthlyInterest.toFixed(2)}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 mt-1 text-emerald-500" />
-                  <span>Estimated payoff time: {payoffMonths} months</span>
-                </li>
-              </ul>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-white/50">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-purple-600">
-                <Target className="h-5 w-5" />
-                <h4 className="font-semibold">Did You Know?</h4>
-              </div>
-              <ul className="space-y-3 text-sm text-gray-600">
-                <li className="flex items-start gap-2">
-                  <ArrowRight className="h-4 w-4 mt-1 text-purple-500" />
-                  <span>Increasing your payment by just {profile?.preferred_currency || '£'}50 could significantly reduce your payoff time</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <ArrowRight className="h-4 w-4 mt-1 text-purple-500" />
-                  <span>Setting up automatic payments helps ensure consistent progress</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <ArrowRight className="h-4 w-4 mt-1 text-purple-500" />
-                  <span>You can track your progress and see your debt decrease over time</span>
-                </li>
-              </ul>
-            </div>
-          </Card>
-        </div>
-
-        <div className="bg-gradient-to-r from-emerald-50 to-blue-50 p-6 rounded-lg">
-          <h4 className="font-semibold text-gray-900 mb-4">Next Steps to Success:</h4>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Button
-              variant="outline"
-              className="bg-white/80 hover:bg-white"
-              onClick={() => navigate('/strategy')}
-            >
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                <span>Create Payment Plan</span>
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-white/80 hover:bg-white"
-              onClick={() => navigate('/track')}
-            >
-              <div className="flex items-center gap-2">
-                <PiggyBank className="h-4 w-4" />
-                <span>Track Payments</span>
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-white/80 hover:bg-white"
-              onClick={() => navigate('/my-plan')}
-            >
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>View Your Plan</span>
-              </div>
-            </Button>
-          </div>
-        </div>
-
-        <div className="pt-8 border-t border-gray-100">
-          {renderActionableInsights()}
-        </div>
-      </div>
-    );
-  };
+  const scoreDetails = calculateScore();
+  const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
 
   const renderActionableInsights = () => {
     if (!scoreDetails || !debts?.length) return null;
@@ -333,9 +205,6 @@ export const DebtScoreCard = () => {
     );
   };
 
-  const scoreDetails = calculateScore();
-  const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
-
   const renderContent = () => {
     if (hasNoDebts) {
       return <NoDebtsMessage />;
@@ -365,10 +234,6 @@ export const DebtScoreCard = () => {
           </motion.div>
         </div>
       );
-    }
-
-    if (debts && debts.length === 1) {
-      return renderFirstTimeUserContent();
     }
 
     return (
