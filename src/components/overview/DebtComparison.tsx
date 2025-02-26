@@ -13,13 +13,8 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 export const DebtComparison = () => {
-  const {
-    debts,
-    profile
-  } = useDebts();
-  const {
-    oneTimeFundings
-  } = useOneTimeFunding();
+  const { debts, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
