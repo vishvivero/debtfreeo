@@ -93,7 +93,7 @@ const Overview = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
-              Failed to load your debt overview. Please try refreshing the page.
+              {error instanceof Error ? error.message : 'Failed to load your debt overview. Please try refreshing the page.'}
             </AlertDescription>
           </Alert>
         </div>
