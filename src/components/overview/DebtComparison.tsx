@@ -45,10 +45,19 @@ export const DebtComparison = () => {
       };
     }
 
-    // Calculate current monthly interest
+    // Calculate current monthly interest correctly
     const monthlyInterestCost = debts.reduce((total, debt) => {
-      const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
-      return total + (debt.balance * monthlyRate);
+      if (debt.status === 'active') {  // Only include active debts
+        const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+        const monthlyInterest = debt.balance * monthlyRate;
+        console.log(`Monthly interest for ${debt.name}:`, {
+          balance: debt.balance,
+          rate: debt.interest_rate,
+          monthlyInterest: monthlyInterest
+        });
+        return total + monthlyInterest;
+      }
+      return total;
     }, 0);
 
     console.log('Monthly interest calculation:', {
@@ -88,7 +97,7 @@ export const DebtComparison = () => {
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
-      monthlyInterestCost
+      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
     };
   };
 
