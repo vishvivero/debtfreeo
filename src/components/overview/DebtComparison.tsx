@@ -164,31 +164,33 @@ export const DebtComparison = () => {
 
               {/* Payment Efficiency */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                  <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                    <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
+                      <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        Payment Efficiency
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help">
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                              Shows how your payments are split between principal and interest.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </span>
+                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                        {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })} of your payments go towards interest.
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Payment Efficiency</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="cursor-help">
-                          <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                          Shows how your payments are split between principal and interest.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                    {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })} of your payments go towards interest.
-                  </div>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
                       <span className="text-gray-600 dark:text-gray-300">
