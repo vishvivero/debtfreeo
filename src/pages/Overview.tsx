@@ -12,6 +12,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { countryCurrencies } from "@/lib/utils/currency-data";
+import { ActionPlan } from "@/components/overview/ActionPlan";
 
 const Overview = () => {
   const { toast } = useToast();
@@ -103,6 +104,19 @@ const Overview = () => {
 
   const currentCurrencySymbol = profile?.preferred_currency || '£';
 
+  // Calculate metrics for ActionPlan
+  const highestAprDebt = debts?.length
+    ? [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0]
+    : undefined;
+
+  const lowestBalanceDebt = debts?.length
+    ? [...debts].sort((a, b) => a.balance - b.balance)[0]
+    : undefined;
+
+  const monthlyInterest = debts?.reduce((total, debt) => {
+    return total + (debt.balance * (debt.interest_rate / 100) / 12);
+  }, 0) || 0;
+
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
@@ -148,6 +162,27 @@ const Overview = () => {
                   transition={{ delay: 0.2, duration: 0.5 }}
                 >
                   <DebtScoreCard />
+                </motion.div>
+
+                {/* Action Plan moved to bottom */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                >
+                  <ActionPlan
+                    highestAprDebt={highestAprDebt ? {
+                      name: highestAprDebt.name,
+                      apr: highestAprDebt.interest_rate
+                    } : undefined}
+                    lowestBalanceDebt={lowestBalanceDebt ? {
+                      name: lowestBalanceDebt.name,
+                      balance: lowestBalanceDebt.balance
+                    } : undefined}
+                    monthlyInterest={monthlyInterest}
+                    optimizationScore={0}
+                    currencySymbol={currentCurrencySymbol}
+                  />
                 </motion.div>
               </motion.div>
             )}
