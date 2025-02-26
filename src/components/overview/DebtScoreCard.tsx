@@ -399,17 +399,16 @@ export const DebtScoreCard = () => {
       </>;
   };
 
-  return <motion.div initial={{
-    opacity: 0,
-    y: 20
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} transition={{
-    duration: 0.5
-  }} className="mb-6">
-      <Card className="bg-white p-6 relative overflow-hidden">
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full"
+    >
+      <Card className="bg-white overflow-hidden">
         {renderContent()}
       </Card>
-    </motion.div>;
+    </motion.div>
+  );
 };
