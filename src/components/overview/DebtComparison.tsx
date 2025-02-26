@@ -1,3 +1,4 @@
+
 import { m as motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -12,6 +13,31 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
+interface ComparisonResult {
+  totalDebts: number;
+  originalPayoffDate: Date;
+  originalTotalInterest: number;
+  optimizedPayoffDate: Date;
+  optimizedTotalInterest: number;
+  timeSaved: {
+    years: number;
+    months: number;
+  };
+  moneySaved: number;
+  baselineYears: number;
+  baselineMonths: number;
+  principalPercentage: number;
+  interestPercentage: number;
+  monthlyInterestCost: number;
+  durationScore: number;
+  interestScore: number;
+  behaviorScore: {
+    ontimePayments: number;
+    excessPayments: number;
+    strategyUsage: number;
+  };
+}
+
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
@@ -19,7 +45,7 @@ export const DebtComparison = () => {
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
 
-  const calculateComparison = () => {
+  const calculateComparison = (): ComparisonResult => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       return {
         totalDebts: 0,
@@ -36,7 +62,14 @@ export const DebtComparison = () => {
         baselineMonths: 0,
         principalPercentage: 0,
         interestPercentage: 0,
-        monthlyInterestCost: 0
+        monthlyInterestCost: 0,
+        durationScore: 0,
+        interestScore: 0,
+        behaviorScore: {
+          ontimePayments: 0,
+          excessPayments: 0,
+          strategyUsage: 0
+        }
       };
     }
 
@@ -44,20 +77,10 @@ export const DebtComparison = () => {
       if (debt.status === 'active') {
         const monthlyRate = debt.interest_rate / 1200;
         const monthlyInterest = debt.balance * monthlyRate;
-        console.log(`Monthly interest for ${debt.name}:`, {
-          balance: debt.balance,
-          rate: debt.interest_rate,
-          monthlyInterest: monthlyInterest
-        });
         return total + monthlyInterest;
       }
       return total;
     }, 0);
-
-    console.log('Monthly interest calculation:', {
-      debts: debts.length,
-      totalMonthlyInterest: monthlyInterestCost
-    });
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     const timelineData = calculateTimelineData(debts, profile.monthly_payment, selectedStrategy, oneTimeFundings);
@@ -76,6 +99,15 @@ export const DebtComparison = () => {
     const yearsSaved = Math.floor(monthsSaved / 12);
     const remainingMonthsSaved = monthsSaved % 12;
 
+    // Calculate scores
+    const interestScore = (lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest) / lastDataPoint.baselineInterest * 50;
+    const durationScore = (totalBaselineMonths - totalAcceleratedMonths) / totalBaselineMonths * 30;
+    const behaviorScore = {
+      ontimePayments: 10, // Assuming all payments are on time
+      excessPayments: profile.monthly_payment > debts.reduce((sum, debt) => sum + debt.minimum_payment, 0) ? 5 : 2.5,
+      strategyUsage: selectedStrategy ? 5 : 0
+    };
+
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
@@ -91,7 +123,10 @@ export const DebtComparison = () => {
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
-      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100
+      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100,
+      durationScore,
+      interestScore,
+      behaviorScore
     };
   };
 
@@ -526,3 +561,4 @@ export const DebtComparison = () => {
     </motion.div>
   );
 };
+
