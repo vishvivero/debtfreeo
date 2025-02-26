@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -12,6 +11,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { countryCurrencies } from "@/lib/utils/currency-data";
+import { DebtOverview } from "@/components/overview/DebtOverview";
 
 const Overview = () => {
   const { toast } = useToast();
@@ -20,7 +20,6 @@ const Overview = () => {
   const { profile, updateProfile } = useProfile();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Validate currency support
   const validateCurrency = (currencySymbol: string) => {
     return countryCurrencies.some(currency => currency.symbol === currencySymbol);
   };
@@ -67,7 +66,6 @@ const Overview = () => {
     }
   };
 
-  // Show loading skeleton while data is being fetched
   if (isLoading) {
     return (
       <MainLayout>
@@ -106,7 +104,7 @@ const Overview = () => {
                   currencySymbol={currentCurrencySymbol}
                   onCurrencyChange={handleCurrencyChange}
                 />
-                <OverviewMetrics />
+                <DebtOverview />
               </div>
 
               <motion.div
