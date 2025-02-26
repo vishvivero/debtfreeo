@@ -130,7 +130,7 @@ export const DebtComparison = () => {
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-gray-500" />
                     <div>
-                      <span className="text-gray-600 dark:text-gray-300 font-medium">
+                      <span className="text-gray-600 dark:text-gray-300 font-medium text-lg">
                         Debt-Free Date
                         <TooltipProvider>
                           <Tooltip>
@@ -146,13 +146,13 @@ export const DebtComparison = () => {
                           </Tooltip>
                         </TooltipProvider>
                       </span>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                         Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
                         {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
                       </div>
                     </div>
                   </div>
-                  <span className="text-lg font-semibold whitespace-nowrap">
+                  <span className="text-xl font-bold text-gray-700 dark:text-gray-300">
                     {comparison.originalPayoffDate.toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric'
