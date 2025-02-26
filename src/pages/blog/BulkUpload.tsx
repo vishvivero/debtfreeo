@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Loader2, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { MainLayout } from "@/components/layout/MainLayout";
+import { AdminSidebar } from "@/components/layout/AdminSidebar";
 
 export const BulkUpload = () => {
   const { user } = useAuth();
@@ -16,7 +18,7 @@ export const BulkUpload = () => {
     const fetchCategories = async () => {
       try {
         const { data, error } = await supabase
-          .from('blog_categories')  // Changed from 'categories' to 'blog_categories'
+          .from('blog_categories')
           .select('id, name, slug')
           .order('name');
 
@@ -36,15 +38,11 @@ export const BulkUpload = () => {
     fetchCategories();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  return (
+  const content = isLoading ? (
+    <div className="flex items-center justify-center min-h-[200px]">
+      <Loader2 className="h-8 w-8 animate-spin" />
+    </div>
+  ) : (
     <>
       <div className="w-full bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -129,5 +127,11 @@ export const BulkUpload = () => {
         </div>
       </div>
     </>
+  );
+
+  return (
+    <MainLayout sidebar={<AdminSidebar />}>
+      {content}
+    </MainLayout>
   );
 };
