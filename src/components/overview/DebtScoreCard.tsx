@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, TrendingUp, PiggyBank, Calendar, Info, Target, AlertTriangle } from "lucide-react";
@@ -8,21 +9,25 @@ import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtSc
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
+
 export const DebtScoreCard = () => {
   const {
     debts,
     profile
   } = useDebts();
+
   console.log('Rendering DebtScoreCard with:', {
     debtCount: debts?.length,
     totalBalance: debts?.reduce((sum, debt) => sum + debt.balance, 0),
     monthlyPayment: profile?.monthly_payment,
     profile
   });
+
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) || 0;
   const hasNoDebts = !debts || debts.length === 0;
   const isDebtFree = debts && debts.length > 0 && totalDebt === 0;
+
   const calculateScore = () => {
     if (!debts || debts.length === 0) return null;
     const effectiveMonthlyPayment = profile?.monthly_payment || totalMinimumPayments;
@@ -31,8 +36,10 @@ export const DebtScoreCard = () => {
     const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(debts, effectiveMonthlyPayment, selectedStrategy, []);
     return calculateDebtScore(debts, originalPayoff, optimizedPayoff, selectedStrategy, effectiveMonthlyPayment);
   };
+
   const scoreDetails = calculateScore();
   const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
+
   const renderActionableInsights = () => {
     if (!scoreDetails || !debts?.length) return null;
     if (debts.length === 1) {
@@ -351,6 +358,7 @@ export const DebtScoreCard = () => {
         </div>
       </div>;
   };
+
   const renderContent = () => {
     if (hasNoDebts) {
       return <NoDebtsMessage />;
@@ -390,6 +398,7 @@ export const DebtScoreCard = () => {
         </div>
       </>;
   };
+
   return <motion.div initial={{
     opacity: 0,
     y: 20
