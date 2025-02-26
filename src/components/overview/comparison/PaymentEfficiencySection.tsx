@@ -37,7 +37,7 @@ export const PaymentEfficiencySection = ({
                 </Tooltip>
               </TooltipProvider>
             </span>
-            <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+            <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed mt-1 sm:mt-2">
               {currencySymbol}{Math.ceil(totalInterest).toLocaleString()} of your payments go towards interest.
             </div>
           </div>
