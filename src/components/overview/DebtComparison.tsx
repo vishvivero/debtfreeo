@@ -162,7 +162,7 @@ export const DebtComparison = () => {
               </div>
 
               {/* Payment Efficiency */}
-              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm relative z-50">
                 <div className="flex items-center gap-3 mb-4">
                   <Percent className="w-5 h-5 text-gray-500" />
                   <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export const DebtComparison = () => {
                         </TooltipTrigger>
                         <TooltipContent 
                           side="right" 
-                          className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg" 
+                          className="z-[100] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg" 
                           sideOffset={5}
                         >
                           Shows how your payments are split between principal and interest. A higher percentage going to principal means more efficient debt reduction, while high interest percentage indicates potential for optimization.
