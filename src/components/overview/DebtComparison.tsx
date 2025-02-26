@@ -422,10 +422,15 @@ export const DebtComparison = () => {
                         </TooltipProvider>
                       </span>
                       <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
+                        Our optimized plan helps you save{' '}
+                        {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
-                        })} in interest payments with our smart plan!
+                        })}{' '}
+                        in total interest charges. By following our recommended payment strategy, 
+                        you'll pay less in interest over the life of your debts. This means more 
+                        of your money goes toward paying down the principal balance instead of 
+                        interest charges.
                       </div>
                     </div>
                   </div>
