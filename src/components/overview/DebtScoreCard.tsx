@@ -1,6 +1,7 @@
+
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Info } from "lucide-react";
+import { CheckCircle2, TrendingUp, PiggyBank, Calendar, Info, Target, AlertTriangle } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -34,9 +35,7 @@ export const DebtScoreCard = () => {
   const calculateScore = () => {
     if (!debts || debts.length === 0) return null;
 
-    // Use either the profile's monthly payment or total minimum payments if monthly payment is not set
     const effectiveMonthlyPayment = profile?.monthly_payment || totalMinimumPayments;
-
     const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
     
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
@@ -65,89 +64,141 @@ export const DebtScoreCard = () => {
   const scoreDetails = calculateScore();
   const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
 
-  const renderCircularProgress = () => {
-    if (!scoreDetails) return null;
+  const renderActionableInsights = () => {
+    if (!scoreDetails || !debts?.length) return null;
 
-    return (
-      <div className="relative w-64 h-64">
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
-          <div className="text-6xl font-bold text-gray-900">
-            {Math.round(scoreDetails.totalScore)}
-          </div>
-          <div className="text-emerald-500 font-medium text-lg">
-            {scoreCategory?.label}
-          </div>
-        </div>
-        <svg className="w-full h-full transform -rotate-90">
-          <defs>
-            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#ef4444" />
-              <stop offset="25%" stopColor="#f97316" />
-              <stop offset="50%" stopColor="#facc15" />
-              <stop offset="75%" stopColor="#84cc16" />
-              <stop offset="100%" stopColor="#22c55e" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="128"
-            cy="128"
-            r="116"
-            stroke="currentColor"
-            strokeWidth="16"
-            fill="none"
-            className="text-gray-100"
-          />
-          <motion.circle
-            initial={{ strokeDashoffset: 729 }}
-            animate={{ 
-              strokeDashoffset: 729 - (729 * scoreDetails.totalScore) / 100 
-            }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            cx="128"
-            cy="128"
-            r="116"
-            stroke="url(#scoreGradient)"
-            strokeWidth="16"
-            fill="none"
-            strokeDasharray="729"
-            className="transition-all duration-1000 ease-out"
-          />
-        </svg>
-      </div>
+    const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
+    const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
+    const totalInterest = debts.reduce((sum, debt) => 
+      sum + (debt.balance * (debt.interest_rate / 100)), 0
     );
-  };
-
-  const renderScoreBreakdown = () => {
-    if (!scoreDetails) return null;
 
     return (
-      <div className="space-y-4 mt-6">
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-          Your Optimized Debt Repayment Strategy
-        </h3>
-        <p className="text-gray-600 mt-2">
-          We've analyzed your debts and created a plan to minimize interest and accelerate your path to financial freedom.
-        </p>
-        <div className="space-y-4">
-          <div className="p-4 bg-emerald-50/50 rounded-lg">
-            <div className="text-gray-600">Interest Savings</div>
-            <div className="text-lg font-semibold text-emerald-600">
-              {scoreDetails.interestScore.toFixed(1)}/50
+      <div className="mt-6 space-y-6">
+        <h3 className="text-2xl font-bold text-gray-900">Action Plan</h3>
+        
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-green-100">
+                <Target className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Priority Focus</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  Focus on {highestInterestDebt.name} with {highestInterestDebt.interest_rate}% APR
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  This debt has the highest interest rate and costs you the most
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="p-4 bg-blue-50/50 rounded-lg">
-            <div className="text-gray-600">Duration Reduction</div>
-            <div className="text-lg font-semibold text-blue-600">
-              {scoreDetails.durationScore.toFixed(1)}/30
+          </Card>
+
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-blue-100">
+                <PiggyBank className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Quick Win</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  Target {lowestBalance.name} with {profile?.preferred_currency || '£'}
+                  {lowestBalance.balance.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Paying this off first will give you momentum
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="p-4 bg-purple-50/50 rounded-lg">
-            <div className="text-gray-600">Payment Behavior</div>
-            <div className="text-lg font-semibold text-purple-600">
-              {(scoreDetails.behaviorScore.ontimePayments + 
-                scoreDetails.behaviorScore.excessPayments + 
-                scoreDetails.behaviorScore.strategyUsage).toFixed(1)}/20
+          </Card>
+
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-amber-100">
+                <TrendingUp className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Monthly Interest Cost</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  {profile?.preferred_currency || '£'}{totalInterest.toFixed(2)} per month
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  This is what your debt costs you monthly
+                </p>
+              </div>
             </div>
+          </Card>
+
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-purple-100">
+                <Calendar className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Optimization Potential</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  {(((scoreDetails.durationScore + scoreDetails.interestScore) / 80) * 100).toFixed(0)}% room for improvement
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Based on your current payment strategy
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+            Recommended Next Steps
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Personalized steps based on your debt profile</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </h4>
+          
+          <div className="space-y-3">
+            {scoreDetails.interestScore < 25 && (
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  Consider consolidating your high-interest debts to reduce overall interest costs
+                </p>
+              </div>
+            )}
+            
+            {scoreDetails.durationScore < 15 && (
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  Look for opportunities to increase your monthly payment by {profile?.preferred_currency || '£'}50-100
+                </p>
+              </div>
+            )}
+            
+            {scoreDetails.behaviorScore.excessPayments < 2.5 && (
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  Set up automatic payments to ensure consistent debt reduction
+                </p>
+              </div>
+            )}
+
+            {debts.some(debt => debt.interest_rate > 20) && (
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  You have high-interest debt(s). Prioritize paying these off first
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -187,17 +238,57 @@ export const DebtScoreCard = () => {
 
     return (
       <>
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-shrink-0">
+        <div className="flex flex-col md:flex-row items-start gap-8">
+          <div className="flex-shrink-0 w-full md:w-auto">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
               <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">YOUR DEBT SCORE</h3>
+                <h3 className="text-lg font-semibold text-gray-700">DEBT FREEDOM SCORE</h3>
               </div>
-              {renderCircularProgress()}
+              <div className="relative w-48 h-48 mx-auto">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
+                  <div className="text-6xl font-bold text-gray-900">
+                    {Math.round(scoreDetails?.totalScore || 0)}
+                  </div>
+                  <div className={`font-medium text-lg ${scoreCategory?.color}`}>
+                    {scoreCategory?.label}
+                  </div>
+                </div>
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="96"
+                    cy="96"
+                    r="88"
+                    stroke="currentColor"
+                    strokeWidth="16"
+                    fill="none"
+                    className="text-gray-100"
+                  />
+                  <circle
+                    cx="96"
+                    cy="96"
+                    r="88"
+                    stroke="url(#scoreGradient)"
+                    strokeWidth="16"
+                    fill="none"
+                    strokeDasharray="553"
+                    strokeDashoffset={553 - (553 * (scoreDetails?.totalScore || 0)) / 100}
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <defs>
+                  <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ef4444" />
+                    <stop offset="25%" stopColor="#f97316" />
+                    <stop offset="50%" stopColor="#facc15" />
+                    <stop offset="75%" stopColor="#84cc16" />
+                    <stop offset="100%" stopColor="#22c55e" />
+                  </linearGradient>
+                </defs>
+              </div>
             </div>
           </div>
-          <div className="flex-grow">
-            {renderScoreBreakdown()}
+          <div className="flex-grow w-full">
+            {renderActionableInsights()}
           </div>
         </div>
 
