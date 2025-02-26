@@ -17,6 +17,11 @@ interface ActionPlanProps {
   currencySymbol: string;
 }
 
+interface Recommendation {
+  icon: React.ReactNode;
+  text: string;
+}
+
 export const ActionPlan = ({
   highestAprDebt,
   lowestBalanceDebt,
@@ -24,6 +29,57 @@ export const ActionPlan = ({
   optimizationScore,
   currencySymbol
 }: ActionPlanProps) => {
+  // Generate dynamic recommendations based on debt situation
+  const getRecommendations = (): Recommendation[] => {
+    const recommendations: Recommendation[] = [];
+
+    // High Interest Debt Recommendation
+    if (highestAprDebt && highestAprDebt.apr > 15) {
+      recommendations.push({
+        icon: <CreditCard className="h-5 w-5 text-primary mt-1" />,
+        text: `Consider consolidating ${highestAprDebt.name} with ${highestAprDebt.apr}% APR to reduce interest costs`
+      });
+    }
+
+    // Monthly Payment Increase Recommendation
+    const suggestedIncrease = monthlyInterest > 1000 ? 
+      `${currencySymbol}100-200` : 
+      `${currencySymbol}50-100`;
+    
+    recommendations.push({
+      icon: <ArrowUpRight className="h-5 w-5 text-primary mt-1" />,
+      text: `Look for opportunities to increase your monthly payment by ${suggestedIncrease}`
+    });
+
+    // Automatic Payments Recommendation
+    if (optimizationScore < 80) {
+      recommendations.push({
+        icon: <Calendar className="h-5 w-5 text-primary mt-1" />,
+        text: "Set up automatic payments to ensure consistent debt reduction"
+      });
+    }
+
+    // Strategy Based on Highest APR
+    if (highestAprDebt && highestAprDebt.apr > 20) {
+      recommendations.push({
+        icon: <Percent className="h-5 w-5 text-primary mt-1" />,
+        text: `Prioritize paying off ${highestAprDebt.name} first as it has the highest interest rate`
+      });
+    }
+
+    // Low Balance Quick Win
+    if (lowestBalanceDebt && lowestBalanceDebt.balance < 5000) {
+      recommendations.push({
+        icon: <Target className="h-5 w-5 text-primary mt-1" />,
+        text: `Consider paying off ${lowestBalanceDebt.name} quickly for a motivational boost`
+      });
+    }
+
+    return recommendations.slice(0, 4); // Limit to 4 recommendations
+  };
+
+  const recommendations = getRecommendations();
+
   return (
     <Card className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm">
       <CardHeader>
@@ -145,22 +201,12 @@ export const ActionPlan = ({
             Recommended Next Steps
           </h3>
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <CreditCard className="h-5 w-5 text-primary mt-1" />
-              <p className="text-gray-600">Consider consolidating your high-interest debts to reduce overall interest costs</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <ArrowUpRight className="h-5 w-5 text-primary mt-1" />
-              <p className="text-gray-600">Look for opportunities to increase your monthly payment by {currencySymbol}50-100</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-primary mt-1" />
-              <p className="text-gray-600">Set up automatic payments to ensure consistent debt reduction</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <Percent className="h-5 w-5 text-primary mt-1" />
-              <p className="text-gray-600">You have high-interest debt(s). Prioritize paying these off first</p>
-            </div>
+            {recommendations.map((recommendation, index) => (
+              <div key={index} className="flex items-start gap-3">
+                {recommendation.icon}
+                <p className="text-gray-600">{recommendation.text}</p>
+              </div>
+            ))}
           </div>
         </motion.div>
       </CardContent>
