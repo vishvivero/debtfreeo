@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { countryCurrencies } from "@/lib/utils/currency-data";
 import { ActionPlan } from "@/components/overview/ActionPlan";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Overview = () => {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ const Overview = () => {
   const { debts, isLoading, error } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isUpdating, setIsUpdating] = useState(false);
+  const isMobile = useIsMobile();
 
   const validateCurrency = (currencySymbol: string) => {
     return countryCurrencies.some(currency => currency.symbol === currencySymbol);
@@ -68,9 +70,9 @@ const Overview = () => {
   };
 
   const LoadingSkeleton = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="h-16 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
@@ -88,7 +90,7 @@ const Overview = () => {
   if (error) {
     return (
       <MainLayout>
-        <div className="container py-8">
+        <div className="container py-4 sm:py-8">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -103,23 +105,31 @@ const Overview = () => {
 
   const currentCurrencySymbol = profile?.preferred_currency || '£';
 
-  // Calculate metrics for ActionPlan
-  const highestAprDebt = debts?.length
-    ? [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0]
-    : undefined;
+  // Calculate metrics for ActionPlan with memoization
+  const metrics = React.useMemo(() => {
+    if (!debts?.length) return {
+      highestAprDebt: undefined,
+      lowestBalanceDebt: undefined,
+      monthlyInterest: 0,
+    };
 
-  const lowestBalanceDebt = debts?.length
-    ? [...debts].sort((a, b) => a.balance - b.balance)[0]
-    : undefined;
+    const highestAprDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
+    const lowestBalanceDebt = [...debts].sort((a, b) => a.balance - b.balance)[0];
+    const monthlyInterest = debts.reduce((total, debt) => {
+      return total + (debt.balance * (debt.interest_rate / 100) / 12);
+    }, 0);
 
-  const monthlyInterest = debts?.reduce((total, debt) => {
-    return total + (debt.balance * (debt.interest_rate / 100) / 12);
-  }, 0) || 0;
+    return {
+      highestAprDebt,
+      lowestBalanceDebt,
+      monthlyInterest,
+    };
+  }, [debts]);
 
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
-        <div className="container py-8">
+        <div className="container py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
@@ -138,7 +148,7 @@ const Overview = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg">
                   <div className="p-4 sm:p-6">
@@ -154,6 +164,7 @@ const Overview = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
+                  className="w-full"
                 >
                   <DebtScoreCard />
                 </motion.div>
@@ -164,15 +175,15 @@ const Overview = () => {
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
                   <ActionPlan
-                    highestAprDebt={highestAprDebt ? {
-                      name: highestAprDebt.name,
-                      apr: highestAprDebt.interest_rate
+                    highestAprDebt={metrics.highestAprDebt ? {
+                      name: metrics.highestAprDebt.name,
+                      apr: metrics.highestAprDebt.interest_rate
                     } : undefined}
-                    lowestBalanceDebt={lowestBalanceDebt ? {
-                      name: lowestBalanceDebt.name,
-                      balance: lowestBalanceDebt.balance
+                    lowestBalanceDebt={metrics.lowestBalanceDebt ? {
+                      name: metrics.lowestBalanceDebt.name,
+                      balance: metrics.lowestBalanceDebt.balance
                     } : undefined}
-                    monthlyInterest={monthlyInterest}
+                    monthlyInterest={metrics.monthlyInterest}
                     optimizationScore={0}
                     currencySymbol={currentCurrencySymbol}
                   />
