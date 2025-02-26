@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -242,56 +243,67 @@ export const DebtComparison = () => {
 
               {/* Total Debts */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
-                      <Coins className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
-                        Total Debts
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
-                            </TooltipTrigger>
-                            <TooltipContent 
-                              side="right" 
-                              className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
-                            >
-                              Your total number of active debts.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                    </div>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                    <Coins className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span className="text-xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400">{comparison.totalDebts}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                      Total Debts
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-help">
+                            <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
+                          </TooltipTrigger>
+                          <TooltipContent 
+                            side="right" 
+                            className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
+                          >
+                            Your total number of active debts.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
+                  </div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  className="w-full mt-2 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm sm:text-base"
-                  onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}
-                >
-                  <span>View Debt List</span>
-                  {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </Button>
-                {isDebtListExpanded && (
-                  <div className="mt-3 space-y-2 sm:space-y-3">
-                    {debts?.map((debt) => (
-                      <div key={debt.id} className="flex justify-between items-center p-2 sm:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{debt.name}</span>
-                        <span className="text-xs sm:text-sm font-semibold text-purple-600 dark:text-purple-400">
-                          {currencySymbol}{debt.balance.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                      <Badge variant="outline" className="text-purple-600 border-purple-600">
+                        Total Active Debts
+                      </Badge>
+                    </span>
+                    <span className="font-semibold text-purple-600 dark:text-purple-400">
+                      {comparison.totalDebts} debts
+                    </span>
                   </div>
-                )}
+                  <Button 
+                    variant="ghost" 
+                    className="w-full flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm sm:text-base"
+                    onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}
+                  >
+                    <span>View Debt List</span>
+                    {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </Button>
+                  {isDebtListExpanded && (
+                    <div className="space-y-3">
+                      {debts?.map((debt) => (
+                        <div key={debt.id} className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                            <span className="font-medium">{debt.name}</span>
+                          </span>
+                          <span className="font-semibold text-purple-600 dark:text-purple-400">
+                            {currencySymbol}{debt.balance.toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
+                    Click to view your complete debt list
+                  </div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Optimized Plan Card */}
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
