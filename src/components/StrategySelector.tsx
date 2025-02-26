@@ -1,9 +1,8 @@
-
 import { Strategy } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, Target, DollarSign, BullsEye } from "lucide-react";
+import { ThumbsUp, Target, DollarSign } from "lucide-react";
 
 interface StrategySelectorProps {
   strategies: Strategy[];
@@ -25,7 +24,7 @@ export const StrategySelector = ({
       case "snowball":
         return <Target className="h-12 w-12 text-primary" />;
       default:
-        return <BullsEye className="h-12 w-12 text-primary" />;
+        return <Target className="h-12 w-12 text-primary" />;
     }
   };
 
