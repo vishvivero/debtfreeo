@@ -87,14 +87,12 @@ export const OptimizedPlanCard = ({ comparison, currencySymbol }: OptimizedPlanC
                 </div>
               </div>
             </div>
-            <div className="text-right mt-4">
-              <span className="text-xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </span>
-            </div>
+            <span className="text-base sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+              {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric'
+              })}
+            </span>
           </div>
         </div>
 
