@@ -431,6 +431,35 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                   </div>
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Original Interest: <span className="font-semibold text-red-600">{currencySymbol}{comparison.originalTotalInterest.toLocaleString()}</span>
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Optimized Interest: <span className="font-semibold text-emerald-600">{currencySymbol}{comparison.optimizedTotalInterest.toLocaleString()}</span>
+                      </span>
+                    </div>
+                    <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full flex">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(comparison.optimizedTotalInterest / comparison.originalTotalInterest) * 100}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-emerald-500"
+                        />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${((comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest) * 100}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-red-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
+                      You save {((comparison.moneySaved / comparison.originalTotalInterest) * 100).toFixed(1)}% on interest payments
+                    </div>
+                  </div>
                   <div className="text-right">
                     <span className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                       {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
