@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types";
 import { Payment } from "@/lib/types/payment";
 import { addMonths } from "date-fns";
@@ -12,27 +13,28 @@ export const calculatePaymentSchedule = (
     initialBalance: debt.balance,
     monthlyAllocation,
     isHighPriorityDebt,
-    minimumPayment: debt.minimum_payment
+    minimumPayment: debt.minimum_payment,
+    interestRate: debt.interest_rate
   });
 
   const schedule: Payment[] = [];
+  let remainingBalance = Number(debt.balance);
+  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   let currentDate = debt.next_payment_date 
     ? new Date(debt.next_payment_date) 
     : new Date();
-  
-  let remainingBalance = Number(debt.balance);
-  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Determine payment amount - for non-high priority debts, use at least minimum payment
-    // but allow for full monthly allocation if available
+    // Determine payment amount
     let paymentAmount = monthlyAllocation;
 
-    // Ensure we don't overpay
+    // Calculate total required for this month (balance + interest)
     const totalRequired = remainingBalance + monthlyInterest;
+    
+    // Adjust payment if it would overpay
     if (paymentAmount > totalRequired) {
       paymentAmount = Number(totalRequired.toFixed(2));
     }
@@ -54,8 +56,7 @@ export const calculatePaymentSchedule = (
       payment: paymentAmount.toFixed(2),
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
-      isLastPayment,
-      isFirstMonth: month === 0
+      isLastPayment
     });
 
     schedule.push({

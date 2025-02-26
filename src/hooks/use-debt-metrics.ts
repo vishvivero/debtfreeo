@@ -27,11 +27,21 @@ export const useDebtMetrics = (debts: Debt[] | null, monthlyPayment: number = 0)
       return total;
     }, 0);
 
-    const baselineMonths = Math.ceil(totalDebt / (monthlyPayment || 1));
-    const baselineYears = Math.floor(baselineMonths / 12);
-    const remainingMonths = baselineMonths % 12;
+    // Calculate months to payoff including interest
+    let remainingDebt = totalDebt;
+    let months = 0;
+    while (remainingDebt > 0 && months < 1200) { // 100 years max
+      const monthlyInterest = (remainingDebt * (debts[0].interest_rate / 100)) / 12;
+      remainingDebt = remainingDebt + monthlyInterest - (monthlyPayment || 1);
+      months++;
+    }
 
-    const interestPercentage = (totalMonthlyInterest * baselineMonths / totalDebt) * 100;
+    const baselineYears = Math.floor(months / 12);
+    const baselineMonths = months % 12;
+
+    // Calculate total interest paid over the loan term
+    const totalInterest = totalMonthlyInterest * months;
+    const interestPercentage = (totalInterest / totalDebt) * 100;
     const principalPercentage = 100 - interestPercentage;
 
     return {
@@ -40,7 +50,7 @@ export const useDebtMetrics = (debts: Debt[] | null, monthlyPayment: number = 0)
       monthlyPayment,
       totalMonthlyInterest,
       baselineYears,
-      baselineMonths: remainingMonths,
+      baselineMonths,
       interestPercentage,
       principalPercentage,
     };
