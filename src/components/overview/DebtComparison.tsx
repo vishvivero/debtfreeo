@@ -106,9 +106,9 @@ export const DebtComparison = () => {
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Current Plan Card */}
-        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg">
+        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
               <Calendar className="w-6 h-6 text-gray-500" />
@@ -284,7 +284,7 @@ export const DebtComparison = () => {
         </Card>
 
         {/* Optimized Plan Card */}
-        <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg">
+        <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Award className="w-6 h-6 text-emerald-500" />
