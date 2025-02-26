@@ -74,9 +74,6 @@ export const DebtScoreCard = () => {
     );
   };
 
-  const scoreDetails = calculateScore();
-  const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
-
   const renderFirstTimeUserContent = () => {
     if (!debts || debts.length !== 1) return null;
     const debt = debts[0];
@@ -88,6 +85,9 @@ export const DebtScoreCard = () => {
       strategies[0],
       []
     );
+    
+    // Extract months from the payoff details of the first debt
+    const payoffMonths = Object.values(timeToPayoff)[0]?.months || 0;
 
     return (
       <div className="space-y-8">
@@ -119,7 +119,7 @@ export const DebtScoreCard = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 mt-1 text-emerald-500" />
-                  <span>Estimated payoff time: {timeToPayoff.months} months</span>
+                  <span>Estimated payoff time: {payoffMonths} months</span>
                 </li>
               </ul>
             </div>
@@ -332,6 +332,9 @@ export const DebtScoreCard = () => {
       </div>
     );
   };
+
+  const scoreDetails = calculateScore();
+  const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
 
   const renderContent = () => {
     if (hasNoDebts) {
