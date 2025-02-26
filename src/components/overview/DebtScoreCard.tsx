@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, TrendingUp, PiggyBank, Calendar, Info, Target, AlertTriangle } from "lucide-react";
@@ -25,7 +24,6 @@ export const DebtScoreCard = () => {
     profile
   });
 
-  // Calculate total debt and minimum payments
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) || 0;
   
@@ -66,6 +64,111 @@ export const DebtScoreCard = () => {
 
   const renderActionableInsights = () => {
     if (!scoreDetails || !debts?.length) return null;
+
+    if (debts.length === 1) {
+      const debt = debts[0];
+      const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
+      const totalCostIfMinimum = debt.balance + (monthlyInterest * 24); // Rough 2-year estimate
+
+      return (
+        <div className="mt-6 space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-emerald-100">
+                  <Target className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Monthly Interest: {profile?.preferred_currency || '£'}
+                    {monthlyInterest.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    This is what your debt costs you each month in interest
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-blue-100">
+                  <PiggyBank className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Payment Impact</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Adding just {profile?.preferred_currency || '£'}50 extra monthly could save you months
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Extra payments go directly to reducing your principal
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-amber-100">
+                  <TrendingUp className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Total Cost Warning</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Paying minimum only: ~{profile?.preferred_currency || '£'}
+                    {totalCostIfMinimum.toFixed(0)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    This is your estimated 2-year cost with minimum payments
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-purple-100">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Success Tips</h4>
+                  <div className="space-y-2 mt-2">
+                    <p className="text-xs text-gray-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                      Set up automatic payments
+                    </p>
+                    <p className="text-xs text-gray-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                      Track your progress monthly
+                    </p>
+                    <p className="text-xs text-gray-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                      Celebrate small wins
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <h5 className="font-medium text-blue-800">Pro Tip</h5>
+                <p className="text-sm text-blue-700 mt-1">
+                  Every extra payment you make reduces both your balance and the amount of interest you'll pay over time.
+                  Consider setting aside any unexpected income for debt payments.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
     const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
