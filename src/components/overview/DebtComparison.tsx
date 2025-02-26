@@ -265,28 +265,33 @@ export const DebtComparison = () => {
       </div>;
   };
 
-  return <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
+  return <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6 sm:space-y-8 px-4 sm:px-0"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Current Plan Card */}
-        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-0 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-              <div className="p-2 rounded-full bg-blue-100">
-                <Wallet className="w-5 h-5 text-blue-600" />
+        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-0 shadow-lg transition-shadow duration-300 hover:shadow-xl">
+          <CardHeader className="pb-2 p-6">
+            <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
+              <div className="p-3 rounded-full bg-blue-100">
+                <Wallet className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
               </div>
-              <span className="bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent leading-tight">
                 Your Debt Overview
               </span>
               <HoverCard>
                 <HoverCardTrigger asChild>
-                  <button className="cursor-help">
-                    <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                  <button className="cursor-help p-2">
+                    <Info className="w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors" />
                   </button>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-80">
+                <HoverCardContent className="w-80 p-4 bg-white/95 backdrop-blur-sm border-gray-200 shadow-lg">
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Current Debt Situation</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <h4 className="font-semibold text-base">Current Debt Situation</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       View your current debt situation and payment efficiency
                     </p>
                   </div>
@@ -294,84 +299,82 @@ export const DebtComparison = () => {
               </HoverCard>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-3 sm:gap-4">
-              {/* Debt-Free Date */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900 shrink-0">
-                      <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        Debt-Free Date
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                              The date you'll become debt-free if you continue making only minimum payments.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
-                        Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
-                        {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
-                      </div>
+          <CardContent className="space-y-6 p-6">
+            <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-start sm:items-center gap-4">
+                  <div className="p-3 sm:p-4 rounded-full bg-blue-100 dark:bg-blue-900 shrink-0">
+                    <Calendar className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
+                      Debt-Free Date
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-help p-1">
+                            <Info className="w-5 h-5 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white/95 backdrop-blur-sm border-gray-200 shadow-lg">
+                            <p className="text-sm font-medium">The date you'll become debt-free if you continue making only minimum payments.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </h3>
+                    <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                      Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
+                      {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {comparison.originalPayoffDate.toLocaleDateString('en-US', {
+                </div>
+                <div className="text-right mt-4">
+                  <span className="text-xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    {comparison.originalPayoffDate.toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric'
                     })}
-                    </span>
-                  </div>
+                  </span>
                 </div>
               </div>
+            </div>
 
-              {/* Payment Efficiency */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                      <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        Payment Efficiency
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                              Shows how your payments are split between principal and interest.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} of your payments go towards interest.
-                      </div>
+            {/* Payment Efficiency Section */}
+            <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
+                    <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      Payment Efficiency
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-help">
+                            <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                            Shows how your payments are split between principal and interest.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
+                    <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                      {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} of your payments go towards interest.
                     </div>
                   </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Principal: <span className="font-semibold text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Interest: <span className="font-semibold text-red-600">{comparison.interestPercentage.toFixed(1)}%</span>
-                      </span>
-                    </div>
-                    <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full flex">
-                        <motion.div initial={{
+                </div>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Principal: <span className="font-semibold text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Interest: <span className="font-semibold text-red-600">{comparison.interestPercentage.toFixed(1)}%</span>
+                    </span>
+                  </div>
+                  <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full flex">
+                      <motion.div initial={{
                         width: 0
                       }} animate={{
                         width: `${comparison.principalPercentage}%`
@@ -379,7 +382,7 @@ export const DebtComparison = () => {
                         duration: 1,
                         ease: "easeOut"
                       }} className="h-full bg-emerald-500" />
-                        <motion.div initial={{
+                      <motion.div initial={{
                         width: 0
                       }} animate={{
                         width: `${comparison.interestPercentage}%`
@@ -387,91 +390,90 @@ export const DebtComparison = () => {
                         duration: 1,
                         ease: "easeOut"
                       }} className="h-full bg-red-500" />
-                      </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
-                      {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} goes to interest payments.
-                    </div>
+                  </div>
+                  <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
+                    {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} goes to interest payments.
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Total Debts */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
-                    <Coins className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      Total Debts
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-help">
-                            <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                            Your total number of active debts.
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </span>
-                  </div>
+            {/* Total Debts Section */}
+            <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                  <Coins className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                      <Badge variant="outline" className="text-purple-600 border-purple-600">
-                        Total Active Debts
-                      </Badge>
-                    </span>
-                    <span className="font-semibold text-purple-600 dark:text-purple-400">
-                      {comparison.totalDebts} debts
-                    </span>
-                  </div>
-                  <Button variant="ghost" className="w-full flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm sm:text-base" onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}>
-                    <span>View Debt List</span>
-                    {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </Button>
-                  {isDebtListExpanded && <div className="space-y-3">
-                      {debts?.map(debt => <div key={debt.id} className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                            <span className="font-medium">{debt.name}</span>
-                          </span>
-                          <span className="font-semibold text-purple-600 dark:text-purple-400">
-                            {currencySymbol}{debt.balance.toLocaleString()}
-                          </span>
-                        </div>)}
-                    </div>}
-                  {!isDebtListExpanded && <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
-                      Click to view your complete debt list
-                    </div>}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Total Debts
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="cursor-help">
+                          <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                          Your total number of active debts.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </span>
                 </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                    <Badge variant="outline" className="text-purple-600 border-purple-600">
+                      Total Active Debts
+                    </Badge>
+                  </span>
+                  <span className="font-semibold text-purple-600 dark:text-purple-400">
+                    {comparison.totalDebts} debts
+                  </span>
+                </div>
+                <Button variant="ghost" className="w-full flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm sm:text-base" onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}>
+                  <span>View Debt List</span>
+                  {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                {isDebtListExpanded && <div className="space-y-3">
+                    {debts?.map(debt => <div key={debt.id} className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                          <span className="font-medium">{debt.name}</span>
+                        </span>
+                        <span className="font-semibold text-purple-600 dark:text-purple-400">
+                          {currencySymbol}{debt.balance.toLocaleString()}
+                        </span>
+                      </div>)}
+                  </div>}
+                {!isDebtListExpanded && <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
+                    Click to view your complete debt list
+                  </div>}
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Optimized Plan Card */}
-        <Card className="bg-gradient-to-br from-gray-50 to-emerald-50 border-0 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-              <div className="p-2 rounded-full bg-emerald-100">
+        <Card className="bg-gradient-to-br from-gray-50 to-emerald-50 border-0 shadow-lg transition-shadow duration-300 hover:shadow-xl">
+          <CardHeader className="pb-2 p-6">
+            <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
+              <div className="p-3 rounded-full bg-emerald-100">
                 <Target className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="bg-gradient-to-r from-emerald-700 to-emerald-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-700 to-emerald-500 bg-clip-text text-transparent leading-tight">
                 What Debtfreeo Can Save You
               </span>
               <HoverCard>
                 <HoverCardTrigger asChild>
-                  <button className="cursor-help">
-                    <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                  <button className="cursor-help p-2">
+                    <Info className="w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors" />
                   </button>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-80">
+                <HoverCardContent className="w-80 p-4 bg-white/95 backdrop-blur-sm border-gray-200 shadow-lg">
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Optimized Strategy</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <h4 className="font-semibold text-base">Optimized Strategy</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       See how much you could save with our optimized payment strategy
                     </p>
                   </div>
@@ -479,30 +481,30 @@ export const DebtComparison = () => {
               </HoverCard>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="grid gap-3 sm:gap-4">
               {/* Optimized Debt-Free Date */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+              <div className="p-3 sm:p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
                     <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                      <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                      <Calendar className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
                         Optimized Debt-Free Date
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                            <TooltipTrigger className="cursor-help p-1">
+                              <Info className="w-5 h-5 text-gray-400" />
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white/95 backdrop-blur-sm border-gray-200 shadow-lg">
                               Your projected debt-free date with our optimized strategy.
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                      </h3>
+                      <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
                         {comparison.timeSaved.years > 0 && <>
                             Become debt-free{' '}
                             {comparison.timeSaved.years} {comparison.timeSaved.years === 1 ? 'year' : 'years'}
@@ -521,8 +523,8 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  <div className="text-right mt-4">
+                    <span className="text-xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                       {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric'
@@ -533,7 +535,7 @@ export const DebtComparison = () => {
               </div>
 
               {/* Total Interest (Optimized) */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+              <div className="p-3 sm:p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
                     <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
@@ -601,7 +603,7 @@ export const DebtComparison = () => {
               </div>
 
               {/* Savings Section */}
-              <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+              <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
                     <Wallet className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
@@ -657,10 +659,13 @@ export const DebtComparison = () => {
         </Card>
       </div>
 
-      <div className="flex justify-center mt-4 sm:mt-8">
-        <Button onClick={() => navigate("/strategy")} className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base">
+      <div className="flex justify-center mt-8">
+        <Button 
+          onClick={() => navigate("/strategy")} 
+          className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-8 py-4 rounded-full flex items-center justify-center gap-3 transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg font-semibold"
+        >
           Start Optimizing Your Debt Now
-          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </Button>
       </div>
     </motion.div>;
