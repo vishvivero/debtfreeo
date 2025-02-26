@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, Wallet } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { strategies } from "@/lib/strategies";
@@ -212,21 +213,26 @@ export const DebtComparison = () => {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-xl font-semibold">
               <div className="p-2 rounded-full bg-blue-100">
-                <Calendar className="w-5 h-5 text-blue-600" />
+                <Wallet className="w-5 h-5 text-blue-600" />
               </div>
               <span className="bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
                 Your Debt Overview
               </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <button className="cursor-help">
                     <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">View your current debt situation and payment efficiency</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                  </button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Current Debt Situation</h4>
+                    <p className="text-sm text-muted-foreground">
+                      View your current debt situation and payment efficiency
+                    </p>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -397,16 +403,21 @@ export const DebtComparison = () => {
               <span className="bg-gradient-to-r from-emerald-700 to-emerald-500 bg-clip-text text-transparent">
                 What Debtfreeo Can Save You
               </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <button className="cursor-help">
                     <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">See how much you could save with our optimized strategy</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                  </button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Optimized Strategy</h4>
+                    <p className="text-sm text-muted-foreground">
+                      See how much you could save with our optimized payment strategy
+                    </p>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
