@@ -362,25 +362,25 @@ export const DebtComparison = () => {
                       <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
                         {comparison.timeSaved.years > 0 && (
                           <>
-                            Our optimized strategy helps you become debt-free{' '}
+                            Become debt-free{' '}
                             {comparison.timeSaved.years} {comparison.timeSaved.years === 1 ? 'year' : 'years'}
                             {comparison.timeSaved.months > 0 && ' and '}
                             {comparison.timeSaved.months > 0 && (
                               <>{comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}</>
                             )}
-                            {' '}faster than with minimum payments alone!
+                            {' '}sooner with our optimized plan!
                           </>
                         )}
                         {!comparison.timeSaved.years && comparison.timeSaved.months > 0 && (
                           <>
-                            Our optimized strategy helps you become debt-free{' '}
+                            Become debt-free{' '}
                             {comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}{' '}
-                            faster than with minimum payments alone!
+                            sooner with our optimized plan!
                           </>
                         )}
                         {!comparison.timeSaved.years && !comparison.timeSaved.months && (
                           <>
-                            Start optimizing your debt repayment strategy today!
+                            Start your journey to become debt-free today!
                           </>
                         )}
                       </div>
