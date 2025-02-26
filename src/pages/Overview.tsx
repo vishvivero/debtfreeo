@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -70,9 +69,9 @@ const Overview = () => {
   };
 
   const LoadingSkeleton = () => (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-2 sm:space-y-6">
       <div className="h-16 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
@@ -90,7 +89,7 @@ const Overview = () => {
   if (error) {
     return (
       <MainLayout>
-        <div className="container py-4 sm:py-8">
+        <div className="container py-2 sm:py-8">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -105,7 +104,6 @@ const Overview = () => {
 
   const currentCurrencySymbol = profile?.preferred_currency || '£';
 
-  // Calculate metrics for ActionPlan with memoization
   const metrics = useMemo(() => {
     if (!debts?.length) return {
       highestAprDebt: undefined,
@@ -129,7 +127,7 @@ const Overview = () => {
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
-        <div className="container py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
+        <div className="container py-2 sm:py-8 px-3 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
@@ -148,10 +146,10 @@ const Overview = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-4 sm:space-y-6"
+                className="space-y-2 sm:space-y-6"
               >
                 <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg">
-                  <div className="p-4 sm:p-6">
+                  <div className="p-3 sm:p-6">
                     <OverviewHeader
                       currencySymbol={currentCurrencySymbol}
                       onCurrencyChange={handleCurrencyChange}
