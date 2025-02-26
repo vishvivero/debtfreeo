@@ -124,7 +124,7 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              {/* Current Debt-Free Date */}
+              {/* Debt-Free Date */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ export const DebtComparison = () => {
                         Debt-Free Date
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger>
+                            <TooltipTrigger className="cursor-help">
                               <Info className="w-4 h-4 text-gray-400 ml-2" />
                             </TooltipTrigger>
                             <TooltipContent 
@@ -168,7 +168,7 @@ export const DebtComparison = () => {
                     <Percent className="w-5 h-5 text-gray-500" />
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger className="flex items-center gap-2">
+                        <TooltipTrigger className="flex items-center gap-2 cursor-help">
                           <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
@@ -228,7 +228,7 @@ export const DebtComparison = () => {
                       Total Debts
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger>
+                          <TooltipTrigger className="cursor-help">
                             <Info className="w-4 h-4 text-gray-400 ml-2" />
                           </TooltipTrigger>
                           <TooltipContent 
@@ -274,7 +274,7 @@ export const DebtComparison = () => {
               What Debtfreeo Can Save You
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger className="cursor-help">
                     <Info className="w-4 h-4 text-emerald-400" />
                   </TooltipTrigger>
                   <TooltipContent side="right" className="z-[60]">
@@ -286,13 +286,26 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
+              {/* Optimized Debt-Free Date */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-emerald-600" />
                     <div>
-                      <span className="text-gray-600 dark:text-gray-300">Optimized Debt-Free Date</span>
-                      <div className="text-sm text-emerald-600 font-medium">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Optimized Debt-Free Date
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help">
+                              <Info className="w-4 h-4 text-gray-400 ml-2" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="z-[60]">
+                              <p>The date you'll be debt-free with our optimized strategy</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </span>
+                      <div className="text-sm text-gray-600 font-medium">
                         {comparison.moneySaved > 0 && `Save ${currencySymbol}${comparison.moneySaved.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
@@ -300,20 +313,27 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                   </div>
-                  <span className="text-lg font-semibold">
-                    {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </span>
                 </div>
               </div>
 
+              {/* Total Interest (Optimized) */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <DollarSign className="w-5 h-5 text-emerald-600" />
-                    <span className="text-gray-600 dark:text-gray-300">Total Interest (Optimized)</span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Total Interest (Optimized)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-help">
+                            <Info className="w-4 h-4 text-gray-400 ml-2" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="z-[60]">
+                            <p>The total interest you'll pay with our optimized strategy</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
                   </div>
                   <span className="text-xl font-semibold text-emerald-600">
                     {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
@@ -335,9 +355,20 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
+              {/* Savings Section */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
+                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3 flex items-center gap-2">
                   With your savings, you could get:
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-4 h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60]">
+                        <p>Examples of what you could do with the money you save</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </h4>
                 <div className="space-y-2">
                   <motion.div 
