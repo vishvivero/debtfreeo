@@ -67,11 +67,20 @@ const Overview = () => {
     }
   };
 
+  // Show loading skeleton while data is being fetched
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="container py-8">
+          <div className="space-y-6 animate-pulse">
+            <div className="h-24 bg-gray-200 rounded-xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
+            <div className="h-64 bg-gray-200 rounded-xl"></div>
+          </div>
         </div>
       </MainLayout>
     );
@@ -84,7 +93,8 @@ const Overview = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container py-8 space-y-6">
           <AnimatePresence mode="wait">
-            <motion.div
+            <motion.div 
+              key="overview-content"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
