@@ -1,4 +1,3 @@
-<lov-code>
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2 } from "lucide-react";
@@ -13,17 +12,14 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { InterestCalculator } from "@/lib/services/calculations/InterestCalculator";
+
 export const DebtComparison = () => {
-  const {
-    debts,
-    profile
-  } = useDebts();
-  const {
-    oneTimeFundings
-  } = useOneTimeFunding();
+  const { debts, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
+
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       return {
@@ -98,29 +94,24 @@ export const DebtComparison = () => {
       monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
     };
   };
+
   const comparison = calculateComparison();
+
   const totalMonthlyInterest = debts?.reduce((total, debt) => {
     if (debt.status === 'active') {
       const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
-      console.log(`Monthly interest for ${debt.name}:`, {
-        balance: debt.balance,
-        rate: debt.interest_rate,
-        monthlyInterest
-      });
       return total + monthlyInterest;
     }
     return total;
   }, 0) || 0;
-  console.log('Monthly interest calculation:', {
-    debts: debts?.length,
-    totalMonthlyInterest
-  });
+
   const renderActionableInsights = () => {
     if (!comparison || !debts?.length) return null;
     if (debts.length === 1) {
       const debt = debts[0];
       const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
-      return <div className="mt-6 space-y-6">
+      return (
+        <div className="mt-6 space-y-6">
           <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
           
           <div className="grid gap-4 md:grid-cols-2">
@@ -192,10 +183,13 @@ export const DebtComparison = () => {
               </div>
             </Card>
           </div>
-        </div>;
+        </div>
+      );
     }
+
     const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
     const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
+
     return (
       <div className="mt-6 space-y-6">
         <h3 className="text-2xl font-bold text-gray-900">Action Plan</h3>
@@ -612,4 +606,7 @@ export const DebtComparison = () => {
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:
+                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
+                      <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div className="flex-
