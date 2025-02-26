@@ -81,7 +81,19 @@ export const DebtScoreCard = () => {
                   <Target className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[300px]">
+                          <p>Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Monthly Interest: {profile?.preferred_currency || '£'}
                     {monthlyInterest.toFixed(2)}
@@ -99,7 +111,19 @@ export const DebtScoreCard = () => {
                   <PiggyBank className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Payment Impact</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Payment Impact</h4>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[300px]">
+                          <p>Extra payments can significantly reduce your total repayment time and interest costs. Even small additional amounts can make a big difference over time.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Adding just {profile?.preferred_currency || '£'}50 extra monthly could save you months
                   </p>
@@ -116,7 +140,19 @@ export const DebtScoreCard = () => {
                   <TrendingUp className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Total Cost Warning</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Total Cost Warning</h4>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[300px]">
+                          <p>This 2-year projection shows the total amount you'll pay if you only make minimum payments. It includes both principal and accumulated interest, highlighting why paying more than the minimum is beneficial.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Paying minimum only: ~{profile?.preferred_currency || '£'}
                     {totalCostIfMinimum.toFixed(0)}
@@ -134,7 +170,19 @@ export const DebtScoreCard = () => {
                   <Calendar className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Success Tips</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Success Tips</h4>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[300px]">
+                          <p>These proven strategies help ensure consistent progress towards becoming debt-free. Automatic payments prevent missed payments, tracking helps maintain motivation, and celebrating milestones reinforces positive financial habits.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <div className="space-y-2 mt-2">
                     <p className="text-xs text-gray-600 flex items-center gap-2">
                       <CheckCircle2 className="h-3 w-3 text-purple-500" />
@@ -158,7 +206,19 @@ export const DebtScoreCard = () => {
             <div className="flex items-start gap-3">
               <Info className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h5 className="font-medium text-blue-800">Pro Tip</h5>
+                <div className="flex items-center gap-2">
+                  <h5 className="font-medium text-blue-800">Pro Tip</h5>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="h-4 w-4 text-blue-400" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[300px]">
+                        <p>This advanced strategy helps you save money on interest while accelerating your debt payoff. By applying extra payments directly to principal, you reduce both the balance and future interest charges.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <p className="text-sm text-blue-700 mt-1">
                   Every extra payment you make reduces both your balance and the amount of interest you'll pay over time.
                   Consider setting aside any unexpected income for debt payments.
