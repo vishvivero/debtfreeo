@@ -1,8 +1,9 @@
+
 import { Strategy } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Target, Wallet, ArrowUpDown } from "lucide-react";
+import { ThumbsUp, Target, DollarSign, BullsEye } from "lucide-react";
 
 interface StrategySelectorProps {
   strategies: Strategy[];
@@ -15,16 +16,39 @@ export const StrategySelector = ({
   selectedStrategy,
   onSelectStrategy,
 }: StrategySelectorProps) => {
-  console.log('StrategySelector props:', { strategies, selectedStrategy }); // Debug log
+  console.log('StrategySelector props:', { strategies, selectedStrategy });
 
   const getStrategyIcon = (id: string) => {
     switch (id) {
       case "avalanche":
-        return <ArrowUpDown className="h-5 w-5" />;
+        return <DollarSign className="h-12 w-12 text-primary" />;
       case "snowball":
-        return <Target className="h-5 w-5" />;
+        return <Target className="h-12 w-12 text-primary" />;
       default:
-        return <Wallet className="h-5 w-5" />;
+        return <BullsEye className="h-12 w-12 text-primary" />;
+    }
+  };
+
+  const getStrategyDetails = (id: string) => {
+    switch (id) {
+      case "avalanche":
+        return {
+          title: "Debt Avalanche",
+          subtitle: "Prioritize highest interest rate",
+          advantage: "Fastest payoff and least interest",
+        };
+      case "snowball":
+        return {
+          title: "Debt Snowball",
+          subtitle: "Prioritize lowest balance first",
+          advantage: "The most quick wins",
+        };
+      default:
+        return {
+          title: "Balance Ratio",
+          subtitle: "Balanced approach to debt repayment",
+          advantage: "Best of both worlds",
+        };
     }
   };
 
@@ -34,66 +58,74 @@ export const StrategySelector = ({
   }
 
   return (
-    <div className="space-y-3 w-full">
-      {strategies.map((strategy, index) => (
-        <motion.div
-          key={strategy.id}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.1 }}
-        >
-          <Button
-            variant={selectedStrategy.id === strategy.id ? "default" : "outline"}
-            className={`w-full justify-between h-auto py-4 px-6 relative ${
-              selectedStrategy.id === strategy.id 
-                ? "bg-primary text-primary-foreground"
-                : "hover:border-primary/50"
-            }`}
-            onClick={() => onSelectStrategy(strategy)}
-          >
-            <div className="flex items-start gap-4 w-full min-w-0">
-              <div className={`p-2 rounded-full shrink-0 ${
-                selectedStrategy.id === strategy.id 
-                  ? "bg-primary-foreground/10" 
-                  : "bg-primary/10"
-              }`}>
-                {getStrategyIcon(strategy.id)}
-              </div>
-              
-              <div className="flex-1 text-left space-y-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold break-words">{strategy.name}</span>
-                  {index === 1 && (
-                    <Badge 
-                      variant="secondary" 
-                      className={`${
-                        selectedStrategy.id === strategy.id
-                          ? "bg-primary-foreground/20 text-primary-foreground"
-                          : "bg-primary/10 text-primary"
-                      } whitespace-nowrap`}
-                    >
-                      Our Pick
-                    </Badge>
-                  )}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {strategies.slice(0, 2).map((strategy, index) => {
+          const details = getStrategyDetails(strategy.id);
+          const isSelected = selectedStrategy.id === strategy.id;
+          
+          return (
+            <motion.div
+              key={strategy.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`rounded-xl border bg-white p-6 ${
+                isSelected ? 'ring-2 ring-primary' : ''
+              }`}
+            >
+              <div className="space-y-6">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  {getStrategyIcon(strategy.id)}
+                  <h3 className="text-xl font-semibold text-gray-900">{details.title}</h3>
+                  <p className="text-gray-500">{details.subtitle}</p>
                 </div>
-                <p className={`text-sm break-words ${
-                  selectedStrategy.id === strategy.id 
-                    ? "text-primary-foreground/90"
-                    : "text-muted-foreground"
-                }`}>
-                  {strategy.description}
-                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Advantage</h4>
+                    <p className="text-gray-600">{details.advantage}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Time to first debt paid off</span>
+                      <span className="text-sm text-gray-900 flex items-center gap-1">
+                        2 years 7 months
+                        <ThumbsUp className="h-4 w-4 text-green-500" />
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Time to all debts paid off</span>
+                      <span className="text-sm text-gray-900 flex items-center gap-1">
+                        3 years 9 months
+                        <ThumbsUp className="h-4 w-4 text-green-500" />
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Interest saved</span>
+                      <span className="text-sm text-gray-900 flex items-center gap-1">
+                        $74.77
+                        <ThumbsUp className="h-4 w-4 text-green-500" />
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant={isSelected ? "secondary" : "default"}
+                    className="w-full"
+                    onClick={() => onSelectStrategy(strategy)}
+                  >
+                    {isSelected ? "Selected" : "Select"}
+                  </Button>
+                </div>
               </div>
-              
-              <ArrowRight className={`h-5 w-5 shrink-0 ${
-                selectedStrategy.id === strategy.id 
-                  ? "text-primary-foreground"
-                  : "text-primary"
-              }`} />
-            </div>
-          </Button>
-        </motion.div>
-      ))}
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 };
