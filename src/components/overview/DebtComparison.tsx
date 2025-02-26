@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { InterestCalculator } from "@/lib/services/calculations/InterestCalculator";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -98,16 +100,29 @@ export const DebtComparison = () => {
 
   const comparison = calculateComparison();
   const totalMonthlyInterest = debts?.reduce((total, debt) => {
-    const monthlyRate = debt.interest_rate / 1200;
-    return total + (debt.balance * monthlyRate);
+    if (debt.status === 'active') {
+      const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
+      console.log(`Monthly interest for ${debt.name}:`, {
+        balance: debt.balance,
+        rate: debt.interest_rate,
+        monthlyInterest
+      });
+      return total + monthlyInterest;
+    }
+    return total;
   }, 0) || 0;
+
+  console.log('Monthly interest calculation:', {
+    debts: debts?.length,
+    totalMonthlyInterest
+  });
 
   const renderActionableInsights = () => {
     if (!comparison || !debts?.length) return null;
 
     if (debts.length === 1) {
       const debt = debts[0];
-      const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
+      const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
 
       return (
         <div className="mt-6 space-y-6">
