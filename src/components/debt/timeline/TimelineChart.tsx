@@ -1,4 +1,3 @@
-
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/lib/types/payment";
@@ -232,7 +231,6 @@ export const TimelineChart = ({
             fillOpacity={1}
             fill="url(#baselineGradient)"
             dot={false}
-            stackId="1"
           />
           <Area
             type="monotone"
