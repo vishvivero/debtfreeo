@@ -116,7 +116,12 @@ export const DebtComparison = () => {
                     side="right" 
                     className="z-[60] bg-white border-gray-200 shadow-lg"
                   >
-                    <p>This shows your current debt situation without any optimizations</p>
+                    <div className="space-y-2">
+                      <h5 className="font-semibold text-sm">Current Debt Overview</h5>
+                      <p className="text-sm text-muted-foreground">
+                        A comprehensive view of your current debt status, including payment timeline and interest costs before optimization.
+                      </p>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -141,7 +146,12 @@ export const DebtComparison = () => {
                               side="right" 
                               className="z-[60] bg-white border-gray-200 shadow-lg"
                             >
-                              <p>Based on minimum payments only (baseline scenario)</p>
+                              <div className="space-y-2">
+                                <h5 className="font-semibold text-sm">Expected Completion Date</h5>
+                                <p className="text-sm text-muted-foreground">
+                                  The projected date when you'll be debt-free based on your current minimum payments. This timeline doesn't include any extra payments or optimization strategies.
+                                </p>
+                              </div>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -177,7 +187,12 @@ export const DebtComparison = () => {
                           className="z-[60] bg-white border-gray-200 shadow-lg" 
                           sideOffset={5}
                         >
-                          <p>How your payments are split between reducing debt (principal) and paying interest</p>
+                          <div className="space-y-2">
+                            <h5 className="font-semibold text-sm">Payment Distribution</h5>
+                            <p className="text-sm text-muted-foreground">
+                              Shows how your payments are split between principal and interest. A higher percentage going to principal means more efficient debt reduction, while high interest percentage indicates potential for optimization.
+                            </p>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -235,7 +250,12 @@ export const DebtComparison = () => {
                             side="right" 
                             className="z-[60] bg-white border-gray-200 shadow-lg"
                           >
-                            <p>The total number of active debts in your portfolio</p>
+                            <div className="space-y-2">
+                              <h5 className="font-semibold text-sm">Debt Portfolio Size</h5>
+                              <p className="text-sm text-muted-foreground">
+                                The number of active debts you're managing. Each debt may have different interest rates and terms, affecting your overall repayment strategy.
+                              </p>
+                            </div>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -278,7 +298,12 @@ export const DebtComparison = () => {
                     <Info className="w-4 h-4 text-emerald-400" />
                   </TooltipTrigger>
                   <TooltipContent side="right" className="z-[60]">
-                    <p>Your potential savings with our optimized debt repayment strategy</p>
+                    <div className="space-y-2">
+                      <h5 className="font-semibold text-sm">Optimization Benefits</h5>
+                      <p className="text-sm text-muted-foreground">
+                        A detailed breakdown of potential savings in both time and money when using our optimized debt repayment strategy, including reduced interest payments and faster payoff times.
+                      </p>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -300,7 +325,12 @@ export const DebtComparison = () => {
                               <Info className="w-4 h-4 text-gray-400 ml-2" />
                             </TooltipTrigger>
                             <TooltipContent side="right" className="z-[60]">
-                              <p>The date you'll be debt-free with our optimized strategy</p>
+                              <div className="space-y-2">
+                                <h5 className="font-semibold text-sm">Accelerated Freedom Date</h5>
+                                <p className="text-sm text-muted-foreground">
+                                  Your new projected debt-free date using our optimized strategy. This factors in smart payment allocation and any additional payments you've planned to make.
+                                </p>
+                              </div>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -329,7 +359,12 @@ export const DebtComparison = () => {
                             <Info className="w-4 h-4 text-gray-400 ml-2" />
                           </TooltipTrigger>
                           <TooltipContent side="right" className="z-[60]">
-                            <p>The total interest you'll pay with our optimized strategy</p>
+                            <div className="space-y-2">
+                              <h5 className="font-semibold text-sm">Reduced Interest Costs</h5>
+                              <p className="text-sm text-muted-foreground">
+                                The total interest you'll pay with our optimized strategy. This amount is typically lower than your current path due to strategic payment allocation and accelerated payoff schedules.
+                              </p>
+                            </div>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -365,7 +400,12 @@ export const DebtComparison = () => {
                         <Info className="w-4 h-4 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent side="right" className="z-[60]">
-                        <p>Examples of what you could do with the money you save</p>
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Potential Uses of Savings</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Real-world examples of what you could do with the money saved through our optimization strategy. These alternatives help visualize the tangible benefits of reduced interest payments.
+                          </p>
+                        </div>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
