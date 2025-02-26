@@ -424,37 +424,79 @@ export const DebtComparison = () => {
                 </h4>
                 <div className="space-y-3">
                   <motion.div 
-                    className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg"
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <Plane className="w-5 h-5 text-emerald-600 dark:text-emerald-400 transform -rotate-45" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {Math.floor(comparison.moneySaved / 1000)} international trips
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
+                        <Plane className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400 transform -rotate-45" />
+                      </div>
+                      <div>
+                        <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          International Trips
+                        </span>
+                        <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                          Plan your dream destinations!
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2 sm:mt-0">
+                      <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        {Math.floor(comparison.moneySaved / 1000)} trips
+                      </span>
+                    </div>
                   </motion.div>
                   <motion.div 
-                    className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg"
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                   >
-                    <Smartphone className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {Math.floor(comparison.moneySaved / 800)} premium smartphones
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
+                        <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div>
+                        <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          Premium Smartphones
+                        </span>
+                        <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                          Stay connected with the latest tech!
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2 sm:mt-0">
+                      <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        {Math.floor(comparison.moneySaved / 800)} phones
+                      </span>
+                    </div>
                   </motion.div>
                   <motion.div 
-                    className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg"
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <Palmtree className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      a dream family vacation
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
+                        <Palmtree className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div>
+                        <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          Dream Family Vacation
+                        </span>
+                        <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                          Create lasting memories together!
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2 sm:mt-0">
+                      <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        1 trip
+                      </span>
+                    </div>
                   </motion.div>
                 </div>
               </div>
