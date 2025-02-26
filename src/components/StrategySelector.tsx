@@ -2,7 +2,7 @@
 import { Strategy } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Target, DollarSign } from "lucide-react";
+import { ThumbsUp, Target, DollarSign } from "lucide-react";
 
 interface StrategySelectorProps {
   strategies: Strategy[];
@@ -34,6 +34,7 @@ export const StrategySelector = ({
         return {
           title: "Debt Avalanche",
           subtitle: "Prioritize highest interest rate",
+          advantage: "Fastest payoff and least interest",
           color: "from-emerald-500 to-teal-600",
           lightColor: "bg-emerald-50",
           iconColor: "text-emerald-500"
@@ -42,6 +43,7 @@ export const StrategySelector = ({
         return {
           title: "Debt Snowball",
           subtitle: "Prioritize lowest balance first",
+          advantage: "The most quick wins",
           color: "from-blue-500 to-indigo-600",
           lightColor: "bg-blue-50",
           iconColor: "text-blue-500"
@@ -50,6 +52,7 @@ export const StrategySelector = ({
         return {
           title: "Balance Ratio",
           subtitle: "Balanced approach to debt repayment",
+          advantage: "Best of both worlds",
           color: "from-purple-500 to-indigo-600",
           lightColor: "bg-purple-50",
           iconColor: "text-purple-500"
@@ -95,25 +98,33 @@ export const StrategySelector = ({
                 </div>
 
                 <div className="space-y-6">
+                  <div className="p-4 rounded-xl bg-gray-50">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Key Advantage</h4>
+                    <p className="text-gray-600">{details.advantage}</p>
+                  </div>
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <span className="text-sm text-gray-600">First debt paid off</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 flex items-center gap-2">
                         2y 7m
+                        <ThumbsUp className="h-4 w-4 text-green-500" />
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <span className="text-sm text-gray-600">All debts paid off</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 flex items-center gap-2">
                         3y 9m
+                        <ThumbsUp className="h-4 w-4 text-green-500" />
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <span className="text-sm text-gray-600">Interest saved</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 flex items-center gap-2">
                         $74.77
+                        <ThumbsUp className="h-4 w-4 text-green-500" />
                       </span>
                     </div>
                   </div>
