@@ -3,9 +3,7 @@ import { useMemo } from "react";
 import { useDebts } from "@/hooks/use-debts";
 import { useDebtMetrics } from "@/hooks/use-debt-metrics";
 import { DebtMetricsCard } from "./comparison/DebtMetricsCard";
-import { ProgressBar } from "./comparison/ProgressBar";
 import { ActionPlan } from "./ActionPlan";
-import { Card } from "@/components/ui/card";
 import { CreditCard, ArrowUpRight, LineChart, PiggyBank } from "lucide-react";
 
 export const DebtOverview = () => {
@@ -64,25 +62,7 @@ export const DebtOverview = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Payment Breakdown</h3>
-          <div className="space-y-4">
-            <ProgressBar
-              percentage={metrics.principalPercentage}
-              color="text-emerald-500"
-              label="Principal"
-              value={`${Math.round(metrics.principalPercentage)}%`}
-            />
-            <ProgressBar
-              percentage={metrics.interestPercentage}
-              color="text-red-500"
-              label="Interest"
-              value={`${Math.round(metrics.interestPercentage)}%`}
-            />
-          </div>
-        </Card>
-
+      <div className="grid grid-cols-1">
         <ActionPlan
           highestAprDebt={highestAprDebt}
           lowestBalanceDebt={lowestBalanceDebt}
