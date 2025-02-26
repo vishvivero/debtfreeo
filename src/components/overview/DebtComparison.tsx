@@ -109,7 +109,7 @@ export const DebtComparison = () => {
               How Does Your Debt Look Now?
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger className="cursor-help">
                     <Info className="w-4 h-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent 
