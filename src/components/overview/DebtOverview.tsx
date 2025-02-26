@@ -4,7 +4,6 @@ import { useDebts } from "@/hooks/use-debts";
 import { useDebtMetrics } from "@/hooks/use-debt-metrics";
 import { DebtMetricsCard } from "./comparison/DebtMetricsCard";
 import { ProgressBar } from "./comparison/ProgressBar";
-import { TimeframeDisplay } from "./comparison/TimeframeDisplay";
 import { ActionPlan } from "./ActionPlan";
 import { Card } from "@/components/ui/card";
 import { CreditCard, ArrowUpRight, LineChart, PiggyBank } from "lucide-react";
@@ -92,13 +91,6 @@ export const DebtOverview = () => {
           currencySymbol={currencySymbol}
         />
       </div>
-
-      <TimeframeDisplay
-        years={metrics.baselineYears}
-        months={metrics.baselineMonths}
-        label="Estimated Time to Debt Freedom"
-        className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm"
-      />
     </div>
   );
 };
