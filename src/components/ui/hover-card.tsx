@@ -28,4 +28,17 @@ const HoverCardContent = React.forwardRef<
 ))
 HoverCardContent.displayName = HoverCardPrimitive.Content.displayName
 
-export { HoverCard, HoverCardTrigger, HoverCardContent }
+// Style the trigger with the help cursor
+const StyledHoverCardTrigger = React.forwardRef<
+  React.ElementRef<typeof HoverCardPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <HoverCardPrimitive.Trigger
+    ref={ref}
+    className={cn("cursor-help", className)}
+    {...props}
+  />
+))
+StyledHoverCardTrigger.displayName = HoverCardPrimitive.Trigger.displayName
+
+export { HoverCard, StyledHoverCardTrigger as HoverCardTrigger, HoverCardContent }
