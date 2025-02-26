@@ -79,7 +79,7 @@ export const PaymentOverviewSection = ({
                 step="any"
                 value={extraPayment || ''}
                 onChange={handleExtraPaymentChange}
-                className="pl-7 pr-3 h-11 text-right bg-gray-50/50 border-gray-200 hover:border-gray-300 focus:border-primary transition-colors"
+                className="pl-7 pr-3 h-11 font-medium text-right bg-gray-50/50 border-gray-200 hover:border-gray-300 focus:border-primary transition-colors"
               />
             </div>
             <p className="text-xs text-gray-500">
