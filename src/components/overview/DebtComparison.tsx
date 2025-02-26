@@ -40,41 +40,39 @@ export const DebtComparison = () => {
         baselineYears: 0,
         baselineMonths: 0,
         principalPercentage: 0,
-        interestPercentage: 0
+        interestPercentage: 0,
+        monthlyInterestCost: 0
       };
     }
-    console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
+
+    // Calculate current monthly interest
+    const monthlyInterestCost = debts.reduce((total, debt) => {
+      const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+      return total + (debt.balance * monthlyRate);
+    }, 0);
+
+    console.log('Monthly interest calculation:', {
+      debts: debts.length,
+      totalMonthlyInterest: monthlyInterestCost
+    });
+
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
-
-    // Calculate minimum payments total
-    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-
-    // Get timeline data
     const timelineData = calculateTimelineData(debts, profile.monthly_payment, selectedStrategy, oneTimeFundings);
-
-    // Get the last data point for final balances and interest
     const lastDataPoint = timelineData[timelineData.length - 1];
-
-    // Find when accelerated balance reaches 0
     const acceleratedPayoffPoint = timelineData.find(d => d.acceleratedBalance <= 0);
     const optimizedPayoffDate = acceleratedPayoffPoint ? new Date(acceleratedPayoffPoint.date) : new Date(lastDataPoint.date);
-
-    // Calculate payment efficiency from original timeline
     const totalPayment = lastDataPoint.baselineInterest + debts.reduce((sum, debt) => sum + debt.balance, 0);
     const interestPercentage = lastDataPoint.baselineInterest / totalPayment * 100;
     const principalPercentage = 100 - interestPercentage;
-
-    // Calculate months for baseline scenario
     const baselineMonths = timelineData.length;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
-
-    // Calculate months saved
     const totalBaselineMonths = baselineMonths;
     const totalAcceleratedMonths = timelineData.find(d => d.acceleratedBalance <= 0) ? timelineData.findIndex(d => d.acceleratedBalance <= 0) : baselineMonths;
     const monthsSaved = Math.max(0, totalBaselineMonths - totalAcceleratedMonths);
     const yearsSaved = Math.floor(monthsSaved / 12);
     const remainingMonthsSaved = monthsSaved % 12;
+
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
@@ -89,7 +87,8 @@ export const DebtComparison = () => {
       baselineYears,
       baselineMonths: remainingMonths,
       principalPercentage,
-      interestPercentage
+      interestPercentage,
+      monthlyInterestCost
     };
   };
 
@@ -465,6 +464,24 @@ export const DebtComparison = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Monthly Interest Cost */}
+              <Card className="p-4 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-full bg-amber-100">
+                    <TrendingUp className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Monthly Interest Cost</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {currencySymbol}{Math.ceil(comparison.monthlyInterestCost).toLocaleString()} per month
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      This is what your debt costs you monthly
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </CardContent>
         </Card>
