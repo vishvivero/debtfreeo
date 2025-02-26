@@ -1,17 +1,17 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { strategies } from "@/lib/strategies";
 import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { InterestCalculator } from "@/lib/services/calculations/InterestCalculator";
+
 export const DebtComparison = () => {
   const {
     debts,
@@ -23,6 +23,7 @@ export const DebtComparison = () => {
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
+
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       return {
@@ -44,11 +45,9 @@ export const DebtComparison = () => {
       };
     }
 
-    // Calculate current monthly interest correctly
     const monthlyInterestCost = debts.reduce((total, debt) => {
       if (debt.status === 'active') {
-        // Only include active debts
-        const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+        const monthlyRate = debt.interest_rate / 1200;
         const monthlyInterest = debt.balance * monthlyRate;
         console.log(`Monthly interest for ${debt.name}:`, {
           balance: debt.balance,
@@ -94,9 +93,10 @@ export const DebtComparison = () => {
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
-      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
+      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100
     };
   };
+
   const comparison = calculateComparison();
   const totalMonthlyInterest = debts?.reduce((total, debt) => {
     if (debt.status === 'active') {
@@ -114,6 +114,7 @@ export const DebtComparison = () => {
     debts: debts?.length,
     totalMonthlyInterest
   });
+
   const renderActionableInsights = () => {
     if (!comparison || !debts?.length) return null;
     if (debts.length === 1) {
@@ -203,35 +204,32 @@ export const DebtComparison = () => {
         </div>
       </div>;
   };
-  return <motion.div initial={{
-    opacity: 0,
-    y: 20
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} transition={{
-    duration: 0.5
-  }} className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0">
+
+  return <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {/* Current Plan Card */}
-        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
-          <CardHeader className="pb-2 p-3 sm:p-6">
-            <CardTitle className="flex items-center gap-2 text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" />
-              Your Debt Overview
+        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-0 shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+              <div className="p-2 rounded-full bg-blue-100">
+                <Calendar className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
+                Your Debt Overview
+              </span>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                  <TooltipTrigger>
+                    <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    A comprehensive view of your current debt situation and how it's structured.
+                  <TooltipContent>
+                    <p className="text-sm">View your current debt situation and payment efficiency</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
+          <CardContent className="space-y-6">
             <div className="grid gap-3 sm:gap-4">
               {/* Debt-Free Date */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
@@ -390,26 +388,28 @@ export const DebtComparison = () => {
         </Card>
 
         {/* Optimized Plan Card */}
-        <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
-          <CardHeader className="pb-2 p-3 sm:p-6">
-            <CardTitle className="flex items-center gap-2">
-              <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500" />
-              <span className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+        <Card className="bg-gradient-to-br from-gray-50 to-emerald-50 border-0 shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+              <div className="p-2 rounded-full bg-emerald-100">
+                <Target className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="bg-gradient-to-r from-emerald-700 to-emerald-500 bg-clip-text text-transparent">
                 What Debtfreeo Can Save You
               </span>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+                  <TooltipTrigger>
+                    <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    See how much you could save with our optimized strategy.
+                  <TooltipContent>
+                    <p className="text-sm">See how much you could save with our optimized strategy</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
+          <CardContent className="space-y-6">
             <div className="grid gap-3 sm:gap-4">
               {/* Optimized Debt-Free Date */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
@@ -540,7 +540,7 @@ export const DebtComparison = () => {
                     <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">With your savings, you could get</span>
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger className="cursor-help">
+                        <TooltipTrigger>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
                         <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
@@ -582,9 +582,6 @@ export const DebtComparison = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Monthly Interest Cost */}
-              
             </div>
           </CardContent>
         </Card>
