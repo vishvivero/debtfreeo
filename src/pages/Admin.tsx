@@ -23,6 +23,97 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
+const Admin = () => {
+  const { user, loading: authLoading } = useAuth();
+  console.log("Admin page - Auth state:", { user: user?.id, authLoading });
+
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ["adminProfile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) {
+        console.log("No user ID available for profile check");
+        throw new Error("No user ID available");
+      }
+
+      console.log("Checking admin status for user:", user.id);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+
+      if (!data?.is_admin) {
+        console.log("User is not an admin:", user.id);
+        throw new Error("Not an admin");
+      }
+
+      console.log("Admin profile confirmed:", data);
+      return data;
+    },
+    enabled: !!user?.id && !authLoading,
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    meta: {
+      errorMessage: "Failed to verify admin status"
+    }
+  });
+
+  if (authLoading || (user && profileLoading)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    console.log("No authenticated user, redirecting to home");
+    return <Navigate to="/" replace />;
+  }
+
+  if (profileError || !profile?.is_admin) {
+    console.log("Access denied:", { error: profileError, isAdmin: profile?.is_admin });
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            You do not have permission to access this area.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <MainLayout sidebar={<AdminSidebar />}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col space-y-6">
+          <Routes>
+            <Route index element={<AdminMetrics />} />
+            <Route path="blogs" element={<AdminBlogList />} />
+            <Route path="categories" element={<CategoryManager />} />
+            <Route path="new-post" element={<NewBlogPost />} />
+            <Route path="edit/:id" element={<EditBlogPost />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="settings" element={<SystemSettings />} />
+            <Route path="banner" element={<BannerManagement />} />
+            <Route path="security" element={<SecurityMonitoring />} />
+            <Route path="content" element={<ContentManagement />} />
+            <Route path="analytics" element={<AnalyticsReporting />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="performance" element={<PerformanceMetrics />} />
+          </Routes>
+        </div>
+      </div>
+    </MainLayout>
+  );
+};
+
 const EditBlogPost = () => {
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -206,97 +297,6 @@ const NewBlogPost = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
-
-const Admin = () => {
-  const { user, loading: authLoading } = useAuth();
-  console.log("Admin page - Auth state:", { user: user?.id, authLoading });
-
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ["adminProfile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) {
-        console.log("No user ID available for profile check");
-        throw new Error("No user ID available");
-      }
-
-      console.log("Checking admin status for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-
-      if (!data?.is_admin) {
-        console.log("User is not an admin:", user.id);
-        throw new Error("Not an admin");
-      }
-
-      console.log("Admin profile confirmed:", data);
-      return data;
-    },
-    enabled: !!user?.id && !authLoading,
-    staleTime: 1000 * 60 * 5,
-    retry: false,
-    meta: {
-      errorMessage: "Failed to verify admin status"
-    }
-  });
-
-  if (authLoading || (user && profileLoading)) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    console.log("No authenticated user, redirecting to home");
-    return <Navigate to="/" replace />;
-  }
-
-  if (profileError || !profile?.is_admin) {
-    console.log("Access denied:", { error: profileError, isAdmin: profile?.is_admin });
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertDescription>
-            You do not have permission to access this area.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  return (
-    <MainLayout sidebar={<AdminSidebar />}>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col space-y-6">
-          <Routes>
-            <Route index element={<AdminMetrics />} />
-            <Route path="blogs" element={<AdminBlogList />} />
-            <Route path="categories" element={<CategoryManager />} />
-            <Route path="new-post" element={<NewBlogPost />} />
-            <Route path="edit/:id" element={<EditBlogPost />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="settings" element={<SystemSettings />} />
-            <Route path="banner" element={<BannerManagement />} />
-            <Route path="security" element={<SecurityMonitoring />} />
-            <Route path="content" element={<ContentManagement />} />
-            <Route path="analytics" element={<AnalyticsReporting />} />
-            <Route path="audit-logs" element={<AuditLogs />} />
-            <Route path="performance" element={<PerformanceMetrics />} />
-          </Routes>
-        </div>
-      </div>
-    </MainLayout>
   );
 };
 
