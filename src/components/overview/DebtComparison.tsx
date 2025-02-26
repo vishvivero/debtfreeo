@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { strategies } from "@/lib/strategies";
@@ -482,15 +482,13 @@ export const DebtComparison = () => {
     );
   };
 
-  return <motion.div initial={{
-    opacity: 0,
-    y: 20
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} transition={{
-    duration: 0.5
-  }} className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0">
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
@@ -637,4 +635,4 @@ export const DebtComparison = () => {
                         Total Active Debts
                       </Badge>
                     </span>
-                    <span className="font-semibold text-purple-600 dark:
+                    <span className="font-semibold text-purple-6
