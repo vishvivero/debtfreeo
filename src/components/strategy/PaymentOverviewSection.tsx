@@ -48,18 +48,30 @@ export const PaymentOverviewSection = ({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
+        <div className="space-y-4">
           <div className="flex justify-between items-center flex-wrap gap-2">
             <span className="text-sm text-gray-600">Minimum Payments</span>
             <span className="font-medium">
               {formatCurrency(totalMinimumPayments, currencySymbol)}
             </span>
           </div>
-          <div className="flex justify-between items-center flex-wrap gap-2">
-            <span className="text-sm text-gray-600">Extra Payment</span>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Extra Payment</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                className={`text-xs ${extraPayment > 0 ? 'text-gray-500 hover:text-primary' : 'invisible'}`}
+              >
+                <RotateCw className="h-3 w-3 mr-1" />
+                Reset
+              </Button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                   {currencySymbol}
                 </div>
                 <Input
@@ -68,32 +80,27 @@ export const PaymentOverviewSection = ({
                   step="any"
                   value={extraPayment || ''}
                   onChange={handleExtraPaymentChange}
-                  className="w-32 pl-6 pr-8 text-right"
+                  className="pl-7 pr-3 h-11 text-right bg-gray-50/50 border-gray-200 hover:border-gray-300 focus:border-primary transition-colors"
                 />
-                {extraPayment > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleReset}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-gray-100"
-                  >
-                    <RotateCw className="h-4 w-4 text-gray-500" />
-                  </Button>
-                )}
               </div>
               <Button
                 variant="ghost"
                 onClick={onOpenExtraPaymentDialog}
-                className="text-primary hover:text-primary/90 min-w-[100px] text-center"
+                className="h-11 text-primary hover:text-primary/90 hover:bg-primary/5 transition-colors"
               >
-                {formatCurrency(extraPayment, currencySymbol)}
+                Customize
+                <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             </div>
+            <p className="text-xs text-gray-500">
+              Maximum: {formatCurrency(totalDebtValue, currencySymbol)}
+            </p>
           </div>
-          <div className="pt-2 border-t">
-            <div className="flex justify-between items-center flex-wrap gap-2">
+
+          <div className="pt-4 mt-2 border-t">
+            <div className="flex justify-between items-center">
               <span className="font-medium">Total Monthly Payment</span>
-              <span className="font-medium text-primary">
+              <span className="text-lg font-semibold text-primary">
                 {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
               </span>
             </div>
