@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+
 export const DebtComparison = () => {
   const {
     debts,
@@ -22,6 +23,7 @@ export const DebtComparison = () => {
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
+
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       return {
@@ -90,6 +92,7 @@ export const DebtComparison = () => {
       interestPercentage
     };
   };
+
   const comparison = calculateComparison();
   return <motion.div initial={{
     opacity: 0,
@@ -191,30 +194,26 @@ export const DebtComparison = () => {
                     </div>
                     <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div className="h-full flex">
-                        <motion.div initial={{
-                        width: 0
-                      }} animate={{
-                        width: `${comparison.principalPercentage}%`
-                      }} transition={{
-                        duration: 1,
-                        ease: "easeOut"
-                      }} className="h-full bg-emerald-500" />
-                        <motion.div initial={{
-                        width: 0
-                      }} animate={{
-                        width: `${comparison.interestPercentage}%`
-                      }} transition={{
-                        duration: 1,
-                        ease: "easeOut"
-                      }} className="h-full bg-red-500" />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${comparison.principalPercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-emerald-500"
+                        />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${comparison.interestPercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-red-500"
+                        />
                       </div>
                     </div>
                   </div>
                   <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
                     {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })} goes to interest
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    })} goes to interest payments.
                   </div>
                 </div>
               </div>
@@ -390,22 +389,18 @@ export const DebtComparison = () => {
                     </div>
                     <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div className="h-full flex">
-                        <motion.div initial={{
-                        width: 0
-                      }} animate={{
-                        width: `${comparison.optimizedTotalInterest / comparison.originalTotalInterest * 100}%`
-                      }} transition={{
-                        duration: 1,
-                        ease: "easeOut"
-                      }} className="h-full bg-emerald-500" />
-                        <motion.div initial={{
-                        width: 0
-                      }} animate={{
-                        width: `${(comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest * 100}%`
-                      }} transition={{
-                        duration: 1,
-                        ease: "easeOut"
-                      }} className="h-full bg-red-500" />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${comparison.optimizedTotalInterest / comparison.originalTotalInterest * 100}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-emerald-500"
+                        />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest * 100}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-red-500"
+                        />
                       </div>
                     </div>
                     <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
