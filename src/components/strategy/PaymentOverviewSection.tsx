@@ -82,9 +82,11 @@ export const PaymentOverviewSection = ({
                 className="pl-7 pr-3 h-11 font-medium text-right bg-gray-50/50 border-gray-200 hover:border-gray-300 focus:border-primary transition-colors"
               />
             </div>
-            <p className="text-xs text-gray-500">
-              Maximum: {formatCurrency(totalDebtValue, currencySymbol)}
-            </p>
+            {extraPayment >= totalDebtValue && (
+              <p className="text-xs text-gray-500">
+                Maximum: {formatCurrency(totalDebtValue, currencySymbol)}
+              </p>
+            )}
           </div>
 
           <div className="pt-4 mt-2 border-t">
