@@ -50,7 +50,7 @@ export const PaymentOverviewSection = ({
       <CardContent className="space-y-4">
         <div className="space-y-4">
           <div className="flex justify-between items-center flex-wrap gap-2">
-            <span className="text-sm font-medium text-primary">Minimum Payments</span>
+            <span className="text-sm text-gray-600">Minimum Payments</span>
             <span className="font-medium">
               {formatCurrency(totalMinimumPayments, currencySymbol)}
             </span>
@@ -58,7 +58,7 @@ export const PaymentOverviewSection = ({
           
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-primary">Extra Payment</span>
+              <span className="text-sm text-gray-600">Extra Payment</span>
               <Button
                 variant="ghost"
                 size="sm"
