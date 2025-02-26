@@ -89,23 +89,27 @@ const Overview = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5 }}
-              className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg"
+              className="grid grid-cols-1 gap-6"
             >
-              <OverviewHeader 
-                currencySymbol={currentCurrencySymbol}
-                onCurrencyChange={handleCurrencyChange}
-              />
-              <OverviewMetrics />
+              <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg">
+                <OverviewHeader 
+                  currencySymbol={currentCurrencySymbol}
+                  onCurrencyChange={handleCurrencyChange}
+                />
+                <OverviewMetrics />
+              </div>
+
+              {/* DebtScoreCard moved to bottom with delayed animation */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mt-auto pt-6"
+              >
+                <DebtScoreCard />
+              </motion.div>
             </motion.div>
           </AnimatePresence>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <DebtScoreCard />
-          </motion.div>
         </div>
       </div>
     </MainLayout>
