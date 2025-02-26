@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -83,12 +82,23 @@ export const DebtComparison = () => {
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
 
+    // Calculate months saved
+    const totalBaselineMonths = baselineMonths;
+    const totalAcceleratedMonths = timelineData.find(d => d.acceleratedBalance <= 0) ? timelineData.findIndex(d => d.acceleratedBalance <= 0) : baselineMonths;
+    const monthsSaved = Math.max(0, totalBaselineMonths - totalAcceleratedMonths);
+    const yearsSaved = Math.floor(monthsSaved / 12);
+    const remainingMonthsSaved = monthsSaved % 12;
+
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
       originalTotalInterest: lastDataPoint.baselineInterest,
       optimizedPayoffDate,
       optimizedTotalInterest: lastDataPoint.acceleratedInterest,
+      timeSaved: { 
+        years: yearsSaved,
+        months: remainingMonthsSaved 
+      },
       moneySaved: lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest,
       baselineYears,
       baselineMonths: remainingMonths,
@@ -333,10 +343,10 @@ export const DebtComparison = () => {
                         </TooltipProvider>
                       </span>
                       <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-2">
-                        {comparison.moneySaved > 0 && `Save ${currencySymbol}${comparison.moneySaved.toLocaleString(undefined, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })} in interest!`}
+                        {comparison.timeSaved.years > 0 && `Save ${comparison.timeSaved.years} ${comparison.timeSaved.years === 1 ? 'year' : 'years'}`}
+                        {comparison.timeSaved.months > 0 && comparison.timeSaved.years > 0 && ' and '}
+                        {comparison.timeSaved.months > 0 && `${comparison.timeSaved.months} ${comparison.timeSaved.months === 1 ? 'month' : 'months'}`}
+                        {(comparison.timeSaved.years > 0 || comparison.timeSaved.months > 0) && ' with our strategy!'}
                       </div>
                     </div>
                   </div>
