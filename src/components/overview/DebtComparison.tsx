@@ -304,6 +304,9 @@ export const DebtComparison = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Optimized Plan Card */}
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
