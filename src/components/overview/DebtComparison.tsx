@@ -120,13 +120,13 @@ export const DebtComparison = () => {
         {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
-              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" />
               Your Debt Overview
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="cursor-help">
-                    <Info className="w-4 h-4 text-gray-400" />
+                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent 
                     side="right" 
@@ -297,14 +297,14 @@ export const DebtComparison = () => {
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <Award className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
-              <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+              <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500" />
+              <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
                 What Debtfreeo Can Save You
               </span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="cursor-help">
-                    <Info className="w-4 h-4 text-emerald-400" />
+                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
                   </TooltipTrigger>
                   <TooltipContent 
                     side="right" 
