@@ -232,6 +232,7 @@ export const TimelineChart = ({
             fillOpacity={1}
             fill="url(#baselineGradient)"
             dot={false}
+            stackId="1"
           />
           <Area
             type="monotone"
