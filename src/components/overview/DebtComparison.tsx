@@ -427,7 +427,7 @@ export const DebtComparison = () => {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
                         })}{' '}
-                        in total interest. Our smart payment strategy puts more money towards your debt.
+                        in total interest. Our smart strategy helps you pay off debt faster.
                       </div>
                     </div>
                   </div>
