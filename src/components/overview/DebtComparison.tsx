@@ -184,10 +184,7 @@ export const DebtComparison = () => {
                         </TooltipProvider>
                       </span>
                       <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })} of your payments go towards interest.
+                        {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} of your payments go towards interest.
                       </div>
                     </div>
                   </div>
@@ -217,10 +214,7 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                     <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
-                      {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      })} goes to interest payments.
+                      {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} goes to interest payments.
                     </div>
                   </div>
                 </div>
@@ -378,7 +372,7 @@ export const DebtComparison = () => {
                       </span>
                       <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
                         Our optimized plan helps you save{' '}
-                        {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
+                        {currencySymbol}{Math.ceil(comparison.moneySaved).toLocaleString(undefined, {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
                       })}{' '}
@@ -389,10 +383,10 @@ export const DebtComparison = () => {
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
                       <span className="text-gray-600 dark:text-gray-300">
-                        Original Interest: <span className="font-semibold text-red-600">{currencySymbol}{comparison.originalTotalInterest.toLocaleString()}</span>
+                        Original Interest: <span className="font-semibold text-red-600">{currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()}</span>
                       </span>
                       <span className="text-gray-600 dark:text-gray-300">
-                        Optimized Interest: <span className="font-semibold text-emerald-600">{currencySymbol}{comparison.optimizedTotalInterest.toLocaleString()}</span>
+                        Optimized Interest: <span className="font-semibold text-emerald-600">{currencySymbol}{Math.ceil(comparison.optimizedTotalInterest).toLocaleString()}</span>
                       </span>
                     </div>
                     <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
