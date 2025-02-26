@@ -159,7 +159,39 @@ export const DebtComparison = () => {
               </div>
             </Card>
             
-            {/* ... keep existing code (other cards in the grid) */}
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-emerald-100">
+                  <Target className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Next Steps</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button>
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Next Steps Explained</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Here are some actionable steps you can take to start reducing your debt.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Focus on reducing your highest interest debt first.
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    This will save you the most money in interest.
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>;
     }
@@ -201,7 +233,34 @@ export const DebtComparison = () => {
             </div>
           </Card>
 
-          {/* ... keep existing code (other cards in grid) */}
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-green-100">
+                <Target className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-900">Next Steps</h4>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                        Here are some actionable steps you can take to start reducing your debt.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Focus on reducing your lowest balance debt next.
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  This will help you gain momentum in your debt-free journey.
+                </p>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>;
   };
@@ -545,7 +604,7 @@ export const DebtComparison = () => {
               <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                    <PiggyBank className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    <Wallet className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">With your savings, you could get</span>
