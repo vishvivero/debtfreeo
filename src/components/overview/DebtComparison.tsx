@@ -41,11 +41,9 @@ export const DebtComparison = () => {
       };
     }
 
-    // Calculate current monthly interest correctly
     const monthlyInterestCost = debts.reduce((total, debt) => {
       if (debt.status === 'active') {
-        // Only include active debts
-        const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+        const monthlyRate = debt.interest_rate / 1200;
         const monthlyInterest = debt.balance * monthlyRate;
         console.log(`Monthly interest for ${debt.name}:`, {
           balance: debt.balance,
@@ -91,7 +89,7 @@ export const DebtComparison = () => {
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
-      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
+      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100
     };
   };
 
@@ -359,16 +357,6 @@ export const DebtComparison = () => {
             <CardTitle className="flex items-center gap-2 text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" />
               Your Debt Overview
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    A comprehensive view of your current debt situation and how it's structured.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
@@ -537,16 +525,6 @@ export const DebtComparison = () => {
               <span className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
                 What Debtfreeo Can Save You
               </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    See how much you could save with our optimized strategy.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
@@ -609,4 +587,43 @@ export const DebtComparison = () => {
                     <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
                       <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <div className="flex-
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        Total Interest (Optimized)
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help">
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                              Your projected total interest savings with our optimized strategy.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </span>
+                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                        {currencySymbol}{Math.ceil(comparison.optimizedTotalInterest).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex justify-center mt-4 sm:mt-8">
+        <Button
+          onClick={() => navigate("/strategy")}
+          className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+        >
+          Start Optimizing Your Debt Now
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+        </Button>
+      </div>
+
+      {renderActionableInsights()}
+    </motion.div>
+  );
+};
