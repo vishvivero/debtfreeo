@@ -277,13 +277,11 @@ export const DebtComparison = () => {
                   <TooltipTrigger className="cursor-help">
                     <Info className="w-4 h-4 text-emerald-400" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60]">
-                    <div className="space-y-2">
-                      <h5 className="font-semibold text-sm">Optimization Benefits</h5>
-                      <p className="text-sm text-muted-foreground">
-                        A detailed breakdown of potential savings in both time and money when using our optimized debt repayment strategy, including reduced interest payments and faster payoff times.
-                      </p>
-                    </div>
+                  <TooltipContent 
+                    side="right" 
+                    className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
+                  >
+                    A detailed breakdown of potential savings in both time and money when using our optimized debt repayment strategy, including reduced interest payments and faster payoff times.
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -304,13 +302,11 @@ export const DebtComparison = () => {
                             <TooltipTrigger className="cursor-help">
                               <Info className="w-4 h-4 text-gray-400 ml-2" />
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60]">
-                              <div className="space-y-2">
-                                <h5 className="font-semibold text-sm">Accelerated Freedom Date</h5>
-                                <p className="text-sm text-muted-foreground">
-                                  Your new projected debt-free date using our optimized strategy. This factors in smart payment allocation and any additional payments you've planned to make.
-                                </p>
-                              </div>
+                            <TooltipContent 
+                              side="right" 
+                              className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
+                            >
+                              Your new projected debt-free date using our optimized strategy. This factors in smart payment allocation and any additional payments you've planned to make.
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -338,13 +334,11 @@ export const DebtComparison = () => {
                           <TooltipTrigger className="cursor-help">
                             <Info className="w-4 h-4 text-gray-400 ml-2" />
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="z-[60]">
-                            <div className="space-y-2">
-                              <h5 className="font-semibold text-sm">Reduced Interest Costs</h5>
-                              <p className="text-sm text-muted-foreground">
-                                The total interest you'll pay with our optimized strategy. This amount is typically lower than your current path due to strategic payment allocation and accelerated payoff schedules.
-                              </p>
-                            </div>
+                          <TooltipContent 
+                            side="right" 
+                            className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
+                          >
+                            The total interest you'll pay with our optimized strategy. This amount is typically lower than your current path due to strategic payment allocation and accelerated payoff schedules.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -379,13 +373,11 @@ export const DebtComparison = () => {
                       <TooltipTrigger className="cursor-help">
                         <Info className="w-4 h-4 text-gray-400" />
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="z-[60]">
-                        <div className="space-y-2">
-                          <h5 className="font-semibold text-sm">Potential Uses of Savings</h5>
-                          <p className="text-sm text-muted-foreground">
-                            Real-world examples of what you could do with the money saved through our optimization strategy. These alternatives help visualize the tangible benefits of reduced interest payments.
-                          </p>
-                        </div>
+                      <TooltipContent 
+                        side="right" 
+                        className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
+                      >
+                        Real-world examples of what you could do with the money saved through our optimization strategy. These alternatives help visualize the tangible benefits of reduced interest payments.
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
