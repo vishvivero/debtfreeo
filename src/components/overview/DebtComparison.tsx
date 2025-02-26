@@ -102,4 +102,9 @@ export const DebtComparison = () => {
         />
         <OptimizedPlanCard
           comparison={comparison}
-          
+          currencySymbol={currencySymbol}
+        />
+      </div>
+    </motion.div>
+  );
+};
