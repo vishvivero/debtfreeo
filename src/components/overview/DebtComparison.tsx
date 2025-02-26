@@ -427,10 +427,8 @@ export const DebtComparison = () => {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
                         })}{' '}
-                        in total interest charges. By following our recommended payment strategy, 
-                        you'll pay less in interest over the life of your debts. This means more 
-                        of your money goes toward paying down the principal balance instead of 
-                        interest charges.
+                        in total interest. Pay less in interest and more towards your principal balance with our 
+                        smart payment strategy.
                       </div>
                     </div>
                   </div>
