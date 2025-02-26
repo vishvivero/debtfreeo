@@ -362,44 +362,43 @@ export const DebtComparison = () => {
               </div>
 
               {/* Total Interest (Optimized) */}
-              <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center justify-between mb-4">
+              <div className="p-4 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                      <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
+                      <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      Total Interest (Optimized)
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-help">
-                            <Info className="w-4 h-4 text-gray-400 ml-2" />
-                          </TooltipTrigger>
-                          <TooltipContent 
-                            side="right" 
-                            className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
-                          >
-                            The total interest you'll pay with our optimized strategy.
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </span>
+                    <div>
+                      <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                        Total Interest (Optimized)
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help">
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
+                            </TooltipTrigger>
+                            <TooltipContent 
+                              side="right" 
+                              className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
+                            >
+                              The total interest you'll pay with our optimized strategy.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </span>
+                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-2">
+                        Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })} in interest with our strategy!
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })}
-                  </span>
-                </div>
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
-                    <ArrowDown className="w-5 h-5" />
-                    <span className="font-medium">
-                      Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
+                  <div className="text-right">
+                    <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                      {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
-                      })} in interest!
+                      })}
                     </span>
                   </div>
                 </div>
