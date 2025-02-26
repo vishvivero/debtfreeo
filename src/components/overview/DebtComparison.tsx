@@ -114,14 +114,9 @@ export const DebtComparison = () => {
                   </TooltipTrigger>
                   <TooltipContent 
                     side="right" 
-                    className="z-[60] bg-white border-gray-200 shadow-lg"
+                    className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
                   >
-                    <div className="space-y-2">
-                      <h5 className="font-semibold text-sm">Current Debt Overview</h5>
-                      <p className="text-sm text-muted-foreground">
-                        A comprehensive view of your current debt status, including payment timeline and interest costs before optimization.
-                      </p>
-                    </div>
+                    How your current debt is structured and what you're paying in terms of time and money without any optimization strategies applied.
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -144,14 +139,9 @@ export const DebtComparison = () => {
                             </TooltipTrigger>
                             <TooltipContent 
                               side="right" 
-                              className="z-[60] bg-white border-gray-200 shadow-lg"
+                              className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
                             >
-                              <div className="space-y-2">
-                                <h5 className="font-semibold text-sm">Expected Completion Date</h5>
-                                <p className="text-sm text-muted-foreground">
-                                  The projected date when you'll be debt-free based on your current minimum payments. This timeline doesn't include any extra payments or optimization strategies.
-                                </p>
-                              </div>
+                              The date you'll become debt-free if you continue making only minimum payments. This baseline scenario helps show the potential impact of optimization.
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -248,14 +238,9 @@ export const DebtComparison = () => {
                           </TooltipTrigger>
                           <TooltipContent 
                             side="right" 
-                            className="z-[60] bg-white border-gray-200 shadow-lg"
+                            className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg"
                           >
-                            <div className="space-y-2">
-                              <h5 className="font-semibold text-sm">Debt Portfolio Size</h5>
-                              <p className="text-sm text-muted-foreground">
-                                The number of active debts you're managing. Each debt may have different interest rates and terms, affecting your overall repayment strategy.
-                              </p>
-                            </div>
+                            Your total number of active debts. Understanding this number helps create a more effective repayment strategy based on your specific situation.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
