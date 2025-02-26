@@ -425,7 +425,7 @@ export const DebtComparison = () => {
                         Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
-                        })} in interest with our strategy!
+                        })} in interest payments with our smart plan!
                       </div>
                     </div>
                   </div>
