@@ -181,12 +181,12 @@ export const DebtComparison = () => {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                </div>
-                <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                  {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })} of your payments go towards interest.
+                  <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                    {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    })} of your payments go towards interest.
+                  </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="space-y-2 sm:space-y-3">
