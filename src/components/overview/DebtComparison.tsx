@@ -142,12 +142,12 @@ export const DebtComparison = () => {
             <div className="grid gap-3 sm:gap-4">
               {/* Debt-Free Date */}
               <div className="p-4 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900">
                       <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div className="flex-1">
+                    <div>
                       <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                         Debt-Free Date
                         <TooltipProvider>
@@ -170,7 +170,7 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-center w-full">
+                  <div className="text-right">
                     <span className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {comparison.originalPayoffDate.toLocaleDateString('en-US', {
                         month: 'long',
