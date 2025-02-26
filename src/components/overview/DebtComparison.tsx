@@ -163,13 +163,13 @@ export const DebtComparison = () => {
 
               {/* Payment Efficiency */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Percent className="w-5 h-5 text-gray-500" />
+                <div className="flex items-center gap-3 mb-4">
+                  <Percent className="w-5 h-5 text-gray-500" />
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">Payment Efficiency</span>
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger className="flex items-center gap-2 cursor-help">
-                          <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
+                        <TooltipTrigger className="cursor-help">
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
                         <TooltipContent 
@@ -185,8 +185,8 @@ export const DebtComparison = () => {
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="text-gray-600 dark:text-gray-300">
                         Principal: <span className="font-medium text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
                       </span>
                       <span className="text-gray-600 dark:text-gray-300">
