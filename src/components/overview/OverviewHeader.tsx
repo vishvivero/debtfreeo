@@ -11,13 +11,12 @@ export const OverviewHeader = ({
   onCurrencyChange,
 }: OverviewHeaderProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
       <div className="space-y-1">
-        <h1 className="text-3xl sm:text-4xl font-bold">
-          <span className="text-emerald-600">Your Financial</span>{" "}
-          <span className="text-blue-600">Overview</span>
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+          Your Debt Overview
         </h1>
-        <p className="text-base sm:text-lg text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
           Track and optimize your journey to financial freedom
         </p>
       </div>

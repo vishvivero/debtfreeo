@@ -126,7 +126,7 @@ const Overview = () => {
   }, [debts]);
 
   const mobileAnimationConfig = {
-    duration: 0.2,
+    duration: 0.15, // Reduced duration for snappier mobile performance
     ease: "easeOut"
   };
 
@@ -152,15 +152,15 @@ const Overview = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={mobileAnimationConfig}
-                className="space-y-3 sm:space-y-6"
+                className="space-y-2 sm:space-y-6"
               >
                 <motion.div
-                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
-                  animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={mobileAnimationConfig}
-                  className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm"
                 >
-                  <div className="p-2 sm:p-6">
+                  <div className="p-3 sm:p-6">
                     <OverviewHeader
                       currencySymbol={currentCurrencySymbol}
                       onCurrencyChange={handleCurrencyChange}
@@ -170,18 +170,18 @@ const Overview = () => {
                 </motion.div>
 
                 <motion.div
-                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
-                  animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                  transition={{ ...mobileAnimationConfig, delay: isMobile ? 0.1 : 0.2 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ ...mobileAnimationConfig, delay: 0.05 }}
                   className="w-full"
                 >
                   <DebtScoreCard />
                 </motion.div>
 
                 <motion.div
-                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
-                  animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                  transition={{ ...mobileAnimationConfig, delay: isMobile ? 0.2 : 0.3 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ ...mobileAnimationConfig, delay: 0.1 }}
                 >
                   <ActionPlan
                     highestAprDebt={metrics.highestAprDebt ? {
