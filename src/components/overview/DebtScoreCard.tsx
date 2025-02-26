@@ -88,7 +88,7 @@ export const DebtScoreCard = () => {
                           <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                         </button>
                       </HoverCardTrigger>
-                      <HoverCardContent className="w-80">
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
                         <div className="space-y-2">
                           <h5 className="font-semibold text-sm">Monthly Interest Explained</h5>
                           <p className="text-sm text-muted-foreground">
@@ -123,7 +123,7 @@ export const DebtScoreCard = () => {
                           <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                         </button>
                       </HoverCardTrigger>
-                      <HoverCardContent className="w-80">
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
                         <div className="space-y-2">
                           <h5 className="font-semibold text-sm">Extra Payment Benefits</h5>
                           <p className="text-sm text-muted-foreground">
@@ -157,7 +157,7 @@ export const DebtScoreCard = () => {
                           <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                         </button>
                       </HoverCardTrigger>
-                      <HoverCardContent className="w-80">
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
                         <div className="space-y-2">
                           <h5 className="font-semibold text-sm">Understanding Total Cost</h5>
                           <p className="text-sm text-muted-foreground">
@@ -192,7 +192,7 @@ export const DebtScoreCard = () => {
                           <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                         </button>
                       </HoverCardTrigger>
-                      <HoverCardContent className="w-80">
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
                         <div className="space-y-2">
                           <h5 className="font-semibold text-sm">Why These Tips Matter</h5>
                           <p className="text-sm text-muted-foreground">
@@ -233,7 +233,7 @@ export const DebtScoreCard = () => {
                         <Info className="h-4 w-4 text-blue-400 hover:text-blue-500 transition-colors" />
                       </button>
                     </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
+                    <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
                       <div className="space-y-2">
                         <h5 className="font-semibold text-sm">Advanced Payment Strategy</h5>
                         <p className="text-sm text-muted-foreground">
