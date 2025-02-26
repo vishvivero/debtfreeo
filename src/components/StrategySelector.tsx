@@ -2,7 +2,7 @@
 import { Strategy } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Target, DollarSign } from "lucide-react";
+import { Target, DollarSign, RocketIcon } from "lucide-react";
 import { useDebtCalculation } from "@/contexts/DebtCalculationContext";
 import { useDebts } from "@/hooks/use-debts";
 import { formatCurrency } from "@/lib/strategies";
@@ -27,11 +27,26 @@ export const StrategySelector = ({
   const getStrategyIcon = (id: string) => {
     switch (id) {
       case "avalanche":
-        return <DollarSign className="h-12 w-12" />;
+        return (
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-12 w-12" />
+            <RocketIcon className="h-6 w-6 text-emerald-400 animate-pulse" />
+          </div>
+        );
       case "snowball":
-        return <Target className="h-12 w-12" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Target className="h-12 w-12" />
+            <RocketIcon className="h-6 w-6 text-blue-400 animate-pulse" />
+          </div>
+        );
       default:
-        return <Target className="h-12 w-12" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Target className="h-12 w-12" />
+            <RocketIcon className="h-6 w-6 text-purple-400 animate-pulse" />
+          </div>
+        );
     }
   };
 
