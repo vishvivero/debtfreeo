@@ -3,10 +3,6 @@ import { Strategy } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Target, DollarSign } from "lucide-react";
-import { useDebtCalculation } from "@/contexts/DebtCalculationContext";
-import { useDebts } from "@/hooks/use-debts";
-import { formatCurrency } from "@/lib/strategies";
-import { format, addMonths } from "date-fns";
 
 interface StrategySelectorProps {
   strategies: Strategy[];
@@ -20,9 +16,6 @@ export const StrategySelector = ({
   onSelectStrategy,
 }: StrategySelectorProps) => {
   console.log('StrategySelector props:', { strategies, selectedStrategy });
-  
-  const { debts } = useDebts();
-  const { calculateTimeline } = useDebtCalculation();
 
   const getStrategyIcon = (id: string) => {
     switch (id) {
@@ -64,25 +57,6 @@ export const StrategySelector = ({
     }
   };
 
-  const getStrategyMetrics = (strategy: Strategy) => {
-    if (!debts || debts.length === 0) return null;
-    
-    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-    const results = calculateTimeline(debts, totalMinimumPayment, strategy, []);
-
-    const formatMonths = (months: number) => {
-      const years = Math.floor(months / 12);
-      const remainingMonths = months % 12;
-      return `${years}y ${remainingMonths}m`;
-    };
-
-    return {
-      firstDebtPaidOff: formatMonths(Math.ceil(results.acceleratedMonths / 2)),
-      allDebtsPaidOff: formatMonths(results.acceleratedMonths),
-      interestSaved: formatCurrency(results.interestSaved, debts[0]?.currency_symbol || '£')
-    };
-  };
-
   if (!strategies || strategies.length === 0) {
     console.warn('No strategies provided to StrategySelector');
     return null;
@@ -93,7 +67,6 @@ export const StrategySelector = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {strategies.slice(0, 2).map((strategy, index) => {
           const details = getStrategyDetails(strategy.id);
-          const metrics = getStrategyMetrics(strategy);
           const isSelected = selectedStrategy.id === strategy.id;
           
           return (
@@ -123,30 +96,26 @@ export const StrategySelector = ({
 
                 <div className="space-y-6">
                   <div className="space-y-4">
-                    {metrics && (
-                      <>
-                        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <span className="text-sm text-gray-600">First debt paid off</span>
-                          <span className="text-sm font-medium text-gray-900">
-                            {metrics.firstDebtPaidOff}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <span className="text-sm text-gray-600">All debts paid off</span>
-                          <span className="text-sm font-medium text-gray-900">
-                            {metrics.allDebtsPaidOff}
-                          </span>
-                        </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <span className="text-sm text-gray-600">First debt paid off</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        2y 7m
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <span className="text-sm text-gray-600">All debts paid off</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        3y 9m
+                      </span>
+                    </div>
 
-                        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <span className="text-sm text-gray-600">Interest saved</span>
-                          <span className="text-sm font-medium text-gray-900">
-                            {metrics.interestSaved}
-                          </span>
-                        </div>
-                      </>
-                    )}
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <span className="text-sm text-gray-600">Interest saved</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        $74.77
+                      </span>
+                    </div>
                   </div>
 
                   <Button
