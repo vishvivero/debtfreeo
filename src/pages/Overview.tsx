@@ -10,7 +10,7 @@ import { DebtOverview } from "@/components/overview/DebtOverview";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { countryCurrencies } from "@/lib/utils/currency-data";
 import { ActionPlan } from "@/components/overview/ActionPlan";
 
@@ -21,7 +21,6 @@ const Overview = () => {
   const { profile, updateProfile } = useProfile();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Validate currency support
   const validateCurrency = (currencySymbol: string) => {
     return countryCurrencies.some(currency => currency.symbol === currencySymbol);
   };
@@ -141,13 +140,8 @@ const Overview = () => {
                 transition={{ duration: 0.5 }}
                 className="space-y-6"
               >
-                <div className="relative">
-                  {isUpdating && (
-                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-xl z-50">
-                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                    </div>
-                  )}
-                  <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg">
+                <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg">
+                  <div className="p-4 sm:p-6">
                     <OverviewHeader
                       currencySymbol={currentCurrencySymbol}
                       onCurrencyChange={handleCurrencyChange}
@@ -164,7 +158,6 @@ const Overview = () => {
                   <DebtScoreCard />
                 </motion.div>
 
-                {/* Action Plan moved to bottom */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
