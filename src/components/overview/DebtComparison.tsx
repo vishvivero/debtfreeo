@@ -271,7 +271,7 @@ export const DebtComparison = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
               <Award className="w-5 h-5" />
-              What Debtfreeo Can Save You
+              <span className="font-semibold">What Debtfreeo Can Save You</span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="cursor-help">
@@ -295,7 +295,7 @@ export const DebtComparison = () => {
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-emerald-600" />
                     <div>
-                      <span className="text-gray-600 dark:text-gray-300">
+                      <span className="text-gray-600 dark:text-gray-300 font-medium text-lg">
                         Optimized Debt-Free Date
                         <TooltipProvider>
                           <Tooltip>
@@ -311,7 +311,7 @@ export const DebtComparison = () => {
                           </Tooltip>
                         </TooltipProvider>
                       </span>
-                      <div className="text-sm text-gray-600 font-medium">
+                      <div className="text-sm text-emerald-600 font-medium mt-1">
                         {comparison.moneySaved > 0 && `Save ${currencySymbol}${comparison.moneySaved.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
@@ -319,6 +319,12 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                   </div>
+                  <span className="text-xl font-bold text-emerald-600">
+                    {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </span>
                 </div>
               </div>
 
