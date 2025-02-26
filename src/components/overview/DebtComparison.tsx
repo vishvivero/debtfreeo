@@ -269,9 +269,11 @@ export const DebtComparison = () => {
         {/* Optimized Plan Card */}
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
-              <Award className="w-5 h-5" />
-              <span className="font-semibold">What Debtfreeo Can Save You</span>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="w-6 h-6 text-emerald-500" />
+              <span className="text-2xl text-emerald-700 dark:text-emerald-300 font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+                What Debtfreeo Can Save You
+              </span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="cursor-help">
