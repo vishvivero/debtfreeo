@@ -114,13 +114,13 @@ export const DebtComparison = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-6 px-4 sm:px-6 lg:px-0"
+      className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+          <CardHeader className="pb-2 p-3 sm:p-6">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-500" />
               Your Debt Overview
               <TooltipProvider>
@@ -138,22 +138,22 @@ export const DebtComparison = () => {
               </TooltipProvider>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+          <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
             <div className="grid gap-3 sm:gap-4">
               {/* Debt-Free Date */}
-              <div className="p-4 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900">
-                      <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
+              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900 shrink-0">
+                      <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div>
-                      <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         Debt-Free Date
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                             </TooltipTrigger>
                             <TooltipContent 
                               side="right" 
@@ -164,14 +164,14 @@ export const DebtComparison = () => {
                           </Tooltip>
                         </TooltipProvider>
                       </span>
-                      <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
                         Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
                         {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    <span className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {comparison.originalPayoffDate.toLocaleDateString('en-US', {
                         month: 'long',
                         year: 'numeric'
@@ -182,17 +182,17 @@ export const DebtComparison = () => {
               </div>
 
               {/* Payment Efficiency */}
-              <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                    <Percent className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                  <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
+                    <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Payment Efficiency</span>
+                    <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Payment Efficiency</span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger className="cursor-help">
-                          <Info className="w-4 h-4 text-gray-400" />
+                          <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                         </TooltipTrigger>
                         <TooltipContent 
                           side="right" 
@@ -204,9 +204,9 @@ export const DebtComparison = () => {
                     </TooltipProvider>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm mb-2">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
                       <span className="text-gray-600 dark:text-gray-300">
                         Principal: <span className="font-semibold text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
                       </span>
@@ -214,7 +214,7 @@ export const DebtComparison = () => {
                         Interest: <span className="font-semibold text-red-600">{comparison.interestPercentage.toFixed(1)}%</span>
                       </span>
                     </div>
-                    <div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div className="h-full flex">
                         <motion.div
                           initial={{ width: 0 }}
@@ -231,7 +231,7 @@ export const DebtComparison = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
+                  <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
                     {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0
@@ -241,19 +241,19 @@ export const DebtComparison = () => {
               </div>
 
               {/* Total Debts */}
-              <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
-                      <Coins className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                      <Coins className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                         Total Debts
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="cursor-help">
-                              <Info className="w-4 h-4 text-gray-400 ml-2" />
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
                             </TooltipTrigger>
                             <TooltipContent 
                               side="right" 
@@ -266,22 +266,22 @@ export const DebtComparison = () => {
                       </span>
                     </div>
                   </div>
-                  <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">{comparison.totalDebts}</span>
+                  <span className="text-xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400">{comparison.totalDebts}</span>
                 </div>
                 <Button 
                   variant="ghost" 
-                  className="w-full mt-2 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                  className="w-full mt-2 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm sm:text-base"
                   onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}
                 >
                   <span>View Debt List</span>
                   {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </Button>
                 {isDebtListExpanded && (
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-3 space-y-2 sm:space-y-3">
                     {debts?.map((debt) => (
-                      <div key={debt.id} className="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{debt.name}</span>
-                        <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <div key={debt.id} className="flex justify-between items-center p-2 sm:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{debt.name}</span>
+                        <span className="text-xs sm:text-sm font-semibold text-purple-600 dark:text-purple-400">
                           {currencySymbol}{debt.balance.toLocaleString()}
                         </span>
                       </div>
@@ -295,10 +295,10 @@ export const DebtComparison = () => {
 
         {/* Optimized Plan Card */}
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 p-3 sm:p-6">
             <CardTitle className="flex items-center gap-2">
               <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500" />
-              <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+              <span className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
                 What Debtfreeo Can Save You
               </span>
               <TooltipProvider>
@@ -316,10 +316,10 @@ export const DebtComparison = () => {
               </TooltipProvider>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+          <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
             <div className="grid gap-3 sm:gap-4">
               {/* Optimized Debt-Free Date */}
-              <div className="p-4 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
@@ -362,7 +362,7 @@ export const DebtComparison = () => {
               </div>
 
               {/* Total Interest (Optimized) */}
-              <div className="p-4 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
+              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
@@ -464,13 +464,13 @@ export const DebtComparison = () => {
         </Card>
       </div>
 
-      <div className="flex justify-center mt-6 sm:mt-8">
+      <div className="flex justify-center mt-4 sm:mt-8">
         <Button
           onClick={() => navigate("/strategy")}
-          className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-6 sm:px-8 py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
         >
           Start Optimizing Your Debt Now
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
       </div>
     </motion.div>
