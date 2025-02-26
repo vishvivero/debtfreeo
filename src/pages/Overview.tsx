@@ -76,9 +76,9 @@ const Overview = () => {
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: i * 0.1 }}
             className="h-32 bg-gray-200 rounded-lg animate-pulse"
           />
         ))}
@@ -125,6 +125,11 @@ const Overview = () => {
     };
   }, [debts]);
 
+  const mobileAnimationConfig = {
+    duration: 0.2,
+    ease: "easeOut"
+  };
+
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
@@ -136,20 +141,25 @@ const Overview = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={mobileAnimationConfig}
               >
                 <LoadingSkeleton />
               </motion.div>
             ) : (
               <motion.div
                 key="content"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={mobileAnimationConfig}
                 className="space-y-3 sm:space-y-6"
               >
-                <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg">
+                <motion.div
+                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                  animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  transition={mobileAnimationConfig}
+                  className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg"
+                >
                   <div className="p-2 sm:p-6">
                     <OverviewHeader
                       currencySymbol={currentCurrencySymbol}
@@ -157,21 +167,21 @@ const Overview = () => {
                     />
                     <DebtOverview />
                   </div>
-                </div>
+                </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
+                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                  animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  transition={{ ...mobileAnimationConfig, delay: isMobile ? 0.1 : 0.2 }}
                   className="w-full"
                 >
                   <DebtScoreCard />
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
+                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                  animate={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  transition={{ ...mobileAnimationConfig, delay: isMobile ? 0.2 : 0.3 }}
                 >
                   <ActionPlan
                     highestAprDebt={metrics.highestAprDebt ? {
