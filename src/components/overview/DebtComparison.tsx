@@ -97,6 +97,391 @@ export const DebtComparison = () => {
   };
 
   const comparison = calculateComparison();
+
+  const renderActionableInsights = () => {
+    if (!comparison || !debts?.length) return null;
+
+    if (debts.length === 1) {
+      const debt = debts[0];
+      const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
+      const totalCostIfMinimum = debt.balance + (monthlyInterest * 24); // Rough 2-year estimate
+
+      return (
+        <div className="mt-6 space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-emerald-100">
+                  <Target className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button>
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Monthly Interest Explained</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Monthly Interest: {profile?.preferred_currency || '£'}
+                    {monthlyInterest.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    This is what your debt costs you each month in interest
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-blue-100">
+                  <PiggyBank className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Payment Impact</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Extra Payment Benefits</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Extra payments can significantly reduce your total repayment time and interest costs. Even small additional amounts can make a big difference over time.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Adding just {profile?.preferred_currency || '£'}50 extra monthly could save you months
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Extra payments go directly to reducing your principal
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-amber-100">
+                  <TrendingUp className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Total Cost Warning</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Understanding Total Cost</h5>
+                          <p className="text-sm text-muted-foreground">
+                            This 2-year projection shows the total amount you'll pay if you only make minimum payments. It includes both principal and accumulated interest, highlighting why paying more than the minimum is beneficial.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Paying minimum only: ~{profile?.preferred_currency || '£'}
+                    {totalCostIfMinimum.toFixed(0)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    This is your estimated 2-year cost with minimum payments
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-purple-100">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Success Tips</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Why These Tips Matter</h5>
+                          <p className="text-sm text-muted-foreground">
+                            These proven strategies help ensure consistent progress towards becoming debt-free. Automatic payments prevent missed payments, tracking helps maintain motivation, and celebrating milestones reinforces positive financial habits.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                  <div className="space-y-2 mt-2">
+                    <p className="text-xs text-gray-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                      Set up automatic payments
+                    </p>
+                    <p className="text-xs text-gray-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                      Track your progress monthly
+                    </p>
+                    <p className="text-xs text-gray-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                      Celebrate small wins
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h5 className="font-medium text-blue-800">Pro Tip</h5>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <button className="cursor-help">
+                        <Info className="h-4 w-4 text-blue-400 hover:text-blue-500 transition-colors" />
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                      <div className="space-y-2">
+                        <h5 className="font-semibold text-sm">Advanced Payment Strategy</h5>
+                        <p className="text-sm text-muted-foreground">
+                          This advanced strategy helps you save money on interest while accelerating your debt payoff. By applying extra payments directly to principal, you reduce both the balance and future interest charges.
+                        </p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+                <p className="text-sm text-blue-700 mt-1">
+                  Every extra payment you make reduces both your balance and the amount of interest you'll pay over time.
+                  Consider setting aside any unexpected income for debt payments.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
+    const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
+    const totalInterest = debts.reduce((sum, debt) => 
+      sum + (debt.balance * (debt.interest_rate / 100)), 0
+    );
+
+    return (
+      <div className="mt-6 space-y-6">
+        <h3 className="text-2xl font-bold text-gray-900">Action Plan</h3>
+        
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-green-100">
+                <Target className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-900">Priority Focus</h4>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                        This debt has the highest interest rate and should be prioritized to minimize interest costs.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Focus on {highestInterestDebt.name} with {highestInterestDebt.interest_rate}% APR
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  This debt has the highest interest rate and costs you the most
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-blue-100">
+                <PiggyBank className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-900">Quick Win</h4>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                        Paying off your smallest debt first can provide psychological momentum and motivation to tackle larger debts.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Target {lowestBalance.name} with {profile?.preferred_currency || '£'}
+                  {lowestBalance.balance.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Paying this off first will give you momentum
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-amber-100">
+                <TrendingUp className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-900">Monthly Interest Cost</h4>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                        The total amount you pay in interest each month across all your debts before any principal reduction.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  {profile?.preferred_currency || '£'}{totalInterest.toFixed(2)} per month
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  This is what your debt costs you monthly
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-purple-100">
+                <Calendar className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-900">Optimization Potential</h4>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                        Shows how much you could improve your debt payoff strategy based on interest rates and payment allocation.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  {(((comparison.durationScore + comparison.interestScore) / 80) * 100).toFixed(0)}% room for improvement
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Based on your current payment strategy
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+            Recommended Next Steps
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <button className="cursor-help">
+                  <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                </button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h5 className="font-semibold text-sm">Personalized steps based on your debt profile</h5>
+                  <p className="text-sm text-muted-foreground">
+                    Personalized steps based on your debt profile
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </h4>
+          
+          <div className="space-y-3">
+            {comparison.interestScore < 25 && (
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  Consider consolidating your high-interest debts to reduce overall interest costs
+                </p>
+              </div>
+            )}
+            
+            {comparison.durationScore < 15 && (
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  Look for opportunities to increase your monthly payment by {profile?.preferred_currency || '£'}50-100
+                </p>
+              </div>
+            )}
+            
+            {comparison.behaviorScore.excessPayments < 2.5 && (
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  Set up automatic payments to ensure consistent debt reduction
+                </p>
+              </div>
+            )}
+
+            {debts.some(debt => debt.interest_rate > 20) && (
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <p className="text-sm text-gray-600">
+                  You have high-interest debt(s). Prioritize paying these off first
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return <motion.div initial={{
     opacity: 0,
     y: 20
@@ -252,250 +637,4 @@ export const DebtComparison = () => {
                         Total Active Debts
                       </Badge>
                     </span>
-                    <span className="font-semibold text-purple-600 dark:text-purple-400">
-                      {comparison.totalDebts} debts
-                    </span>
-                  </div>
-                  <Button variant="ghost" className="w-full flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm sm:text-base" onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}>
-                    <span>View Debt List</span>
-                    {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </Button>
-                  {isDebtListExpanded && <div className="space-y-3">
-                      {debts?.map(debt => <div key={debt.id} className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                            <span className="font-medium">{debt.name}</span>
-                          </span>
-                          <span className="font-semibold text-purple-600 dark:text-purple-400">
-                            {currencySymbol}{debt.balance.toLocaleString()}
-                          </span>
-                        </div>)}
-                    </div>}
-                  {!isDebtListExpanded && <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
-                      Click to view your complete debt list
-                    </div>}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Optimized Plan Card */}
-        <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
-          <CardHeader className="pb-2 p-3 sm:p-6">
-            <CardTitle className="flex items-center gap-2">
-              <Award className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500" />
-              <span className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-                What Debtfreeo Can Save You
-              </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help">
-                    <Info className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    See how much you could save with our optimized strategy.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
-            <div className="grid gap-3 sm:gap-4">
-              {/* Optimized Debt-Free Date */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                      <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        Optimized Debt-Free Date
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                              Your projected debt-free date with our optimized strategy.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        {comparison.timeSaved.years > 0 && <>
-                            Become debt-free{' '}
-                            {comparison.timeSaved.years} {comparison.timeSaved.years === 1 ? 'year' : 'years'}
-                            {comparison.timeSaved.months > 0 && ' and '}
-                            {comparison.timeSaved.months > 0 && <>{comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}</>}
-                            {' '}sooner with our optimized plan!
-                          </>}
-                        {!comparison.timeSaved.years && comparison.timeSaved.months > 0 && <>
-                            Become debt-free{' '}
-                            {comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}{' '}
-                            sooner with our optimized plan!
-                          </>}
-                        {!comparison.timeSaved.years && !comparison.timeSaved.months && <>
-                            Start your journey to become debt-free today!
-                          </>}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                      {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Interest (Optimized) */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                      <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        Total Interest (Optimized)
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                              The total interest you'll pay with our optimized strategy.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        Our optimized plan helps you save{' '}
-                        {currencySymbol}{Math.ceil(comparison.moneySaved).toLocaleString(undefined, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      })}{' '}
-                        in total interest.
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Original Interest: <span className="font-semibold text-red-600">{currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()}</span>
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Optimized Interest: <span className="font-semibold text-emerald-600">{currencySymbol}{Math.ceil(comparison.optimizedTotalInterest).toLocaleString()}</span>
-                      </span>
-                    </div>
-                    <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full flex">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${comparison.optimizedTotalInterest / comparison.originalTotalInterest * 100}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-emerald-500"
-                        />
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest * 100}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-red-500"
-                        />
-                      </div>
-                    </div>
-                    <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
-                      You save {(comparison.moneySaved / comparison.originalTotalInterest * 100).toFixed(1)}% on interest payments
-                    </div>
-                  </div>
-                  
-                </div>
-              </div>
-
-              {/* Savings Section */}
-              <div className="p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                    <PiggyBank className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">With your savings, you could get</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="cursor-help">
-                          <Info className="w-4 h-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                          Real-world examples of what you could do with your savings.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                        <Plane className="w-4 h-4 text-emerald-600" /> International Trips
-                      </span>
-                      <span className="font-semibold text-emerald-600">
-                        {Math.floor(comparison.moneySaved / 1000)} trips
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                        <Smartphone className="w-4 h-4 text-emerald-600" /> Premium Smartphones
-                      </span>
-                      <span className="font-semibold text-emerald-600">
-                        {Math.floor(comparison.moneySaved / 800)} phones
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                        <Palmtree className="w-4 h-4 text-emerald-600" /> Dream Family Vacation
-                      </span>
-                      <span className="font-semibold text-emerald-600">
-                        1 trip
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
-                    Make your savings work for you!
-                  </div>
-                </div>
-              </div>
-
-              {/* Monthly Interest Cost */}
-              <Card className="p-4 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-full bg-amber-100">
-                    <TrendingUp className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Monthly Interest Cost</h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {currencySymbol}{Math.ceil(comparison.monthlyInterestCost).toLocaleString()} per month
-                    </p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      This is what your debt costs you monthly
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex justify-center mt-4 sm:mt-8">
-        <Button onClick={() => navigate("/strategy")} className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base">
-          Start Optimizing Your Debt Now
-          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-        </Button>
-      </div>
-    </motion.div>;
-};
+                    <span className="font-semibold text-purple-600 dark:
