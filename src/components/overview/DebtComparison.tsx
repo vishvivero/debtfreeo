@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coins, Calendar, ArrowDown, Percent, DollarSign, Award, Info, ArrowRight, Plane, Smartphone, Palmtree, ChevronDown, ChevronUp, Target, PiggyBank, TrendingUp, CheckCircle2 } from "lucide-react";
@@ -13,14 +12,17 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { InterestCalculator } from "@/lib/services/calculations/InterestCalculator";
-
 export const DebtComparison = () => {
-  const { debts, profile } = useDebts();
-  const { oneTimeFundings } = useOneTimeFunding();
+  const {
+    debts,
+    profile
+  } = useDebts();
+  const {
+    oneTimeFundings
+  } = useOneTimeFunding();
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
-
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       return {
@@ -44,7 +46,8 @@ export const DebtComparison = () => {
 
     // Calculate current monthly interest correctly
     const monthlyInterestCost = debts.reduce((total, debt) => {
-      if (debt.status === 'active') {  // Only include active debts
+      if (debt.status === 'active') {
+        // Only include active debts
         const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
         const monthlyInterest = debt.balance * monthlyRate;
         console.log(`Monthly interest for ${debt.name}:`, {
@@ -56,12 +59,10 @@ export const DebtComparison = () => {
       }
       return total;
     }, 0);
-
     console.log('Monthly interest calculation:', {
       debts: debts.length,
       totalMonthlyInterest: monthlyInterestCost
     });
-
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     const timelineData = calculateTimelineData(debts, profile.monthly_payment, selectedStrategy, oneTimeFundings);
     const lastDataPoint = timelineData[timelineData.length - 1];
@@ -78,7 +79,6 @@ export const DebtComparison = () => {
     const monthsSaved = Math.max(0, totalBaselineMonths - totalAcceleratedMonths);
     const yearsSaved = Math.floor(monthsSaved / 12);
     const remainingMonthsSaved = monthsSaved % 12;
-
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
@@ -97,7 +97,6 @@ export const DebtComparison = () => {
       monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
     };
   };
-
   const comparison = calculateComparison();
   const totalMonthlyInterest = debts?.reduce((total, debt) => {
     if (debt.status === 'active') {
@@ -111,21 +110,16 @@ export const DebtComparison = () => {
     }
     return total;
   }, 0) || 0;
-
   console.log('Monthly interest calculation:', {
     debts: debts?.length,
     totalMonthlyInterest
   });
-
   const renderActionableInsights = () => {
     if (!comparison || !debts?.length) return null;
-
     if (debts.length === 1) {
       const debt = debts[0];
       const monthlyInterest = InterestCalculator.calculateMonthlyInterest(debt.balance, debt.interest_rate);
-
-      return (
-        <div className="mt-6 space-y-6">
+      return <div className="mt-6 space-y-6">
           <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
           
           <div className="grid gap-4 md:grid-cols-2">
@@ -165,15 +159,11 @@ export const DebtComparison = () => {
             
             {/* ... keep existing code (other cards in the grid) */}
           </div>
-        </div>
-      );
+        </div>;
     }
-
     const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
     const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
-
-    return (
-      <div className="mt-6 space-y-6">
+    return <div className="mt-6 space-y-6">
         <h3 className="text-2xl font-bold text-gray-900">Action Plan</h3>
         
         <div className="grid gap-4 md:grid-cols-2">
@@ -211,10 +201,8 @@ export const DebtComparison = () => {
 
           {/* ... keep existing code (other cards in grid) */}
         </div>
-      </div>
-    );
+      </div>;
   };
-
   return <motion.div initial={{
     opacity: 0,
     y: 20
@@ -320,18 +308,22 @@ export const DebtComparison = () => {
                     </div>
                     <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div className="h-full flex">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${comparison.principalPercentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-emerald-500"
-                        />
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${comparison.interestPercentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-red-500"
-                        />
+                        <motion.div initial={{
+                        width: 0
+                      }} animate={{
+                        width: `${comparison.principalPercentage}%`
+                      }} transition={{
+                        duration: 1,
+                        ease: "easeOut"
+                      }} className="h-full bg-emerald-500" />
+                        <motion.div initial={{
+                        width: 0
+                      }} animate={{
+                        width: `${comparison.interestPercentage}%`
+                      }} transition={{
+                        duration: 1,
+                        ease: "easeOut"
+                      }} className="h-full bg-red-500" />
                       </div>
                     </div>
                     <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
@@ -512,18 +504,22 @@ export const DebtComparison = () => {
                     </div>
                     <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div className="h-full flex">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${comparison.optimizedTotalInterest / comparison.originalTotalInterest * 100}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-emerald-500"
-                        />
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest * 100}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-red-500"
-                        />
+                        <motion.div initial={{
+                        width: 0
+                      }} animate={{
+                        width: `${comparison.optimizedTotalInterest / comparison.originalTotalInterest * 100}%`
+                      }} transition={{
+                        duration: 1,
+                        ease: "easeOut"
+                      }} className="h-full bg-emerald-500" />
+                        <motion.div initial={{
+                        width: 0
+                      }} animate={{
+                        width: `${(comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest * 100}%`
+                      }} transition={{
+                        duration: 1,
+                        ease: "easeOut"
+                      }} className="h-full bg-red-500" />
                       </div>
                     </div>
                     <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
@@ -588,22 +584,7 @@ export const DebtComparison = () => {
               </div>
 
               {/* Monthly Interest Cost */}
-              <Card className="p-4 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-full bg-amber-100">
-                    <TrendingUp className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Monthly Interest Cost</h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {currencySymbol}{Math.ceil(comparison.monthlyInterestCost).toLocaleString()} per month
-                    </p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      This is what your debt costs you monthly
-                    </p>
-                  </div>
-                </div>
-              </Card>
+              
             </div>
           </CardContent>
         </Card>
