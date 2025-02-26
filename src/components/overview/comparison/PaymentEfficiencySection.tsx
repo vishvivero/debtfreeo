@@ -17,14 +17,14 @@ export const PaymentEfficiencySection = ({
   currencySymbol
 }: PaymentEfficiencyProps) => {
   return (
-    <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="p-3 sm:p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="flex flex-col space-y-3">
-        <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+        <div className="flex items-start sm:items-center gap-2 sm:gap-4">
           <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900 shrink-0">
             <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               Payment Efficiency
               <TooltipProvider>
                 <Tooltip>
@@ -37,7 +37,7 @@ export const PaymentEfficiencySection = ({
                 </Tooltip>
               </TooltipProvider>
             </span>
-            <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed mt-1 sm:mt-2">
+            <div className="text-xs sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed mt-1 sm:mt-2">
               {currencySymbol}{Math.ceil(totalInterest).toLocaleString()} of your payments go towards interest.
             </div>
           </div>
@@ -51,7 +51,7 @@ export const PaymentEfficiencySection = ({
               Interest: <span className="font-semibold text-red-600">{interestPercentage.toFixed(1)}%</span>
             </span>
           </div>
-          <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div className="h-full flex">
               <motion.div
                 initial={{ width: 0 }}

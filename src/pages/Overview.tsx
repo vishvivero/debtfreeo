@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -127,7 +128,7 @@ const Overview = () => {
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
-        <div className="container py-2 sm:py-8 px-3 sm:px-6 lg:px-8">
+        <div className="container mx-auto py-2 sm:py-8 px-2 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
@@ -146,10 +147,10 @@ const Overview = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-2 sm:space-y-6"
+                className="space-y-3 sm:space-y-6"
               >
                 <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl shadow-lg">
-                  <div className="p-3 sm:p-6">
+                  <div className="p-2 sm:p-6">
                     <OverviewHeader
                       currencySymbol={currentCurrencySymbol}
                       onCurrencyChange={handleCurrencyChange}
