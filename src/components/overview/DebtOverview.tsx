@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { useDebts } from "@/hooks/use-debts";
 import { useDebtMetrics } from "@/hooks/use-debt-metrics";
 import { DebtMetricsCard } from "./comparison/DebtMetricsCard";
-import { ActionPlan } from "./ActionPlan";
 import { CreditCard, ArrowUpRight, LineChart, PiggyBank } from "lucide-react";
 
 export const DebtOverview = () => {
@@ -16,25 +15,6 @@ export const DebtOverview = () => {
     monthlyPayment: `${currencySymbol}${metrics.monthlyPayment.toLocaleString()}`,
     monthlyInterest: `${currencySymbol}${Math.round(metrics.totalMonthlyInterest).toLocaleString()}`
   }), [metrics, currencySymbol]);
-
-  // Calculate highest APR debt and lowest balance debt
-  const highestAprDebt = useMemo(() => {
-    if (!debts?.length) return undefined;
-    const debt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
-    return {
-      name: debt.name,
-      apr: debt.interest_rate
-    };
-  }, [debts]);
-
-  const lowestBalanceDebt = useMemo(() => {
-    if (!debts?.length) return undefined;
-    const debt = [...debts].sort((a, b) => a.balance - b.balance)[0];
-    return {
-      name: debt.name,
-      balance: debt.balance
-    };
-  }, [debts]);
 
   return (
     <div className="space-y-6">
@@ -59,16 +39,6 @@ export const DebtOverview = () => {
           icon={<PiggyBank className="w-5 h-5 text-purple-500" />}
           info="Interest paid per month across all debts"
           delay={0.3}
-        />
-      </div>
-
-      <div className="grid grid-cols-1">
-        <ActionPlan
-          highestAprDebt={highestAprDebt}
-          lowestBalanceDebt={lowestBalanceDebt}
-          monthlyInterest={metrics.totalMonthlyInterest}
-          optimizationScore={0}
-          currencySymbol={currencySymbol}
         />
       </div>
     </div>
