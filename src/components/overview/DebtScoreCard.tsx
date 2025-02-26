@@ -2,11 +2,10 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, TrendingUp, PiggyBank, Calendar, Info, Target, AlertTriangle } from "lucide-react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { useDebts } from "@/hooks/use-debts";
 import { DebtComparison } from "./DebtComparison";
 import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtScoreCalculator";
@@ -83,16 +82,21 @@ export const DebtScoreCard = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[300px]">
-                          <p>Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Monthly Interest Explained</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Monthly Interest: {profile?.preferred_currency || '£'}
@@ -113,16 +117,21 @@ export const DebtScoreCard = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-gray-900">Payment Impact</h4>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[300px]">
-                          <p>Extra payments can significantly reduce your total repayment time and interest costs. Even small additional amounts can make a big difference over time.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Extra Payment Benefits</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Extra payments can significantly reduce your total repayment time and interest costs. Even small additional amounts can make a big difference over time.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Adding just {profile?.preferred_currency || '£'}50 extra monthly could save you months
@@ -142,16 +151,21 @@ export const DebtScoreCard = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-gray-900">Total Cost Warning</h4>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[300px]">
-                          <p>This 2-year projection shows the total amount you'll pay if you only make minimum payments. It includes both principal and accumulated interest, highlighting why paying more than the minimum is beneficial.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Understanding Total Cost</h5>
+                          <p className="text-sm text-muted-foreground">
+                            This 2-year projection shows the total amount you'll pay if you only make minimum payments. It includes both principal and accumulated interest, highlighting why paying more than the minimum is beneficial.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Paying minimum only: ~{profile?.preferred_currency || '£'}
@@ -172,16 +186,21 @@ export const DebtScoreCard = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-gray-900">Success Tips</h4>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[300px]">
-                          <p>These proven strategies help ensure consistent progress towards becoming debt-free. Automatic payments prevent missed payments, tracking helps maintain motivation, and celebrating milestones reinforces positive financial habits.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button className="cursor-help">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Why These Tips Matter</h5>
+                          <p className="text-sm text-muted-foreground">
+                            These proven strategies help ensure consistent progress towards becoming debt-free. Automatic payments prevent missed payments, tracking helps maintain motivation, and celebrating milestones reinforces positive financial habits.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </div>
                   <div className="space-y-2 mt-2">
                     <p className="text-xs text-gray-600 flex items-center gap-2">
@@ -208,16 +227,21 @@ export const DebtScoreCard = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h5 className="font-medium text-blue-800">Pro Tip</h5>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="h-4 w-4 text-blue-400" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-[300px]">
-                        <p>This advanced strategy helps you save money on interest while accelerating your debt payoff. By applying extra payments directly to principal, you reduce both the balance and future interest charges.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <button className="cursor-help">
+                        <Info className="h-4 w-4 text-blue-400 hover:text-blue-500 transition-colors" />
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-2">
+                        <h5 className="font-semibold text-sm">Advanced Payment Strategy</h5>
+                        <p className="text-sm text-muted-foreground">
+                          This advanced strategy helps you save money on interest while accelerating your debt payoff. By applying extra payments directly to principal, you reduce both the balance and future interest charges.
+                        </p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
                 <p className="text-sm text-blue-700 mt-1">
                   Every extra payment you make reduces both your balance and the amount of interest you'll pay over time.
