@@ -40,10 +40,9 @@ export const DebtComparison = () => {
       };
     }
 
-    // Calculate current monthly interest correctly
     const monthlyInterestCost = debts.reduce((total, debt) => {
-      if (debt.status === 'active') {  // Only include active debts
-        const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly decimal
+      if (debt.status === 'active') {
+        const monthlyRate = debt.interest_rate / 1200;
         const monthlyInterest = debt.balance * monthlyRate;
         console.log(`Monthly interest for ${debt.name}:`, {
           balance: debt.balance,
@@ -92,7 +91,7 @@ export const DebtComparison = () => {
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
-      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100 // Round to 2 decimal places
+      monthlyInterestCost: Math.round(monthlyInterestCost * 100) / 100
     };
   };
 
@@ -104,7 +103,7 @@ export const DebtComparison = () => {
     if (debts.length === 1) {
       const debt = debts[0];
       const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
-      const totalCostIfMinimum = debt.balance + (monthlyInterest * 24); // Rough 2-year estimate
+      const totalCostIfMinimum = debt.balance + (monthlyInterest * 24);
 
       return (
         <div className="mt-6 space-y-6">
@@ -490,7 +489,6 @@ export const DebtComparison = () => {
       className="space-y-4 sm:space-y-6 px-2 sm:px-6 lg:px-0"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
-        {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20 border-0 shadow-lg h-full">
           <CardHeader className="pb-2 p-3 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-sm sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
@@ -510,129 +508,21 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-6 p-3 sm:p-6">
             <div className="grid gap-3 sm:gap-4">
-              {/* Debt-Free Date */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900 shrink-0">
-                      <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        Debt-Free Date
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                              The date you'll become debt-free if you continue making only minimum payments.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
-                        Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
-                        {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {comparison.originalPayoffDate.toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                    </span>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                  <Badge variant="outline" className="text-purple-600 border-purple-600">
+                    Total Active Debts
+                  </Badge>
+                </span>
+                <span className="font-semibold text-purple-600 dark:text-purple-400">
+                  {comparison.totalDebts}
+                </span>
               </div>
-
-              {/* Payment Efficiency */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                      <Percent className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        Payment Efficiency
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                              Shows how your payments are split between principal and interest.
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} of your payments go towards interest.
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Principal: <span className="font-semibold text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Interest: <span className="font-semibold text-red-600">{comparison.interestPercentage.toFixed(1)}%</span>
-                      </span>
-                    </div>
-                    <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full flex">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${comparison.principalPercentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-emerald-500"
-                        />
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${comparison.interestPercentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-red-500"
-                        />
-                      </div>
-                    </div>
-                    <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
-                      {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()} goes to interest payments.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Debts */}
-              <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
-                    <Coins className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      Total Debts
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-help">
-                            <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                            Your total number of active debts.
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                      <Badge variant="outline" className="text-purple-600 border-purple-600">
-                        Total Active Debts
-                      </Badge>
-                    </span>
-                    <span className="font-semibold text-purple-6
+              {renderActionableInsights()}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </motion.div>
+  );
+};
