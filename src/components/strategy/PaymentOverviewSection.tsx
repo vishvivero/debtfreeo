@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Wallet, ArrowRight, RotateCw } from "lucide-react";
+import { Wallet, RotateCw } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 
 interface PaymentOverviewSectionProps {
@@ -69,28 +69,18 @@ export const PaymentOverviewSection = ({
                 Reset
               </Button>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                  {currencySymbol}
-                </div>
-                <Input
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={extraPayment || ''}
-                  onChange={handleExtraPaymentChange}
-                  className="pl-7 pr-3 h-11 text-right bg-gray-50/50 border-gray-200 hover:border-gray-300 focus:border-primary transition-colors"
-                />
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                {currencySymbol}
               </div>
-              <Button
-                variant="ghost"
-                onClick={onOpenExtraPaymentDialog}
-                className="h-11 text-primary hover:text-primary/90 hover:bg-primary/5 transition-colors"
-              >
-                Customize
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={extraPayment || ''}
+                onChange={handleExtraPaymentChange}
+                className="pl-7 pr-3 h-11 text-right bg-gray-50/50 border-gray-200 hover:border-gray-300 focus:border-primary transition-colors"
+              />
             </div>
             <p className="text-xs text-gray-500">
               Maximum: {formatCurrency(totalDebtValue, currencySymbol)}
