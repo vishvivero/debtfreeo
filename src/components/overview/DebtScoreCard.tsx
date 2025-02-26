@@ -338,16 +338,21 @@ export const DebtScoreCard = () => {
         <div className="mt-8 space-y-4">
           <h4 className="font-semibold text-gray-900 flex items-center gap-2">
             Recommended Next Steps
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Personalized steps based on your debt profile</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <button className="cursor-help">
+                  <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                </button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h5 className="font-semibold text-sm">Personalized steps based on your debt profile</h5>
+                  <p className="text-sm text-muted-foreground">
+                    Personalized steps based on your debt profile
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
           </h4>
           
           <div className="space-y-3">
