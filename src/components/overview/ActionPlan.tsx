@@ -1,6 +1,6 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Target, ArrowUp, PiggyBank, LineChart, Percent } from "lucide-react";
+import { Target, ArrowUp, PiggyBank, LineChart, Percent, CreditCard, Calendar, ArrowUpRight, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ActionPlanProps {
@@ -32,7 +32,7 @@ export const ActionPlan = ({
           Action Plan
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Priority Focus */}
           <motion.div
@@ -132,6 +132,37 @@ export const ActionPlan = ({
             </div>
           </motion.div>
         </div>
+
+        {/* Recommended Next Steps */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+          className="bg-primary/5 p-6 rounded-lg"
+        >
+          <h3 className="font-semibold text-lg text-gray-800 mb-4 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-primary" />
+            Recommended Next Steps
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <CreditCard className="h-5 w-5 text-primary mt-1" />
+              <p className="text-gray-600">Consider consolidating your high-interest debts to reduce overall interest costs</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <ArrowUpRight className="h-5 w-5 text-primary mt-1" />
+              <p className="text-gray-600">Look for opportunities to increase your monthly payment by {currencySymbol}50-100</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-primary mt-1" />
+              <p className="text-gray-600">Set up automatic payments to ensure consistent debt reduction</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <Percent className="h-5 w-5 text-primary mt-1" />
+              <p className="text-gray-600">You have high-interest debt(s). Prioritize paying these off first</p>
+            </div>
+          </div>
+        </motion.div>
       </CardContent>
     </Card>
   );
