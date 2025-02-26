@@ -182,6 +182,12 @@ export const DebtComparison = () => {
                     </TooltipProvider>
                   </div>
                 </div>
+                <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                  {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })} of your payments go towards interest.
+                </div>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
@@ -208,12 +214,12 @@ export const DebtComparison = () => {
                         />
                       </div>
                     </div>
-                  </div>
-                  <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
-                    {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })} goes to interest payments.
+                    <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
+                      {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      })} goes to interest payments.
+                    </div>
                   </div>
                 </div>
               </div>
