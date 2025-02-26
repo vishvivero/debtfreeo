@@ -299,9 +299,11 @@ export const DebtComparison = () => {
                       ))}
                     </div>
                   )}
-                  <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
-                    Click to view your complete debt list
-                  </div>
+                  {!isDebtListExpanded && (
+                    <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
+                      Click to view your complete debt list
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
