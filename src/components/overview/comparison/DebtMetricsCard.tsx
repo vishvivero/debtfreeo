@@ -1,6 +1,5 @@
 
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 import {
@@ -48,25 +47,26 @@ export const DebtMetricsCard = ({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <motion.h3 
-                className="font-semibold text-gray-900"
+                className="font-medium text-gray-700 flex items-center gap-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: delay + 0.1 }}
               >
+                {icon}
                 {title}
+                {info && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="w-4 h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">{info}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </motion.h3>
-              {info && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="w-4 h-4 text-gray-400" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs">{info}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
             </div>
             <motion.p 
               className="text-2xl font-bold"
@@ -87,14 +87,6 @@ export const DebtMetricsCard = ({
               </motion.p>
             )}
           </div>
-          <motion.div 
-            className={`p-3 rounded-full bg-gray-50`}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: delay + 0.2 }}
-          >
-            {icon}
-          </motion.div>
         </div>
       </Card>
     </motion.div>
