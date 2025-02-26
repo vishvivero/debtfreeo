@@ -360,10 +360,29 @@ export const DebtComparison = () => {
                         </TooltipProvider>
                       </span>
                       <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                        {comparison.timeSaved.years > 0 && `Save ${comparison.timeSaved.years} ${comparison.timeSaved.years === 1 ? 'year' : 'years'}`}
-                        {comparison.timeSaved.months > 0 && comparison.timeSaved.years > 0 && ' and '}
-                        {comparison.timeSaved.months > 0 && `${comparison.timeSaved.months} ${comparison.timeSaved.months === 1 ? 'month' : 'months'}`}
-                        {(comparison.timeSaved.years > 0 || comparison.timeSaved.months > 0) && ' with our strategy!'}
+                        {comparison.timeSaved.years > 0 && (
+                          <>
+                            Our optimized strategy helps you become debt-free{' '}
+                            {comparison.timeSaved.years} {comparison.timeSaved.years === 1 ? 'year' : 'years'}
+                            {comparison.timeSaved.months > 0 && ' and '}
+                            {comparison.timeSaved.months > 0 && (
+                              <>{comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}</>
+                            )}
+                            {' '}faster than with minimum payments alone!
+                          </>
+                        )}
+                        {!comparison.timeSaved.years && comparison.timeSaved.months > 0 && (
+                          <>
+                            Our optimized strategy helps you become debt-free{' '}
+                            {comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}{' '}
+                            faster than with minimum payments alone!
+                          </>
+                        )}
+                        {!comparison.timeSaved.years && !comparison.timeSaved.months && (
+                          <>
+                            Start optimizing your debt repayment strategy today!
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
