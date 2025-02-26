@@ -7,6 +7,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { OverviewMetrics } from "@/components/overview/OverviewMetrics";
+import { DebtComparison } from "@/components/overview/DebtComparison";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -89,25 +90,33 @@ const Overview = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 gap-6"
+              className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg"
             >
-              <div className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg">
-                <OverviewHeader 
-                  currencySymbol={currentCurrencySymbol}
-                  onCurrencyChange={handleCurrencyChange}
-                />
-                <OverviewMetrics />
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <DebtScoreCard />
-              </motion.div>
+              <OverviewHeader 
+                currencySymbol={currentCurrencySymbol}
+                onCurrencyChange={handleCurrencyChange}
+              />
+              <OverviewMetrics />
             </motion.div>
           </AnimatePresence>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <DebtScoreCard />
+          </motion.div>
+
+          {/* New container around DebtComparison */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-lg"
+          >
+            <DebtComparison />
+          </motion.div>
         </div>
       </div>
     </MainLayout>
