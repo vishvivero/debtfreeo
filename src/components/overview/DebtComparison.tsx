@@ -97,6 +97,109 @@ export const DebtComparison = () => {
   };
 
   const comparison = calculateComparison();
+  const totalMonthlyInterest = debts?.reduce((total, debt) => {
+    const monthlyRate = debt.interest_rate / 1200;
+    return total + (debt.balance * monthlyRate);
+  }, 0) || 0;
+
+  const renderActionableInsights = () => {
+    if (!comparison || !debts?.length) return null;
+
+    if (debts.length === 1) {
+      const debt = debts[0];
+      const monthlyInterest = (debt.balance * (debt.interest_rate / 100)) / 12;
+
+      return (
+        <div className="mt-6 space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900">Getting Started with Your Debt-Free Journey</h3>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="p-4 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-full bg-emerald-100">
+                  <Target className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900">Understanding Your Debt</h4>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button>
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 bg-white border-gray-200 shadow-lg z-50">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-sm">Monthly Interest Explained</h5>
+                          <p className="text-sm text-muted-foreground">
+                            Monthly interest is calculated based on your current balance and APR. This shows how much you're paying just in interest each month before any principal reduction.
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Monthly Interest: {currencySymbol}{monthlyInterest.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    This is what your debt costs you each month in interest
+                  </p>
+                </div>
+              </div>
+            </Card>
+            
+            {/* ... keep existing code (other cards in the grid) */}
+          </div>
+        </div>
+      );
+    }
+
+    const highestInterestDebt = [...debts].sort((a, b) => b.interest_rate - a.interest_rate)[0];
+    const lowestBalance = [...debts].sort((a, b) => a.balance - b.balance)[0];
+
+    return (
+      <div className="mt-6 space-y-6">
+        <h3 className="text-2xl font-bold text-gray-900">Action Plan</h3>
+        
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="p-4 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-green-100">
+                <Target className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-900">Priority Focus</h4>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-help">
+                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
+                        This debt has the highest interest rate and should be prioritized to minimize interest costs.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Focus on {highestInterestDebt.name} with {highestInterestDebt.interest_rate}% APR
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Monthly Interest: {currencySymbol}{totalMonthlyInterest.toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  This is what your debt costs you monthly
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* ... keep existing code (other cards in grid) */}
+        </div>
+      </div>
+    );
+  };
+
   return <motion.div initial={{
     opacity: 0,
     y: 20
