@@ -363,18 +363,18 @@ export const DebtComparison = () => {
 
               {/* Total Interest (Optimized) */}
               <div className="p-3 sm:p-6 bg-white/90 dark:bg-gray-800/90 rounded-xl backdrop-blur-sm shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                      <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
+                      <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <div>
-                      <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         Total Interest (Optimized)
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="cursor-help">
-                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 ml-2" />
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                             </TooltipTrigger>
                             <TooltipContent 
                               side="right" 
@@ -385,7 +385,7 @@ export const DebtComparison = () => {
                           </Tooltip>
                         </TooltipProvider>
                       </span>
-                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-2">
+                      <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
                         Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0
@@ -394,7 +394,7 @@ export const DebtComparison = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                       {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
