@@ -31,7 +31,7 @@ export const AddDebtDialog = ({
           <X className="h-5 w-5 text-gray-500" />
         </button>
       </DialogHeader>
-      <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} />
+      <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} onClose={onClose} />
     </DialogContent>;
 
   // If isOpen is provided, render controlled dialog

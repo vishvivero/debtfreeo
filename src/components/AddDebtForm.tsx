@@ -25,9 +25,10 @@ import { InterestCalculator } from "@/lib/services/calculations/core/InterestCal
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
   currencySymbol?: string;
+  onClose?: () => void;
 }
 
-export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormProps) => {
+export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDebtFormProps) => {
   const { addDebt } = useDebts();
   const { toast } = useToast();
   const [name, setName] = useState("");
@@ -134,6 +135,11 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       setRemainingMonths("");
       setUseRemainingMonths(false);
       setUsePrincipalAsBalance(false);
+      
+      // Close the dialog if onClose is provided
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
