@@ -56,27 +56,44 @@ export const DebtCard = ({
       totalPaid
     });
 
-    const monthlyInterest = debt.interest_rate / 1200;
-    const monthlyPayment = debt.minimum_payment;
-    const balance = debt.balance;
-    
-    const monthlyInterestAmount = balance * monthlyInterest;
-    
-    if (monthlyPayment <= monthlyInterestAmount) {
-      console.log('Payment cannot cover interest:', {
-        payment: monthlyPayment,
-        monthlyInterest: monthlyInterestAmount
+    let months = 0;
+    if (debt.interest_rate === 0) {
+      // For zero-interest debts, use simple division
+      if (debt.minimum_payment <= 0) {
+        console.log('Zero interest debt with no minimum payment');
+        return { months: 0, formattedTime: "Never", progressPercentage: 0 };
+      }
+      months = Math.ceil(debt.balance / debt.minimum_payment);
+      console.log('Zero interest calculation:', {
+        balance: debt.balance,
+        payment: debt.minimum_payment,
+        months
       });
-      return { months: Infinity, formattedTime: "Never", progressPercentage: 0 };
+    } else {
+      // For interest-bearing debts, use the compound interest formula
+      const monthlyRate = debt.interest_rate / 1200;
+      const monthlyPayment = debt.minimum_payment;
+      const balance = debt.balance;
+      
+      const monthlyInterestAmount = balance * monthlyRate;
+      
+      if (monthlyPayment <= monthlyInterestAmount) {
+        console.log('Payment cannot cover interest:', {
+          payment: monthlyPayment,
+          monthlyInterest: monthlyInterestAmount
+        });
+        return { months: 0, formattedTime: "Never", progressPercentage: 0 };
+      }
+
+      months = Math.ceil(Math.log(monthlyPayment / (monthlyPayment - balance * monthlyRate)) / Math.log(1 + monthlyRate));
     }
 
-    const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
-    const originalBalance = balance + totalPaid;
+    const originalBalance = debt.balance + totalPaid;
     const progressPercentage = (totalPaid / originalBalance) * 100;
     
     console.log('Progress calculation:', {
       originalBalance,
-      currentBalance: balance,
+      currentBalance: debt.balance,
       totalPaid,
       months,
       progressPercentage
