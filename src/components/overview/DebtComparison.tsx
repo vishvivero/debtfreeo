@@ -40,7 +40,10 @@ export const DebtComparison = () => {
         baselineYears: 0,
         baselineMonths: 0,
         principalPercentage: 0,
-        interestPercentage: 0
+        interestPercentage: 0,
+        interestSavedPercentage: 0,
+        optimizedInterestPercentage: 0,
+        originalInterestPercentage: 0
       };
     }
 
@@ -84,20 +87,34 @@ export const DebtComparison = () => {
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
+    // Calculate interest savings percentages for the progress bar
+    const totalInterest = lastDataPoint.baselineInterest;
+    const interestSaved = lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest;
+    const interestSavedPercentage = totalInterest > 0 ? (interestSaved / totalInterest) * 100 : 0;
+    
+    // For the progress bar percentages
+    const originalInterestPercentage = 100;
+    const optimizedInterestPercentage = totalInterest > 0 
+      ? (lastDataPoint.acceleratedInterest / lastDataPoint.baselineInterest) * 100 
+      : 0;
+
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
       originalTotalInterest: lastDataPoint.baselineInterest,
       optimizedPayoffDate,
       optimizedTotalInterest: lastDataPoint.acceleratedInterest,
-      moneySaved: lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest,
+      moneySaved: interestSaved,
       baselineYears,
       baselineMonths: remainingMonths,
       principalPercentage,
       interestPercentage,
       timeSavedYears,
       timeSavedMonths: timeSavedRemainingMonths,
-      totalTimeSavedMonths: timeSavedMonths
+      totalTimeSavedMonths: timeSavedMonths,
+      interestSavedPercentage,
+      optimizedInterestPercentage,
+      originalInterestPercentage
     };
   };
 
@@ -357,29 +374,64 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
+              {/* Redesigned Total Interest (Optimized) with Progress Bar */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <DollarSign className="w-5 h-5 text-emerald-600" />
-                    <span className="text-gray-600 dark:text-gray-300">Total Interest (Optimized)</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Total Interest (Optimized)</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent 
+                          side="right" 
+                          className="z-[60] bg-white border-gray-200 shadow-lg" 
+                          sideOffset={5}
+                        >
+                          <p>How our optimized strategy reduces your interest payments</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
-                  <span className="text-xl font-semibold text-emerald-600">
-                    {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })}
-                  </span>
                 </div>
-                <div className="mt-4 p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
-                    <ArrowDown className="w-4 h-4" />
-                    <span className="font-medium">
-                      Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      })} in interest!
-                    </span>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                        Original Interest: <span className="font-medium text-red-600">{currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })}</span>
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Optimized Interest: <span className="font-medium text-emerald-600">{currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })}</span>
+                      </span>
+                    </div>
+                    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full flex">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${comparison.optimizedInterestPercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-emerald-500"
+                        />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${100 - comparison.optimizedInterestPercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-red-100"
+                        />
+                      </div>
+                    </div>
                   </div>
+                </div>
+                <div className="mt-4 text-sm text-center text-emerald-600 font-medium">
+                  You save {comparison.interestSavedPercentage.toFixed(1)}% on interest payments
                 </div>
               </div>
 
