@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -188,7 +189,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     <div key={category} className="flex justify-between items-center">
                       <span className="font-medium">{category}</span>
                       <span className="text-muted-foreground">
-                        {debts[0]?.currency_symbol || '£'}{amount.toLocaleString()}
+                        {currencySymbol}{amount.toLocaleString()}
                       </span>
                     </div>
                   ))}
@@ -199,27 +200,27 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         </motion.div>
       </div>
 
-      {/* Redesigned Download Report Section */}
+      {/* Report Download Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
         className="mt-8"
       >
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-300">
+            <CardTitle className="flex items-center gap-2 text-purple-800">
               <FileText className="h-5 w-5" />
               Generate Detailed Report
             </CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardDescription className="text-purple-600">
               Download a comprehensive overview of your debt management progress
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="font-medium text-purple-800 dark:text-purple-300">Report Contents:</h4>
+                <h4 className="font-medium text-purple-800">Report Contents:</h4>
                 <ul className="space-y-2">
                   {[
                     { icon: <TrendingUp className="h-4 w-4" />, text: "Debt Distribution Analysis" },
@@ -227,7 +228,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     { icon: <DollarSign className="h-4 w-4" />, text: "Interest Savings" },
                     { icon: <Tag className="h-4 w-4" />, text: "Category Breakdown" }
                   ].map((item, index) => (
-                    <li key={index} className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                    <li key={index} className="flex items-center gap-2 text-purple-700">
                       {item.icon}
                       <span>{item.text}</span>
                     </li>
@@ -252,7 +253,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <p className="text-sm text-purple-600 dark:text-purple-400 text-center">
+                <p className="text-sm text-purple-600 text-center">
                   PDF format • Includes all metrics • {new Date().toLocaleDateString()}
                 </p>
               </div>
