@@ -30,8 +30,15 @@ export const calculatePayoffDetails = (
     // Handle zero-interest debts separately
     if (debt.interest_rate === 0) {
       // Calculate months to pay off for zero-interest debt
-      const paymentAmount = Math.max(debt.minimum_payment, 0);
-      const monthsToPayoff = paymentAmount > 0 ? Math.ceil(debt.balance / paymentAmount) : maxMonths;
+      const minPayment = Math.max(debt.minimum_payment, 1); // Ensure minimum payment is at least 1 to avoid division by zero
+      const monthsToPayoff = Math.ceil(debt.balance / minPayment);
+      
+      console.log('Zero interest debt calculation:', {
+        debtName: debt.name,
+        balance: debt.balance,
+        minPayment,
+        monthsToPayoff
+      });
       
       const payoffDate = new Date();
       payoffDate.setMonth(payoffDate.getMonth() + monthsToPayoff);
@@ -39,7 +46,7 @@ export const calculatePayoffDetails = (
       results[debt.id] = {
         months: monthsToPayoff,
         totalInterest: 0,
-        proposedPayment: paymentAmount,
+        proposedPayment: minPayment,
         payoffDate: payoffDate
       };
     } else {
@@ -106,6 +113,9 @@ export const calculatePayoffDetails = (
     results,
     zeroInterestDebts: debts.filter(d => d.interest_rate === 0).map(d => ({
       id: d.id,
+      name: d.name,
+      balance: d.balance,
+      minPayment: d.minimum_payment,
       months: results[d.id]?.months,
       payment: results[d.id]?.proposedPayment
     }))
