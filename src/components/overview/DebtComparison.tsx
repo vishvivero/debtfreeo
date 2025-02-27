@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -127,28 +128,30 @@ export const DebtComparison = () => {
               {/* Current Debt-Free Date */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-gray-500" />
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-300 font-medium">
-                        Debt-Free Date
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Info className="w-4 h-4 text-gray-400 ml-2" />
-                            </TooltipTrigger>
-                            <TooltipContent 
-                              side="right" 
-                              className="z-[60] bg-white border-gray-200 shadow-lg"
-                            >
-                              <p>Based on minimum payments only (baseline scenario)</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
-                      <div className="text-sm text-gray-500">
-                        Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
-                        {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">
+                          Debt-Free Date
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="w-4 h-4 text-gray-400 ml-2" />
+                              </TooltipTrigger>
+                              <TooltipContent 
+                                side="right" 
+                                className="z-[60] bg-white border-gray-200 shadow-lg"
+                              >
+                                <p>Based on minimum payments only (baseline scenario)</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </span>
+                        <div className="text-sm text-gray-500 pr-2 max-w-full">
+                          Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
+                          {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
+                        </div>
                       </div>
                     </div>
                   </div>
