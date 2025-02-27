@@ -41,7 +41,7 @@ export const PaymentOverviewSection = ({
         <div className="grid gap-6 md:grid-cols-2">
           <div className="p-4 rounded-lg bg-gray-50/50 border border-gray-200">
             <div className="text-sm text-gray-600 mb-2">Required Monthly Payment</div>
-            <div className="text-2xl font-semibold text-gray-700">
+            <div className="text-gray-700">
               {formatCurrency(totalMinimumPayments, currencySymbol)}
             </div>
           </div>
