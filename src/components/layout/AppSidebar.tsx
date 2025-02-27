@@ -20,7 +20,7 @@ export function AppSidebar() {
         <div className="flex-1 overflow-y-auto">
           <SidebarNavigation />
         </div>
-        <SidebarFooter className="flex-shrink-0" />
+        <SidebarFooter />
       </div>
     </Sidebar>
   );
