@@ -35,11 +35,13 @@ export const TimelineChart = ({
     const totalInitialBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
     const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
 
-    console.log('Initial setup:', {
+    console.log('Timeline calculation setup:', {
       totalInitialBalance,
       totalMinimumPayment,
-      debtsCount: debts.length,
-      maxMonths
+      baselineMonths,
+      acceleratedMonths,
+      maxMonths,
+      debtsCount: debts.length
     });
 
     const data = Array.from({ length: maxMonths + 1 }, (_, index) => {
@@ -55,6 +57,7 @@ export const TimelineChart = ({
 
       // Process baseline scenario (minimum payments only)
       let totalBaselineBalance = 0;
+      let baselineFullyPaid = true;
       for (const debt of debts) {
         const currentBalance = debtBalances.get(debt.id)!;
         if (currentBalance > 0) {
@@ -63,11 +66,13 @@ export const TimelineChart = ({
           const newBalance = Math.max(0, currentBalance + monthlyInterest - minimumPayment);
           debtBalances.set(debt.id, newBalance);
           totalBaselineBalance += newBalance;
+          if (newBalance > 0) baselineFullyPaid = false;
         }
       }
 
       // Process accelerated scenario
       let totalAcceleratedBalance = 0;
+      let acceleratedFullyPaid = true;
       let availablePayment = totalMinimumPayment;
 
       // Add one-time fundings for this month
@@ -79,13 +84,6 @@ export const TimelineChart = ({
       
       const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => sum + Number(funding.amount), 0);
       availablePayment += totalFundingAmount;
-
-      if (totalFundingAmount > 0) {
-        console.log('Applying funding:', {
-          month: format(currentDate, 'MMM yyyy'),
-          amount: totalFundingAmount
-        });
-      }
 
       // Apply payments to each debt in accelerated scenario
       for (const debt of debts) {
@@ -106,13 +104,17 @@ export const TimelineChart = ({
           acceleratedDebtBalances.set(debt.id, newBalance);
           totalAcceleratedBalance += newBalance;
           availablePayment -= totalPayment;
+          if (newBalance > 0) acceleratedFullyPaid = false;
         }
       }
 
-      console.log(`Month ${index} balances:`, {
-        baselineBalance: totalBaselineBalance,
-        acceleratedBalance: totalAcceleratedBalance,
-        date: format(currentDate, 'MMM yyyy')
+      console.log(`Month ${index} status:`, {
+        date: format(currentDate, 'MMM yyyy'),
+        baselineBalance: totalBaselineBalance.toFixed(2),
+        acceleratedBalance: totalAcceleratedBalance.toFixed(2),
+        baselineFullyPaid,
+        acceleratedFullyPaid,
+        remainingPayment: availablePayment.toFixed(2)
       });
 
       return {
@@ -121,6 +123,22 @@ export const TimelineChart = ({
         acceleratedBalance: Math.round(totalAcceleratedBalance * 100) / 100
       };
     });
+
+    // Find actual payoff months
+    const findPayoffMonth = (data: any[]) => {
+      return data.findIndex(point => point.baselineBalance === 0 && point.acceleratedBalance === 0);
+    };
+
+    const actualPayoffMonth = findPayoffMonth(data);
+    if (actualPayoffMonth !== -1) {
+      console.log('Found actual payoff month:', {
+        month: actualPayoffMonth,
+        expectedBaselineMonths: baselineMonths,
+        expectedAcceleratedMonths: acceleratedMonths
+      });
+      // Trim data to actual payoff month
+      return data.slice(0, actualPayoffMonth + 1);
+    }
 
     return data;
   };
