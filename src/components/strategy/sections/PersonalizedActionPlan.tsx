@@ -33,78 +33,121 @@ export interface ActionItem {
   description: string;
   icon: React.ReactNode;
   priority: 'high' | 'medium' | 'low';
+  benefit: string;
+  savingsEstimate?: string;
+  timeEstimate?: string;
   isCompleted?: boolean;
 }
 
 export const PersonalizedActionPlan = () => {
   const { debts } = useDebts();
   const { profile } = useProfile();
-  const [selectedAction, setSelectedAction] = useState<number | null>(null);
   
   if (!debts || !profile) return null;
 
   const currencySymbol = profile.preferred_currency || "£";
   const completionPercentage = getCompletionPercentage(debts);
   
+  // Calculate total debt and average interest rate
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const avgInterestRate = debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt;
+  
   // Create personalized action items based on the user's debt situation
   const generateActionItems = (): ActionItem[] => {
     const items: ActionItem[] = [];
     
     // Always suggest making at least minimum payments
+    const minPaymentsSavings = Math.round(totalDebt * 0.05); // Rough estimate of late fee avoidance
     items.push({
       title: "Make minimum payments on time",
       description: "Set up automatic payments for all your debts to ensure you never miss a payment date.",
       icon: <Calendar className="h-5 w-5" />,
-      priority: 'high'
+      priority: 'high',
+      benefit: "Avoid late fees and credit score damage",
+      savingsEstimate: `${currencySymbol}${minPaymentsSavings.toLocaleString()} in late fees annually`
     });
     
     // Check if they have high-interest debts
-    const hasHighInterestDebt = debts.some(debt => debt.interest_rate > 15);
-    if (hasHighInterestDebt) {
+    const highInterestDebts = debts.filter(debt => debt.interest_rate > 15);
+    if (highInterestDebts.length > 0) {
+      const highInterestTotal = highInterestDebts.reduce((sum, debt) => sum + debt.balance, 0);
+      const avgHighRate = highInterestDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / highInterestTotal;
+      const avgNormalRate = 10; // Assuming this is an achievable rate
+      const interestSavings = Math.round(highInterestTotal * (avgHighRate - avgNormalRate) / 100);
+      
       items.push({
         title: "Focus on high-interest debt first",
         description: "Prioritize paying off debts with interest rates above 15% to save money on interest charges.",
         icon: <Target className="h-5 w-5" />,
-        priority: 'high'
+        priority: 'high',
+        benefit: "Reduce your high-cost interest payments",
+        savingsEstimate: `${currencySymbol}${interestSavings.toLocaleString()} per year in interest charges`,
+        timeEstimate: "Accelerate payoff by 6-12 months"
       });
     }
     
     // Check if they have multiple small debts
-    const hasSmallDebts = debts.filter(debt => debt.balance < 1000).length > 1;
-    if (hasSmallDebts) {
+    const smallDebts = debts.filter(debt => debt.balance < 1000);
+    if (smallDebts.length > 1) {
+      const smallDebtTotal = smallDebts.reduce((sum, debt) => sum + debt.balance, 0);
+      const avgSmallInterest = smallDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / smallDebtTotal;
+      const monthsToPayoff = Math.ceil(smallDebtTotal / (smallDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0) * 1.5)); // Assuming 1.5x minimum payment
+      
       items.push({
         title: "Eliminate small debts quickly",
         description: "Pay off your smallest debts first to reduce the number of monthly payments and build momentum.",
         icon: <Award className="h-5 w-5" />,
-        priority: 'medium'
+        priority: 'medium',
+        benefit: "Build psychological momentum and simplify your finances",
+        timeEstimate: `Clear ${smallDebts.length} smaller debts in ~${monthsToPayoff} months`,
+        savingsEstimate: `Reduce ${smallDebts.length} monthly payments to just one`
       });
     }
     
     // Suggest consolidation if they have many debts
     if (debts.length > 3) {
+      const potentialConsolidationRate = avgInterestRate > 12 ? avgInterestRate - 3 : avgInterestRate - 1; // Estimated potential rate
+      const annualSavings = Math.round(totalDebt * (avgInterestRate - potentialConsolidationRate) / 100);
+      
       items.push({
         title: "Consider debt consolidation",
         description: "Look into consolidating multiple debts into a single loan with a lower interest rate.",
         icon: <ListChecks className="h-5 w-5" />,
-        priority: 'medium'
+        priority: 'medium',
+        benefit: "Simplify payments and potentially reduce interest",
+        savingsEstimate: `${currencySymbol}${annualSavings.toLocaleString()} per year in interest`,
+        timeEstimate: "Simplify to 1 payment instead of " + debts.length
       });
     }
     
     // Suggest increasing monthly payments
+    const currentMinimums = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+    const suggestedExtraPayment = Math.max(50, Math.round(currentMinimums * 0.1)); // Either 50 or 10% of minimum payments, whichever is greater
+    const payoffAcceleration = Math.round(12 * suggestedExtraPayment / (totalDebt * avgInterestRate / 1200));
+    
     items.push({
       title: "Increase your monthly payment",
-      description: `Adding just ${currencySymbol}50 more to your monthly payment could significantly reduce your payoff time.`,
+      description: `Adding just ${currencySymbol}${suggestedExtraPayment} more to your monthly payment could significantly reduce your payoff time.`,
       icon: <ArrowRight className="h-5 w-5" />,
-      priority: 'medium'
+      priority: 'medium',
+      benefit: "Accelerate your debt payoff timeline",
+      timeEstimate: `Become debt-free ~${payoffAcceleration} months sooner`,
+      savingsEstimate: `Save ${currencySymbol}${Math.round(totalDebt * avgInterestRate / 100 * payoffAcceleration / 12).toLocaleString()} in interest`
     });
     
     // Add a debt-free celebration planning action when they're close to paying off
     if (completionPercentage > 75) {
+      const remainingDebt = totalDebt * (1 - completionPercentage / 100);
+      const monthsRemaining = Math.ceil(remainingDebt / currentMinimums);
+      
       items.push({
         title: "Plan your debt-free celebration",
         description: "You're getting close! Start planning how you'll celebrate becoming debt-free and what financial goals you'll tackle next.",
         icon: <Award className="h-5 w-5" />,
-        priority: 'low'
+        priority: 'low',
+        benefit: "Keep motivated during the final stretch",
+        timeEstimate: `Only ~${monthsRemaining} months remaining at current pace`,
+        savingsEstimate: `Soon redirecting ${currencySymbol}${currentMinimums.toLocaleString()} monthly to savings`
       });
     }
     
@@ -201,39 +244,44 @@ export const PersonalizedActionPlan = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`p-4 border rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer 
-                      ${selectedAction === index ? 'ring-2 ring-red-400 bg-red-50' : 'bg-white'}`}
-                    onClick={() => setSelectedAction(selectedAction === index ? null : index)}
+                    className="p-4 border rounded-xl shadow-sm hover:shadow-md transition-all bg-white"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 p-2 rounded-full bg-gradient-to-r ${priorityConfig.high.color} text-white`}>
                         {item.icon}
                       </div>
                       <div className="flex-1">
-                        <div className="flex justify-between">
-                          <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                          {selectedAction === index ? 
-                            <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          }
+                        <h4 className="font-semibold text-gray-900">{item.title}</h4>
+                        <p className="text-gray-600 mt-2 text-sm">{item.description}</p>
+                        
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                            <div className="text-xs font-medium text-red-600 uppercase mb-1">Benefit</div>
+                            <div className="text-sm font-semibold text-red-800">{item.benefit}</div>
+                          </div>
+                          
+                          {item.savingsEstimate && (
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                              <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                              <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                            </div>
+                          )}
+                          
+                          {item.timeEstimate && (
+                            <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                              <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                              <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                            </div>
+                          )}
                         </div>
                         
-                        {selectedAction === index && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-2"
-                          >
-                            <p className="text-gray-600">{item.description}</p>
-                            <Button 
-                              variant="link" 
-                              className="px-0 mt-2 text-red-500 hover:text-red-600"
-                              size="sm"
-                            >
-                              Learn more
-                            </Button>
-                          </motion.div>
-                        )}
+                        <Button 
+                          variant="link" 
+                          className="px-0 mt-2 text-red-500 hover:text-red-600"
+                          size="sm"
+                        >
+                          Learn more
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
@@ -260,39 +308,44 @@ export const PersonalizedActionPlan = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
-                    className={`p-4 border rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer 
-                      ${selectedAction === highPriorityItems.length + index ? 'ring-2 ring-amber-400 bg-amber-50' : 'bg-white'}`}
-                    onClick={() => setSelectedAction(selectedAction === highPriorityItems.length + index ? null : highPriorityItems.length + index)}
+                    className="p-4 border rounded-xl shadow-sm hover:shadow-md transition-all bg-white"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 p-2 rounded-full bg-gradient-to-r ${priorityConfig.medium.color} text-white`}>
                         {item.icon}
                       </div>
                       <div className="flex-1">
-                        <div className="flex justify-between">
-                          <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                          {selectedAction === highPriorityItems.length + index ? 
-                            <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          }
+                        <h4 className="font-semibold text-gray-900">{item.title}</h4>
+                        <p className="text-gray-600 mt-2 text-sm">{item.description}</p>
+                        
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
+                            <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
+                            <div className="text-sm font-semibold text-amber-800">{item.benefit}</div>
+                          </div>
+                          
+                          {item.savingsEstimate && (
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                              <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                              <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                            </div>
+                          )}
+                          
+                          {item.timeEstimate && (
+                            <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                              <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                              <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                            </div>
+                          )}
                         </div>
                         
-                        {selectedAction === highPriorityItems.length + index && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-2"
-                          >
-                            <p className="text-gray-600">{item.description}</p>
-                            <Button 
-                              variant="link" 
-                              className="px-0 mt-2 text-amber-600 hover:text-amber-700"
-                              size="sm"
-                            >
-                              Learn more
-                            </Button>
-                          </motion.div>
-                        )}
+                        <Button 
+                          variant="link" 
+                          className="px-0 mt-2 text-amber-600 hover:text-amber-700"
+                          size="sm"
+                        >
+                          Learn more
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
@@ -319,45 +372,44 @@ export const PersonalizedActionPlan = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 + index * 0.1 }}
-                    className={`p-4 border rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer 
-                      ${selectedAction === highPriorityItems.length + mediumPriorityItems.length + index 
-                        ? 'ring-2 ring-teal-400 bg-teal-50' 
-                        : 'bg-white'}`}
-                    onClick={() => setSelectedAction(
-                      selectedAction === highPriorityItems.length + mediumPriorityItems.length + index 
-                        ? null 
-                        : highPriorityItems.length + mediumPriorityItems.length + index
-                    )}
+                    className="p-4 border rounded-xl shadow-sm hover:shadow-md transition-all bg-white"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 p-2 rounded-full bg-gradient-to-r ${priorityConfig.low.color} text-white`}>
                         {item.icon}
                       </div>
                       <div className="flex-1">
-                        <div className="flex justify-between">
-                          <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                          {selectedAction === highPriorityItems.length + mediumPriorityItems.length + index ? 
-                            <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          }
+                        <h4 className="font-semibold text-gray-900">{item.title}</h4>
+                        <p className="text-gray-600 mt-2 text-sm">{item.description}</p>
+                        
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                            <div className="text-xs font-medium text-emerald-600 uppercase mb-1">Benefit</div>
+                            <div className="text-sm font-semibold text-emerald-800">{item.benefit}</div>
+                          </div>
+                          
+                          {item.savingsEstimate && (
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                              <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                              <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                            </div>
+                          )}
+                          
+                          {item.timeEstimate && (
+                            <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                              <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                              <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                            </div>
+                          )}
                         </div>
                         
-                        {selectedAction === highPriorityItems.length + mediumPriorityItems.length + index && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-2"
-                          >
-                            <p className="text-gray-600">{item.description}</p>
-                            <Button 
-                              variant="link" 
-                              className="px-0 mt-2 text-teal-600 hover:text-teal-700"
-                              size="sm"
-                            >
-                              Learn more
-                            </Button>
-                          </motion.div>
-                        )}
+                        <Button 
+                          variant="link" 
+                          className="px-0 mt-2 text-teal-600 hover:text-teal-700"
+                          size="sm"
+                        >
+                          Learn more
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
@@ -370,7 +422,7 @@ export const PersonalizedActionPlan = () => {
         <div className="mt-6 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg border border-gray-100">
           <div className="flex items-start gap-2">
             <CheckCircle2 className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
-            <p>This action plan is tailored to your debt profile and updated as your situation changes. Click any action for more details and guidance.</p>
+            <p>This action plan is tailored to your debt profile and updated as your situation changes. Each recommendation includes estimated benefits based on your current financial data.</p>
           </div>
         </div>
       </CardContent>
