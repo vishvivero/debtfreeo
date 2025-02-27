@@ -146,6 +146,7 @@ export const DebtDetailsPage = () => {
         <PayoffTimeline 
           debts={[debt]}
           extraPayment={monthlyPayment - debt.minimum_payment}
+          enableOneTimeFundings={false} // Explicitly disable one-time fundings for individual debt view
         />
 
         <Separator className="my-8" />
