@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
@@ -109,7 +110,7 @@ const DebtList = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="active" className="space-y-4">
+                <TabsContent value="active" className="space-y-3">
                   {filteredActiveDebts.map((debt) => (
                     <DebtCard
                       key={debt.id}
@@ -120,7 +121,7 @@ const DebtList = () => {
                   ))}
                 </TabsContent>
 
-                <TabsContent value="completed" className="space-y-4">
+                <TabsContent value="completed" className="space-y-3">
                   {filteredCompletedDebts.map((debt) => (
                     <DebtCard
                       key={debt.id}

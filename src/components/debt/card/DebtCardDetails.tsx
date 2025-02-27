@@ -1,6 +1,8 @@
 
 import { Debt } from "@/lib/types/debt";
 import { calculatePrincipal } from "../utils/debtPayoffCalculator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 interface DebtCardDetailsProps {
   debt: Debt;
@@ -23,34 +25,45 @@ export const DebtCardDetails = ({ debt }: DebtCardDetailsProps) => {
   const displayInterestRate = isInterestIncluded ? originalRate : debt.interest_rate;
 
   return (
-    <div className="grid grid-cols-3 gap-6 mb-8">
-      <div>
-        <p className="text-gray-600 mb-1">Balance</p>
-        <p className="text-2xl font-semibold">
+    <div className="grid grid-cols-3 gap-4">
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <p className="text-xs text-gray-600">Balance</p>
+          {isInterestIncluded && calculatedPrincipal !== null && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-3 w-3 text-blue-500" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Principal only (interest excluded)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        <p className="text-base font-semibold">
           {debt.currency_symbol}{displayBalance.toLocaleString()}
         </p>
-        {isInterestIncluded && calculatedPrincipal !== null && (
-          <p className="text-xs text-blue-600">
-            Principal only (interest excluded)
-          </p>
-        )}
       </div>
-      <div>
-        <p className="text-gray-600 mb-1">Monthly Payment</p>
-        <p className="text-2xl font-semibold">
+      <div className="space-y-1">
+        <p className="text-xs text-gray-600">Monthly Payment</p>
+        <p className="text-base font-semibold">
           {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
         </p>
       </div>
-      <div>
-        <p className="text-gray-600 mb-1">APR</p>
-        <p className="text-2xl font-semibold">
-          {displayInterestRate}%
+      <div className="space-y-1">
+        <p className="text-xs text-gray-600">APR</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-base font-semibold">
+            {displayInterestRate}%
+          </p>
           {isInterestIncluded && (
-            <span className="ml-2 text-xs font-normal text-blue-500 bg-blue-50 px-2 py-1 rounded-full">
+            <span className="text-[10px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded-full whitespace-nowrap">
               Interest Included
             </span>
           )}
-        </p>
+        </div>
       </div>
     </div>
   );

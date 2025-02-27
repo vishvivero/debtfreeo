@@ -15,22 +15,22 @@ export const DebtCardHeader = ({
   onEdit 
 }: DebtCardHeaderProps) => {
   return (
-    <div className="flex justify-between items-start mb-6">
-      <h3 className="text-2xl font-bold text-gray-900">{debt.name}</h3>
-      <div className="flex gap-2">
+    <div className="flex justify-between items-center">
+      <h3 className="text-xl font-bold text-gray-900 truncate">{debt.name}</h3>
+      <div className="flex gap-1">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={onEdit}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-gray-500 hover:text-gray-700 h-8 w-8 p-0"
         >
           <Pencil className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={() => onDelete(debt.id)}
-          className="text-red-500 hover:text-red-600"
+          className="text-red-500 hover:text-red-600 h-8 w-8 p-0"
         >
           <Trash2 className="h-4 w-4" />
         </Button>

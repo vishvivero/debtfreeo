@@ -1,7 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, AlarmClock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DebtCardProgressProps {
   progressPercentage: number;
@@ -15,33 +16,37 @@ export const DebtCardProgress = ({
   payoffTime
 }: DebtCardProgressProps) => {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h4 className="font-semibold text-gray-900">Progress</h4>
-          <span className="text-sm font-medium text-gray-600">
-            {progressPercentage}%
-          </span>
+    <div className="flex items-center space-x-4">
+      <div className="flex-1 space-y-1">
+        <div className="flex justify-between items-center text-xs">
+          <span className="font-medium text-gray-700">Progress</span>
+          <span className="text-gray-600">{progressPercentage}%</span>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress value={progressPercentage} className="h-1.5" />
       </div>
-
+      
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center text-xs text-gray-500 gap-1 min-w-max">
+              <AlarmClock className="h-3 w-3" />
+              <span className="whitespace-nowrap">{payoffTime}</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">Standard repayment duration without debt payoff strategy</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      
       <Button 
         onClick={onViewDetails}
-        className="w-full bg-gradient-to-r from-emerald-400 to-blue-400 hover:from-emerald-500 hover:to-blue-500 text-white flex items-center justify-center gap-2"
+        size="sm"
+        className="bg-gradient-to-r from-emerald-400 to-blue-400 hover:from-emerald-500 hover:to-blue-500 text-white"
       >
-        View Details
-        <ChevronRight className="h-4 w-4" />
+        Details
+        <ChevronRight className="h-3 w-3 ml-1" />
       </Button>
-
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-gray-500">
-          Standard repayment duration (without debt payoff strategy):
-        </p>
-        <p className="text-sm text-gray-600">
-          {payoffTime}
-        </p>
-      </div>
     </div>
   );
 };
