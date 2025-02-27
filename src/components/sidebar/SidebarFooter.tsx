@@ -11,12 +11,12 @@ export function SidebarFooter() {
     <div className="flex-shrink-0 p-4 border-t border-border/50 flex items-center justify-between">
       <Button
         variant="ghost"
-        size="icon"
         onClick={() => navigate("/profile")}
-        className="rounded-full"
+        size="sm"
+        className="gap-2"
       >
-        <Settings className="h-5 w-5" />
-        <span className="sr-only">Settings</span>
+        <Settings className="h-4 w-4" />
+        Settings
       </Button>
       <ThemeToggle />
     </div>
