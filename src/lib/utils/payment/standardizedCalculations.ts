@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { addMonths } from "date-fns";
@@ -256,14 +257,17 @@ export const calculateMultiDebtPayoff = (
   debts.forEach(debt => {
     // Handle interest-included debts
     if (debt.metadata?.interest_included === true && debt.metadata?.remaining_months) {
+      const originalRate = debt.metadata.original_rate || debt.interest_rate;
+      const originalPrincipal = InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        originalRate,
+        debt.minimum_payment,
+        debt.metadata.remaining_months
+      );
+
       results[debt.id] = {
         months: debt.metadata.remaining_months,
-        totalInterest: debt.balance - InterestCalculator.calculatePrincipalFromTotal(
-          debt.balance,
-          debt.metadata.original_rate || debt.interest_rate,
-          debt.minimum_payment,
-          debt.metadata.remaining_months
-        ),
+        totalInterest: debt.balance - originalPrincipal,
         payoffDate: addMonths(new Date(), debt.metadata.remaining_months),
         redistributionHistory: []
       };
