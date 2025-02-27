@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { addMonths } from "date-fns";
@@ -70,22 +69,24 @@ export const calculateAmortizationSchedule = (
   // Check if this is a debt with interest included
   const isInterestIncluded = debt.metadata?.interest_included === true;
   const remainingMonths = debt.metadata?.remaining_months || 0;
+  const originalRate = debt.metadata?.original_rate || debt.interest_rate;
+  
   let effectiveBalance = debt.balance;
   let effectiveRate = debt.interest_rate;
   
-  // If interest is included, back-calculate the principal
+  // If interest is included, use the back-calculated principal
   if (isInterestIncluded && remainingMonths > 0) {
     effectiveBalance = InterestCalculator.calculatePrincipalFromTotal(
       debt.balance,
-      debt.metadata?.original_rate || effectiveRate,
+      originalRate,
       debt.minimum_payment,
       remainingMonths
     );
     
-    // Use the original interest rate if available
-    effectiveRate = debt.metadata?.original_rate || effectiveRate;
+    // Keep using the original interest rate
+    effectiveRate = originalRate;
     
-    console.log('Back-calculated principal for included-interest debt:', {
+    console.log('Back-calculated values for included-interest debt:', {
       totalOutstanding: debt.balance,
       calculatedPrincipal: effectiveBalance,
       effectiveRate,
@@ -138,7 +139,7 @@ export const calculateAmortizationSchedule = (
       principal,
       interest: monthlyInterest,
       endingBalance,
-      remainingBalance: endingBalance // Added for compatibility
+      remainingBalance: endingBalance
     });
 
     if (endingBalance === 0) break;
@@ -173,14 +174,17 @@ export const calculateSingleDebtPayoff = (
 
   // Handle interest included case
   if (debt.metadata?.interest_included === true && debt.metadata?.remaining_months) {
+    const originalRate = debt.metadata.original_rate || debt.interest_rate;
+    const originalPrincipal = InterestCalculator.calculatePrincipalFromTotal(
+      debt.balance,
+      originalRate,
+      debt.minimum_payment,
+      debt.metadata.remaining_months
+    );
+
     return {
       months: debt.metadata.remaining_months,
-      totalInterest: debt.balance - InterestCalculator.calculatePrincipalFromTotal(
-        debt.balance,
-        debt.metadata.original_rate || debt.interest_rate,
-        debt.minimum_payment,
-        debt.metadata.remaining_months
-      ),
+      totalInterest: debt.balance - originalPrincipal,
       payoffDate: addMonths(new Date(), debt.metadata.remaining_months),
       redistributionHistory: []
     };
