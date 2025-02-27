@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -73,7 +74,13 @@ export const PaymentOverviewSection = ({
                 {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
               </div>
             </div>
-            
+            <Button
+              onClick={onOpenExtraPaymentDialog}
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 w-full md:w-auto"
+            >
+              <span>Calculate Impact</span>
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardContent>
