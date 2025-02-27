@@ -57,6 +57,14 @@ export default function ResultsHistory() {
     );
   }
   
+  // Calculate total debt
+  const totalDebt = debts ? debts.reduce((sum, debt) => sum + debt.balance, 0) : 0;
+  
+  // Calculate weighted average interest rate
+  const avgInterestRate = debts && totalDebt > 0 
+    ? debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt
+    : 0;
+  
   // Determine the selected strategy
   const selectedStrategyId = profile?.selected_strategy || strategies[0].id;
   const selectedStrategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
@@ -215,7 +223,7 @@ export default function ResultsHistory() {
                             <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
                               <div className="text-sm font-medium text-emerald-700 mb-1">Total Debt</div>
                               <div className="text-2xl font-bold text-emerald-900">
-                                {currencySymbol}{debts.reduce((sum, debt) => sum + debt.balance, 0).toLocaleString()}
+                                {currencySymbol}{totalDebt.toLocaleString()}
                               </div>
                               <div className="text-xs text-emerald-600 mt-1">
                                 {debts.length} active {debts.length === 1 ? 'debt' : 'debts'}
@@ -225,7 +233,7 @@ export default function ResultsHistory() {
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                               <div className="text-sm font-medium text-blue-700 mb-1">Time Until Debt-Free</div>
                               <div className="text-2xl font-bold text-blue-900">
-                                ~{Math.ceil(debts.reduce((sum, debt) => sum + debt.balance, 0) / currentPayment)} months
+                                ~{Math.ceil(totalDebt / currentPayment)} months
                               </div>
                               <div className="text-xs text-blue-600 mt-1">
                                 Using {selectedStrategy.name} strategy
@@ -235,7 +243,7 @@ export default function ResultsHistory() {
                             <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
                               <div className="text-sm font-medium text-purple-700 mb-1">Average Interest Rate</div>
                               <div className="text-2xl font-bold text-purple-900">
-                                {avgInterestRate ? avgInterestRate.toFixed(1) : 0}%
+                                {avgInterestRate.toFixed(1)}%
                               </div>
                               <div className="text-xs text-purple-600 mt-1">
                                 Weighted by debt balance
