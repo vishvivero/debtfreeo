@@ -43,7 +43,8 @@ export const DebtComparison = () => {
         interestPercentage: 0,
         interestSavedPercentage: 0,
         optimizedInterestPercentage: 0,
-        originalInterestPercentage: 0
+        originalInterestPercentage: 0,
+        annualInterest: 0
       };
     }
 
@@ -97,6 +98,11 @@ export const DebtComparison = () => {
     const optimizedInterestPercentage = totalInterest > 0 
       ? (lastDataPoint.acceleratedInterest / lastDataPoint.baselineInterest) * 100 
       : 0;
+      
+    // Calculate approximate annual interest
+    const annualInterest = baselineYears > 0 
+      ? lastDataPoint.baselineInterest / baselineYears 
+      : lastDataPoint.baselineInterest;
 
     return {
       totalDebts: debts.length,
@@ -114,7 +120,8 @@ export const DebtComparison = () => {
       totalTimeSavedMonths: timeSavedMonths,
       interestSavedPercentage,
       optimizedInterestPercentage,
-      originalInterestPercentage
+      originalInterestPercentage,
+      annualInterest
     };
   };
 
@@ -246,11 +253,17 @@ export const DebtComparison = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-center text-gray-500">
+                <div className="mt-3 text-xs text-center text-gray-500">
                   {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
                   })} goes to interest
+                </div>
+                <div className="mt-1 text-xs text-center text-gray-500">
+                  Approximate annual interest: {currencySymbol}{comparison.annualInterest.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })}
                 </div>
               </div>
 
@@ -395,6 +408,12 @@ export const DebtComparison = () => {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
+                </div>
+                <div className="text-sm text-emerald-600 dark:text-emerald-400 mb-4">
+                  Our optimized plan helps you save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })} in total interest.
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
