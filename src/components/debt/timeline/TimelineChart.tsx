@@ -117,30 +117,36 @@ export const TimelineChart = ({
         remainingPayment: availablePayment.toFixed(2)
       });
 
+      // Return the data point, ensuring both scenarios continue until their respective end dates
       return {
         date: format(currentDate, 'yyyy-MM-dd'),
-        baselineBalance: Math.round(totalBaselineBalance * 100) / 100,
-        acceleratedBalance: Math.round(totalAcceleratedBalance * 100) / 100
+        baselineBalance: index <= baselineMonths ? Math.round(totalBaselineBalance * 100) / 100 : null,
+        acceleratedBalance: index <= acceleratedMonths ? Math.round(totalAcceleratedBalance * 100) / 100 : null
       };
     });
 
-    // Find actual payoff months
-    const findPayoffMonth = (data: any[]) => {
-      return data.findIndex(point => point.baselineBalance === 0 && point.acceleratedBalance === 0);
+    // Find earliest month where both scenarios are paid off
+    const findCommonPayoffMonth = (data: any[]) => {
+      for (let i = 0; i < data.length; i++) {
+        const point = data[i];
+        // Check if baseline is done (either 0 or null) and accelerated is done (either 0 or null)
+        if ((point.baselineBalance === 0 || point.baselineBalance === null) && 
+            (point.acceleratedBalance === 0 || point.acceleratedBalance === null)) {
+          return i;
+        }
+      }
+      return data.length;
     };
 
-    const actualPayoffMonth = findPayoffMonth(data);
-    if (actualPayoffMonth !== -1) {
-      console.log('Found actual payoff month:', {
-        month: actualPayoffMonth,
-        expectedBaselineMonths: baselineMonths,
-        expectedAcceleratedMonths: acceleratedMonths
-      });
-      // Trim data to actual payoff month
-      return data.slice(0, actualPayoffMonth + 1);
-    }
+    const commonPayoffMonth = findCommonPayoffMonth(data);
+    console.log('Found common payoff month:', {
+      month: commonPayoffMonth,
+      baselineMonths,
+      acceleratedMonths
+    });
 
-    return data;
+    // Return data up to the point where both scenarios are complete
+    return data.slice(0, commonPayoffMonth + 1);
   };
 
   const chartData = generateTimelineData();
@@ -216,6 +222,7 @@ export const TimelineChart = ({
             fillOpacity={1}
             fill="url(#baselineGradient)"
             dot={false}
+            connectNulls
           />
           <Area
             type="monotone"
@@ -226,6 +233,7 @@ export const TimelineChart = ({
             fillOpacity={1}
             fill="url(#acceleratedGradient)"
             dot={false}
+            connectNulls
           />
         </AreaChart>
       </ResponsiveContainer>
