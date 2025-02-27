@@ -31,25 +31,26 @@ export const NoDebtsMessage = () => {
     }
   };
 
+  const handleIconClick = () => {
+    setIsDialogOpen(true);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="text-center space-y-6 py-8"
     >
-      <Button 
-        onClick={() => setIsDialogOpen(true)}
-        className="inline-flex flex-col items-center justify-center bg-transparent hover:bg-emerald-50 transition-colors duration-200 p-0"
-      >
+      <div onClick={handleIconClick} className="cursor-pointer">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="p-4 bg-emerald-50 rounded-full mb-2"
+          className="inline-block p-4 bg-emerald-50 rounded-full mb-2"
         >
           <Plus className="w-12 h-12 text-emerald-600" />
         </motion.div>
         <h2 className="text-2xl font-bold text-gray-900">No Debts Added Yet!</h2>
-      </Button>
+      </div>
       
       <p className="text-gray-600 max-w-md mx-auto">
         Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
