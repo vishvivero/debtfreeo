@@ -22,7 +22,9 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
         {/* Sidebar - Only show on desktop */}
         {hasSidebar && !isMobile && (
           <div className="relative flex w-64 transition-transform">
-            {SidebarComponent}
+            <div className="fixed inset-y-0 z-50 flex w-64 flex-col">
+              {SidebarComponent}
+            </div>
           </div>
         )}
         
