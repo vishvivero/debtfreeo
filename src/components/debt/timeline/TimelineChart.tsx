@@ -1,5 +1,5 @@
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { format, parseISO, addMonths } from "date-fns";
@@ -177,22 +177,18 @@ export const TimelineChart = ({
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
-          <defs>
-            <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#94A3B8" stopOpacity={0.1}/>
-            </linearGradient>
-            <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} horizontal={true} stroke="#e5e7eb" />
+        <LineChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
+          <CartesianGrid 
+            vertical={false} 
+            horizontal={true} 
+            stroke="#E2E8F0" 
+            strokeDasharray="3 3"
+          />
           <XAxis 
             dataKey="date"
-            tick={{ fontSize: 12, fill: '#6B7280' }}
-            tickLine={{ stroke: '#9CA3AF' }}
+            tick={{ fontSize: 12, fill: '#64748B' }}
+            tickLine={false}
+            axisLine={false}
             tickFormatter={(value) => {
               try {
                 if (!value) return '';
@@ -203,15 +199,26 @@ export const TimelineChart = ({
               }
             }}
             interval="preserveStartEnd"
-            minTickGap={30}
+            minTickGap={60}
           />
           <YAxis 
             tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
-            tick={{ fontSize: 12, fill: '#6B7280' }}
-            tickLine={{ stroke: '#9CA3AF' }}
+            tick={{ fontSize: 12, fill: '#64748B' }}
+            tickLine={false}
+            axisLine={false}
+            tickCount={6}
           />
           <Tooltip content={<TooltipComponent />} />
-          <Legend />
+          <Legend 
+            verticalAlign="bottom"
+            height={36}
+            iconType="line"
+            formatter={(value) => (
+              <span style={{ color: '#64748B', fontSize: '14px' }}>
+                {value}
+              </span>
+            )}
+          />
           
           {oneTimeFundings.map((funding, index) => (
             <ReferenceLine
@@ -228,7 +235,6 @@ export const TimelineChart = ({
             />
           ))}
 
-          {/* Add vertical line for accelerated payoff date */}
           {acceleratedPayoffDate && (
             <ReferenceLine
               x={acceleratedPayoffDate}
@@ -244,29 +250,25 @@ export const TimelineChart = ({
             />
           )}
           
-          <Area
+          <Line
             type="monotone"
             dataKey="baselineBalance"
             name="Original Timeline"
-            stroke="#94A3B8"
+            stroke="#059669"
             strokeWidth={2}
-            fillOpacity={1}
-            fill="url(#baselineGradient)"
             dot={false}
             connectNulls
           />
-          <Area
+          <Line
             type="monotone"
             dataKey="acceleratedBalance"
             name="Accelerated Timeline"
             stroke="#10B981"
-            strokeWidth={3}
-            fillOpacity={1}
-            fill="url(#acceleratedGradient)"
+            strokeWidth={2}
             dot={false}
             connectNulls
           />
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );
