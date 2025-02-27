@@ -11,7 +11,6 @@ import { calculateTimelineData } from "./TimelineCalculator";
 import { format } from "date-fns";
 import { useProfile } from "@/hooks/use-profile";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
-import { normalizeDate } from "@/lib/utils/dateUtils";
 
 interface PayoffTimelineContainerProps {
   debts: Debt[];
@@ -37,19 +36,18 @@ export const PayoffTimelineContainer = ({
 
   // Format the funding data to ensure it has proper date format
   const formattedFundings = oneTimeFundings.map(funding => {
-    const normalizedDate = normalizeDate(funding.payment_date);
-    
     console.log('Formatting funding:', {
       id: funding.id,
       originalDate: funding.payment_date,
-      normalizedDate,
       dateType: typeof funding.payment_date,
       amount: funding.amount
     });
     
     return {
       ...funding,
-      payment_date: normalizedDate || new Date().toISOString()
+      payment_date: typeof funding.payment_date === 'string' 
+        ? funding.payment_date 
+        : String(funding.payment_date) // Convert to string instead of calling toISOString
     };
   });
 
