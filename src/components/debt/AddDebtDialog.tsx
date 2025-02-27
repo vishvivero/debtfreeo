@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
@@ -24,12 +23,7 @@ export const AddDebtDialog = ({
   const dialogContent = <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden">
       <DialogHeader className="flex items-center justify-between p-4 border-b">
         <DialogTitle className="text-xl font-semibold text-gray-800">Add New Debt</DialogTitle>
-        <button 
-          onClick={onClose}
-          className="rounded-full p-1 hover:bg-gray-100 transition-colors"
-        >
-          <X className="h-5 w-5 text-gray-500" />
-        </button>
+        
       </DialogHeader>
       <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} onClose={onClose} />
     </DialogContent>;
