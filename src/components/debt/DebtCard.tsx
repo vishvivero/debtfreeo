@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ChevronRight } from "lucide-react";
@@ -61,15 +60,30 @@ export const DebtCard = ({
     // Check if this is a debt with interest already included
     const isInterestIncluded = debt.metadata?.interest_included === true;
     
+    // Calculate the appropriate balance to use
+    let effectiveBalance = debt.balance;
+    if (isInterestIncluded && debt.metadata?.remaining_months) {
+      const calculatedPrincipal = InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        debt.interest_rate,
+        debt.minimum_payment,
+        debt.metadata.remaining_months
+      );
+      
+      if (calculatedPrincipal > 0) {
+        effectiveBalance = calculatedPrincipal;
+      }
+    }
+    
     let months = 0;
     if (debt.interest_rate === 0) {
-      // For zero-interest debts or debts with interest included, use simple division
+      // For zero-interest debts, use simple division
       if (debt.minimum_payment <= 0) {
         console.log('Zero interest debt with no minimum payment');
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
       
-      months = Math.ceil(debt.balance / debt.minimum_payment);
+      months = Math.ceil(effectiveBalance / debt.minimum_payment);
       
       // If specified in metadata, use that value instead
       if (isInterestIncluded && debt.metadata?.remaining_months) {
@@ -78,7 +92,7 @@ export const DebtCard = ({
       }
       
       console.log('Zero interest calculation:', {
-        balance: debt.balance,
+        balance: effectiveBalance,
         payment: debt.minimum_payment,
         months,
         isInterestIncluded
@@ -87,10 +101,9 @@ export const DebtCard = ({
       // For interest-bearing debts, use the compound interest formula
       const monthlyRate = debt.interest_rate / 1200;
       const monthlyPayment = debt.minimum_payment;
-      const balance = debt.balance;
       
-      const monthlyInterestAmount = balance * monthlyRate;
-      
+      // If payment is too low to cover interest, debt can't be paid off
+      const monthlyInterestAmount = effectiveBalance * monthlyRate;
       if (monthlyPayment <= monthlyInterestAmount) {
         console.log('Payment cannot cover interest:', {
           payment: monthlyPayment,
@@ -99,21 +112,41 @@ export const DebtCard = ({
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
 
-      months = Math.ceil(Math.log(monthlyPayment / (monthlyPayment - balance * monthlyRate)) / Math.log(1 + monthlyRate));
+      // If metadata has remaining months, use that value
+      if (isInterestIncluded && debt.metadata?.remaining_months) {
+        months = debt.metadata.remaining_months;
+        console.log('Using remaining months from metadata for interest-bearing loan:', months);
+      } else {
+        // Otherwise, calculate using the standard formula for number of payments
+        // n = ln(c / (c - i*p)) / ln(1 + i)
+        // where c is the monthly payment, i is the monthly interest rate, and p is the principal
+        months = Math.ceil(
+          Math.log(monthlyPayment / (monthlyPayment - effectiveBalance * monthlyRate)) / 
+          Math.log(1 + monthlyRate)
+        );
+      }
+      
+      console.log('Interest-bearing calculation:', {
+        balance: effectiveBalance,
+        payment: monthlyPayment,
+        monthlyRate,
+        months
+      });
     }
 
-    const originalBalance = debt.balance + totalPaid;
-    const progressPercentage = (totalPaid / originalBalance) * 100;
+    // Calculate progress percentage
+    const originalBalance = effectiveBalance + totalPaid;
+    const progressPercentage = originalBalance > 0 ? (totalPaid / originalBalance) * 100 : 0;
     
     console.log('Progress calculation:', {
       originalBalance,
-      currentBalance: debt.balance,
+      currentBalance: effectiveBalance,
       totalPaid,
       months,
-      progressPercentage,
-      isInterestIncluded
+      progressPercentage
     });
     
+    // Format the time string
     const years = Math.floor(months / 12);
     const remainingMonths = Math.ceil(months % 12);
     
