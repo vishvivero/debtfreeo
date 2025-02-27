@@ -78,6 +78,12 @@ export const DebtComparison = () => {
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
 
+    // Calculate time saved
+    const acceleratedMonths = timelineData.findIndex(d => d.acceleratedBalance <= 0);
+    const timeSavedMonths = baselineMonths - (acceleratedMonths > 0 ? acceleratedMonths : baselineMonths);
+    const timeSavedYears = Math.floor(timeSavedMonths / 12);
+    const timeSavedRemainingMonths = timeSavedMonths % 12;
+
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
@@ -88,7 +94,10 @@ export const DebtComparison = () => {
       baselineYears,
       baselineMonths: remainingMonths,
       principalPercentage,
-      interestPercentage
+      interestPercentage,
+      timeSavedYears,
+      timeSavedMonths: timeSavedRemainingMonths,
+      totalTimeSavedMonths: timeSavedMonths
     };
   };
 
@@ -323,10 +332,16 @@ export const DebtComparison = () => {
                   </div>
                   
                   <div className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    With our optimized strategy, you could save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })} in interest payments
+                    {comparison.totalTimeSavedMonths > 0 ? (
+                      <span>
+                        With our optimized strategy, you could be debt-free 
+                        {comparison.timeSavedYears > 0 && ` ${comparison.timeSavedYears} ${comparison.timeSavedYears === 1 ? 'year' : 'years'}`}
+                        {comparison.timeSavedMonths > 0 && comparison.timeSavedYears > 0 && ' and'}
+                        {comparison.timeSavedMonths > 0 && ` ${comparison.timeSavedMonths} ${comparison.timeSavedMonths === 1 ? 'month' : 'months'}`} sooner
+                      </span>
+                    ) : (
+                      <span>Our optimized strategy helps you pay off your debt more efficiently</span>
+                    )}
                   </div>
                   
                   <div className="flex justify-end">
