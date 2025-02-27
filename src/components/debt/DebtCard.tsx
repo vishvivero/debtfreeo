@@ -60,50 +60,38 @@ export const DebtCard = ({
     // Check if this is a debt with interest already included
     const isInterestIncluded = debt.metadata?.interest_included === true;
     
-    // Calculate the appropriate balance to use
-    let effectiveBalance = debt.balance;
-    if (isInterestIncluded && debt.metadata?.remaining_months) {
-      const calculatedPrincipal = InterestCalculator.calculatePrincipalFromTotal(
-        debt.balance,
-        debt.interest_rate,
-        debt.minimum_payment,
-        debt.metadata.remaining_months
-      );
-      
-      if (calculatedPrincipal > 0) {
-        effectiveBalance = calculatedPrincipal;
-      }
-    }
-    
     let months = 0;
-    if (debt.interest_rate === 0) {
+    let effectiveBalance = debt.balance;
+
+    if (isInterestIncluded) {
+      // For loans with interest included, simply divide total by monthly payment
+      months = Math.ceil(debt.balance / debt.minimum_payment);
+      console.log('Interest included calculation:', {
+        totalBalance: debt.balance,
+        monthlyPayment: debt.minimum_payment,
+        months
+      });
+    } else if (debt.interest_rate === 0) {
       // For zero-interest debts, use simple division
       if (debt.minimum_payment <= 0) {
         console.log('Zero interest debt with no minimum payment');
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
       
-      months = Math.ceil(effectiveBalance / debt.minimum_payment);
-      
-      // If specified in metadata, use that value instead
-      if (isInterestIncluded && debt.metadata?.remaining_months) {
-        months = debt.metadata.remaining_months;
-        console.log('Using remaining months from metadata:', months);
-      }
+      months = Math.ceil(debt.balance / debt.minimum_payment);
       
       console.log('Zero interest calculation:', {
-        balance: effectiveBalance,
+        balance: debt.balance,
         payment: debt.minimum_payment,
-        months,
-        isInterestIncluded
+        months
       });
     } else {
-      // For interest-bearing debts, use the compound interest formula
+      // For standard interest-bearing debts, use the compound interest formula
       const monthlyRate = debt.interest_rate / 1200;
       const monthlyPayment = debt.minimum_payment;
       
       // If payment is too low to cover interest, debt can't be paid off
-      const monthlyInterestAmount = effectiveBalance * monthlyRate;
+      const monthlyInterestAmount = debt.balance * monthlyRate;
       if (monthlyPayment <= monthlyInterestAmount) {
         console.log('Payment cannot cover interest:', {
           payment: monthlyPayment,
@@ -112,26 +100,30 @@ export const DebtCard = ({
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
 
-      // If metadata has remaining months, use that value
-      if (isInterestIncluded && debt.metadata?.remaining_months) {
-        months = debt.metadata.remaining_months;
-        console.log('Using remaining months from metadata for interest-bearing loan:', months);
-      } else {
-        // Otherwise, calculate using the standard formula for number of payments
-        // n = ln(c / (c - i*p)) / ln(1 + i)
-        // where c is the monthly payment, i is the monthly interest rate, and p is the principal
-        months = Math.ceil(
-          Math.log(monthlyPayment / (monthlyPayment - effectiveBalance * monthlyRate)) / 
-          Math.log(1 + monthlyRate)
-        );
-      }
+      // Calculate using the standard formula for number of payments
+      months = Math.ceil(
+        Math.log(monthlyPayment / (monthlyPayment - debt.balance * monthlyRate)) / 
+        Math.log(1 + monthlyRate)
+      );
       
       console.log('Interest-bearing calculation:', {
-        balance: effectiveBalance,
+        balance: debt.balance,
         payment: monthlyPayment,
         monthlyRate,
         months
       });
+    }
+
+    // For progress calculation, use the appropriate balance
+    if (isInterestIncluded) {
+      // For loans with interest included, use the calculated principal for progress
+      const calculatedPrincipal = InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        debt.interest_rate,
+        debt.minimum_payment,
+        months
+      );
+      effectiveBalance = calculatedPrincipal > 0 ? calculatedPrincipal : debt.balance;
     }
 
     // Calculate progress percentage
