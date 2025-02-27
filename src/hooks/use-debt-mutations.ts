@@ -10,6 +10,27 @@ export function useDebtMutations() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  // Helper function to ensure proper typing when getting data from the database
+  const mapDatabaseResponseToDebt = (data: any): Debt => {
+    return {
+      id: data.id,
+      user_id: data.user_id,
+      name: data.name,
+      banker_name: data.banker_name,
+      balance: data.balance,
+      interest_rate: data.interest_rate,
+      minimum_payment: Number(data.minimum_payment),
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      currency_symbol: data.currency_symbol,
+      next_payment_date: data.next_payment_date,
+      category: data.category,
+      closed_date: data.closed_date,
+      status: data.status as 'active' | 'paid',
+      metadata: data.metadata || null // Ensure metadata is properly typed
+    };
+  };
+
   const updateDebtAndProfile = async (debt: Debt) => {
     if (!user?.id) throw new Error("No user ID available");
 
@@ -75,14 +96,11 @@ export function useDebtMutations() {
         throw error;
       }
 
-      // Ensure status is of correct type before passing to updateDebtAndProfile
-      const typedDebt: Debt = {
-        ...data,
-        status: data.status as 'active' | 'paid'
-      };
+      // Map database response to Debt type
+      const typedDebt = mapDatabaseResponseToDebt(data);
 
       await updateDebtAndProfile(typedDebt);
-      return data;
+      return typedDebt;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts", user?.id] });
@@ -132,16 +150,12 @@ export function useDebtMutations() {
         throw error;
       }
 
-      // Ensure data is properly typed before passing to updateDebtAndProfile
-      const typedDebt: Debt = {
-        ...data,
-        status: data.status as 'active' | 'paid',
-        minimum_payment: Number(data.minimum_payment) // Ensure it's a number
-      };
+      // Map database response to Debt type
+      const typedDebt = mapDatabaseResponseToDebt(data);
 
       console.log("Successfully added debt with minimum payment:", typedDebt.minimum_payment);
       await updateDebtAndProfile(typedDebt);
-      return data;
+      return typedDebt;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts", user?.id] });
@@ -187,11 +201,11 @@ export function useDebtMutations() {
 
       if (debt) {
         // Create a properly typed debt object for the update
-        const typedDebt: Debt = {
+        const typedDebt = mapDatabaseResponseToDebt({
           ...debt,
-          status: debt.status as 'active' | 'paid',
-          minimum_payment: 0
-        };
+          minimum_payment: 0 // Set to 0 for calculation purposes when deleted
+        });
+        
         await updateDebtAndProfile(typedDebt);
       }
     },
