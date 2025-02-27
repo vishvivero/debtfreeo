@@ -53,21 +53,34 @@ export const DebtCard = ({
       balance: debt.balance,
       rate: debt.interest_rate,
       payment: debt.minimum_payment,
-      totalPaid
+      totalPaid,
+      metadata: debt.metadata
     });
 
+    // Check if this is a debt with interest already included
+    const isInterestIncluded = debt.metadata?.interest_included === true;
+    
     let months = 0;
     if (debt.interest_rate === 0) {
-      // For zero-interest debts, use simple division
+      // For zero-interest debts or debts with interest included, use simple division
       if (debt.minimum_payment <= 0) {
         console.log('Zero interest debt with no minimum payment');
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
+      
       months = Math.ceil(debt.balance / debt.minimum_payment);
+      
+      // If specified in metadata, use that value instead
+      if (isInterestIncluded && debt.metadata?.remaining_months) {
+        months = debt.metadata.remaining_months;
+        console.log('Using remaining months from metadata:', months);
+      }
+      
       console.log('Zero interest calculation:', {
         balance: debt.balance,
         payment: debt.minimum_payment,
-        months
+        months,
+        isInterestIncluded
       });
     } else {
       // For interest-bearing debts, use the compound interest formula
@@ -96,7 +109,8 @@ export const DebtCard = ({
       currentBalance: debt.balance,
       totalPaid,
       months,
-      progressPercentage
+      progressPercentage,
+      isInterestIncluded
     });
     
     const years = Math.floor(months / 12);
@@ -122,6 +136,8 @@ export const DebtCard = ({
     navigate(`/overview/debt/${debt.id}`);
   };
 
+  // Check if this is a debt with interest included
+  const isInterestIncluded = debt.metadata?.interest_included === true;
   const payoffDetails = getPayoffDetails(debt);
 
   return (
@@ -170,6 +186,11 @@ export const DebtCard = ({
             <p className="text-gray-600 mb-1">APR</p>
             <p className="text-2xl font-semibold">
               {debt.interest_rate}%
+              {isInterestIncluded && (
+                <span className="ml-2 text-xs font-normal text-blue-500 bg-blue-50 px-2 py-1 rounded-full">
+                  Interest Included
+                </span>
+              )}
             </p>
           </div>
         </div>
