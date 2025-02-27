@@ -130,7 +130,7 @@ export function useDebtMutations() {
         throw new Error("Invalid minimum payment amount");
       }
 
-      console.log("Adding new debt with minimum payment:", newDebt.minimum_payment);
+      console.log("Adding new debt with metadata:", newDebt.metadata);
       
       // Create a new object with only the properties that should be sent to the database
       const debtToInsert = {
