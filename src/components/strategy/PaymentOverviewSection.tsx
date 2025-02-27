@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DollarSign, RotateCw, TrendingUp } from "lucide-react";
+import { RotateCw, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 interface PaymentOverviewSectionProps {
   totalMinimumPayments: number;
@@ -51,7 +51,7 @@ export const PaymentOverviewSection = ({
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <DollarSign className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-500">{currencySymbol}</span>
                 </div>
                 <Input type="number" value={extraPayment || ''} onChange={e => {
                 const value = Number(e.target.value);
