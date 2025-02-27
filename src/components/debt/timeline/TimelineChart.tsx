@@ -1,5 +1,5 @@
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { format, parseISO, addMonths } from "date-fns";
@@ -85,18 +85,40 @@ export const TimelineChart = ({
       const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => sum + Number(funding.amount), 0);
       availablePayment += totalFundingAmount;
 
-      // Process each debt with interest and payments
+      // First, apply minimum payments to all debts
       for (const debt of debts) {
         const currentBalance = acceleratedDebtBalances.get(debt.id)!;
         if (currentBalance > 0) {
           const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
-          const payment = Math.min(currentBalance + monthlyInterest, availablePayment);
-          const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
+          const minimumPayment = Math.min(currentBalance + monthlyInterest, debt.minimum_payment);
+          const newBalance = Math.max(0, currentBalance + monthlyInterest - minimumPayment);
           acceleratedDebtBalances.set(debt.id, newBalance);
-          availablePayment -= payment;
-          totalAcceleratedBalance += newBalance;
-          if (newBalance > 0) acceleratedFullyPaid = false;
+          availablePayment -= minimumPayment;
         }
+      }
+
+      // Then, apply any extra payments to the debt with highest interest
+      if (availablePayment > 0) {
+        const sortedDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
+        
+        for (const debt of sortedDebts) {
+          if (availablePayment <= 0) break;
+          
+          const currentBalance = acceleratedDebtBalances.get(debt.id)!;
+          if (currentBalance > 0) {
+            const extraPayment = Math.min(availablePayment, currentBalance);
+            const newBalance = Math.max(0, currentBalance - extraPayment);
+            acceleratedDebtBalances.set(debt.id, newBalance);
+            availablePayment -= extraPayment;
+          }
+        }
+      }
+
+      // Calculate total accelerated balance
+      for (const debt of debts) {
+        const balance = acceleratedDebtBalances.get(debt.id)!;
+        totalAcceleratedBalance += balance;
+        if (balance > 0) acceleratedFullyPaid = false;
       }
 
       console.log(`Month ${index} status:`, {
@@ -116,7 +138,27 @@ export const TimelineChart = ({
       };
     });
 
-    return data;
+    // Find earliest month where both scenarios are paid off
+    const findCommonPayoffMonth = (data: any[]) => {
+      for (let i = 0; i < data.length; i++) {
+        const point = data[i];
+        if ((point.baselineBalance === 0 || point.baselineBalance === null) && 
+            (point.acceleratedBalance === 0 || point.acceleratedBalance === null)) {
+          return i;
+        }
+      }
+      return data.length;
+    };
+
+    const commonPayoffMonth = findCommonPayoffMonth(data);
+    console.log('Found common payoff month:', {
+      month: commonPayoffMonth,
+      baselineMonths,
+      acceleratedMonths
+    });
+
+    // Return data up to the point where both scenarios are complete
+    return data.slice(0, commonPayoffMonth + 1);
   };
 
   const chartData = generateTimelineData();
@@ -135,18 +177,22 @@ export const TimelineChart = ({
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
-          <CartesianGrid 
-            vertical={false} 
-            horizontal={true} 
-            stroke="#E2E8F0" 
-            strokeDasharray="3 3"
-          />
+        <AreaChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
+          <defs>
+            <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#94A3B8" stopOpacity={0.1}/>
+            </linearGradient>
+            <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} horizontal={true} stroke="#e5e7eb" />
           <XAxis 
             dataKey="date"
-            tick={{ fontSize: 12, fill: '#64748B' }}
-            tickLine={false}
-            axisLine={false}
+            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tickLine={{ stroke: '#9CA3AF' }}
             tickFormatter={(value) => {
               try {
                 if (!value) return '';
@@ -157,26 +203,15 @@ export const TimelineChart = ({
               }
             }}
             interval="preserveStartEnd"
-            minTickGap={60}
+            minTickGap={30}
           />
           <YAxis 
             tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
-            tick={{ fontSize: 12, fill: '#64748B' }}
-            tickLine={false}
-            axisLine={false}
-            tickCount={6}
+            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tickLine={{ stroke: '#9CA3AF' }}
           />
           <Tooltip content={<TooltipComponent />} />
-          <Legend 
-            verticalAlign="bottom"
-            height={36}
-            iconType="line"
-            formatter={(value) => (
-              <span style={{ color: '#64748B', fontSize: '14px' }}>
-                {value}
-              </span>
-            )}
-          />
+          <Legend />
           
           {oneTimeFundings.map((funding, index) => (
             <ReferenceLine
@@ -193,6 +228,7 @@ export const TimelineChart = ({
             />
           ))}
 
+          {/* Add vertical line for accelerated payoff date */}
           {acceleratedPayoffDate && (
             <ReferenceLine
               x={acceleratedPayoffDate}
@@ -208,25 +244,29 @@ export const TimelineChart = ({
             />
           )}
           
-          <Line
+          <Area
             type="monotone"
             dataKey="baselineBalance"
             name="Original Timeline"
-            stroke="#059669"
+            stroke="#94A3B8"
             strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#baselineGradient)"
             dot={false}
             connectNulls
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="acceleratedBalance"
             name="Accelerated Timeline"
             stroke="#10B981"
-            strokeWidth={2}
+            strokeWidth={3}
+            fillOpacity={1}
+            fill="url(#acceleratedGradient)"
             dot={false}
             connectNulls
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
