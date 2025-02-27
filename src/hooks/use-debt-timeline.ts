@@ -1,3 +1,4 @@
+
 import { useCallback, useMemo } from 'react';
 import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
@@ -21,7 +22,13 @@ export const useDebtTimeline = (
     console.log('useDebtTimeline: Starting calculation with params:', {
       debtsTotal: debts.reduce((sum, debt) => sum + debt.balance, 0),
       monthlyPayment,
-      strategy: strategy.name
+      strategy: strategy.name,
+      zeroInterestDebts: debts.filter(d => d.interest_rate === 0).map(d => ({
+        name: d.name,
+        balance: d.balance,
+        minPayment: d.minimum_payment,
+        monthsToPayoff: d.minimum_payment > 0 ? Math.ceil(d.balance / d.minimum_payment) : 'unknown'
+      }))
     });
 
     const results = calculateTimeline(debts, monthlyPayment, strategy, oneTimeFundings);
