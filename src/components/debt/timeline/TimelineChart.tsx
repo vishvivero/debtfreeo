@@ -85,27 +85,40 @@ export const TimelineChart = ({
       const totalFundingAmount = fundingsForMonth.reduce((sum, funding) => sum + Number(funding.amount), 0);
       availablePayment += totalFundingAmount;
 
-      // Apply payments to each debt in accelerated scenario
+      // First, apply minimum payments to all debts
       for (const debt of debts) {
         const currentBalance = acceleratedDebtBalances.get(debt.id)!;
         if (currentBalance > 0) {
           const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
           const minimumPayment = Math.min(currentBalance + monthlyInterest, debt.minimum_payment);
-          
-          // Calculate how much extra payment can be applied to this debt
-          const extraPayment = Math.min(
-            availablePayment - minimumPayment,
-            currentBalance + monthlyInterest - minimumPayment
-          );
-          
-          const totalPayment = minimumPayment + Math.max(0, extraPayment);
-          const newBalance = Math.max(0, currentBalance + monthlyInterest - totalPayment);
-          
+          const newBalance = Math.max(0, currentBalance + monthlyInterest - minimumPayment);
           acceleratedDebtBalances.set(debt.id, newBalance);
-          totalAcceleratedBalance += newBalance;
-          availablePayment -= totalPayment;
-          if (newBalance > 0) acceleratedFullyPaid = false;
+          availablePayment -= minimumPayment;
         }
+      }
+
+      // Then, apply any extra payments to the debt with highest interest
+      if (availablePayment > 0) {
+        const sortedDebts = [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
+        
+        for (const debt of sortedDebts) {
+          if (availablePayment <= 0) break;
+          
+          const currentBalance = acceleratedDebtBalances.get(debt.id)!;
+          if (currentBalance > 0) {
+            const extraPayment = Math.min(availablePayment, currentBalance);
+            const newBalance = Math.max(0, currentBalance - extraPayment);
+            acceleratedDebtBalances.set(debt.id, newBalance);
+            availablePayment -= extraPayment;
+          }
+        }
+      }
+
+      // Calculate total accelerated balance
+      for (const debt of debts) {
+        const balance = acceleratedDebtBalances.get(debt.id)!;
+        totalAcceleratedBalance += balance;
+        if (balance > 0) acceleratedFullyPaid = false;
       }
 
       console.log(`Month ${index} status:`, {
@@ -129,7 +142,6 @@ export const TimelineChart = ({
     const findCommonPayoffMonth = (data: any[]) => {
       for (let i = 0; i < data.length; i++) {
         const point = data[i];
-        // Check if baseline is done (either 0 or null) and accelerated is done (either 0 or null)
         if ((point.baselineBalance === 0 || point.baselineBalance === null) && 
             (point.acceleratedBalance === 0 || point.acceleratedBalance === null)) {
           return i;
