@@ -1,3 +1,4 @@
+
 export interface Debt {
   id: string;
   user_id?: string;
@@ -13,6 +14,11 @@ export interface Debt {
   category?: string;
   closed_date?: string;
   status: 'active' | 'paid';
+  metadata?: {
+    interest_included?: boolean;
+    remaining_months?: number | null;
+    [key: string]: any;
+  };
 }
 
 export interface PaymentHistory {
