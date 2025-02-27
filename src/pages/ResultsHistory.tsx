@@ -47,6 +47,7 @@ export default function ResultsHistory() {
     }
   };
   
+  // Show loading state while data is being fetched
   if (isLoading) {
     return (
       <MainLayout>
@@ -57,10 +58,28 @@ export default function ResultsHistory() {
     );
   }
   
-  // Calculate total debt
+  // Safety check for undefined debts
+  if (!debts) {
+    console.error("Debts data is undefined");
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <div className="text-center p-8 bg-white rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-2">No debt data available</h2>
+            <p className="text-muted-foreground mb-4">Unable to load your debt information. Please try again later.</p>
+            <Button onClick={() => navigate("/overview")}>
+              Return to Dashboard
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  // Calculate total debt - with safety check
   const totalDebt = debts ? debts.reduce((sum, debt) => sum + debt.balance, 0) : 0;
   
-  // Calculate weighted average interest rate
+  // Calculate weighted average interest rate - with safety check
   const avgInterestRate = debts && totalDebt > 0 
     ? debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt
     : 0;
@@ -81,6 +100,9 @@ export default function ResultsHistory() {
   ];
 
   const currencySymbol = profile?.preferred_currency || "£";
+  
+  // Safety check for the current payment to avoid division by zero
+  const safeCurrentPayment = currentPayment > 0 ? currentPayment : 1;
   
   return (
     <MainLayout>
@@ -233,7 +255,7 @@ export default function ResultsHistory() {
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                               <div className="text-sm font-medium text-blue-700 mb-1">Time Until Debt-Free</div>
                               <div className="text-2xl font-bold text-blue-900">
-                                ~{Math.ceil(totalDebt / currentPayment)} months
+                                ~{Math.ceil(totalDebt / safeCurrentPayment)} months
                               </div>
                               <div className="text-xs text-blue-600 mt-1">
                                 Using {selectedStrategy.name} strategy
