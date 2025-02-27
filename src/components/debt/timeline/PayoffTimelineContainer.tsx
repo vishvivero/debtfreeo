@@ -35,12 +35,21 @@ export const PayoffTimelineContainer = ({
   });
 
   // Format the funding data to ensure it has proper date format
-  const formattedFundings = oneTimeFundings.map(funding => ({
-    ...funding,
-    payment_date: typeof funding.payment_date === 'string' 
-      ? funding.payment_date 
-      : String(funding.payment_date) // Convert to string instead of calling toISOString
-  }));
+  const formattedFundings = oneTimeFundings.map(funding => {
+    console.log('Formatting funding:', {
+      id: funding.id,
+      originalDate: funding.payment_date,
+      dateType: typeof funding.payment_date,
+      amount: funding.amount
+    });
+    
+    return {
+      ...funding,
+      payment_date: typeof funding.payment_date === 'string' 
+        ? funding.payment_date 
+        : String(funding.payment_date) // Convert to string instead of calling toISOString
+    };
+  });
 
   console.log('Formatted fundings:', formattedFundings);
 

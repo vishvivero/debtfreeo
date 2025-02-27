@@ -14,7 +14,15 @@ export interface TimelineData {
   acceleratedInterest: number;
   oneTimePayment?: number;
   currencySymbol: string;
+  paymentDetails?: {
+    hasOneTimePayment: boolean;
+    oneTimeAmount: number;
+    regularPaymentAmount: number;
+  };
 }
+
+// Flag to enable/disable detailed logging
+const ENABLE_DETAILED_LOGGING = true;
 
 export const calculateTimelineData = (
   debts: Debt[],
@@ -47,6 +55,27 @@ export const calculateTimelineData = (
   let month = 0;
   const maxMonths = 360; // 30 years cap
 
+  if (ENABLE_DETAILED_LOGGING) {
+    console.log('[TIMELINE DEBUG] Starting calculation with initial balances:', {
+      baseline: Array.from(balances.entries()).map(([id, balance]) => ({
+        id,
+        balance
+      })),
+      accelerated: Array.from(acceleratedBalances.entries()).map(([id, balance]) => ({
+        id,
+        balance
+      })),
+      totalMinimumPayment,
+      totalMonthlyPayment
+    });
+
+    console.log('[TIMELINE DEBUG] One-time fundings to process:', oneTimeFundings.map(funding => ({
+      date: funding.payment_date,
+      amount: funding.amount,
+      parsedDate: new Date(String(funding.payment_date))
+    })));
+  }
+
   while (month < maxMonths) {
     const currentDate = addMonths(startDate, month);
     const currentDateStr = currentDate.toISOString();
@@ -58,8 +87,18 @@ export const calculateTimelineData = (
           ? new Date(funding.payment_date) 
           : new Date(String(funding.payment_date)); // Convert to string first
           
-        return fundingDate.getMonth() === currentDate.getMonth() &&
+        const isSameMonth = fundingDate.getMonth() === currentDate.getMonth() &&
               fundingDate.getFullYear() === currentDate.getFullYear();
+        
+        if (ENABLE_DETAILED_LOGGING && isSameMonth) {
+          console.log(`[TIMELINE DEBUG] Found one-time funding for month ${format(currentDate, 'MMM yyyy')}:`, {
+            fundingDate: format(fundingDate, 'yyyy-MM-dd'),
+            amount: funding.amount,
+            notes: funding.notes
+          });
+        }
+        
+        return isSameMonth;
       } catch (error) {
         console.error('Error comparing funding date:', error);
         return false;
@@ -67,6 +106,10 @@ export const calculateTimelineData = (
     });
     
     const oneTimeFundingAmount = monthlyFundings.reduce((sum, funding) => sum + Number(funding.amount), 0);
+
+    if (ENABLE_DETAILED_LOGGING && oneTimeFundingAmount > 0) {
+      console.log(`[TIMELINE DEBUG] Month ${month} (${format(currentDate, 'MMM yyyy')}) has one-time funding of ${oneTimeFundingAmount}`);
+    }
 
     // Calculate baseline scenario
     let totalBaselineBalance = 0;
@@ -93,7 +136,20 @@ export const calculateTimelineData = (
     // Calculate accelerated scenario
     let totalAcceleratedBalance = 0;
     let monthlyAcceleratedInterest = 0;
-    let remainingAcceleratedPayment = totalMonthlyPayment + oneTimeFundingAmount;
+    let remainingAcceleratedPayment = totalMonthlyPayment;
+    let oneTimePaymentApplied = 0;
+
+    if (ENABLE_DETAILED_LOGGING && oneTimeFundingAmount > 0) {
+      console.log(`[TIMELINE DEBUG] Before applying one-time funding:`, {
+        month: month,
+        date: format(currentDate, 'MMM yyyy'),
+        acceleratedBalances: Array.from(acceleratedBalances.entries()).map(([id, balance]) => ({
+          id,
+          balance
+        })),
+        totalAcceleratedBalance: Array.from(acceleratedBalances.values()).reduce((sum, balance) => sum + balance, 0)
+      });
+    }
 
     // First apply minimum payments
     debts.forEach(debt => {
@@ -112,7 +168,7 @@ export const calculateTimelineData = (
 
     totalAcceleratedInterest += monthlyAcceleratedInterest;
 
-    // Then apply extra payments according to strategy
+    // Then apply extra payments according to strategy (regular extra payment)
     if (remainingAcceleratedPayment > 0) {
       const sortedDebts = strategy.calculate(debts);
       for (const debt of sortedDebts) {
@@ -128,8 +184,50 @@ export const calculateTimelineData = (
       }
     }
 
+    // Apply one-time funding specifically after regular payments
+    let oneTimePaymentRemaining = oneTimeFundingAmount;
+    if (oneTimePaymentRemaining > 0) {
+      const sortedDebts = strategy.calculate(debts);
+      for (const debt of sortedDebts) {
+        const currentBalance = acceleratedBalances.get(debt.id) || 0;
+        if (currentBalance > 0) {
+          const oneTimePayment = Math.min(oneTimePaymentRemaining, currentBalance);
+          const newBalance = Math.max(0, currentBalance - oneTimePayment);
+          
+          if (ENABLE_DETAILED_LOGGING) {
+            console.log(`[TIMELINE DEBUG] Applying one-time payment to debt ${debt.name}:`, {
+              debtId: debt.id,
+              previousBalance: currentBalance,
+              oneTimePayment,
+              newBalance
+            });
+          }
+          
+          acceleratedBalances.set(debt.id, newBalance);
+          oneTimePaymentRemaining = Math.max(0, oneTimePaymentRemaining - oneTimePayment);
+          oneTimePaymentApplied += oneTimePayment;
+          
+          if (oneTimePaymentRemaining <= 0) break;
+        }
+      }
+    }
+
     totalAcceleratedBalance = Array.from(acceleratedBalances.values())
       .reduce((sum, balance) => sum + balance, 0);
+
+    if (ENABLE_DETAILED_LOGGING && oneTimeFundingAmount > 0) {
+      console.log(`[TIMELINE DEBUG] After applying one-time funding:`, {
+        month: month,
+        date: format(currentDate, 'MMM yyyy'),
+        oneTimeFundingAmount,
+        oneTimePaymentApplied,
+        acceleratedBalances: Array.from(acceleratedBalances.entries()).map(([id, balance]) => ({
+          id,
+          balance
+        })),
+        totalAcceleratedBalance
+      });
+    }
 
     // Add data point
     data.push({
@@ -141,7 +239,12 @@ export const calculateTimelineData = (
       baselineInterest: Number(totalBaselineInterest.toFixed(2)),
       acceleratedInterest: Number(totalAcceleratedInterest.toFixed(2)),
       oneTimePayment: oneTimeFundingAmount > 0 ? oneTimeFundingAmount : undefined,
-      currencySymbol: debts[0]?.currency_symbol || '£'
+      currencySymbol: debts[0]?.currency_symbol || '£',
+      paymentDetails: oneTimeFundingAmount > 0 ? {
+        hasOneTimePayment: true,
+        oneTimeAmount: oneTimeFundingAmount,
+        regularPaymentAmount: totalMonthlyPayment
+      } : undefined
     });
 
     // Break if both scenarios are paid off
@@ -156,13 +259,44 @@ export const calculateTimelineData = (
   oneTimeFundings.forEach(funding => {
     const fundingDate = typeof funding.payment_date === 'string' 
       ? funding.payment_date 
-      : String(funding.payment_date); // Convert to string instead of calling toISOString
+      : String(funding.payment_date);
+
+    const parsedDate = new Date(fundingDate);
+    
+    // Log detailed funding information
+    if (ENABLE_DETAILED_LOGGING) {
+      console.log('[TIMELINE DEBUG] Processing one-time funding for chart visualization:', {
+        rawDate: funding.payment_date,
+        fundingDate,
+        parsedDate: format(parsedDate, 'yyyy-MM-dd'),
+        amount: funding.amount
+      });
+    }
 
     // Check if this funding date is already in our data
-    const existingDataIndex = data.findIndex(d => d.date === fundingDate);
+    const existingDataIndex = data.findIndex(d => {
+      try {
+        const dataDate = new Date(d.date);
+        const isSameMonth = dataDate.getMonth() === parsedDate.getMonth() && 
+                            dataDate.getFullYear() === parsedDate.getFullYear();
+        return isSameMonth;
+      } catch (error) {
+        console.error('Error comparing dates:', error);
+        return false;
+      }
+    });
+    
     if (existingDataIndex === -1) {
-      // If we don't have an exact match, log info for debugging
-      console.log(`Funding date ${fundingDate} not found in timeline data points`);
+      console.log(`[TIMELINE DEBUG] Funding date ${format(parsedDate, 'yyyy-MM-dd')} not found in timeline data points`);
+    } else if (ENABLE_DETAILED_LOGGING) {
+      console.log(`[TIMELINE DEBUG] Found matching data point for funding:`, {
+        fundingDate: format(parsedDate, 'yyyy-MM-dd'),
+        matchingDataPointDate: data[existingDataIndex].date,
+        matchingDataPointMonth: data[existingDataIndex].monthLabel,
+        baselineBalance: data[existingDataIndex].baselineBalance,
+        acceleratedBalance: data[existingDataIndex].acceleratedBalance,
+        oneTimePayment: data[existingDataIndex].oneTimePayment
+      });
     }
   });
 
