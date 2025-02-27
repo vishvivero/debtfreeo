@@ -6,9 +6,7 @@ import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
-import { PersonalizedActionPlan } from "./sections/PersonalizedActionPlan";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
-import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { ResultsDialog } from "./ResultsDialog";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { StrategySelector } from "@/components/StrategySelector";
@@ -18,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { DecimalToggle } from "@/components/DecimalToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
+import { useNavigate } from "react-router-dom";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -49,6 +48,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
   const { toast } = useToast();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
+  const navigate = useNavigate();
 
   // Initialize strategy from profile only once when component mounts
   useEffect(() => {
@@ -73,6 +73,10 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const handleResultsClick = () => {
     setHasViewedResults(true);
     setIsResultsDialogOpen(true);
+  };
+
+  const handleViewResultsPage = () => {
+    navigate("/results-history");
   };
 
   const handleStrategyChange = async (strategy: Strategy) => {
@@ -220,41 +224,23 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             </div>
           </div>
 
-          <Button 
-            className="w-full"
-            onClick={handleResultsClick}
-          >
-            Get My Results
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              className="flex-1"
+              onClick={handleResultsClick}
+            >
+              Get Results
+            </Button>
+            <Button 
+              className="flex-1"
+              variant="outline"
+              onClick={handleViewResultsPage}
+            >
+              View Full Results
+            </Button>
+          </div>
         </div>
       </motion.div>
-
-      {hasViewedResults && (
-        <>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <PersonalizedActionPlan />
-          </motion.div>
-
-          {debts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="w-full"
-            >
-              <PayoffTimeline
-                debts={debts}
-                extraPayment={extraPayment}
-                enableOneTimeFundings={showOneTimeFunding}
-              />
-            </motion.div>
-          )}
-        </>
-      )}
 
       <Dialog open={isStrategyDialogOpen} onOpenChange={setIsStrategyDialogOpen}>
         <DialogContent className="sm:max-w-xl">
