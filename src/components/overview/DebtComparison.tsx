@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -124,18 +125,20 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              {/* Current Debt-Free Date */}
-              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-gray-500" />
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-300 font-medium">
+              {/* Redesigned Current Debt-Free Date */}
+              <div className="p-5 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                      <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-gray-800 dark:text-gray-200 font-semibold text-lg">
                         Debt-Free Date
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Info className="w-4 h-4 text-gray-400 ml-2" />
+                              <Info className="w-4 h-4 text-gray-400 ml-2 inline-block align-text-bottom" />
                             </TooltipTrigger>
                             <TooltipContent 
                               side="right" 
@@ -146,18 +149,24 @@ export const DebtComparison = () => {
                           </Tooltip>
                         </TooltipProvider>
                       </span>
-                      <div className="text-sm text-gray-500">
-                        Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
-                        {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
-                      </div>
                     </div>
                   </div>
-                  <span className="text-lg font-semibold whitespace-nowrap">
-                    {comparison.originalPayoffDate.toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </span>
+                  
+                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Based on minimum payments only, you will be paying debts for {comparison.baselineYears} {comparison.baselineYears === 1 ? 'year' : 'years'}
+                    {comparison.baselineMonths > 0 && ` and ${comparison.baselineMonths} ${comparison.baselineMonths === 1 ? 'month' : 'months'}`}
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <div className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-full">
+                      <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {comparison.originalPayoffDate.toLocaleDateString('en-US', {
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
