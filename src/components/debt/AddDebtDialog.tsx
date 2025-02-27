@@ -21,9 +21,9 @@ export const AddDebtDialog = ({
       onClose();
     }
   };
-  const dialogContent = <DialogContent className="sm:max-w-[600px] p-6 bg-white">
-      <DialogHeader className="flex items-center justify-between">
-        <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
+  const dialogContent = <DialogContent className="sm:max-w-[650px] p-0 bg-white rounded-xl overflow-hidden">
+      <DialogHeader className="flex items-center justify-between p-6 border-b">
+        <DialogTitle className="text-2xl font-semibold text-gray-800">Add New Debt</DialogTitle>
         <button 
           onClick={onClose}
           className="rounded-full p-1 hover:bg-gray-100 transition-colors"
