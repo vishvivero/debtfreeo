@@ -259,6 +259,7 @@ export type Database = {
           interest_rate: number
           is_gold_loan: boolean | null
           loan_term_months: number | null
+          metadata: Json | null
           minimum_payment: number
           name: string
           next_payment_date: string | null
@@ -278,6 +279,7 @@ export type Database = {
           interest_rate: number
           is_gold_loan?: boolean | null
           loan_term_months?: number | null
+          metadata?: Json | null
           minimum_payment: number
           name: string
           next_payment_date?: string | null
@@ -297,6 +299,7 @@ export type Database = {
           interest_rate?: number
           is_gold_loan?: boolean | null
           loan_term_months?: number | null
+          metadata?: Json | null
           minimum_payment?: number
           name?: string
           next_payment_date?: string | null
