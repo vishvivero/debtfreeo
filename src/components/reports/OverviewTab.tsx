@@ -1,8 +1,8 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { FileDown, TrendingUp, DollarSign, Calendar, Tag, Download, FileText, ChevronRight } from "lucide-react";
-import { DebtOverviewChart } from "./DebtOverviewChart";
+import { FileDown, DollarSign, Calendar, Tag, Download, FileText, ChevronRight } from "lucide-react";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
@@ -82,7 +82,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
@@ -100,10 +100,10 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="bg-gradient-to-br from-green-50 to-green-100">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-green-700 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
+                <Calendar className="h-4 w-4" />
                 Average Interest Rate
               </CardTitle>
             </CardHeader>
@@ -118,7 +118,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-purple-700 flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
@@ -136,7 +136,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100">
+          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-amber-700 flex items-center gap-2">
                 <Tag className="h-4 w-4" />
@@ -150,54 +150,33 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         </motion.div>
       </div>
 
-      {/* Chart and Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div 
-          className="lg:col-span-2"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Debt Distribution</CardTitle>
-              <CardDescription>Overview of your debt portfolio</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <DebtOverviewChart debts={debts} />
+      {/* Categories Section */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Debt Categories</CardTitle>
+            <CardDescription>Breakdown by category</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px] pr-4">
+              <div className="space-y-4">
+                {Object.entries(categories).map(([category, amount]) => (
+                  <div key={category} className="flex justify-between items-center">
+                    <span className="font-medium">{category}</span>
+                    <span className="text-muted-foreground">
+                      {currencySymbol}{amount.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Debt Categories</CardTitle>
-              <CardDescription>Breakdown by category</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-4">
-                  {Object.entries(categories).map(([category, amount]) => (
-                    <div key={category} className="flex justify-between items-center">
-                      <span className="font-medium">{category}</span>
-                      <span className="text-muted-foreground">
-                        {debts[0]?.currency_symbol || '£'}{amount.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Redesigned Download Report Section */}
       <motion.div
@@ -222,9 +201,9 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                 <h4 className="font-medium text-purple-800 dark:text-purple-300">Report Contents:</h4>
                 <ul className="space-y-2">
                   {[
-                    { icon: <TrendingUp className="h-4 w-4" />, text: "Debt Distribution Analysis" },
+                    { icon: <DollarSign className="h-4 w-4" />, text: "Debt Distribution Analysis" },
                     { icon: <Calendar className="h-4 w-4" />, text: "Payment Timeline" },
-                    { icon: <DollarSign className="h-4 w-4" />, text: "Interest Savings" },
+                    { icon: <DollarSign className="h-4 w-4" />, text: "Interest Analysis" },
                     { icon: <Tag className="h-4 w-4" />, text: "Category Breakdown" }
                   ].map((item, index) => (
                     <li key={index} className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
