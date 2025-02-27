@@ -1,4 +1,3 @@
-
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -83,7 +82,7 @@ export default function Strategy() {
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
-        <div className="container max-w-7xl mx-auto py-8">
+        <div className="container max-w-7xl py-8 space-y-8">
           <StrategyHeader />
           
           <DebtCalculationProvider>
