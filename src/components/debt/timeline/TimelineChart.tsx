@@ -1,5 +1,5 @@
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { format, parseISO, addMonths } from "date-fns";
@@ -177,7 +177,17 @@ export const TimelineChart = ({
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
+        <AreaChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
+          <defs>
+            <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#E2E8F0" stopOpacity={0.8}/>
+              <stop offset="100%" stopColor="#F8FAFC" stopOpacity={0.2}/>
+            </linearGradient>
+            <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0FD396" stopOpacity={0.8}/>
+              <stop offset="100%" stopColor="#E6FEF6" stopOpacity={0.2}/>
+            </linearGradient>
+          </defs>
           <CartesianGrid 
             vertical={false} 
             horizontal={true} 
@@ -212,7 +222,7 @@ export const TimelineChart = ({
           <Legend 
             verticalAlign="bottom"
             height={36}
-            iconType="line"
+            iconType="circle"
             formatter={(value) => (
               <span style={{ color: '#64748B', fontSize: '14px' }}>
                 {value}
@@ -238,37 +248,41 @@ export const TimelineChart = ({
           {acceleratedPayoffDate && (
             <ReferenceLine
               x={acceleratedPayoffDate}
-              stroke="#10B981"
+              stroke="#0FD396"
               strokeWidth={2}
               label={{
                 value: "Debt-Free!",
                 position: 'top',
-                fill: '#10B981',
+                fill: '#0FD396',
                 fontSize: 12,
                 fontWeight: 'bold'
               }}
             />
           )}
           
-          <Line
+          <Area
             type="monotone"
             dataKey="baselineBalance"
             name="Original Timeline"
-            stroke="#059669"
+            stroke="#94A3B8"
             strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#baselineGradient)"
             dot={false}
             connectNulls
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="acceleratedBalance"
             name="Accelerated Timeline"
-            stroke="#10B981"
+            stroke="#0FD396"
             strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#acceleratedGradient)"
             dot={false}
             connectNulls
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
