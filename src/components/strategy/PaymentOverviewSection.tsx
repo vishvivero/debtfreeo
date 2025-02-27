@@ -41,8 +41,15 @@ export const PaymentOverviewSection = ({
         <div className="grid gap-6 md:grid-cols-2">
           <div className="p-4 rounded-lg bg-gray-50/50 border border-gray-200">
             <div className="text-sm text-gray-600 mb-2">Required Monthly Payment</div>
-            <div className="text-gray-700">
-              {formatCurrency(totalMinimumPayments, currencySymbol)}
+            <div className="flex items-center h-10">
+              <div className="relative flex-1">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                  <span className="text-gray-500">{currencySymbol}</span>
+                </div>
+                <div className="pl-9 py-2 text-gray-700">
+                  {formatCurrency(totalMinimumPayments, currencySymbol).replace(currencySymbol, '')}
+                </div>
+              </div>
             </div>
           </div>
           
