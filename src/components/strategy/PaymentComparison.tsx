@@ -32,7 +32,8 @@ export const PaymentComparison = ({
     baselineInterest: timelineResults.baselineInterest,
     acceleratedInterest: timelineResults.acceleratedInterest,
     baselineMonths: timelineResults.baselineMonths,
-    acceleratedMonths: timelineResults.acceleratedMonths
+    acceleratedMonths: timelineResults.acceleratedMonths,
+    oneTimeFundingsCount: oneTimeFundings.length
   });
 
   return (
@@ -69,6 +70,14 @@ export const PaymentComparison = ({
           <p className="text-sm text-emerald-600">
             Months to Pay Off: {Math.ceil(timelineResults.acceleratedMonths)}
           </p>
+          {oneTimeFundings.length > 0 && (
+            <p className="text-sm text-emerald-600">
+              Lump Sum Payments: {formatCurrency(
+                oneTimeFundings.reduce((sum, fund) => sum + Number(fund.amount), 0), 
+                currencySymbol
+              )}
+            </p>
+          )}
         </div>
       </div>
     </div>

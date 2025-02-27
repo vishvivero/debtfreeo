@@ -37,6 +37,7 @@ export const ResultsDialog = ({
 }: ResultsDialogProps) => {
   const { toast } = useToast();
   const [currentView, setCurrentView] = useState<'initial' | 'timeline' | 'insights'>('initial');
+  const hasOneTimeFundings = oneTimeFundings.length > 0;
 
   if (isOpen) {
     confetti({
@@ -55,7 +56,9 @@ export const ResultsDialog = ({
     totalMinimumPayment,
     extraPayment,
     totalMonthlyPayment,
-    selectedStrategy: selectedStrategy.name
+    selectedStrategy: selectedStrategy.name,
+    oneTimeFundings: oneTimeFundings.length,
+    hasOneTimeFundings
   });
 
   const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
@@ -139,6 +142,7 @@ export const ResultsDialog = ({
                 <PayoffTimeline
                   debts={debts}
                   extraPayment={extraPayment}
+                  enableOneTimeFundings={hasOneTimeFundings}
                 />
                 <div className="mt-6 flex justify-between gap-4">
                   <Button 
@@ -250,6 +254,30 @@ export const ResultsDialog = ({
                   />
                 </motion.div>
 
+                {/* Only show one-time payment information if they are enabled */}
+                {hasOneTimeFundings && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45 }}
+                    className="bg-purple-50 p-4 rounded-lg border border-purple-100"
+                  >
+                    <h3 className="font-semibold text-purple-800 mb-2">
+                      Lump Sum Payments Impact
+                    </h3>
+                    <p className="text-sm text-purple-700">
+                      You've included {oneTimeFundings.length > 1 
+                        ? `${oneTimeFundings.length} lump sum payments` 
+                        : "a lump sum payment"} 
+                      {oneTimeFundings.length > 1 ? " that total " : " of "}
+                      <span className="font-semibold">
+                        {currencySymbol}{oneTimeFundings.reduce((sum, f) => sum + Number(f.amount), 0).toLocaleString()}
+                      </span>. 
+                      These payments significantly accelerate your debt payoff timeline.
+                    </p>
+                  </motion.div>
+                )}
+
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -283,4 +311,3 @@ export const ResultsDialog = ({
     </Dialog>
   );
 };
-
