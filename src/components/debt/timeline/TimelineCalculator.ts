@@ -27,6 +27,9 @@ export interface TimelineData {
 // Flag to enable/disable detailed logging
 const ENABLE_DETAILED_LOGGING = true;
 
+/**
+ * Calculates the timeline data for debt repayment, including one-time funding impacts
+ */
 export const calculateTimelineData = (
   debts: Debt[],
   totalMonthlyPayment: number,
@@ -63,7 +66,12 @@ export const calculateTimelineData = (
     ...funding,
     payment_date: normalizeDate(funding.payment_date) || new Date().toISOString(),
     amount: Number(funding.amount)
-  }));
+  })).sort((a, b) => {
+    // Sort by date (earliest first)
+    const dateA = new Date(a.payment_date);
+    const dateB = new Date(b.payment_date);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   if (ENABLE_DETAILED_LOGGING) {
     console.log('[TIMELINE DEBUG] Starting calculation with initial balances:', {
@@ -81,7 +89,7 @@ export const calculateTimelineData = (
     });
   }
 
-  // Create a map to track months where we've already generated "before funding" and "after funding" points
+  // Create a map to track months where we've already generated points for funding
   const processedFundingMonths = new Map<string, boolean>();
 
   while (month < maxMonths) {

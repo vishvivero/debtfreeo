@@ -66,6 +66,13 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
               {currencySymbol}{Math.max(0, baselineBalance - acceleratedBalance).toLocaleString()}
             </span>
           </div>
+          
+          {/* Summary information */}
+          {oneTimePayment && (
+            <div className="mt-2 pt-2 border-t text-xs text-purple-700">
+              This one-time payment accelerates your debt payoff timeline.
+            </div>
+          )}
         </div>
       </div>
     );

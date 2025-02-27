@@ -49,11 +49,6 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
     }
   };
 
-  // Custom step function for the chart
-  const getStepType = () => {
-    return "step";
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
