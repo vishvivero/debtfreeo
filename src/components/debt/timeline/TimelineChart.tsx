@@ -17,7 +17,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
     // Ensure payment_date is a string for ReferenceLine
     payment_date: typeof funding.payment_date === 'string' 
       ? funding.payment_date 
-      : funding.payment_date.toISOString()
+      : new Date(funding.payment_date as unknown as string).toISOString() // Fix type casting issue
   }));
 
   return (
