@@ -1,12 +1,19 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Percent, Wallet, Coins } from "lucide-react";
+import { CreditCard, Percent, Wallet, Coins, Info } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -37,7 +44,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         currency_symbol: currencySymbol,
         next_payment_date: date.toISOString(),
         category,
-        status: 'active' as const // Add status field
+        status: 'active' as const
       };
 
       console.log("Submitting debt:", newDebt);
@@ -92,7 +99,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         </div>
 
         <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Outstanding Debt Balance</Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium text-gray-700">Outstanding Debt Balance</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Enter the current outstanding balance from your latest statement. For loans, this should be the remaining principal plus any pre-calculated interest if shown in your statement.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Wallet className="h-5 w-5 text-gray-400" />
@@ -111,7 +130,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         </div>
 
         <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Enter the Annual Percentage Rate (APR) for this debt. For loans with pre-calculated interest in the balance, you can enter 0% if you don't want additional interest calculations.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Percent className="h-5 w-5 text-gray-400" />
@@ -131,7 +162,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         </div>
 
         <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Minimum Payment / EMI</Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium text-gray-700">Minimum Payment / EMI</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Enter your fixed monthly payment (EMI) or minimum payment amount. For loans with pre-calculated interest, this is your regular installment amount.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Coins className="h-5 w-5 text-gray-400" />
