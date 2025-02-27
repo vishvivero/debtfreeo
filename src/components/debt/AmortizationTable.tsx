@@ -21,7 +21,7 @@ export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: Am
       <h2 className="text-2xl font-semibold mb-4">Amortization Schedule for {debt.name}</h2>
       
       {isInterestIncluded && (
-        <Alert variant="info" className="mb-4 bg-blue-50 border-blue-200">
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
           <AlertCircle className="h-4 w-4 text-blue-500" />
           <AlertDescription className="text-blue-700">
             This loan has pre-calculated interest included in the balance. 
