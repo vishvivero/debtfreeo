@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DollarSign, ArrowRight, RotateCw, TrendingUp } from "lucide-react";
+import { Wallet, ArrowRight, RotateCw } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 
 interface PaymentOverviewSectionProps {
@@ -32,29 +31,25 @@ export const PaymentOverviewSection = ({
     <Card className="bg-white/95">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-emerald-500" />
-          Accelerate Your Debt Payoff
+          <Wallet className="h-5 w-5 text-primary" />
+          Monthly Payments
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Add extra payments to reduce your debt faster and save on interest
+          Track and manage your monthly debt payments
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="p-4 rounded-lg bg-blue-50/50 border border-blue-100">
-            <div className="text-sm text-blue-600 mb-2">Required Monthly Payment</div>
-            <div className="text-2xl font-semibold text-blue-700">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <span className="text-sm text-gray-600">Minimum Payments</span>
+            <span className="font-medium">
               {formatCurrency(totalMinimumPayments, currencySymbol)}
-            </div>
+            </span>
           </div>
-          
-          <div className="p-4 rounded-lg bg-emerald-50/50 border border-emerald-100">
-            <div className="text-sm text-emerald-600 mb-2">Extra Monthly Payment</div>
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <span className="text-sm text-gray-600">Extra Payment</span>
             <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <DollarSign className="h-4 w-4 text-gray-500" />
-                </div>
+              <div className="relative">
                 <Input
                   type="number"
                   value={extraPayment || ''}
@@ -64,39 +59,35 @@ export const PaymentOverviewSection = ({
                     onExtraPaymentChange(Math.min(value, maxValue));
                   }}
                   max={totalDebtValue}
-                  className="pl-9 text-emerald-600 font-medium"
-                  placeholder="0"
+                  className="w-32 pl-3 pr-10 text-left"
                 />
+                {extraPayment > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleReset}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-gray-100"
+                  >
+                    <RotateCw className="h-4 w-4 text-gray-500" />
+                  </Button>
+                )}
               </div>
-              {extraPayment > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleReset}
-                  className="h-10 w-10 rounded-full hover:bg-emerald-100/80"
-                >
-                  <RotateCw className="h-4 w-4 text-emerald-500" />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                onClick={onOpenExtraPaymentDialog}
+                className="text-primary hover:text-primary/90 min-w-[100px] text-center"
+              >
+                {formatCurrency(extraPayment, currencySymbol)}
+              </Button>
             </div>
           </div>
-        </div>
-
-        <div className="border-t pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-              <div className="text-sm text-gray-500 mb-1">Total Monthly Payment</div>
-              <div className="text-2xl font-bold text-gray-900">
+          <div className="pt-2 border-t">
+            <div className="flex justify-between items-center flex-wrap gap-2">
+              <span className="font-medium">Total Monthly Payment</span>
+              <span className="font-medium text-primary">
                 {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
-              </div>
+              </span>
             </div>
-            <Button
-              onClick={onOpenExtraPaymentDialog}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 w-full md:w-auto"
-            >
-              <span>Calculate Impact</span>
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </div>
         </div>
       </CardContent>
