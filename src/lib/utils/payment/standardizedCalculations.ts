@@ -1,3 +1,4 @@
+
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { addMonths } from "date-fns";
@@ -31,11 +32,21 @@ export const calculateMonthlyInterest = (balance: number, annualRate: number): n
 
 // Add the new utility functions
 export const isDebtPayable = (debt: Debt): boolean => {
+  // For zero interest debt, it's payable if there's any minimum payment
+  if (debt.interest_rate === 0) {
+    return debt.minimum_payment > 0;
+  }
+  
   const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
   return debt.minimum_payment > monthlyInterest;
 };
 
 export const getMinimumViablePayment = (debt: Debt): number => {
+  // For zero interest debt, any positive payment will work
+  if (debt.interest_rate === 0) {
+    return Math.max(debt.minimum_payment, 1);
+  }
+  
   const monthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
   return Math.ceil(monthlyInterest + 1); // At least $1 more than monthly interest
 };
@@ -48,14 +59,43 @@ export const calculateAmortizationSchedule = (
   console.log('Calculating amortization schedule for:', {
     debtName: debt.name,
     initialBalance: debt.balance,
-    monthlyPayment
+    monthlyPayment,
+    interestRate: debt.interest_rate
   });
 
   const schedule: AmortizationEntry[] = [];
   let currentBalance = debt.balance;
   let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
   const monthlyRate = debt.interest_rate / 1200;
+  
+  // For zero interest loans, calculate based on simple division
+  if (debt.interest_rate === 0) {
+    const payment = Math.min(monthlyPayment, currentBalance);
+    const totalMonths = Math.ceil(currentBalance / payment);
+    
+    for (let month = 0; month < totalMonths; month++) {
+      const remainingPayment = Math.min(payment, currentBalance);
+      const newBalance = Math.max(0, currentBalance - remainingPayment);
+      
+      schedule.push({
+        date: new Date(currentDate),
+        startingBalance: currentBalance,
+        payment: remainingPayment,
+        principal: remainingPayment,
+        interest: 0,
+        endingBalance: newBalance,
+        remainingBalance: newBalance
+      });
+      
+      if (newBalance === 0) break;
+      currentBalance = newBalance;
+      currentDate = addMonths(currentDate, 1);
+    }
+    
+    return schedule;
+  }
 
+  // For interest-bearing loans
   while (currentBalance > 0.01) {
     const monthlyInterest = Number((currentBalance * monthlyRate).toFixed(2));
     const payment = Math.min(monthlyPayment, currentBalance + monthlyInterest);
@@ -95,9 +135,25 @@ export const calculateSingleDebtPayoff = (
   console.log('Calculating single debt payoff:', {
     debtName: debt.name,
     monthlyPayment,
-    strategy: strategy.name
+    strategy: strategy.name,
+    isZeroInterest: debt.interest_rate === 0
   });
 
+  // For zero interest loans, use simple division
+  if (debt.interest_rate === 0) {
+    const payment = Math.max(monthlyPayment, 1); // Avoid division by zero
+    const months = Math.ceil(debt.balance / payment);
+    const payoffDate = addMonths(new Date(), months);
+    
+    return {
+      months,
+      totalInterest: 0,
+      payoffDate,
+      redistributionHistory: []
+    };
+  }
+
+  // For interest-bearing loans
   let totalInterest = 0;
   let months = 0;
   let currentBalance = debt.balance;
@@ -133,7 +189,8 @@ export const calculateMultiDebtPayoff = (
   console.log('🔄 Starting multi-debt payoff calculation:', {
     totalDebts: debts.length,
     totalMonthlyPayment,
-    strategy: strategy.name
+    strategy: strategy.name,
+    zeroInterestDebts: debts.filter(d => d.interest_rate === 0).length
   });
 
   const results: { [key: string]: PayoffDetails } = {};
@@ -146,14 +203,31 @@ export const calculateMultiDebtPayoff = (
 
   // Initialize tracking
   debts.forEach(debt => {
-    results[debt.id] = {
-      months: 0,
-      totalInterest: 0,
-      payoffDate: new Date(),
-      redistributionHistory: []
-    };
+    // Handle zero-interest debts with special calculation
+    if (debt.interest_rate === 0) {
+      const payment = Math.max(debt.minimum_payment, 1); // Avoid division by zero
+      const months = Math.ceil(debt.balance / payment);
+      const payoffDate = addMonths(new Date(), months);
+      
+      results[debt.id] = {
+        months: months,
+        totalInterest: 0,
+        payoffDate: payoffDate,
+        redistributionHistory: []
+      };
+    } else {
+      results[debt.id] = {
+        months: 0,
+        totalInterest: 0,
+        payoffDate: new Date(),
+        redistributionHistory: []
+      };
+    }
     balances.set(debt.id, debt.balance);
   });
+
+  // Filter out zero-interest debts from the main calculation
+  remainingDebts = remainingDebts.filter(debt => debt.interest_rate !== 0);
 
   // Calculate total minimum payments
   const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
@@ -237,6 +311,18 @@ export const calculateMultiDebtPayoff = (
       results[debt.id].months = maxMonths;
       results[debt.id].payoffDate = addMonths(startDate, maxMonths);
     }
+  });
+
+  console.log('Multi-debt payoff calculation complete:', {
+    totalCalculatedMonths: currentMonth,
+    remainingDebtsCount: remainingDebts.length,
+    zeroInterestResults: Object.entries(results)
+      .filter(([id, _]) => debts.find(d => d.id === id)?.interest_rate === 0)
+      .map(([id, detail]) => ({
+        debtId: id,
+        debtName: debts.find(d => d.id === id)?.name,
+        months: detail.months
+      }))
   });
 
   return results;

@@ -32,7 +32,13 @@ export class StandardizedDebtCalculator {
       totalDebts: debts.length,
       monthlyPayment,
       strategy: strategy.name,
-      oneTimeFundings: oneTimeFundings.length
+      oneTimeFundings: oneTimeFundings.length,
+      zeroInterestDebts: debts.filter(d => d.interest_rate === 0).map(d => ({
+        name: d.name,
+        balance: d.balance,
+        minPayment: d.minimum_payment,
+        monthsToPayoff: d.minimum_payment > 0 ? Math.ceil(d.balance / d.minimum_payment) : 'infinite'
+      }))
     });
 
     // Calculate baseline scenario (minimum payments only)
@@ -54,6 +60,15 @@ export class StandardizedDebtCalculator {
     // Ensure consistent precision in final calculations
     const monthsSaved = Math.max(0, baselineResult.months - acceleratedResult.months);
     const interestSaved = InterestCalculator.ensurePrecision(baselineResult.totalInterest - acceleratedResult.totalInterest);
+
+    console.log('Calculation results:', {
+      baselineMonths: baselineResult.months,
+      acceleratedMonths: acceleratedResult.months,
+      baselineInterest: baselineResult.totalInterest,
+      acceleratedInterest: acceleratedResult.totalInterest,
+      monthsSaved,
+      interestSaved
+    });
 
     return {
       baselineMonths: baselineResult.months,

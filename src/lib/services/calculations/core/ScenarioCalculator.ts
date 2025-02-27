@@ -32,12 +32,19 @@ export class ScenarioCalculator {
     const startDate = new Date();
     let releasedPayments = 0;
     const payments: { debtId: string; amount: number; }[] = [];
+    const zeroInterestMonths = new Map<string, number>();
 
-    // Initialize balances with consistent precision
+    // Handle zero-interest debts separately and initialize balances
     debts.forEach(debt => {
+      if (debt.interest_rate === 0) {
+        const payment = Math.max(debt.minimum_payment, 1);
+        const monthsToPayoff = Math.ceil(debt.balance / payment);
+        zeroInterestMonths.set(debt.id, monthsToPayoff);
+      }
       balances.set(debt.id, InterestCalculator.ensurePrecision(debt.balance));
     });
 
+    // Process the calculation
     while (remainingDebts.length > 0 && currentMonth < maxMonths) {
       let availablePayment = monthlyPayment + releasedPayments;
       releasedPayments = 0;
@@ -59,7 +66,11 @@ export class ScenarioCalculator {
       // First apply minimum payments
       for (const debt of remainingDebts) {
         const currentBalance = balances.get(debt.id) || 0;
-        const monthlyInterest = InterestCalculator.calculateMonthlyInterest(currentBalance, debt.interest_rate);
+        
+        // Calculate interest (0 for zero-interest debts)
+        const monthlyInterest = debt.interest_rate === 0 ? 0 : 
+          InterestCalculator.calculateMonthlyInterest(currentBalance, debt.interest_rate);
+        
         totalInterest += monthlyInterest;
         
         const minPayment = Math.min(debt.minimum_payment, currentBalance + monthlyInterest);
@@ -109,10 +120,30 @@ export class ScenarioCalculator {
       currentMonth++;
     }
 
+    // Get the maximum months between current calculation and zero-interest debts
+    const finalMonths = Math.max(
+      currentMonth,
+      ...Array.from(zeroInterestMonths.values())
+    );
+
+    // Calculate final payoff date
+    const finalPayoffDate = new Date(startDate);
+    finalPayoffDate.setMonth(finalPayoffDate.getMonth() + finalMonths);
+
+    console.log('Scenario calculation complete:', {
+      interestBearingMonths: currentMonth,
+      zeroInterestMonths: Array.from(zeroInterestMonths.entries()).map(([id, months]) => ({
+        debtId: id,
+        months
+      })),
+      finalMonths,
+      totalInterest
+    });
+
     return {
-      months: currentMonth,
+      months: finalMonths,
       totalInterest: InterestCalculator.ensurePrecision(totalInterest),
-      finalPayoffDate: new Date(startDate.setMonth(startDate.getMonth() + currentMonth)),
+      finalPayoffDate,
       payments
     };
   }
