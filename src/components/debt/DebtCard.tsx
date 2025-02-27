@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { EditDebtDialog } from "./EditDebtDialog";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 interface DebtCardProps {
   debt: Debt;
@@ -136,10 +137,31 @@ export const DebtCard = ({
     navigate(`/overview/debt/${debt.id}`);
   };
 
+  // Calculate principal for debts with interest included
+  const calculatePrincipal = (): number | null => {
+    if (debt.metadata?.interest_included && debt.metadata.remaining_months) {
+      return InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        debt.interest_rate,
+        debt.minimum_payment,
+        debt.metadata.remaining_months
+      );
+    }
+    return null;
+  };
+
   // Check if this is a debt with interest included
   const isInterestIncluded = debt.metadata?.interest_included === true;
   const originalRate = debt.metadata?.original_rate || debt.interest_rate;
   const payoffDetails = getPayoffDetails(debt);
+
+  // Calculate principal amount for display
+  const calculatedPrincipal = calculatePrincipal();
+  
+  // Determine what to display for balance
+  const displayBalance = isInterestIncluded && calculatedPrincipal !== null 
+    ? calculatedPrincipal 
+    : debt.balance;
 
   // Determine what interest rate to display
   const displayInterestRate = isInterestIncluded ? originalRate : debt.interest_rate;
@@ -177,8 +199,13 @@ export const DebtCard = ({
           <div>
             <p className="text-gray-600 mb-1">Balance</p>
             <p className="text-2xl font-semibold">
-              {debt.currency_symbol}{debt.balance.toLocaleString()}
+              {debt.currency_symbol}{displayBalance.toLocaleString()}
             </p>
+            {isInterestIncluded && calculatedPrincipal !== null && (
+              <p className="text-xs text-blue-600">
+                Principal only (interest excluded)
+              </p>
+            )}
           </div>
           <div>
             <p className="text-gray-600 mb-1">Monthly Payment</p>

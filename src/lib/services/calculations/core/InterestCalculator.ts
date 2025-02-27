@@ -1,112 +1,62 @@
-
+/**
+ * Utilities for standard interest calculations
+ */
 export class InterestCalculator {
-  private static readonly PRECISION = 2;
-
   /**
-   * Calculate monthly interest for a debt balance based on annual interest rate
+   * Calculates monthly interest based on the current balance and annual interest rate
    */
-  public static calculateMonthlyInterest(balance: number, annualRate: number): number {
-    if (annualRate === 0) return 0;
-    
-    const monthlyRate = annualRate / 1200; // Convert to monthly decimal rate
-    return this.ensurePrecision(balance * monthlyRate);
+  static calculateMonthlyInterest(balance: number, annualInterestRate: number): number {
+    // Convert annual rate to monthly rate (divide by 1200 to account for percentage)
+    const monthlyInterestRate = annualInterestRate / 1200;
+    return this.ensurePrecision(balance * monthlyInterestRate);
   }
 
   /**
-   * Calculate total interest over a specified term
+   * Calculates the remaining loan balance after a payment
    */
-  public static calculateTotalInterest(
-    balance: number,
-    annualRate: number,
-    months: number
+  static calculateRemainingBalance(
+    currentBalance: number,
+    payment: number,
+    interestAmount: number
   ): number {
-    if (annualRate === 0) return 0;
-    
-    const monthlyRate = annualRate / 1200;
-    let remainingBalance = balance;
-    let totalInterest = 0;
-    
-    for (let i = 0; i < months; i++) {
-      const monthlyInterest = remainingBalance * monthlyRate;
-      totalInterest += monthlyInterest;
-      remainingBalance = remainingBalance * (1 + monthlyRate);
+    // If payment is less than interest, balance increases
+    if (payment < interestAmount) {
+      return this.ensurePrecision(currentBalance + (interestAmount - payment));
     }
     
-    return this.ensurePrecision(totalInterest);
+    // Otherwise, reduce balance by payment minus interest
+    return this.ensurePrecision(currentBalance - (payment - interestAmount));
   }
 
   /**
-   * Calculate months to pay off at a fixed payment amount
+   * Calculate the principal amount from total loan amount (for loans with pre-calculated interest)
    */
-  public static calculateMonthsToPayoff(
-    balance: number,
-    annualRate: number,
-    monthlyPayment: number
-  ): number {
-    // For zero interest loans, use simple division
-    if (annualRate === 0) {
-      if (monthlyPayment <= 0) return Number.POSITIVE_INFINITY;
-      return Math.ceil(balance / monthlyPayment);
-    }
-    
-    const monthlyRate = annualRate / 1200;
-    
-    // Check if payment is enough to cover interest
-    const monthlyInterest = balance * monthlyRate;
-    if (monthlyPayment <= monthlyInterest) {
-      return Number.POSITIVE_INFINITY; // Loan will never be paid off
-    }
-    
-    // Standard formula for months to pay off with compound interest
-    const term = Math.log(monthlyPayment / (monthlyPayment - monthlyInterest)) / Math.log(1 + monthlyRate);
-    return Math.ceil(term);
-  }
-
-  /**
-   * Calculate the original principal amount from a loan with pre-calculated interest
-   * using the equated monthly installment (EMI) formula
-   * 
-   * P = EMI × ((1 - (1 + r)^(-n)) / r)
-   * 
-   * where:
-   * - EMI is the monthly payment
-   * - r is the monthly interest rate (annual rate / 1200)
-   * - n is the number of months
-   * - P is the original principal amount
-   */
-  public static calculatePrincipalFromTotal(
-    totalAmount: number,
-    annualRate: number,
+  static calculatePrincipalFromTotal(
+    totalLoanAmount: number,
+    annualInterestRate: number,
     monthlyPayment: number,
-    remainingMonths: number
+    loanTermMonths: number
   ): number {
-    // For zero interest loans, the principal is the same as the total
-    if (annualRate === 0 || remainingMonths === 0) {
-      return totalAmount;
+    // For zero interest loans or invalid parameters
+    if (annualInterestRate <= 0 || loanTermMonths <= 0 || monthlyPayment <= 0) {
+      return totalLoanAmount;
     }
+
+    // Convert annual rate to monthly rate
+    const monthlyRate = annualInterestRate / 1200;
     
-    const monthlyRate = annualRate / 1200;
+    // Calculate present value (principal) from future value (total with interest)
+    // Using the standard formula to solve for principal given payment, rate, and term
+    const principalAmount = monthlyPayment * 
+      (1 - Math.pow(1 + monthlyRate, -loanTermMonths)) / monthlyRate;
     
-    // Using the rearranged EMI formula to calculate principal
-    // P = EMI × ((1 - (1 + r)^(-n)) / r)
-    const principalFactor = (1 - Math.pow(1 + monthlyRate, -remainingMonths)) / monthlyRate;
-    const calculatedPrincipal = monthlyPayment * principalFactor;
-    
-    console.log('Calculated principal from total:', {
-      totalAmount,
-      annualRate,
-      monthlyPayment,
-      remainingMonths,
-      calculatedPrincipal
-    });
-    
-    return this.ensurePrecision(calculatedPrincipal);
+    return this.ensurePrecision(principalAmount);
   }
 
   /**
-   * Ensure consistent precision in numerical calculations
+   * Ensures consistent decimal precision for monetary values
    */
-  public static ensurePrecision(value: number): number {
-    return Number(value.toFixed(this.PRECISION));
+  static ensurePrecision(value: number, precision: number = 2): number {
+    return Number(value.toFixed(precision));
   }
 }

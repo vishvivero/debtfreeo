@@ -4,7 +4,9 @@ import { Card } from "@/components/ui/card";
 import { CircularProgress } from "./CircularProgress";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { DollarSign, Calendar, Tag } from "lucide-react";
+import { DollarSign, Calendar, Tag, Info } from "lucide-react";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DebtHeroSectionProps {
   debt: Debt;
@@ -20,12 +22,33 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }:
     ? Math.min(Math.round((totalPaid / totalAmount) * 100), 100)
     : 0;
 
+  // Check if this is a loan with interest included
+  const isInterestIncluded = debt.metadata?.interest_included === true;
+  const remainingMonths = debt.metadata?.remaining_months;
+  
+  // Calculate principal for loans with interest included
+  const calculatedPrincipal = isInterestIncluded && remainingMonths
+    ? InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        debt.interest_rate,
+        debt.minimum_payment,
+        remainingMonths
+      )
+    : null;
+
   console.log('Progress calculation:', {
     totalPaid,
     currentBalance: debt.balance,
     totalAmount,
-    progressPercentage
+    progressPercentage,
+    isInterestIncluded,
+    calculatedPrincipal
   });
+
+  // Determine what to display as the balance
+  const displayBalance = isInterestIncluded && calculatedPrincipal 
+    ? calculatedPrincipal 
+    : debt.balance;
 
   return (
     <motion.div
@@ -47,10 +70,34 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }:
             <div className="flex items-center gap-3">
               <DollarSign className="h-5 w-5 text-emerald-500" />
               <div>
-                <p className="text-sm text-gray-600">Current Balance</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-sm text-gray-600">Current Balance</p>
+                  {isInterestIncluded && calculatedPrincipal && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-blue-400" />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-white">
+                          <p className="text-sm">
+                            {isInterestIncluded 
+                              ? `Showing principal amount only (total with interest: ${currencySymbol}${debt.balance.toLocaleString()})` 
+                              : 'Current outstanding balance'
+                            }
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
                 <p className="text-lg font-semibold">
-                  {currencySymbol}{debt.balance.toLocaleString()}
+                  {currencySymbol}{displayBalance.toLocaleString()}
                 </p>
+                {isInterestIncluded && calculatedPrincipal && (
+                  <span className="text-xs text-blue-600">
+                    Principal only (interest excluded)
+                  </span>
+                )}
               </div>
             </div>
           </Card>

@@ -1,110 +1,186 @@
 
-import { AmortizationEntry } from "@/lib/utils/payment/standardizedCalculations";
+import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Debt } from "@/lib/types/debt";
+import { CheckCircle2, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
-import { Debt } from "@/lib/types";
-import { AlertCircle, Info } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CalculationResult } from "@/lib/utils/payment/standardizedCalculations";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 interface AmortizationTableProps {
-  debt: {
-    name: string;
-    balance?: number;
-    interest_rate?: number;
-    minimum_payment?: number;
-    metadata?: {
-      interest_included?: boolean;
-      remaining_months?: number;
-      original_rate?: number;
-    };
-  };
-  amortizationData: AmortizationEntry[];
+  debt: Debt;
+  amortizationData: CalculationResult[];
   currencySymbol: string;
 }
 
 export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: AmortizationTableProps) => {
+  const [visibleRows, setVisibleRows] = useState(12); // Show first 12 months by default
+  
   const isInterestIncluded = debt.metadata?.interest_included === true;
-  const originalRate = debt.metadata?.original_rate || debt.interest_rate || 0;
-  const remainingMonths = debt.metadata?.remaining_months || 0;
+  const remainingMonths = debt.metadata?.remaining_months;
   
-  let originalPrincipal = debt.balance || 0;
-  let totalInterest = 0;
+  // Calculate principal for loans with interest included
+  const calculatedPrincipal = isInterestIncluded && remainingMonths
+    ? InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        debt.interest_rate,
+        debt.minimum_payment,
+        remainingMonths
+      )
+    : null;
+
+  // Starting balance for the amortization table should be the calculated principal, if applicable
+  const initialBalance = isInterestIncluded && calculatedPrincipal ? calculatedPrincipal : debt.balance;
   
-  // Calculate the original principal amount if interest is included
-  if (isInterestIncluded && debt.balance && debt.minimum_payment && remainingMonths) {
-    originalPrincipal = InterestCalculator.calculatePrincipalFromTotal(
-      debt.balance,
-      originalRate,
-      debt.minimum_payment,
-      remainingMonths
+  // If there's no amortization data, show a message
+  if (!amortizationData || amortizationData.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Amortization Schedule</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Unable to generate amortization schedule for this debt.</p>
+        </CardContent>
+      </Card>
     );
-    
-    // Calculate total interest
-    totalInterest = (debt.minimum_payment * remainingMonths) - originalPrincipal;
   }
+
+  const totalInterest = amortizationData.reduce((sum, row) => sum + row.interestPayment, 0);
+  const totalPayments = amortizationData.reduce((sum, row) => sum + row.payment, 0);
   
+  const loadMoreRows = () => {
+    setVisibleRows(prevValue => prevValue + 12);
+  };
+
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Amortization Schedule for {debt.name}</h2>
-      
-      {isInterestIncluded && (
-        <Alert className="mb-4 bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertTitle className="text-blue-700 font-medium">Interest Already Included</AlertTitle>
-          <AlertDescription className="text-blue-700">
-            <div className="mt-2 space-y-2">
-              <p>
-                This loan has pre-calculated interest included in the balance. Below is the breakdown:
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-                <div className="font-medium">Total with Interest:</div>
-                <div>{currencySymbol}{debt.balance?.toFixed(2)}</div>
-                
-                <div className="font-medium">Original Principal:</div>
-                <div>{currencySymbol}{originalPrincipal.toFixed(2)}</div>
-                
-                <div className="font-medium">Total Interest:</div>
-                <div>{currencySymbol}{totalInterest.toFixed(2)}</div>
-                
-                <div className="font-medium">Interest Rate:</div>
-                <div>{originalRate}%</div>
-                
-                <div className="font-medium">Monthly Payment:</div>
-                <div>{currencySymbol}{debt.minimum_payment?.toFixed(2)}</div>
-                
-                <div className="font-medium">Remaining Months:</div>
-                <div>{remainingMonths}</div>
-              </div>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Payment</TableHead>
-              <TableHead>Principal</TableHead>
-              <TableHead>Interest</TableHead>
-              <TableHead>Remaining Balance</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {amortizationData.map((entry, index) => (
-              <TableRow key={index}>
-                <TableCell>{format(entry.date, 'MMM d, yyyy')}</TableCell>
-                <TableCell>{currencySymbol}{entry.payment.toFixed(2)}</TableCell>
-                <TableCell>{currencySymbol}{entry.principal.toFixed(2)}</TableCell>
-                <TableCell>{currencySymbol}{entry.interest.toFixed(2)}</TableCell>
-                <TableCell>{currencySymbol}{entry.remainingBalance.toFixed(2)}</TableCell>
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-2">
+            Amortization Schedule
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-sm p-4 bg-white border rounded-lg shadow-lg">
+                  <h4 className="font-semibold text-gray-900 mb-2">Amortization Schedule</h4>
+                  <p className="text-sm text-gray-600 mb-2">
+                    This schedule shows how each payment is applied to principal and interest, 
+                    and how your balance decreases over time.
+                  </p>
+                  {isInterestIncluded && calculatedPrincipal !== null && (
+                    <p className="text-sm text-blue-600">
+                      Note: Since your loan includes pre-calculated interest, we're showing the amortization 
+                      based on the calculated principal amount of {currencySymbol}{calculatedPrincipal.toLocaleString()}.
+                    </p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </CardTitle>
+          
+          <div className="text-sm font-medium text-gray-500">
+            Total interest: {currencySymbol}{totalInterest.toLocaleString()}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Payment #</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Payment</TableHead>
+                <TableHead>Principal</TableHead>
+                <TableHead>Interest</TableHead>
+                <TableHead>Remaining Balance</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="bg-gray-50/50">
+                <TableCell className="font-medium">Initial</TableCell>
+                <TableCell>{format(new Date(), 'MMM yyyy')}</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell className="font-medium">
+                  {currencySymbol}{initialBalance.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </TableCell>
+              </TableRow>
+              
+              {amortizationData.slice(0, visibleRows).map((row, index) => (
+                <TableRow key={index} className={row.remainingBalance <= 0 ? 'bg-green-50/50' : ''}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>{format(row.date, 'MMM yyyy')}</TableCell>
+                  <TableCell>{currencySymbol}{row.payment.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}</TableCell>
+                  <TableCell>{currencySymbol}{row.principalPayment.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}</TableCell>
+                  <TableCell>{currencySymbol}{row.interestPayment.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}</TableCell>
+                  <TableCell className="font-medium">
+                    {row.remainingBalance <= 0 ? (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Paid Off
+                      </div>
+                    ) : (
+                      currencySymbol + row.remainingBalance.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        
+        {visibleRows < amortizationData.length && (
+          <div className="mt-4 text-center">
+            <button 
+              onClick={loadMoreRows} 
+              className="text-sm text-primary hover:text-primary/80 font-medium"
+            >
+              Load more months
+            </button>
+          </div>
+        )}
+        
+        <div className="mt-4 p-4 bg-gray-50 rounded-md">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Total Payments</p>
+              <p className="text-lg font-semibold">{currencySymbol}{totalPayments.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Total Interest</p>
+              <p className="text-lg font-semibold">{currencySymbol}{totalInterest.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}</p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
