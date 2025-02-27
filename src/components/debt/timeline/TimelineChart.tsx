@@ -1,13 +1,14 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { TimelineTooltip } from "./TimelineTooltip";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatDate, isSameMonthAndYear } from "@/lib/utils/dateUtils";
 
 interface TimelineChartProps {
   data: any[];
@@ -30,16 +31,17 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
   };
   
   // Find data points that have one-time payments
-  const oneTimePaymentMonths = data.filter(d => d.oneTimePayment).map(d => d.monthLabel);
+  const oneTimePaymentMonths = data
+    .filter(d => d.oneTimePayment)
+    .map(d => d.monthLabel)
+    .filter((value, index, self) => self.indexOf(value) === index); // Deduplicate
   
   // Helper to highlight one-time funding dates
   const isOneTimeFundingMonth = (dateStr: string) => {
     try {
       const date = parseISO(dateStr);
       return formattedFundings.some(funding => {
-        const fundingDate = new Date(String(funding.payment_date));
-        return fundingDate.getMonth() === date.getMonth() && 
-               fundingDate.getFullYear() === date.getFullYear();
+        return isSameMonthAndYear(date, funding.payment_date);
       });
     } catch (error) {
       console.error('Error checking funding date:', error);
@@ -49,6 +51,25 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
 
   return (
     <div className="space-y-4">
+      {/* Payment Legend - Only show when there are one-time payments */}
+      {oneTimePaymentMonths.length > 0 && (
+        <div className="flex items-center gap-3 flex-wrap bg-gray-50 p-2 rounded-md">
+          <div className="text-sm font-medium">Payment Legend:</div>
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span>
+            <span className="text-xs">One-Time Payment</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+            <span className="text-xs">Monthly Payment</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-4 border-t border-dashed border-purple-500"></span>
+            <span className="text-xs">Payment Month</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2 items-center">
           {oneTimePaymentMonths.length > 0 && (
@@ -106,7 +127,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               tickFormatter={(value) => {
                 try {
                   if (!value) return '';
-                  return format(parseISO(value), 'MMM yyyy');
+                  return formatDate(value, 'MMM yyyy');
                 } catch (error) {
                   console.error('Error formatting date:', error);
                   return '';
@@ -130,26 +151,37 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               tickLine={{ stroke: '#9CA3AF' }}
             />
             <Tooltip content={<TimelineTooltip />} />
-            <Legend />
+            <Legend formatter={(value) => {
+              if (value === "Original Timeline") {
+                return <span className="text-gray-600">Original Timeline</span>;
+              }
+              if (value === "Accelerated Timeline") {
+                return <span className="text-emerald-600 font-medium">Accelerated Timeline</span>;
+              }
+              return value;
+            }} />
             
             {/* Render reference lines for one-time funding payments */}
             {formattedFundings.map((funding, index) => {
-              const fundingDate = typeof funding.payment_date === 'string' 
-                ? funding.payment_date 
-                : String(funding.payment_date);
-              
-              // Enhance the visibility of reference lines in debug mode
-              const strokeStyle = debugMode ? 
-                { stroke: "#9333EA", strokeWidth: 3, strokeDasharray: "5 2" } :
-                { stroke: "#9333EA", strokeWidth: 2, strokeDasharray: "5 5" };
+              // Find the data point that matches this funding date
+              const matchingPoint = data.find(d => d.oneTimePayment && 
+                isSameMonthAndYear(d.date, funding.payment_date));
                 
+              if (!matchingPoint) return null;
+              
+              const strokeStyle = { 
+                stroke: "#9333EA", 
+                strokeWidth: debugMode ? 3 : 2, 
+                strokeDasharray: debugMode ? "5 2" : "5 5"
+              };
+              
               return (
                 <ReferenceLine
                   key={index}
-                  x={fundingDate}
+                  x={matchingPoint.date}
                   {...strokeStyle}
                   label={{
-                    value: `${debts[0].currency_symbol}${funding.amount.toLocaleString()}`,
+                    value: `${debts[0].currency_symbol}${Number(funding.amount).toLocaleString()}`,
                     position: 'top',
                     fill: '#9333EA',
                     fontSize: 12,
@@ -171,33 +203,49 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               dot={false}
             />
             <Area
-              type="monotone"
+              // Use step for one-time payments to create more distinct drops
+              type="step"
               dataKey="acceleratedBalance"
               name="Accelerated Timeline"
               stroke="#34D399"
-              strokeWidth={2}
+              strokeWidth={3}
               fillOpacity={1}
               fill="url(#acceleratedGradient)"
               dot={(props) => {
                 // Check if this data point corresponds to a funding date
                 if (!props || !props.payload) return null;
                 
-                const dataDate = props.payload.date;
-                // Check if this is a funding date
-                const isFundingMonth = isOneTimeFundingMonth(dataDate);
-                
-                if (isFundingMonth) {
+                // Draw special dots for one-time payment points
+                if (props.payload.oneTimePayment) {
                   return (
                     <circle
                       cx={props.cx}
                       cy={props.cy}
-                      r={debugMode ? 7 : 5}
+                      r={7}
                       fill="#9333EA"
                       stroke="#FFFFFF"
                       strokeWidth={2}
                     />
                   );
                 }
+                
+                // Draw dots to emphasize the before/after funding points
+                if (
+                  props.payload.paymentDetails?.isPrefundingPoint || 
+                  props.payload.paymentDetails?.isPostfundingPoint
+                ) {
+                  return (
+                    <circle
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={4}
+                      fill={debugMode ? "#34D399" : "transparent"}
+                      stroke={debugMode ? "#FFFFFF" : "transparent"}
+                      strokeWidth={1}
+                    />
+                  );
+                }
+                
                 return null;
               }}
               activeDot={{ r: 6, fill: "#34D399", stroke: "#FFFFFF", strokeWidth: 2 }}
@@ -205,6 +253,17 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      
+      {/* Show savings impact when one-time payments exist */}
+      {oneTimePaymentMonths.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-50 to-green-50 p-3 rounded-md text-sm">
+          <p className="font-medium text-gray-700 mb-1">Impact of One-Time Payments</p>
+          <p className="text-gray-600">
+            Your {formattedFundings.length > 1 ? `${formattedFundings.length} one-time payments` : "one-time payment"} create{formattedFundings.length > 1 ? "" : "s"} vertical drops in the accelerated timeline, 
+            showing an immediate reduction in your debt balance that accelerates your payoff.
+          </p>
+        </div>
+      )}
       
       {/* Debug Data Inspector */}
       {debugMode && showData && (
@@ -227,24 +286,43 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
                   <thead>
                     <tr className="border-b">
                       <th className="py-2 text-left">Month</th>
-                      <th className="py-2 text-left">Date</th>
+                      <th className="py-2 text-left">Type</th>
                       <th className="py-2 text-right">Baseline</th>
                       <th className="py-2 text-right">Accelerated</th>
                       <th className="py-2 text-right">One-Time</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((point, i) => (
-                      <tr key={i} className={`border-b ${point.oneTimePayment ? "bg-purple-50" : ""}`}>
-                        <td className="py-1">{point.monthLabel}</td>
-                        <td className="py-1 text-xs">{new Date(point.date).toISOString().split('T')[0]}</td>
-                        <td className="py-1 text-right">{point.baselineBalance.toLocaleString()}</td>
-                        <td className="py-1 text-right">{point.acceleratedBalance.toLocaleString()}</td>
-                        <td className={`py-1 text-right ${point.oneTimePayment ? "text-purple-700 font-medium" : ""}`}>
-                          {point.oneTimePayment ? point.oneTimePayment.toLocaleString() : "-"}
-                        </td>
-                      </tr>
-                    ))}
+                    {data.map((point, i) => {
+                      let pointType = "Regular";
+                      if (point.oneTimePayment) {
+                        pointType = "Funding";
+                      } else if (point.paymentDetails?.isPrefundingPoint) {
+                        pointType = "Pre-Funding";
+                      } else if (point.paymentDetails?.isPostfundingPoint) {
+                        pointType = "Post-Funding";
+                      }
+                      
+                      return (
+                        <tr key={i} className={`border-b ${
+                          point.oneTimePayment 
+                            ? "bg-purple-100" 
+                            : point.paymentDetails?.isPrefundingPoint 
+                              ? "bg-yellow-50"
+                              : point.paymentDetails?.isPostfundingPoint
+                                ? "bg-green-50"
+                                : ""
+                        }`}>
+                          <td className="py-1">{point.monthLabel}</td>
+                          <td className="py-1 text-xs">{pointType}</td>
+                          <td className="py-1 text-right">{point.baselineBalance.toLocaleString()}</td>
+                          <td className="py-1 text-right">{point.acceleratedBalance.toLocaleString()}</td>
+                          <td className={`py-1 text-right ${point.oneTimePayment ? "text-purple-700 font-medium" : ""}`}>
+                            {point.oneTimePayment ? point.oneTimePayment.toLocaleString() : "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </CardContent>
@@ -274,7 +352,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
                         
                       return (
                         <tr key={i} className="border-b">
-                          <td className="py-1">{new Date(fundingDate).toLocaleDateString()}</td>
+                          <td className="py-1">{formatDate(fundingDate, 'yyyy-MM-dd')}</td>
                           <td className="py-1 text-right">{Number(funding.amount).toLocaleString()}</td>
                           <td className="py-1">{funding.notes || "-"}</td>
                         </tr>
