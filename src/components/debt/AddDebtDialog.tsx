@@ -1,6 +1,7 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
 
@@ -19,9 +20,15 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
   };
 
   const dialogContent = (
-    <DialogContent className="sm:max-w-[500px] p-6 bg-white">
-      <DialogHeader>
+    <DialogContent className="sm:max-w-[600px] p-6 bg-white">
+      <DialogHeader className="flex items-center justify-between">
         <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
+        <button 
+          onClick={onClose}
+          className="rounded-full p-1 hover:bg-gray-100 transition-colors"
+        >
+          <X className="h-5 w-5 text-gray-500" />
+        </button>
       </DialogHeader>
       <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} />
     </DialogContent>
@@ -40,7 +47,7 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol, isOpen, onClose }: Ad
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90 text-white">
+        <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
         </Button>
       </DialogTrigger>

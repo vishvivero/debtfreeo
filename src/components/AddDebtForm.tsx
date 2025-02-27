@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Percent, Wallet, Coins, Info, ChevronDown, ChevronUp, Calculator } from "lucide-react";
+import { CreditCard, Percent, Wallet, Coins, Info, ChevronDown, ChevronUp, Calculator, Calendar } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
-import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   Tooltip,
@@ -20,6 +19,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { addMonths, format } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
@@ -37,6 +37,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const [interestRate, setInterestRate] = useState("");
   const [minimumPayment, setMinimumPayment] = useState("");
   const [date, setDate] = useState<Date>(new Date());
+  const [activeTab, setActiveTab] = useState("basic");
   const [showAdvanced, setShowAdvanced] = useState(false);
   
   // Advanced options
@@ -69,7 +70,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         Number(remainingMonths)
       );
       setCalculatedPrincipal(principal);
-      console.log("Calculated principal:", principal);
       
       // If usePrincipalAsBalance is enabled, update the balance field
       if (usePrincipalAsBalance) {
@@ -82,7 +82,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted with date:", date);
     
     try {
       // Calculate final interest rate based on advanced settings
@@ -91,7 +90,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       // If using remaining months to calculate interest
       if (useRemainingMonths && estimatedInterestRate !== null) {
         finalInterestRate = estimatedInterestRate;
-        console.log("Using calculated interest rate:", finalInterestRate);
       }
       
       // Determine the final balance to use (either original or principal)
@@ -118,8 +116,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         }
       };
 
-      console.log("Submitting debt:", newDebt);
-
       if (onAddDebt) {
         await onAddDebt(newDebt);
       } else {
@@ -142,6 +138,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       setRemainingMonths("");
       setUseRemainingMonths(false);
       setUsePrincipalAsBalance(false);
+      setActiveTab("basic");
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -163,7 +160,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     }
 
     // Simple estimation using trial and error approach
-    // Start with a reasonable guess (e.g., 5%)
     let rate = 5.0;
     const maxIterations = 100;
     const tolerance = 0.01;
@@ -195,324 +191,364 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     return parseFloat(rate.toFixed(2));
   }
 
+  // Format date to MM/DD/YYYY for display
+  const formatDateForDisplay = (date: Date) => {
+    return format(date, 'MM/dd/yyyy');
+  };
+
+  // Format date to YYYY-MM-DD for input value
+  const formatDateForInput = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-6">
-        <DebtCategorySelect value={category} onChange={setCategory} />
-
-        <div className="relative space-y-2">
-          <Label className="text-sm font-medium text-gray-700">Debt Name</Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <CreditCard className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="Credit Card, Personal Loan, etc."
-              required
-            />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 mb-6">
+          <TabsTrigger value="basic" className="text-base">Basic Info</TabsTrigger>
+          <TabsTrigger value="advanced" className="text-base">Advanced Options</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="basic" className="space-y-5">
+          {/* Debt Category */}
+          <div className="space-y-2">
+            <Label className="text-gray-700 font-medium">Debt Category</Label>
+            <DebtCategorySelect value={category} onChange={setCategory} />
           </div>
-        </div>
 
-        <div className="relative space-y-2">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium text-gray-700">Outstanding Debt Balance</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>Enter the current outstanding balance from your latest statement. For loans, this should be the remaining principal plus any pre-calculated interest if shown in your statement.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Wallet className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="number"
-              value={balance}
-              onChange={(e) => setBalance(e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="10000"
-              required
-              min="0"
-              step="0.01"
-            />
-          </div>
-        </div>
-
-        <div className="relative space-y-2">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Enter the Annual Percentage Rate (APR) for this debt. For loans with pre-calculated interest in the balance, enter the original interest rate.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Percent className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="number"
-              value={interestRate}
-              onChange={(e) => setInterestRate(e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="5.5"
-              required={!useRemainingMonths}
-              disabled={useRemainingMonths}
-              min="0"
-              max="100"
-              step="0.1"
-            />
-          </div>
-        </div>
-
-        <div className="relative space-y-2">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm font-medium text-gray-700">Minimum Payment / EMI</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Enter your fixed monthly payment (EMI) or minimum payment amount. For loans with pre-calculated interest, this is your regular installment amount.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Coins className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="number"
-              value={minimumPayment}
-              onChange={(e) => setMinimumPayment(e.target.value)}
-              className="pl-10 bg-white hover:border-primary/50 transition-colors"
-              placeholder="250"
-              required
-              min="0"
-              step="0.01"
-            />
-          </div>
-        </div>
-
-        <DebtDateSelect 
-          date={date} 
-          onSelect={(newDate) => {
-            console.log("Date selected in form:", newDate);
-            newDate && setDate(newDate);
-          }} 
-        />
-
-        <Collapsible
-          open={showAdvanced}
-          onOpenChange={setShowAdvanced}
-          className="border rounded-md p-4 bg-gray-50"
-        >
-          <CollapsibleTrigger className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <Calculator className="h-4 w-4 text-primary" />
-              <span className="font-medium">Advanced Options</span>
-            </div>
-            {showAdvanced ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pt-4">
-            {/* Advanced options - wider format with columns when expanded */}
-            <div className={`${showAdvanced ? "grid md:grid-cols-2 gap-6" : "space-y-4"}`}>
-              {/* Left column - Interest Already Included */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="interest-included" className="font-medium">
-                        Interest Already Included
-                      </Label>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Info className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Turn this on if your loan balance already includes all future interest. Common for personal loans and auto loans in some countries. We'll calculate the original principal based on your interest rate and payment schedule.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      The outstanding balance includes all future interest
-                    </p>
-                  </div>
-                  <Switch
-                    id="interest-included"
-                    checked={isInterestIncluded}
-                    onCheckedChange={(checked) => {
-                      setIsInterestIncluded(checked);
-                      // Can't use both options at once
-                      if (checked) {
-                        setUseRemainingMonths(false);
-                        // Require remaining months if interest is included
-                        if (!remainingMonths) {
-                          setRemainingMonths("12");
-                        }
-                      } else {
-                        // Reset this option when turning off interest included
-                        setUsePrincipalAsBalance(false);
-                      }
-                    }}
-                  />
-                </div>
-
-                {isInterestIncluded && (
-                  <div>
-                    <Label htmlFor="remaining-months" className="text-sm font-medium">
-                      Remaining Months
-                    </Label>
-                    <Input
-                      id="remaining-months"
-                      type="number"
-                      value={remainingMonths}
-                      onChange={(e) => setRemainingMonths(e.target.value)}
-                      placeholder="36"
-                      className="mt-1"
-                      min="1"
-                      required={isInterestIncluded}
-                    />
-                    
-                    {balance && minimumPayment && remainingMonths && interestRate && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
-                        <p className="text-sm font-medium text-blue-800">
-                          Estimated payoff: {format(addMonths(new Date(), parseInt(remainingMonths)), 'MMMM yyyy')}
-                        </p>
-                        <p className="text-sm font-medium text-blue-800 mt-1">
-                          Original interest rate: {interestRate}%
-                        </p>
-                        {calculatedPrincipal !== null && (
-                          <>
-                            <p className="text-sm font-medium text-blue-800 mt-1">
-                              Calculated principal: {currencySymbol}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                            </p>
-                            <p className="text-sm font-medium text-blue-800 mt-1">
-                              Interest amount: {currencySymbol}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
-                            </p>
-                            
-                            <div className="mt-3 flex items-center justify-between">
-                              <Label htmlFor="use-principal" className="font-medium text-blue-800">
-                                Use principal as balance
-                              </Label>
-                              <Switch
-                                id="use-principal"
-                                checked={usePrincipalAsBalance}
-                                onCheckedChange={setUsePrincipalAsBalance}
-                              />
-                            </div>
-                            {usePrincipalAsBalance && (
-                              <p className="text-sm text-blue-600 mt-2">
-                                Balance will be updated to the calculated principal amount
-                              </p>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+          {/* Debt Name */}
+          <div className="space-y-2">
+            <Label className="text-gray-700 font-medium">Debt Name</Label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <CreditCard className="h-5 w-5 text-gray-400" />
               </div>
-              
-              {/* Right column - Calculate Interest from Remaining Months */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="use-months" className="font-medium">
-                        Calculate Interest from Remaining Months
-                      </Label>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Info className="h-4 w-4 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>If you know how many months are left on your loan, we can calculate the interest rate for you. This is useful when you don't know the exact interest rate but know the payoff timeline.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Calculate interest rate from payment schedule
-                    </p>
-                  </div>
-                  <Switch
-                    id="use-months"
-                    checked={useRemainingMonths}
-                    onCheckedChange={(checked) => {
-                      setUseRemainingMonths(checked);
-                      // Can't use both options at once
-                      if (checked) {
-                        setIsInterestIncluded(false);
-                        setUsePrincipalAsBalance(false);
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="pl-10 py-6 rounded-md"
+                placeholder="Enter debt name"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Balance */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1">
+              <Label className="text-gray-700 font-medium">Outstanding Balance</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Enter the current outstanding balance from your latest statement</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Wallet className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="number"
+                value={balance}
+                onChange={(e) => setBalance(e.target.value)}
+                className="pl-10 py-6 rounded-md"
+                placeholder="Enter balance amount"
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          {/* Interest Rate */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1">
+              <Label className="text-gray-700 font-medium">Interest Rate (%)</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Enter the Annual Percentage Rate (APR) for this debt</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Percent className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="number"
+                value={interestRate}
+                onChange={(e) => setInterestRate(e.target.value)}
+                className="pl-10 py-6 rounded-md"
+                placeholder="Enter interest rate"
+                required={!useRemainingMonths}
+                disabled={useRemainingMonths}
+                min="0"
+                max="100"
+                step="0.1"
+              />
+            </div>
+          </div>
+
+          {/* Minimum Payment */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1">
+              <Label className="text-gray-700 font-medium">Minimum Payment / EMI</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Enter your fixed monthly payment (EMI) or minimum payment amount</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Coins className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="number"
+                value={minimumPayment}
+                onChange={(e) => setMinimumPayment(e.target.value)}
+                className="pl-10 py-6 rounded-md"
+                placeholder="Enter minimum payment"
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          {/* Next Payment Date */}
+          <div className="space-y-2">
+            <Label className="text-gray-700 font-medium">Next Payment Date</Label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Calendar className="h-5 w-5 text-gray-400" />
+              </div>
+              <div className="flex">
+                <Input
+                  type="text"
+                  value={formatDateForDisplay(date)}
+                  readOnly
+                  className="pl-10 py-6 rounded-l-md bg-white flex-1"
+                />
+                <div className="relative">
+                  <Input
+                    type="date"
+                    value={formatDateForInput(date)}
+                    onChange={(e) => e.target.valueAsDate && setDate(e.target.valueAsDate)}
+                    className="sr-only"
+                    min={formatDateForInput(new Date())}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-full rounded-l-none border-l-0 px-3 py-6"
+                    onClick={() => {
+                      const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
+                      if (dateInput) {
+                        dateInput.showPicker();
                       }
                     }}
-                  />
+                  >
+                    <Calendar className="h-5 w-5 text-gray-500" />
+                  </Button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
 
-                {useRemainingMonths && (
-                  <div>
-                    <Label htmlFor="remaining-months" className="text-sm font-medium">
-                      Remaining Months
+        <TabsContent value="advanced" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Interest Already Included */}
+            <div className="p-4 border rounded-lg">
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-1 pr-4">
+                  <div className="flex items-center gap-1">
+                    <Label className="font-medium">
+                      Interest Already Included
                     </Label>
-                    <Input
-                      id="remaining-months"
-                      type="number"
-                      value={remainingMonths}
-                      onChange={(e) => setRemainingMonths(e.target.value)}
-                      placeholder="36"
-                      className="mt-1"
-                      min="1"
-                      required={useRemainingMonths}
-                    />
-                    
-                    {balance && minimumPayment && remainingMonths && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
-                        <p className="text-sm font-medium text-blue-800">
-                          Estimated payoff: {projectedPayoffDate}
-                        </p>
-                        {estimatedInterestRate !== null && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Turn this on if your loan balance already includes all future interest. Common for personal loans and auto loans in some countries.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    The outstanding balance includes all future interest
+                  </p>
+                </div>
+                <Switch
+                  checked={isInterestIncluded}
+                  onCheckedChange={(checked) => {
+                    setIsInterestIncluded(checked);
+                    if (checked) {
+                      setUseRemainingMonths(false);
+                      if (!remainingMonths) {
+                        setRemainingMonths("12");
+                      }
+                    } else {
+                      setUsePrincipalAsBalance(false);
+                    }
+                  }}
+                />
+              </div>
+
+              {isInterestIncluded && (
+                <div>
+                  <Label className="text-sm font-medium">
+                    Remaining Months
+                  </Label>
+                  <Input
+                    type="number"
+                    value={remainingMonths}
+                    onChange={(e) => setRemainingMonths(e.target.value)}
+                    placeholder="36"
+                    className="mt-1"
+                    min="1"
+                    required={isInterestIncluded}
+                  />
+                  
+                  {balance && minimumPayment && remainingMonths && interestRate && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                      <p className="text-sm font-medium text-blue-800">
+                        Estimated payoff: {format(addMonths(new Date(), parseInt(remainingMonths)), 'MMMM yyyy')}
+                      </p>
+                      <p className="text-sm font-medium text-blue-800 mt-1">
+                        Original interest rate: {interestRate}%
+                      </p>
+                      {calculatedPrincipal !== null && (
+                        <>
                           <p className="text-sm font-medium text-blue-800 mt-1">
-                            Estimated interest rate: {estimatedInterestRate}%
+                            Calculated principal: {currencySymbol}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
                           </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                          <p className="text-sm font-medium text-blue-800 mt-1">
+                            Interest amount: {currencySymbol}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
+                          </p>
+                          
+                          <div className="mt-3 flex items-center justify-between">
+                            <Label htmlFor="use-principal" className="font-medium text-blue-800">
+                              Use principal as balance
+                            </Label>
+                            <Switch
+                              id="use-principal"
+                              checked={usePrincipalAsBalance}
+                              onCheckedChange={setUsePrincipalAsBalance}
+                              size="sm"
+                            />
+                          </div>
+                          {usePrincipalAsBalance && (
+                            <p className="text-sm text-blue-600 mt-2">
+                              Balance will be updated to the calculated principal amount
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
+            
+            {/* Calculate Interest from Remaining Months */}
+            <div className="p-4 border rounded-lg">
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-1 pr-4">
+                  <div className="flex items-center gap-1">
+                    <Label className="font-medium">
+                      Calculate Interest from Remaining Months
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>If you know how many months are left on your loan, we can calculate the interest rate for you.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Calculate interest rate from payment schedule
+                  </p>
+                </div>
+                <Switch
+                  checked={useRemainingMonths}
+                  onCheckedChange={(checked) => {
+                    setUseRemainingMonths(checked);
+                    if (checked) {
+                      setIsInterestIncluded(false);
+                      setUsePrincipalAsBalance(false);
+                    }
+                  }}
+                />
+              </div>
+
+              {useRemainingMonths && (
+                <div>
+                  <Label className="text-sm font-medium">
+                    Remaining Months
+                  </Label>
+                  <Input
+                    type="number"
+                    value={remainingMonths}
+                    onChange={(e) => setRemainingMonths(e.target.value)}
+                    placeholder="36"
+                    className="mt-1"
+                    min="1"
+                    required={useRemainingMonths}
+                  />
+                  
+                  {balance && minimumPayment && remainingMonths && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                      <p className="text-sm font-medium text-blue-800">
+                        Estimated payoff: {projectedPayoffDate}
+                      </p>
+                      {estimatedInterestRate !== null && (
+                        <p className="text-sm font-medium text-blue-800 mt-1">
+                          Estimated interest rate: {estimatedInterestRate}%
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="pt-4 pb-2 px-1">
+            <p className="text-sm text-gray-500">
+              These advanced options help you correctly set up loans with pre-calculated interest or loans 
+              where you may not know the exact interest rate but know the payoff timeline.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Button 
         type="submit" 
-        className="w-full bg-primary hover:bg-primary/90 text-white transition-colors"
+        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-6"
       >
         Add Debt
       </Button>
