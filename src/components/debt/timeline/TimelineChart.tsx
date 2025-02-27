@@ -1,3 +1,4 @@
+
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { parseISO } from "date-fns";
@@ -48,25 +49,9 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
     }
   };
 
-  // Custom curve type for one-time payments to create more distinct drops
-  const stepAfter = (context: any) => {
-    const { current, next } = context;
-    
-    // If next point has a one-time payment or current point is a pre-funding point,
-    // draw a step line instead of curved line
-    if (
-      (next?.payload?.oneTimePayment || 
-       current?.payload?.paymentDetails?.isPrefundingPoint || 
-       next?.payload?.paymentDetails?.isPostfundingPoint)
-    ) {
-      // Draw a step (horizontal then vertical)
-      return `L ${next.x},${current.y} L ${next.x},${next.y}`;
-    }
-    
-    // Otherwise use monotone curve
-    const x = next.x;
-    const y = next.y;
-    return `L ${x},${y}`;
+  // Custom step function for the chart
+  const getStepType = () => {
+    return "step";
   };
 
   return (
@@ -196,8 +181,8 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               dot={false}
             />
             <Area
-              // Use custom curve type for one-time payments to create more distinct drops
-              type={stepAfter}
+              // Use step for one-time payments to create more distinct drops
+              type="step"
               dataKey="acceleratedBalance"
               name="Accelerated Timeline"
               stroke="#34D399"

@@ -359,7 +359,8 @@ export const calculateTimelineData = (
     }
 
     // Break if both scenarios are paid off
-    if (totalBaselineBalance <= 0.01 && totalAcceleratedBalance <= 0.01) {
+    if (Array.from(balances.values()).reduce((sum, balance) => sum + balance, 0) <= 0.01 && 
+        Array.from(acceleratedBalances.values()).reduce((sum, balance) => sum + balance, 0) <= 0.01) {
       break;
     }
 
