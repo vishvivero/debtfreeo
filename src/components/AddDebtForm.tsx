@@ -45,6 +45,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const [remainingMonths, setRemainingMonths] = useState("");
   const [useRemainingMonths, setUseRemainingMonths] = useState(false);
   const [calculatedPrincipal, setCalculatedPrincipal] = useState<number | null>(null);
+  const [usePrincipalAsBalance, setUsePrincipalAsBalance] = useState(false);
   
   // Calculate projected payoff date based on remaining months
   const projectedPayoffDate = useRemainingMonths && remainingMonths ? 
@@ -70,10 +71,15 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       );
       setCalculatedPrincipal(principal);
       console.log("Calculated principal:", principal);
+      
+      // If usePrincipalAsBalance is enabled, update the balance field
+      if (usePrincipalAsBalance) {
+        setBalance(principal.toFixed(2));
+      }
     } else {
       setCalculatedPrincipal(null);
     }
-  }, [isInterestIncluded, remainingMonths, balance, minimumPayment, interestRate]);
+  }, [isInterestIncluded, remainingMonths, balance, minimumPayment, interestRate, usePrincipalAsBalance]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -89,9 +95,14 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         console.log("Using calculated interest rate:", finalInterestRate);
       }
       
+      // Determine the final balance to use (either original or principal)
+      const finalBalance = usePrincipalAsBalance && calculatedPrincipal !== null
+        ? calculatedPrincipal
+        : Number(balance);
+      
       const newDebt = {
         name,
-        balance: Number(balance),
+        balance: finalBalance,
         interest_rate: finalInterestRate,
         minimum_payment: Number(minimumPayment),
         banker_name: "Not specified",
@@ -104,6 +115,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           interest_included: isInterestIncluded,
           remaining_months: (isInterestIncluded || useRemainingMonths) ? Number(remainingMonths) : null,
           original_rate: isInterestIncluded ? finalInterestRate : null,
+          total_with_interest: isInterestIncluded && !usePrincipalAsBalance ? Number(balance) : null,
         }
       };
 
@@ -130,6 +142,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       setIsInterestIncluded(false);
       setRemainingMonths("");
       setUseRemainingMonths(false);
+      setUsePrincipalAsBalance(false);
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -357,6 +370,9 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
                     if (!remainingMonths) {
                       setRemainingMonths("12");
                     }
+                  } else {
+                    // Reset this option when turning off interest included
+                    setUsePrincipalAsBalance(false);
                   }
                 }}
               />
@@ -394,6 +410,22 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
                         <p className="text-sm font-medium text-blue-800 mt-1">
                           Interest amount: {currencySymbol}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
                         </p>
+                        
+                        <div className="mt-3 flex items-center justify-between">
+                          <Label htmlFor="use-principal" className="font-medium text-blue-800">
+                            Use principal as balance
+                          </Label>
+                          <Switch
+                            id="use-principal"
+                            checked={usePrincipalAsBalance}
+                            onCheckedChange={setUsePrincipalAsBalance}
+                          />
+                        </div>
+                        {usePrincipalAsBalance && (
+                          <p className="text-sm text-blue-600 mt-2">
+                            Balance will be updated to the calculated principal amount
+                          </p>
+                        )}
                       </>
                     )}
                   </div>
@@ -431,6 +463,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
                     // Can't use both options at once
                     if (checked) {
                       setIsInterestIncluded(false);
+                      setUsePrincipalAsBalance(false);
                     }
                   }}
                 />
