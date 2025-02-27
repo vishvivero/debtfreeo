@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Progress } from "@/components/ui/progress";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -41,8 +40,7 @@ export const DebtComparison = () => {
         baselineYears: 0,
         baselineMonths: 0,
         principalPercentage: 0,
-        interestPercentage: 0,
-        savedPercentage: 0
+        interestPercentage: 0
       };
     }
 
@@ -86,11 +84,6 @@ export const DebtComparison = () => {
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
-    // Calculate interest savings percentage
-    const savedPercentage = lastDataPoint.baselineInterest > 0 
-      ? ((lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest) / lastDataPoint.baselineInterest) * 100
-      : 0;
-
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
@@ -104,8 +97,7 @@ export const DebtComparison = () => {
       interestPercentage,
       timeSavedYears,
       timeSavedMonths: timeSavedRemainingMonths,
-      totalTimeSavedMonths: timeSavedMonths,
-      savedPercentage
+      totalTimeSavedMonths: timeSavedMonths
     };
   };
 
@@ -365,66 +357,32 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Redesigned Total Interest (Optimized) */}
-              <div className="p-5 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
-                    <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                    <span className="text-gray-600 dark:text-gray-300">Total Interest (Optimized)</span>
                   </div>
-                  <div className="flex-1">
-                    <span className="text-gray-800 dark:text-gray-200 font-semibold text-lg">
-                      Total Interest (Optimized)
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Info className="w-4 h-4 text-gray-400 ml-2 inline-block align-text-bottom" />
-                          </TooltipTrigger>
-                          <TooltipContent 
-                            side="right" 
-                            className="z-[60] bg-white border-gray-200 shadow-lg"
-                          >
-                            <p>The total interest paid with our optimized strategy</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                  <span className="text-xl font-semibold text-emerald-600">
+                    {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    })}
+                  </span>
+                </div>
+                <div className="mt-4 p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                    <ArrowDown className="w-4 h-4" />
+                    <span className="font-medium">
+                      Save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      })} in interest!
                     </span>
                   </div>
                 </div>
-                
-                <div className="text-sm text-emerald-500 dark:text-emerald-400 mb-4">
-                  Our optimized plan helps you save {currencySymbol}{comparison.moneySaved.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })} in total interest.
-                </div>
-                
-                <div className="flex justify-between text-sm mb-3">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Original Interest: <span className="font-medium text-red-600">{currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })}</span>
-                  </span>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Optimized Interest: <span className="font-medium text-emerald-600">{currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })}</span>
-                  </span>
-                </div>
-                
-                <Progress 
-                  value={comparison.savedPercentage} 
-                  className="h-3 bg-red-200"
-                  indicatorClassName="bg-emerald-500"
-                />
-                
-                <div className="mt-3 text-sm text-center text-gray-600 dark:text-gray-300">
-                  You save {comparison.savedPercentage.toFixed(1)}% on interest payments
-                </div>
               </div>
 
-              {/* What you could do with savings */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
                   With your savings, you could get:
