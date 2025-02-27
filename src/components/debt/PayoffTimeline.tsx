@@ -8,9 +8,14 @@ import { PayoffTimelineContainer } from "./timeline/PayoffTimelineContainer";
 interface PayoffTimelineProps {
   debts: Debt[];
   extraPayment: number;
+  enableOneTimeFundings?: boolean;
 }
 
-export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => {
+export const PayoffTimeline = ({ 
+  debts, 
+  extraPayment,
+  enableOneTimeFundings = true
+}: PayoffTimelineProps) => {
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile } = useProfile();
   
@@ -23,13 +28,14 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   }
 
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
+  const activeOneTimeFundings = enableOneTimeFundings ? oneTimeFundings : [];
 
   return (
     <PayoffTimelineContainer
       debts={debts}
       extraPayment={extraPayment}
       strategy={selectedStrategy}
-      oneTimeFundings={oneTimeFundings}
+      oneTimeFundings={activeOneTimeFundings}
     />
   );
 };

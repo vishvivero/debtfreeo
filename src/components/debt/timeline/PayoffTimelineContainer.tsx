@@ -32,7 +32,8 @@ export const PayoffTimelineContainer = ({
     totalDebts: debts.length,
     extraPayment,
     strategy: strategy.name,
-    oneTimeFundings: oneTimeFundings.length
+    oneTimeFundings: oneTimeFundings.length,
+    oneTimeFundingsEnabled: oneTimeFundings.length > 0
   });
 
   // Format the funding data to ensure it has proper date format

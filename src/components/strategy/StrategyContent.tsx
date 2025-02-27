@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
@@ -144,6 +145,11 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     }
   };
 
+  // Get the active one-time fundings based on the toggle state
+  const getActiveOneTimeFundings = () => {
+    return showOneTimeFunding ? oneTimeFundings : [];
+  };
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <motion.div
@@ -243,6 +249,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <PayoffTimeline
                 debts={debts}
                 extraPayment={extraPayment}
+                enableOneTimeFundings={showOneTimeFunding}
               />
             </motion.div>
           )}
@@ -268,7 +275,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         debts={debts}
         monthlyPayment={currentPayment}
         extraPayment={extraPayment}
-        oneTimeFundings={oneTimeFundings}
+        oneTimeFundings={getActiveOneTimeFundings()}
         selectedStrategy={selectedStrategy}
         currencySymbol={preferredCurrency}
       />
