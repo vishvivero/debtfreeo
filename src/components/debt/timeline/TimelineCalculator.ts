@@ -56,7 +56,7 @@ export const calculateTimelineData = (
       try {
         const fundingDate = typeof funding.payment_date === 'string' 
           ? new Date(funding.payment_date) 
-          : funding.payment_date;
+          : new Date(String(funding.payment_date)); // Convert to string first
           
         return fundingDate.getMonth() === currentDate.getMonth() &&
               fundingDate.getFullYear() === currentDate.getFullYear();
@@ -156,7 +156,7 @@ export const calculateTimelineData = (
   oneTimeFundings.forEach(funding => {
     const fundingDate = typeof funding.payment_date === 'string' 
       ? funding.payment_date 
-      : funding.payment_date.toISOString();
+      : String(funding.payment_date); // Convert to string instead of calling toISOString
 
     // Check if this funding date is already in our data
     const existingDataIndex = data.findIndex(d => d.date === fundingDate);
