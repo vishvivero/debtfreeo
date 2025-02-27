@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -26,6 +27,7 @@ export const DebtComparison = () => {
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
+  const isMobile = useIsMobile();
 
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
@@ -114,7 +116,7 @@ export const DebtComparison = () => {
                     <Info className="w-4 h-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent 
-                    side="right" 
+                    side={isMobile ? "bottom" : "right"} 
                     className="z-[60] bg-white border-gray-200 shadow-lg"
                   >
                     <p>This shows your current debt situation without any optimizations</p>
@@ -141,7 +143,7 @@ export const DebtComparison = () => {
                               <Info className="w-4 h-4 text-gray-400 ml-2 inline-block align-text-bottom" />
                             </TooltipTrigger>
                             <TooltipContent 
-                              side="right" 
+                              side={isMobile ? "bottom" : "right"} 
                               className="z-[60] bg-white border-gray-200 shadow-lg"
                             >
                               <p>Based on minimum payments only (baseline scenario)</p>
@@ -170,19 +172,19 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Payment Efficiency */}
+              {/* Payment Efficiency - Improved for mobile */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center gap-2">
                     <Percent className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">Payment Efficiency</span>
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger className="flex items-center gap-2">
-                          <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
+                        <TooltipTrigger>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
                         <TooltipContent 
-                          side="right" 
+                          side={isMobile ? "bottom" : "right"} 
                           className="z-[60] bg-white border-gray-200 shadow-lg" 
                           sideOffset={5}
                         >
@@ -193,14 +195,14 @@ export const DebtComparison = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                  <div className="space-y-3">
+                    <div className={`grid ${isMobile ? 'grid-cols-2' : 'flex justify-between'} text-sm mb-2`}>
+                      <div className="text-gray-600 dark:text-gray-300">
                         Principal: <span className="font-medium text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-300">
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300 text-right">
                         Interest: <span className="font-medium text-red-600">{comparison.interestPercentage.toFixed(1)}%</span>
-                      </span>
+                      </div>
                     </div>
                     <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                       <div className="h-full flex">
@@ -241,7 +243,7 @@ export const DebtComparison = () => {
                             <Info className="w-4 h-4 text-gray-400 ml-2" />
                           </TooltipTrigger>
                           <TooltipContent 
-                            side="right" 
+                            side={isMobile ? "bottom" : "right"} 
                             className="z-[60] bg-white border-gray-200 shadow-lg"
                           >
                             <p>The total number of active debts in your portfolio</p>
@@ -286,7 +288,7 @@ export const DebtComparison = () => {
                   <TooltipTrigger>
                     <Info className="w-4 h-4 text-emerald-400" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60]">
+                  <TooltipContent side={isMobile ? "bottom" : "right"} className="z-[60]">
                     <p>Your potential savings with our optimized debt repayment strategy</p>
                   </TooltipContent>
                 </Tooltip>
@@ -311,7 +313,7 @@ export const DebtComparison = () => {
                               <Info className="w-4 h-4 text-gray-400 ml-2 inline-block align-text-bottom" />
                             </TooltipTrigger>
                             <TooltipContent 
-                              side="right" 
+                              side={isMobile ? "bottom" : "right"} 
                               className="z-[60] bg-white border-gray-200 shadow-lg"
                             >
                               <p>Based on our optimized payment strategy</p>
