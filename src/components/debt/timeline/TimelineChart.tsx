@@ -1,3 +1,4 @@
+
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { format, parseISO } from "date-fns";
@@ -49,17 +50,21 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           <Tooltip content={<TimelineTooltip />} />
           <Legend />
           
+          {/* Render reference lines for one-time funding payments */}
           {formattedFundings.map((funding, index) => (
             <ReferenceLine
               key={index}
               x={funding.payment_date}
               stroke="#9333EA"
-              strokeDasharray="3 3"
+              strokeWidth={2}
+              strokeDasharray="5 5"
               label={{
-                value: `${debts[0].currency_symbol}${funding.amount}`,
+                value: `${debts[0].currency_symbol}${funding.amount.toLocaleString()}`,
                 position: 'top',
                 fill: '#9333EA',
-                fontSize: 12
+                fontSize: 12,
+                fontWeight: 'bold',
+                offset: 10
               }}
             />
           ))}
@@ -82,7 +87,29 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#acceleratedGradient)"
-            dot={false}
+            dot={(props) => {
+              // Check if this data point corresponds to a funding date
+              if (!props || !props.payload) return null;
+              
+              const dataDate = props.payload.date;
+              // Check if this is a funding date
+              const fundingIndex = formattedFundings.findIndex(f => f.payment_date === dataDate);
+              
+              if (fundingIndex >= 0) {
+                return (
+                  <circle
+                    cx={props.cx}
+                    cy={props.cy}
+                    r={5}
+                    fill="#9333EA"
+                    stroke="#FFFFFF"
+                    strokeWidth={2}
+                  />
+                );
+              }
+              return null;
+            }}
+            activeDot={{ r: 6, fill: "#34D399", stroke: "#FFFFFF", strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>
