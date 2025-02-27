@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
@@ -121,7 +122,7 @@ export const OneTimeFundingSection = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground -mt-4">
           Add extra payments to accelerate your debt payoff
         </p>
         
