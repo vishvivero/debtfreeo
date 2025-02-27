@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Sparkles, DollarSign, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
@@ -11,7 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
-import { ScoreInsightsSection } from "@/components/strategy/sections/ScoreInsightsSection";
+import { PersonalizedActionPlan } from "@/components/strategy/sections/PersonalizedActionPlan";
+
 interface ResultsDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,6 +24,7 @@ interface ResultsDialogProps {
   selectedStrategy: Strategy;
   currencySymbol?: string;
 }
+
 export const ResultsDialog = ({
   isOpen,
   onClose,
@@ -37,6 +40,7 @@ export const ResultsDialog = ({
   } = useToast();
   const [currentView, setCurrentView] = useState<'initial' | 'timeline' | 'insights'>('initial');
   const hasOneTimeFundings = oneTimeFundings.length > 0;
+  
   if (isOpen) {
     confetti({
       particleCount: 100,
@@ -50,6 +54,7 @@ export const ResultsDialog = ({
   // Calculate total minimum payment required
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+  
   console.log('ResultsDialog calculation params:', {
     totalDebts: debts.length,
     totalMinimumPayment,
@@ -59,8 +64,11 @@ export const ResultsDialog = ({
     oneTimeFundings: oneTimeFundings.length,
     hasOneTimeFundings
   });
+  
   const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(debts, totalMonthlyPayment, selectedStrategy, oneTimeFundings);
+  
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
+  
   const handleNext = () => {
     if (currentView === 'initial') {
       setCurrentView('timeline');
@@ -68,6 +76,7 @@ export const ResultsDialog = ({
       setCurrentView('insights');
     }
   };
+  
   const handleBack = () => {
     if (currentView === 'timeline') {
       setCurrentView('initial');
@@ -75,6 +84,7 @@ export const ResultsDialog = ({
       setCurrentView('timeline');
     }
   };
+  
   return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <AnimatePresence mode="wait">
@@ -92,11 +102,11 @@ export const ResultsDialog = ({
         }}>
               <DialogHeader>
                 <DialogTitle className="text-xl sm:text-2xl font-bold">
-                  Your Debt Score Insights
+                  Your Personalized Action Plan
                 </DialogTitle>
               </DialogHeader>
               <div className="mt-4">
-                <ScoreInsightsSection />
+                <PersonalizedActionPlan />
                 <div className="mt-6 flex justify-between">
                   <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
                     <ChevronLeft className="h-4 w-4" />
@@ -122,7 +132,9 @@ export const ResultsDialog = ({
           duration: 0.3
         }}>
               <DialogHeader>
-                
+                <DialogTitle className="text-xl sm:text-2xl font-bold">
+                  Combined Debt Payoff Timeline
+                </DialogTitle>
               </DialogHeader>
               <div className="mt-4">
                 <PayoffTimeline debts={debts} extraPayment={extraPayment} enableOneTimeFundings={hasOneTimeFundings} />

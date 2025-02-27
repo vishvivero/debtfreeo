@@ -6,7 +6,7 @@ import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
-import { ScoreInsightsSection } from "./sections/ScoreInsightsSection";
+import { PersonalizedActionPlan } from "./sections/PersonalizedActionPlan";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { ResultsDialog } from "./ResultsDialog";
@@ -236,7 +236,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <ScoreInsightsSection />
+            <PersonalizedActionPlan />
           </motion.div>
 
           {debts.length > 0 && (
