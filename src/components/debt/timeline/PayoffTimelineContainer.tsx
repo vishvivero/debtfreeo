@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown } from "lucide-react";
@@ -33,8 +34,13 @@ export const PayoffTimelineContainer = ({
     oneTimeFundings: oneTimeFundings.length
   });
 
-  // Keep fundings as is, let TimelineCalculator handle date conversion
-  const formattedFundings = [...oneTimeFundings];
+  // Format the funding data to ensure it has proper date format
+  const formattedFundings = oneTimeFundings.map(funding => ({
+    ...funding,
+    payment_date: typeof funding.payment_date === 'string' ? funding.payment_date : funding.payment_date.toISOString()
+  }));
+
+  console.log('Formatted fundings:', formattedFundings);
 
   // Calculate total minimum payment required
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
