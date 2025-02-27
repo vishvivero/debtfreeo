@@ -1,3 +1,4 @@
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useState, useEffect } from "react";
 import { useDebts } from "@/hooks/use-debts";
@@ -11,9 +12,10 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { strategies } from "@/lib/strategies";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, CalendarIcon, History, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2, CalendarIcon, History, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Target, DollarSign, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+
 export default function ResultsHistory() {
   const {
     debts,
@@ -105,8 +107,14 @@ export default function ResultsHistory() {
 
   // Safety check for the current payment to avoid division by zero
   const safeCurrentPayment = currentPayment > 0 ? currentPayment : 1;
+
+  // Estimate months until debt-free (rough approximation)
+  const estimatedMonths = Math.ceil(totalDebt / safeCurrentPayment);
+  const estimatedYears = Math.floor(estimatedMonths / 12);
+  const remainingMonths = estimatedMonths % 12;
+  
   return <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
         <div className="container py-8">
           <div className="flex items-center gap-4 mb-6">
             <Button variant="outline" size="icon" onClick={() => navigate("/strategy")} className="h-9 w-9">
@@ -120,8 +128,6 @@ export default function ResultsHistory() {
           
           <Tabs defaultValue="latest" className="space-y-4" onValueChange={setSelectedTab}>
             <div className="flex items-center justify-between">
-              
-              
               <Button variant="outline" onClick={() => navigate("/strategy")} className="gap-2">
                 Update Plan
               </Button>
@@ -161,86 +167,157 @@ export default function ResultsHistory() {
               }} transition={{
                 duration: 0.3
               }}>
-                    <Card className="border-none shadow-md mb-6">
-                      <CardHeader className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20">
+                    {/* Updated Strategy Overview Card with enhanced styling */}
+                    <Card className="border-none shadow-lg mb-8 overflow-hidden">
+                      <CardHeader className="bg-gradient-to-r from-indigo-500/90 to-purple-600/90 dark:from-indigo-700 dark:to-purple-800 text-white">
                         <div className="flex items-center justify-between">
-                          <CardTitle className="flex items-center gap-2">
-                            <span className="p-1.5 rounded-full bg-purple-500 text-white">
+                          <CardTitle className="flex items-center gap-2 text-white">
+                            <span className="p-1.5 rounded-full bg-white text-indigo-600">
                               <History className="h-4 w-4" />
                             </span>
                             Strategy Overview
                           </CardTitle>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-sm text-white/80">
                             Updated {new Date().toLocaleDateString()}
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-6">
-                        <div className="grid gap-4 md:grid-cols-3 mb-6">
-                          <div className="rounded-lg border p-4">
-                            <div className="text-sm font-medium text-muted-foreground mb-1">Strategy</div>
-                            <div className="font-semibold">{selectedStrategy.name}</div>
-                          </div>
-                          <div className="rounded-lg border p-4">
-                            <div className="text-sm font-medium text-muted-foreground mb-1">Monthly Payment</div>
-                            <div className="font-semibold">
-                              {currencySymbol}{currentPayment.toLocaleString()}
+                      <CardContent className="p-0">
+                        {/* Strategy info section */}
+                        <div className="p-6 bg-white dark:bg-slate-900">
+                          <div className="grid gap-6 md:grid-cols-3 mb-6">
+                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
+                              <div className="flex items-start mb-2">
+                                <div className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mr-3">
+                                  <Target className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Strategy</div>
+                                  <div className="font-semibold text-slate-800 dark:text-slate-200">{selectedStrategy.name}</div>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="rounded-lg border p-4">
-                            <div className="text-sm font-medium text-muted-foreground mb-1">Extra Monthly</div>
-                            <div className="font-semibold">
-                              {currencySymbol}{extraPayment.toLocaleString()}
+                            
+                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
+                              <div className="flex items-start mb-2">
+                                <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mr-3">
+                                  <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Monthly Payment</div>
+                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                    {currencySymbol}{currentPayment.toLocaleString()}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 pl-11">
+                                {extraPayment > 0 && <span>Including {currencySymbol}{extraPayment.toLocaleString()} extra</span>}
+                              </div>
+                            </div>
+                            
+                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
+                              <div className="flex items-start mb-2">
+                                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30 mr-3">
+                                  <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Estimated Timeline</div>
+                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                    {estimatedYears > 0 ? `${estimatedYears} ${estimatedYears === 1 ? 'year' : 'years'}` : ''} 
+                                    {remainingMonths > 0 ? `${estimatedYears > 0 ? ' and ' : ''}${remainingMonths} ${remainingMonths === 1 ? 'month' : 'months'}` : ''}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                         
-                        <Separator className="my-6" />
-                        
-                        <div className="space-y-6">
-                          <h3 className="text-lg font-semibold">Results Summary</h3>
+                        {/* Results Summary with enhanced styling */}
+                        <div className="p-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/70 border-t border-slate-100 dark:border-slate-800">
+                          <h3 className="text-lg font-semibold mb-5 text-slate-800 dark:text-slate-200">Results Summary</h3>
                           
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
-                              <div className="text-sm font-medium text-emerald-700 mb-1">Total Debt</div>
-                              <div className="text-2xl font-bold text-emerald-900">
-                                {currencySymbol}{totalDebt.toLocaleString()}
+                            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-5 rounded-xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
+                              <div className="flex items-center gap-2">
+                                <div className="bg-emerald-100 dark:bg-emerald-800/30 p-2 rounded-full">
+                                  <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Total Debt</span>
                               </div>
-                              <div className="text-xs text-emerald-600 mt-1">
-                                {debts.length} active {debts.length === 1 ? 'debt' : 'debts'}
-                              </div>
-                            </div>
-                            
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                              <div className="text-sm font-medium text-blue-700 mb-1">Time Until Debt-Free</div>
-                              <div className="text-2xl font-bold text-blue-900">
-                                ~{Math.ceil(totalDebt / safeCurrentPayment)} months
-                              </div>
-                              <div className="text-xs text-blue-600 mt-1">
-                                Using {selectedStrategy.name} strategy
+                              <div className="mt-3">
+                                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                                  {currencySymbol}{totalDebt.toLocaleString()}
+                                </div>
+                                <div className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-1">
+                                  {debts.length} active {debts.length === 1 ? 'debt' : 'debts'}
+                                </div>
                               </div>
                             </div>
                             
-                            <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                              <div className="text-sm font-medium text-purple-700 mb-1">Average Interest Rate</div>
-                              <div className="text-2xl font-bold text-purple-900">
-                                {avgInterestRate.toFixed(1)}%
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-5 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                              <div className="flex items-center gap-2">
+                                <div className="bg-blue-100 dark:bg-blue-800/30 p-2 rounded-full">
+                                  <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Strategy Impact</span>
                               </div>
-                              <div className="text-xs text-purple-600 mt-1">
-                                Weighted by debt balance
+                              <div className="mt-3">
+                                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                                  {selectedStrategy.name}
+                                </div>
+                                <div className="text-xs text-blue-600/80 dark:text-blue-400/80 mt-1">
+                                  Using {selectedStrategy.description.split(' ').slice(0, 5).join(' ')}...
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-5 rounded-xl border border-purple-100 dark:border-purple-800/30 shadow-sm">
+                              <div className="flex items-center gap-2">
+                                <div className="bg-purple-100 dark:bg-purple-800/30 p-2 rounded-full">
+                                  <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">Interest Rate</span>
+                              </div>
+                              <div className="mt-3">
+                                <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                                  {avgInterestRate.toFixed(1)}%
+                                </div>
+                                <div className="text-xs text-purple-600/80 dark:text-purple-400/80 mt-1">
+                                  Weighted average
+                                </div>
                               </div>
                             </div>
                           </div>
                           
-                          <p className="text-muted-foreground">
-                            This overview shows your current debt strategy and key metrics. Navigate to see your detailed action plan and projected timeline.
+                          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm">
+                            This overview shows your current debt strategy and key metrics. Navigate through the tabs to see your detailed action plan and projected timeline.
                           </p>
+                          
+                          {/* One-time payments summary if any */}
+                          {oneTimeFundings.length > 0 && (
+                            <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800/30">
+                              <div className="flex items-start">
+                                <div className="p-2 bg-indigo-100 dark:bg-indigo-800/30 rounded-full mr-3">
+                                  <DollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium text-indigo-700 dark:text-indigo-300">
+                                    {oneTimeFundings.length > 1 ? 'Lump Sum Payments' : 'Lump Sum Payment'}
+                                  </h4>
+                                  <p className="text-sm text-indigo-700/80 dark:text-indigo-400/80 mt-1">
+                                    You've added {oneTimeFundings.length} {oneTimeFundings.length > 1 ? 'payments' : 'payment'} totaling {currencySymbol}
+                                    {oneTimeFundings.reduce((sum, f) => sum + Number(f.amount), 0).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
                     
                     <div className="text-center">
-                      <Button onClick={handleNext} className="gap-2">
+                      <Button onClick={handleNext} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
                         View Action Plan
                         <ChevronRight className="h-4 w-4" />
                       </Button>
@@ -267,7 +344,7 @@ export default function ResultsHistory() {
                           <ChevronLeft className="h-4 w-4" />
                           Back to Overview
                         </Button>
-                        <Button onClick={handleNext} className="gap-2">
+                        <Button onClick={handleNext} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
                           View Timeline
                           <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -302,7 +379,7 @@ export default function ResultsHistory() {
               
               {/* Pagination Indicator */}
               <div className="flex justify-center items-center mt-8 gap-2">
-                {pages.map((_, index) => <div key={index} className={`h-2 rounded-full transition-all ${currentPage === index ? 'w-8 bg-primary' : 'w-2 bg-gray-300 cursor-pointer'}`} onClick={() => setCurrentPage(index)} />)}
+                {pages.map((_, index) => <div key={index} className={`h-2 rounded-full transition-all ${currentPage === index ? 'w-8 bg-indigo-600 dark:bg-indigo-500' : 'w-2 bg-gray-300 dark:bg-gray-700 cursor-pointer'}`} onClick={() => setCurrentPage(index)} />)}
               </div>
             </TabsContent>
             
