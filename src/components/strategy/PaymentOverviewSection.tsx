@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DollarSign, ArrowRight, RotateCw, TrendingUp } from "lucide-react";
+import { DollarSign, RotateCw, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 interface PaymentOverviewSectionProps {
   totalMinimumPayments: number;
@@ -67,20 +67,11 @@ export const PaymentOverviewSection = ({
         </div>
 
         <div className="border-t pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-              <div className="text-sm text-gray-500 mb-1">Total Monthly Payment</div>
-              <div className="text-2xl font-bold text-gray-900">
-                {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
-              </div>
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500">Total Monthly Payment</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
             </div>
-            <Button
-              onClick={onOpenExtraPaymentDialog}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 w-full md:w-auto"
-            >
-              <span>Calculate Impact</span>
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </div>
         </div>
       </CardContent>
