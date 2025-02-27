@@ -1,4 +1,3 @@
-
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { format, parseISO } from "date-fns";
@@ -11,15 +10,6 @@ interface TimelineChartProps {
 }
 
 export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartProps) => {
-  // Ensure funding dates are properly formatted for the chart
-  const enhancedFundings = formattedFundings.map(funding => ({
-    ...funding,
-    // Ensure payment_date is a string for ReferenceLine
-    payment_date: typeof funding.payment_date === 'string' 
-      ? funding.payment_date 
-      : new Date(funding.payment_date as unknown as string).toISOString() // Fix type casting issue
-  }));
-
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -59,21 +49,17 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           <Tooltip content={<TimelineTooltip />} />
           <Legend />
           
-          {/* Render reference lines for one-time funding payments with more prominent styling */}
-          {enhancedFundings.map((funding, index) => (
+          {formattedFundings.map((funding, index) => (
             <ReferenceLine
               key={index}
               x={funding.payment_date}
               stroke="#9333EA"
-              strokeWidth={2}
-              strokeDasharray="5 5"
+              strokeDasharray="3 3"
               label={{
-                value: `${debts[0].currency_symbol}${funding.amount.toLocaleString()}`,
+                value: `${debts[0].currency_symbol}${funding.amount}`,
                 position: 'top',
                 fill: '#9333EA',
-                fontSize: 12,
-                fontWeight: 'bold',
-                offset: 10
+                fontSize: 12
               }}
             />
           ))}
@@ -96,24 +82,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#acceleratedGradient)"
-            dot={(props) => {
-              // Add a dot at each one-time funding date on the accelerated line
-              const date = props.payload.date;
-              const isFundingDate = enhancedFundings.some(f => f.payment_date === date);
-              if (isFundingDate) {
-                return (
-                  <circle
-                    cx={props.cx}
-                    cy={props.cy}
-                    r={6}
-                    fill="#9333EA"
-                    stroke="#FFFFFF"
-                    strokeWidth={2}
-                  />
-                );
-              }
-              return null;
-            }}
+            dot={false}
           />
         </AreaChart>
       </ResponsiveContainer>
