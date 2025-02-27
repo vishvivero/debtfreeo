@@ -51,6 +51,25 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
 
   return (
     <div className="space-y-4">
+      {/* Payment Legend - Only show when there are one-time payments */}
+      {oneTimePaymentMonths.length > 0 && (
+        <div className="flex items-center gap-3 flex-wrap bg-gray-50 p-2 rounded-md">
+          <div className="text-sm font-medium">Payment Legend:</div>
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span>
+            <span className="text-xs">One-Time Payment</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+            <span className="text-xs">Monthly Payment</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-4 border-t border-dashed border-purple-500"></span>
+            <span className="text-xs">Payment Month</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2 items-center">
           {oneTimePaymentMonths.length > 0 && (
@@ -132,7 +151,15 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               tickLine={{ stroke: '#9CA3AF' }}
             />
             <Tooltip content={<TimelineTooltip />} />
-            <Legend />
+            <Legend formatter={(value) => {
+              if (value === "Original Timeline") {
+                return <span className="text-gray-600">Original Timeline</span>;
+              }
+              if (value === "Accelerated Timeline") {
+                return <span className="text-emerald-600 font-medium">Accelerated Timeline</span>;
+              }
+              return value;
+            }} />
             
             {/* Render reference lines for one-time funding payments */}
             {formattedFundings.map((funding, index) => {
@@ -181,7 +208,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
               dataKey="acceleratedBalance"
               name="Accelerated Timeline"
               stroke="#34D399"
-              strokeWidth={2}
+              strokeWidth={3}
               fillOpacity={1}
               fill="url(#acceleratedGradient)"
               dot={(props) => {
@@ -226,6 +253,17 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      
+      {/* Show savings impact when one-time payments exist */}
+      {oneTimePaymentMonths.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-50 to-green-50 p-3 rounded-md text-sm">
+          <p className="font-medium text-gray-700 mb-1">Impact of One-Time Payments</p>
+          <p className="text-gray-600">
+            Your {formattedFundings.length > 1 ? `${formattedFundings.length} one-time payments` : "one-time payment"} create{formattedFundings.length > 1 ? "" : "s"} vertical drops in the accelerated timeline, 
+            showing an immediate reduction in your debt balance that accelerates your payoff.
+          </p>
+        </div>
+      )}
       
       {/* Debug Data Inspector */}
       {debugMode && showData && (

@@ -21,12 +21,14 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
     const oneTimePayment = payload[0]?.payload?.oneTimePayment;
     const paymentDetails = payload[0]?.payload?.paymentDetails;
     const pointType = getPointType(payload[0]?.payload);
+    const difference = Math.max(0, baselineBalance - acceleratedBalance);
+    const percentSaved = baselineBalance > 0 ? ((difference / baselineBalance) * 100).toFixed(1) : "0.0";
     
     return (
       <div className={`bg-white p-3 shadow-md rounded-md border border-gray-200 max-w-[280px] ${
         oneTimePayment ? 'border-l-4 border-l-purple-500' : ''
       }`}>
-        <div className="flex justify-between items-center mb-1">
+        <div className="flex justify-between items-center mb-2">
           <p className="font-medium text-gray-700">{date}</p>
           {pointType && (
             <span className={`text-xs px-2 py-0.5 rounded-full ${getPointTypeStyles(pointType)}`}>
@@ -35,7 +37,7 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
           )}
         </div>
         
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex justify-between gap-4">
             <span className="text-sm text-gray-600">Original Balance</span>
             <span className="text-sm font-medium text-gray-700">
@@ -59,18 +61,35 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
             </div>
           )}
           
-          {/* Difference display */}
+          {/* Difference display with percentage */}
           <div className="flex justify-between gap-4 pt-1 border-t mt-1">
-            <span className="text-sm text-gray-600">Difference</span>
-            <span className="text-sm font-medium text-emerald-600">
-              {currencySymbol}{Math.max(0, baselineBalance - acceleratedBalance).toLocaleString()}
-            </span>
+            <span className="text-sm text-gray-600">Savings</span>
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-medium text-emerald-600">
+                {currencySymbol}{difference.toLocaleString()}
+              </span>
+              <span className="text-xs text-emerald-500">
+                ({percentSaved}% of original)
+              </span>
+            </div>
           </div>
           
           {/* Summary information */}
           {oneTimePayment && (
             <div className="mt-2 pt-2 border-t text-xs text-purple-700">
-              This one-time payment accelerates your debt payoff timeline.
+              This one-time payment of {currencySymbol}{oneTimePayment.toLocaleString()} accelerates your debt payoff timeline.
+            </div>
+          )}
+          
+          {pointType === 'Before Funding' && (
+            <div className="mt-2 pt-2 border-t text-xs text-yellow-700">
+              Balance before one-time payment is applied.
+            </div>
+          )}
+          
+          {pointType === 'After Funding' && (
+            <div className="mt-2 pt-2 border-t text-xs text-green-700">
+              Balance after one-time payment is applied.
             </div>
           )}
         </div>
