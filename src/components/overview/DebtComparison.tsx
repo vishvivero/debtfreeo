@@ -220,7 +220,7 @@ export const DebtComparison = () => {
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm mb-2">
+                    <div className="flex justify-between text-xs mb-2">
                       <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
                         Principal: <span className="font-medium text-emerald-600">{comparison.principalPercentage.toFixed(1)}%</span>
                       </span>
@@ -246,7 +246,7 @@ export const DebtComparison = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-center text-gray-500">
+                <div className="mt-4 text-xs text-center text-gray-500">
                   {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
@@ -398,7 +398,7 @@ export const DebtComparison = () => {
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm mb-2">
+                    <div className="flex justify-between text-xs mb-2">
                       <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
                         Original Interest: <span className="font-medium text-red-600">{currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
@@ -430,7 +430,7 @@ export const DebtComparison = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-center text-emerald-600 font-medium">
+                <div className="mt-4 text-xs text-center text-emerald-600 font-medium">
                   You save {comparison.interestSavedPercentage.toFixed(1)}% on interest payments
                 </div>
               </div>
