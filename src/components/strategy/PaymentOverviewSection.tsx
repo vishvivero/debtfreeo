@@ -41,9 +41,9 @@ export const PaymentOverviewSection = ({
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="p-4 rounded-lg bg-blue-50/50 border border-blue-100">
-            <div className="text-sm text-blue-600 mb-2">Required Monthly Payment</div>
-            <div className="text-2xl font-semibold text-blue-700">
+          <div className="p-4 rounded-lg bg-purple-50/50 border border-purple-100">
+            <div className="text-sm text-purple-600 mb-2">Required Monthly Payment</div>
+            <div className="text-2xl font-semibold text-purple-700">
               {formatCurrency(totalMinimumPayments, currencySymbol)}
             </div>
           </div>
