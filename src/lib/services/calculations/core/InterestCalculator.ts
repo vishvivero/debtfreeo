@@ -36,40 +36,6 @@ export class InterestCalculator {
   }
 
   /**
-   * Calculate actual principal from a balance that includes interest
-   */
-  public static calculatePrincipalFromTotal(
-    totalBalance: number,
-    annualRate: number,
-    monthlyPayment: number,
-    totalMonths: number
-  ): number {
-    if (annualRate === 0 || totalMonths <= 0 || monthlyPayment <= 0) {
-      return totalBalance;
-    }
-
-    const monthlyRate = annualRate / 1200;
-    
-    // Using the standard loan formula:
-    // totalBalance = principal * (1 + monthlyRate)^totalMonths - (monthlyPayment * ((1 + monthlyRate)^totalMonths - 1) / monthlyRate)
-    const rateFactorPow = Math.pow(1 + monthlyRate, totalMonths);
-    const paymentFactor = (rateFactorPow - 1) / monthlyRate;
-    
-    // Solve for principal
-    const principal = (totalBalance + (monthlyPayment * paymentFactor)) / rateFactorPow;
-    
-    console.log('Back-calculating principal:', {
-      totalBalance,
-      annualRate,
-      monthlyPayment,
-      totalMonths,
-      calculatedPrincipal: this.ensurePrecision(principal)
-    });
-
-    return this.ensurePrecision(principal);
-  }
-
-  /**
    * Calculate months to pay off at a fixed payment amount
    */
   public static calculateMonthsToPayoff(

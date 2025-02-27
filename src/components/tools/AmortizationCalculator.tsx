@@ -9,7 +9,6 @@ import { AmortizationTable } from "@/components/debt/AmortizationTable";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
 import { AmortizationEntry } from "@/lib/utils/payment/standardizedCalculations";
-import { Debt } from "@/lib/types";
 
 export const AmortizationCalculator = () => {
   const { profile } = useProfile();
@@ -53,18 +52,6 @@ export const AmortizationCalculator = () => {
     }
 
     setAmortizationSchedule(schedule);
-  };
-
-  // Create a dummy debt object for the amortization table
-  const dummyDebt: Debt = {
-    id: "calculator",
-    name: "Calculator",
-    banker_name: "Calculator",
-    balance: parseFloat(loanAmount) || 0,
-    interest_rate: parseFloat(interestRate) || 0,
-    minimum_payment: 0,
-    currency_symbol: currency,
-    status: 'active'
   };
 
   return (
@@ -139,7 +126,7 @@ export const AmortizationCalculator = () => {
           {amortizationSchedule.length > 0 && (
             <div className="mt-8">
               <AmortizationTable
-                debt={dummyDebt}
+                debt={{ name: "Calculator" }}
                 amortizationData={amortizationSchedule}
                 currencySymbol={currency}
               />
