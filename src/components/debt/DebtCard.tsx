@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ChevronRight } from "lucide-react";
@@ -8,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { EditDebtDialog } from "./EditDebtDialog";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 interface DebtCardProps {
   debt: Debt;
@@ -57,38 +57,41 @@ export const DebtCard = ({
       metadata: debt.metadata
     });
 
-    // Check if this is a debt with interest already included
-    const isInterestIncluded = debt.metadata?.interest_included === true;
+    let effectiveBalance = debt.balance;
+    let effectiveRate = debt.interest_rate;
     
+    // If this debt has interest included, back-calculate the principal
+    if (debt.metadata?.interest_included === true && debt.metadata?.remaining_months) {
+      effectiveBalance = InterestCalculator.calculatePrincipalFromTotal(
+        debt.balance,
+        debt.metadata.original_rate || effectiveRate,
+        debt.minimum_payment,
+        debt.metadata.remaining_months
+      );
+      effectiveRate = debt.metadata.original_rate || effectiveRate;
+      
+      console.log('Back-calculated principal for included-interest debt:', {
+        originalBalance: debt.balance,
+        calculatedPrincipal: effectiveBalance,
+        effectiveRate,
+        remainingMonths: debt.metadata.remaining_months
+      });
+    }
+
     let months = 0;
-    if (debt.interest_rate === 0) {
-      // For zero-interest debts or debts with interest included, use simple division
+    if (effectiveRate === 0) {
+      // For true zero-interest debts, use simple division
       if (debt.minimum_payment <= 0) {
         console.log('Zero interest debt with no minimum payment');
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
-      
-      months = Math.ceil(debt.balance / debt.minimum_payment);
-      
-      // If specified in metadata, use that value instead
-      if (isInterestIncluded && debt.metadata?.remaining_months) {
-        months = debt.metadata.remaining_months;
-        console.log('Using remaining months from metadata:', months);
-      }
-      
-      console.log('Zero interest calculation:', {
-        balance: debt.balance,
-        payment: debt.minimum_payment,
-        months,
-        isInterestIncluded
-      });
+      months = Math.ceil(effectiveBalance / debt.minimum_payment);
     } else {
       // For interest-bearing debts, use the compound interest formula
-      const monthlyRate = debt.interest_rate / 1200;
+      const monthlyRate = effectiveRate / 1200;
       const monthlyPayment = debt.minimum_payment;
-      const balance = debt.balance;
       
-      const monthlyInterestAmount = balance * monthlyRate;
+      const monthlyInterestAmount = effectiveBalance * monthlyRate;
       
       if (monthlyPayment <= monthlyInterestAmount) {
         console.log('Payment cannot cover interest:', {
@@ -98,19 +101,18 @@ export const DebtCard = ({
         return { months: 0, formattedTime: "Never", progressPercentage: 0 };
       }
 
-      months = Math.ceil(Math.log(monthlyPayment / (monthlyPayment - balance * monthlyRate)) / Math.log(1 + monthlyRate));
+      months = Math.ceil(Math.log(monthlyPayment / (monthlyPayment - effectiveBalance * monthlyRate)) / Math.log(1 + monthlyRate));
     }
 
-    const originalBalance = debt.balance + totalPaid;
+    const originalBalance = effectiveBalance + totalPaid;
     const progressPercentage = (totalPaid / originalBalance) * 100;
     
     console.log('Progress calculation:', {
       originalBalance,
-      currentBalance: debt.balance,
+      currentBalance: effectiveBalance,
       totalPaid,
       months,
-      progressPercentage,
-      isInterestIncluded
+      progressPercentage
     });
     
     const years = Math.floor(months / 12);
