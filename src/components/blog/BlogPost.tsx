@@ -467,9 +467,8 @@ const BlogPost = () => {
               <div className="space-y-2">
                 <h4 className="font-semibold text-gray-900">Vishnu Raj</h4>
                 <p className="text-gray-600">
-                  As a passionate solopreneur, I leverage AI, technology, and no-code tools to build innovative solutions. 
-                  With a keen eye for problem-solving, I explore complex challenges through investigative research and writing. 
-                  My work focuses on simplifying business, finance, and personal growth to help others succeed.
+                  Financial expert and debt freedom advocate with over a decade of experience helping people achieve their financial goals. 
+                  Passionate about making financial education accessible to everyone.
                 </p>
                 <div className="flex items-center gap-3">
                   <Link to="#" className="text-primary hover:text-primary/80">

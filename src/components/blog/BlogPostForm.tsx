@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -6,15 +7,11 @@ import { useAuth } from "@/lib/auth";
 import { BlogFormHeader } from "./form/BlogFormHeader";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { BlogContent } from "./form/BlogContent";
-import { BlogBulkUpload } from "./form/BlogBulkUpload";
 import { BlogFormProps } from "./types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { calculateReadTime } from "@/utils/blogUtils";
+import { Label } from "@/components/ui/label";
 
 export const BlogPostForm = ({
   title,
@@ -29,7 +26,6 @@ export const BlogPostForm = ({
   image,
   setImage,
   imagePreview,
-  setImagePreview,
   keyTakeaways,
   setKeyTakeaways,
   metaTitle,
@@ -38,86 +34,11 @@ export const BlogPostForm = ({
   setMetaDescription,
   keywords,
   setKeywords,
-  postId,
-  isSimpleMode,
-}: BlogFormProps & { isSimpleMode: boolean }) => {
+}: BlogFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchBlogData = async () => {
-      if (postId) {
-        const { data, error } = await supabase
-          .from('blogs')
-          .select('image_url')
-          .eq('id', postId)
-          .single();
-
-        if (!error && data?.image_url) {
-          console.log("Found existing image URL:", data.image_url);
-          setExistingImageUrl(data.image_url);
-          setImagePreview(data.image_url);
-        }
-      }
-    };
-
-    fetchBlogData();
-  }, [postId, setImagePreview]);
-
-  const parseMarkdownContent = (markdownContent: string) => {
-    console.log("Parsing markdown content...");
-
-    const titleMatch = markdownContent.match(/^#\s*([^\n]+)/);
-    if (titleMatch && setTitle) {
-      console.log("Found title:", titleMatch[1]);
-      setTitle(titleMatch[1].trim());
-    }
-
-    const metaTitleMatch = markdownContent.match(/\*\*Meta Title:\*\*\s*([^\n]+)/);
-    if (metaTitleMatch && setMetaTitle) {
-      console.log("Found meta title:", metaTitleMatch[1]);
-      setMetaTitle(metaTitleMatch[1].trim());
-    }
-
-    const metaDescriptionMatch = markdownContent.match(/\*\*Meta Description:\*\*\s*([^\n]+)/);
-    if (metaDescriptionMatch && setMetaDescription) {
-      console.log("Found meta description:", metaDescriptionMatch[1]);
-      setMetaDescription(metaDescriptionMatch[1].trim());
-    }
-
-    const keywordsMatch = markdownContent.match(/\*\*Keywords:\*\*\s*([^\n]+)/);
-    if (keywordsMatch && setKeywords) {
-      const keywordsArray = keywordsMatch[1].split(',').map(k => k.trim());
-      console.log("Found keywords:", keywordsArray);
-      setKeywords(keywordsArray);
-    }
-
-    const excerptMatch = markdownContent.match(/\*\*Excerpt:\*\*\s*\n\n([^#]+)/);
-    if (excerptMatch && setExcerpt) {
-      console.log("Found excerpt:", excerptMatch[1]);
-      setExcerpt(excerptMatch[1].trim());
-    }
-
-    const keyTakeawaysMatch = markdownContent.match(/## Key Takeaways\n\n([\s\S]+?)(?=\n##|$)/);
-    if (keyTakeawaysMatch && setKeyTakeaways) {
-      console.log("Found key takeaways:", keyTakeawaysMatch[1]);
-      setKeyTakeaways(keyTakeawaysMatch[1].trim());
-    }
-
-    const mainContentMatch = markdownContent.match(/^(?:.*\n)*?##\s*[^\n]+\n\n([\s\S]+?)(?=\n##\s*Key Takeaways|$)/);
-    if (mainContentMatch && setContent) {
-      console.log("Found main content");
-      setContent(mainContentMatch[1].trim());
-    }
-  };
-
-  const handleMarkdownChange = (value: string) => {
-    console.log("Markdown content changed");
-    parseMarkdownContent(value);
-  };
 
   const handleSubmit = async (isDraft: boolean = true) => {
     if (!user) {
@@ -142,20 +63,18 @@ export const BlogPostForm = ({
     console.log("Starting blog post submission...");
 
     try {
-      let imageUrl = existingImageUrl;
+      let imageUrl = null;
 
+      // Handle image upload if an image is selected
       if (image) {
-        console.log("Processing new image upload...");
+        console.log("Processing image upload...");
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
         console.log("Uploading image to storage:", fileName);
         const { error: uploadError, data } = await supabase.storage
           .from('blog-images')
-          .upload(fileName, image, {
-            upsert: false,
-            contentType: image.type
-          });
+          .upload(fileName, image);
 
         if (uploadError) {
           console.error("Image upload error:", uploadError);
@@ -164,172 +83,69 @@ export const BlogPostForm = ({
 
         console.log("Image upload successful:", data);
         
+        // Get the public URL for the uploaded image
         const { data: { publicUrl } } = supabase.storage
           .from('blog-images')
           .getPublicUrl(fileName);
 
-        imageUrl = publicUrl;
-        console.log("New image URL saved:", imageUrl);
+        imageUrl = fileName; // Store only the filename in the database
+        console.log("Image URL saved:", imageUrl);
       }
 
-      const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
-      const readTimeMinutes = calculateReadTime(content);
-      console.log("Calculated read time:", readTimeMinutes, "minutes");
-
-      const updateData = {
-        title,
-        content,
-        excerpt,
-        category: category || 'uncategorized',
-        is_published: !isDraft,
-        meta_title: metaTitle || title,
-        meta_description: metaDescription || excerpt,
-        keywords: keywordsArray,
-        key_takeaways: keyTakeaways || '',
-        read_time_minutes: readTimeMinutes,
-        updated_at: new Date().toISOString(),
-        ...(imageUrl && { image_url: imageUrl }),
-      };
-
-      let error;
+      // Generate a unique slug by appending a timestamp
+      const timestamp = new Date().getTime();
+      const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
       
-      if (postId) {
-        console.log("Updating existing blog post:", postId);
-        const { error: updateError } = await supabase
-          .from('blogs')
-          .update(updateData)
-          .eq('id', postId);
-        error = updateError;
-      } else {
-        console.log("Creating new blog post");
-        const timestamp = new Date().getTime();
-        const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
-        
-        const { error: insertError } = await supabase
-          .from('blogs')
-          .insert({
-            ...updateData,
-            author_id: user.id,
-            slug,
-          });
-        error = insertError;
+      const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
+
+      console.log("Creating blog post entry...");
+      const { error: postError } = await supabase
+        .from('blogs')
+        .insert({
+          title,
+          content,
+          excerpt,
+          category: category || 'uncategorized',
+          author_id: user.id,
+          is_published: !isDraft,
+          image_url: imageUrl,
+          slug,
+          meta_title: metaTitle || title,
+          meta_description: metaDescription || excerpt,
+          keywords: keywordsArray,
+          key_takeaways: keyTakeaways || '',
+        });
+
+      if (postError) {
+        console.error("Blog post creation error:", postError);
+        throw postError;
       }
 
-      if (error) {
-        console.error("Blog post operation error:", error);
-        throw error;
-      }
-
-      console.log("Blog post operation completed successfully");
+      console.log("Blog post created successfully");
       toast({
         title: "Success",
-        description: postId 
-          ? "Post updated successfully" 
-          : (isDraft ? "Draft saved successfully" : "Post published successfully"),
+        description: isDraft ? "Draft saved successfully" : "Post published successfully",
       });
 
       navigate('/admin/blogs');
     } catch (error) {
-      console.error('Error with blog post operation:', error);
+      console.error('Error creating post:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: postId 
-          ? "Failed to update post. Please try again." 
-          : "Failed to create post. Please try again.",
+        description: "Failed to create post. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isSimpleMode) {
-    return (
-      <div className="space-y-6">
-        <BlogBulkUpload 
-          categories={categories || []} 
-          userId={user?.id || ''}
-        />
-        
-        <Card className="p-6">
-          <Label htmlFor="category">Category</Label>
-          <select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full p-2 border rounded-md mt-2"
-          >
-            <option value="">Select a category</option>
-            {categories?.map((cat) => (
-              <option key={cat.id} value={cat.slug}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </Card>
-
-        <BlogImageUpload
-          setImage={setImage}
-          imagePreview={imagePreview}
-          setImagePreview={setImagePreview}
-          existingImageUrl={existingImageUrl}
-        />
-
-        <Card className="p-6">
-          <Label htmlFor="markdownContent">Blog Content (Markdown)</Label>
-          <Textarea
-            id="markdownContent"
-            value={content}
-            onChange={(e) => handleMarkdownChange(e.target.value)}
-            placeholder={`# Title
-
-**Meta Title:** Your SEO title
-
-**Meta Description:** Your SEO description
-
-**Keywords:** keyword1, keyword2, keyword3
-
-**Excerpt:**
-
-Brief summary of your post
-
-## Content
-
-Your blog post content here...
-
-## Key Takeaways
-
-* Key point 1
-* Key point 2
-* Key point 3`}
-            className="h-[500px] font-mono mt-2"
-          />
-        </Card>
-
-        <div className="flex justify-end gap-4">
-          <Button
-            variant="outline"
-            onClick={() => handleSubmit(true)}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : null}
-            Save as Draft
-          </Button>
-          <Button
-            onClick={() => handleSubmit(false)}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : null}
-            Publish
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (setKeywords) {
+      const keywordsString = e.target.value;
+      setKeywords(keywordsString.split(',').map(k => k.trim()));
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -379,12 +195,7 @@ Your blog post content here...
               id="keywords"
               placeholder="e.g., debt management, financial planning, savings"
               value={keywords?.join(', ')}
-              onChange={(e) => {
-                if (setKeywords) {
-                  const keywordsString = e.target.value;
-                  setKeywords(keywordsString.split(',').map(k => k.trim()));
-                }
-              }}
+              onChange={handleKeywordsChange}
               className="max-w-2xl"
             />
           </div>
@@ -394,8 +205,6 @@ Your blog post content here...
       <BlogImageUpload
         setImage={setImage}
         imagePreview={imagePreview}
-        setImagePreview={setImagePreview}
-        existingImageUrl={existingImageUrl}
       />
 
       <BlogContent
@@ -405,6 +214,14 @@ Your blog post content here...
         setContent={setContent}
         keyTakeaways={keyTakeaways}
         setKeyTakeaways={setKeyTakeaways}
+        title={title}
+        setTitle={setTitle}
+        metaTitle={metaTitle}
+        setMetaTitle={setMetaTitle}
+        metaDescription={metaDescription}
+        setMetaDescription={setMetaDescription}
+        keywords={keywords}
+        setKeywords={setKeywords}
       />
 
       <div className="flex justify-end gap-4">
@@ -416,7 +233,7 @@ Your blog post content here...
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : null}
-          {postId ? "Update as Draft" : "Save as Draft"}
+          Save as Draft
         </Button>
         <Button
           onClick={() => handleSubmit(false)}
@@ -425,7 +242,7 @@ Your blog post content here...
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : null}
-          {postId ? "Update & Publish" : "Publish"}
+          Publish
         </Button>
       </div>
     </div>

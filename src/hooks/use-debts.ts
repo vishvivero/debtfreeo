@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -13,7 +12,7 @@ export const useDebts = () => {
   const { updateDebt, addDebt, deleteDebt } = useDebtMutations();
   const { recordPayment } = usePaymentHistory();
 
-  const { data: debts, isLoading, error } = useQuery({
+  const { data: debts, isLoading } = useQuery({
     queryKey: ["debts", user?.id],
     queryFn: async () => {
       if (!user?.id) {
@@ -44,7 +43,6 @@ export const useDebts = () => {
   return {
     debts,
     isLoading,
-    error,
     updateDebt,
     addDebt,
     deleteDebt,

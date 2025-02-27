@@ -11,8 +11,7 @@ export interface BlogFormProps {
   categories?: Array<{ id: string; name: string; slug: string }>;
   image: File | null;
   setImage: (file: File | null) => void;
-  imagePreview: string | null;
-  setImagePreview: (preview: string | null) => void;
+  imagePreview: string | null | ((preview: string) => void);
   keyTakeaways: string;
   setKeyTakeaways: (value: string) => void;
   metaTitle?: string;
@@ -21,6 +20,4 @@ export interface BlogFormProps {
   setMetaDescription?: (value: string) => void;
   keywords?: string[];
   setKeywords?: (value: string[]) => void;
-  postId?: string;
-  isSimpleMode: boolean;
 }

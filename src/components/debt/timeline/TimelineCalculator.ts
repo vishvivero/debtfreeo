@@ -1,4 +1,3 @@
-
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { format, addMonths } from "date-fns";

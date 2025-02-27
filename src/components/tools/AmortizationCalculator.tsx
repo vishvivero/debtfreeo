@@ -36,14 +36,18 @@ export const AmortizationCalculator = () => {
     for (let i = 0; i < months; i++) {
       const interest = balance * monthlyRate;
       const principalPaid = monthlyPayment - interest;
-      balance = Math.max(0, balance - principalPaid);
+      const startingBalance = balance;
+      balance -= principalPaid;
+      const endingBalance = Math.max(0, balance);
 
       schedule.push({
         date: new Date(currentDate.setMonth(currentDate.getMonth() + 1)),
+        startingBalance,
         payment: monthlyPayment,
         principal: principalPaid,
         interest: interest,
-        remainingBalance: balance
+        endingBalance,
+        remainingBalance: endingBalance
       });
     }
 

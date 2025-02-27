@@ -19,123 +19,68 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Ban, Loader2 } from "lucide-react";
+import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
-  const { debts, isLoading: isDebtsLoading } = useDebts();
-  const { profile, isLoading: isProfileLoading } = useProfile();
+  const { debts } = useDebts();
+  const { profile } = useProfile();
   const navigate = useNavigate();
+  const debt = debts?.find(d => d.id === debtId);
   
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
-  const [monthlyPayment, setMonthlyPayment] = useState(0);
-  const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+  const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
 
-  console.log('DebtDetailsPage render:', { debtId, hasDebts: !!debts, hasProfile: !!profile });
-
-  const debt = debts?.find(d => d.id === debtId);
-  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
-  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
-
-  useEffect(() => {
-    if (debt) {
-      // Ensure we have a valid monthly payment that's at least the minimum payment
-      const validMonthlyPayment = Math.max(debt.minimum_payment, monthlyPayment || debt.minimum_payment);
-      console.log('Setting initial monthly payment:', validMonthlyPayment);
-      setMonthlyPayment(validMonthlyPayment);
-    }
-  }, [debt]);
-
-  useEffect(() => {
-    const fetchPaymentHistory = async () => {
-      if (!debt?.user_id || !debt?.id) return;
-
-      setIsLoadingPayments(true);
-      console.log('Fetching payment history for debt:', debt.id);
-
-      try {
-        const { data: payments, error } = await supabase
-          .from('payment_history')
-          .select('*')
-          .eq('user_id', debt.user_id)
-          .eq('redistributed_from', debt.id);
-
-        if (error) {
-          console.error('Error fetching payment history:', error);
-          return;
-        }
-
-        if (!payments) {
-          console.log('No payments found');
-          return;
-        }
-
-        const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
-        setTotalPaid(total);
-
-        const interest = payments.reduce((sum, payment) => {
-          const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
-          return sum + interestPortion;
-        }, 0);
-        setTotalInterest(interest);
-
-        console.log('Payment history summary:', {
-          totalPaid: total,
-          totalInterest: interest,
-          paymentCount: payments.length
-        });
-      } catch (err) {
-        console.error('Error in payment history fetch:', err);
-      } finally {
-        setIsLoadingPayments(false);
-      }
-    };
-
-    fetchPaymentHistory();
-  }, [debt]);
-
-  // Show loading state while initial data is being fetched
-  if (isDebtsLoading || isProfileLoading) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  // Early return if debt or profile is not loaded
   if (!debt || !profile) {
-    console.log('Required data not loaded:', { hasDebt: !!debt, hasProfile: !!profile, debtId });
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Debt not found</h2>
-            <p className="mt-2 text-gray-600">The requested debt could not be found.</p>
-            <Button 
-              onClick={() => navigate('/overview/debts')}
-              className="mt-4 bg-primary hover:bg-primary/90 text-white"
-            >
-              Return to Debts Overview
-            </Button>
-          </div>
-        </div>
-      </MainLayout>
-    );
+    console.log('Debt not found for id:', debtId);
+    return <div>Debt not found</div>;
   }
 
   const isPayable = isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
   const currencySymbol = profile.preferred_currency || '£';
 
-  // Calculate the extra payment amount
-  const extraPayment = Math.max(0, monthlyPayment - debt.minimum_payment);
+  useEffect(() => {
+    const fetchPaymentHistory = async () => {
+      if (!debt) return;
+
+      console.log('Fetching payment history for debt:', debt.id);
+
+      const { data: payments, error } = await supabase
+        .from('payment_history')
+        .select('*')
+        .eq('user_id', debt.user_id)
+        .eq('redistributed_from', debt.id);
+
+      if (error) {
+        console.error('Error fetching payment history:', error);
+        return;
+      }
+
+      const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
+      setTotalPaid(total);
+
+      const interest = payments.reduce((sum, payment) => {
+        const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
+        return sum + interestPortion;
+      }, 0);
+      setTotalInterest(interest);
+
+      console.log('Payment history summary:', {
+        totalPaid: total,
+        totalInterest: interest,
+        paymentCount: payments.length
+      });
+    };
+
+    fetchPaymentHistory();
+  }, [debt]);
+
+  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
   if (!isPayable) {
     return (
@@ -200,22 +145,16 @@ export const DebtDetailsPage = () => {
 
         <PayoffTimeline 
           debts={[debt]}
-          extraPayment={extraPayment}
+          extraPayment={monthlyPayment - debt.minimum_payment}
         />
 
         <Separator className="my-8" />
 
-        {isLoadingPayments ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : (
-          <AmortizationTable 
-            debt={debt} 
-            amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
-            currencySymbol={currencySymbol}
-          />
-        )}
+        <AmortizationTable 
+          debt={debt} 
+          amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
+          currencySymbol={currencySymbol}
+        />
       </div>
     </MainLayout>
   );

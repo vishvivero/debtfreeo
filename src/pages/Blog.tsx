@@ -29,26 +29,18 @@ const Blog = () => {
     },
   });
 
-  // Query for blog statistics with unique readers count
+  // Query for blog statistics
   const { data: blogStats } = useQuery({
     queryKey: ["blogStats"],
     queryFn: async () => {
-      // Get total published posts count
       const { count: totalPosts } = await supabase
         .from("blogs")
         .select("*", { count: "exact", head: true })
         .eq("is_published", true);
 
-      // Get unique readers count (based on distinct visitor_ids)
       const { count: totalReaders } = await supabase
         .from("blog_visits")
-        .select("visitor_id", { count: "exact", head: true })
-        .not('visitor_id', 'eq', null);
-
-      console.log("Blog stats:", {
-        posts: totalPosts,
-        readers: totalReaders
-      });
+        .select("*", { count: "exact", head: true });
 
       return {
         posts: totalPosts || 0,

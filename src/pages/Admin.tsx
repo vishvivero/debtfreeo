@@ -19,101 +19,8 @@ import { AnalyticsReporting } from "@/components/admin/AnalyticsReporting";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
-const Admin = () => {
-  const { user, loading: authLoading } = useAuth();
-  console.log("Admin page - Auth state:", { user: user?.id, authLoading });
-
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ["adminProfile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) {
-        console.log("No user ID available for profile check");
-        throw new Error("No user ID available");
-      }
-
-      console.log("Checking admin status for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-
-      if (!data?.is_admin) {
-        console.log("User is not an admin:", user.id);
-        throw new Error("Not an admin");
-      }
-
-      console.log("Admin profile confirmed:", data);
-      return data;
-    },
-    enabled: !!user?.id && !authLoading,
-    staleTime: 1000 * 60 * 5,
-    retry: false,
-    meta: {
-      errorMessage: "Failed to verify admin status"
-    }
-  });
-
-  if (authLoading || (user && profileLoading)) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    console.log("No authenticated user, redirecting to home");
-    return <Navigate to="/" replace />;
-  }
-
-  if (profileError || !profile?.is_admin) {
-    console.log("Access denied:", { error: profileError, isAdmin: profile?.is_admin });
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertDescription>
-            You do not have permission to access this area.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  return (
-    <MainLayout sidebar={<AdminSidebar />}>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col space-y-6">
-          <Routes>
-            <Route index element={<AdminMetrics />} />
-            <Route path="blogs" element={<AdminBlogList />} />
-            <Route path="categories" element={<CategoryManager />} />
-            <Route path="new-post" element={<NewBlogPost />} />
-            <Route path="edit/:id" element={<EditBlogPost />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="settings" element={<SystemSettings />} />
-            <Route path="banner" element={<BannerManagement />} />
-            <Route path="security" element={<SecurityMonitoring />} />
-            <Route path="content" element={<ContentManagement />} />
-            <Route path="analytics" element={<AnalyticsReporting />} />
-            <Route path="audit-logs" element={<AuditLogs />} />
-            <Route path="performance" element={<PerformanceMetrics />} />
-          </Routes>
-        </div>
-      </div>
-    </MainLayout>
-  );
-};
-
+// Create a new component for the edit form
 const EditBlogPost = () => {
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -126,7 +33,6 @@ const EditBlogPost = () => {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
-  const [isSimpleMode, setIsSimpleMode] = useState(false);
 
   const { data: blog, isLoading: blogLoading } = useQuery({
     queryKey: ["blog", id],
@@ -163,6 +69,7 @@ const EditBlogPost = () => {
     }
   });
 
+  // Update form when blog data is loaded
   useEffect(() => {
     if (blog) {
       setTitle(blog.title);
@@ -200,8 +107,7 @@ const EditBlogPost = () => {
       categories={categories}
       image={image}
       setImage={setImage}
-      imagePreview={imagePreview}
-      setImagePreview={setImagePreview}
+      imagePreview={setImagePreview}
       keyTakeaways={keyTakeaways}
       setKeyTakeaways={setKeyTakeaways}
       metaTitle={metaTitle}
@@ -210,12 +116,11 @@ const EditBlogPost = () => {
       setMetaDescription={setMetaDescription}
       keywords={keywords}
       setKeywords={setKeywords}
-      postId={id}
-      isSimpleMode={isSimpleMode}
     />
   );
 };
 
+// Create a new component for the new post form
 const NewBlogPost = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -227,7 +132,6 @@ const NewBlogPost = () => {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
-  const [isSimpleMode, setIsSimpleMode] = useState(false);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["blog-categories"],
@@ -254,49 +158,100 @@ const NewBlogPost = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card>
-        <CardHeader className="space-y-6">
-          <div className="flex items-center justify-between">
-            <CardTitle>Create New Blog Post</CardTitle>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="simple-mode">Simple Mode</Label>
-              <Switch
-                id="simple-mode"
-                checked={isSimpleMode}
-                onCheckedChange={setIsSimpleMode}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <BlogPostForm
-            title={title}
-            setTitle={setTitle}
-            content={content}
-            setContent={setContent}
-            excerpt={excerpt}
-            setExcerpt={setExcerpt}
-            category={category}
-            setCategory={setCategory}
-            categories={categories}
-            image={image}
-            setImage={setImage}
-            imagePreview={imagePreview}
-            setImagePreview={setImagePreview}
-            keyTakeaways={keyTakeaways}
-            setKeyTakeaways={setKeyTakeaways}
-            metaTitle={metaTitle}
-            setMetaTitle={setMetaTitle}
-            metaDescription={metaDescription}
-            setMetaDescription={setMetaDescription}
-            keywords={keywords}
-            setKeywords={setKeywords}
-            isSimpleMode={isSimpleMode}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <BlogPostForm
+      title={title}
+      setTitle={setTitle}
+      content={content}
+      setContent={setContent}
+      excerpt={excerpt}
+      setExcerpt={setExcerpt}
+      category={category}
+      setCategory={setCategory}
+      categories={categories}
+      image={image}
+      setImage={setImage}
+      imagePreview={setImagePreview}
+      keyTakeaways={keyTakeaways}
+      setKeyTakeaways={setKeyTakeaways}
+      metaTitle={metaTitle}
+      setMetaTitle={setMetaTitle}
+      metaDescription={metaDescription}
+      setMetaDescription={setMetaDescription}
+      keywords={keywords}
+      setKeywords={setKeywords}
+    />
+  );
+};
+
+const Admin = () => {
+  const { user } = useAuth();
+  
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5
+  });
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (profileLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (profileError || !profile?.is_admin) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            You do not have permission to access this area.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <MainLayout sidebar={<AdminSidebar />}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col space-y-6">
+          <Routes>
+            <Route index element={<AdminMetrics />} />
+            <Route path="blogs" element={<AdminBlogList />} />
+            <Route path="categories" element={<CategoryManager />} />
+            <Route path="new-post" element={<NewBlogPost />} />
+            <Route path="edit/:id" element={<EditBlogPost />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="settings" element={<SystemSettings />} />
+            <Route path="banner" element={<BannerManagement />} />
+            <Route path="security" element={<SecurityMonitoring />} />
+            <Route path="content" element={<ContentManagement />} />
+            <Route path="analytics" element={<AnalyticsReporting />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="performance" element={<PerformanceMetrics />} />
+          </Routes>
+        </div>
+      </div>
+    </MainLayout>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard, 
   FileEdit, 
@@ -14,10 +15,9 @@ import {
   BarChart,
   ScrollText,
   Activity,
-  Flag,
-  Upload
+  Flag
 } from "lucide-react";
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import {
   Sidebar,
@@ -128,19 +128,6 @@ export function AdminSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === '/admin/bulk-upload'}
-                  tooltip="Bulk Upload Blogs"
-                  className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
-                >
-                  <Link to="/admin/bulk-upload" className="flex items-center gap-3 px-4 py-2">
-                    <Upload className="h-4 w-4" />
-                    <span className="font-medium">Bulk Upload</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton

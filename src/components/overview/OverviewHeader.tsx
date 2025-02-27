@@ -3,7 +3,7 @@ import { CurrencySelector } from "@/components/profile/CurrencySelector";
 
 interface OverviewHeaderProps {
   currencySymbol: string;
-  onCurrencyChange: (currency: string) => Promise<void>;
+  onCurrencyChange: (currency: string) => void;
 }
 
 export const OverviewHeader = ({
@@ -11,16 +11,17 @@ export const OverviewHeader = ({
   onCurrencyChange,
 }: OverviewHeaderProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
-      <div className="space-y-1">
-        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Your Debt Overview
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold">
+          <span className="text-emerald-600">Your Financial</span>{" "}
+          <span className="text-blue-600">Overview</span>
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 text-lg">
           Track and optimize your journey to financial freedom
         </p>
       </div>
-      <div className="w-full sm:w-auto">
+      <div>
         <CurrencySelector
           value={currencySymbol}
           onValueChange={onCurrencyChange}

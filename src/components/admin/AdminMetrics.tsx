@@ -1,30 +1,16 @@
-
 import React from 'react';
 import { useVisitorMetrics } from '@/hooks/use-visitor-metrics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { VisitorMap } from './VisitorMap';
 import { BlogMetricsChart } from './BlogMetricsChart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, Eye, FileText, Activity, UserCircle, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { Users, Eye, FileText, Activity, UserCircle } from 'lucide-react';
 
 export const AdminMetrics = () => {
-  const { data: metrics, isLoading, error } = useVisitorMetrics();
+  const { data: metrics, isLoading } = useVisitorMetrics();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-8 text-center text-red-500">
-        Error loading metrics: {error.message}
-      </div>
-    );
+    return <div className="flex items-center justify-center p-8">Loading metrics...</div>;
   }
 
   const statsCards = [
@@ -60,15 +46,6 @@ export const AdminMetrics = () => {
     }
   ];
 
-  // Process visitTrends data to ensure proper date formatting and sorting
-  const processedVisitTrends = metrics?.visitTrends
-    ?.map(trend => ({
-      ...trend,
-      date: new Date(trend.date).toISOString().split('T')[0],
-      visits: Number(trend.visits)
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) || [];
-
   // Calculate top pages from visit data
   const topPages = metrics?.pageVisits?.sort((a, b) => b.visits - a.visits).slice(0, 5) || [];
 
@@ -98,12 +75,12 @@ export const AdminMetrics = () => {
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={processedVisitTrends}>
+              <LineChart data={metrics?.visitTrends || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
                   dataKey="date" 
                   className="text-xs"
-                  tickFormatter={(date) => format(new Date(date), 'MMM dd')}
+                  tickFormatter={(date) => new Date(date).toLocaleDateString()}
                 />
                 <YAxis 
                   className="text-xs"
@@ -121,7 +98,7 @@ export const AdminMetrics = () => {
                     borderRadius: '8px'
                   }}
                   formatter={(value: number) => [`${value} visits`, 'Visits']}
-                  labelFormatter={(date: string) => format(new Date(date), 'MMMM dd, yyyy')}
+                  labelFormatter={(date: string) => new Date(date).toLocaleDateString()}
                 />
                 <Line 
                   type="monotone" 
@@ -155,9 +132,7 @@ export const AdminMetrics = () => {
             <div className="space-y-4">
               {topPages.map((page, index) => (
                 <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground truncate max-w-[70%]">
-                    {page.path || 'Unknown'}
-                  </span>
+                  <span className="text-sm text-muted-foreground">{page.path || 'Unknown'}</span>
                   <span className="text-sm font-medium">{page.visits.toLocaleString()}</span>
                 </div>
               ))}

@@ -1,5 +1,4 @@
 
-import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
@@ -10,54 +9,41 @@ import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 export const OverviewMetrics = () => {
   const { debts, profile, isLoading } = useDebts();
   
-  // Memoize calculations to prevent unnecessary recalculations
-  const metrics = useMemo(() => {
-    if (!debts) return { totalDebt: 0, monthlyPayment: 0, progress: 0 };
-    
-    const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const monthlyPayment = profile?.monthly_payment || 0;
-    const progress = totalDebt > 0 ? Math.round((monthlyPayment / totalDebt) * 100) : 0;
-    
-    console.log('Calculated metrics:', { totalDebt, monthlyPayment, progress });
-    return { totalDebt, monthlyPayment, progress };
-  }, [debts, profile?.monthly_payment]);
+  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
+  const monthlyPayment = profile?.monthly_payment || 0;
+  const progress = totalDebt > 0 ? Math.round((monthlyPayment / totalDebt) * 100) : 0;
   
   const currencySymbol = profile?.preferred_currency || "$";
 
-  const cards = useMemo(() => [
+  const cards = [
     {
       title: "Total Debt",
-      value: `${currencySymbol}${metrics.totalDebt.toLocaleString()}`,
+      value: `${currencySymbol}${totalDebt.toLocaleString()}`,
       icon: CreditCard,
       bgColor: "bg-emerald-50",
       iconColor: "text-emerald-500"
     },
     {
       title: "Monthly Payment",
-      value: `${currencySymbol}${metrics.monthlyPayment.toLocaleString()}`,
+      value: `${currencySymbol}${monthlyPayment.toLocaleString()}`,
       icon: ArrowUpRight,
       bgColor: "bg-blue-50",
       iconColor: "text-blue-500"
     },
     {
       title: "Debt Payment Progress",
-      value: `${metrics.progress}%`,
+      value: "Coming Soon",
       icon: LineChart,
       bgColor: "bg-purple-50",
       iconColor: "text-purple-500"
     }
-  ], [currencySymbol, metrics]);
+  ];
 
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-32 animate-pulse bg-gray-100 rounded-lg" />
-        ))}
-      </div>
-    );
+    return <div className="h-24 animate-pulse bg-gray-100 rounded-lg" />;
   }
 
+  // Hide KPI metrics when there are no debts
   if (!debts || debts.length === 0) {
     return null;
   }
@@ -71,8 +57,8 @@ export const OverviewMetrics = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
         >
-          <Card className="p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-            <div className="flex justify-between items-start relative z-10">
+          <Card className="p-6 shadow-sm hover:shadow-md transition-shadow relative">
+            <div className="flex justify-between items-start">
               <div>
                 <p className="text-gray-600 text-sm font-medium">{card.title}</p>
                 <p className="text-2xl font-bold mt-1">{card.value}</p>
@@ -87,3 +73,4 @@ export const OverviewMetrics = () => {
     </div>
   );
 };
+
