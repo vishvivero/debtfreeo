@@ -60,16 +60,43 @@ export const calculateAmortizationSchedule = (
     debtName: debt.name,
     initialBalance: debt.balance,
     monthlyPayment,
-    interestRate: debt.interest_rate
+    interestRate: debt.interest_rate,
+    metadata: debt.metadata
   });
 
   const schedule: AmortizationEntry[] = [];
-  let currentBalance = debt.balance;
+  
+  // Check if this is a debt with interest included
+  const isInterestIncluded = debt.metadata?.interest_included === true;
+  let effectiveBalance = debt.balance;
+  let effectiveRate = debt.interest_rate;
+  
+  // If interest is included, back-calculate the principal
+  if (isInterestIncluded && debt.metadata?.remaining_months) {
+    // Import the InterestCalculator if needed
+    const { InterestCalculator } = require("@/lib/services/calculations/core/InterestCalculator");
+    effectiveBalance = InterestCalculator.calculatePrincipalFromTotal(
+      debt.balance,
+      debt.metadata.original_rate || effectiveRate,
+      debt.minimum_payment,
+      debt.metadata.remaining_months
+    );
+    effectiveRate = debt.metadata.original_rate || effectiveRate;
+    
+    console.log('Back-calculated principal for included-interest debt:', {
+      originalBalance: debt.balance,
+      calculatedPrincipal: effectiveBalance,
+      effectiveRate,
+      remainingMonths: debt.metadata.remaining_months
+    });
+  }
+  
+  let currentBalance = effectiveBalance;
   let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
-  const monthlyRate = debt.interest_rate / 1200;
+  const monthlyRate = effectiveRate / 1200;
   
   // For zero interest loans, calculate based on simple division
-  if (debt.interest_rate === 0) {
+  if (effectiveRate === 0) {
     const payment = Math.min(monthlyPayment, currentBalance);
     const totalMonths = Math.ceil(currentBalance / payment);
     
@@ -120,7 +147,9 @@ export const calculateAmortizationSchedule = (
   console.log('Amortization schedule calculated:', {
     debtName: debt.name,
     totalMonths: schedule.length,
-    finalBalance: schedule[schedule.length - 1].endingBalance
+    finalBalance: schedule[schedule.length - 1].endingBalance,
+    isInterestIncluded,
+    effectiveRate
   });
 
   return schedule;
