@@ -180,25 +180,19 @@ export const TimelineChart = ({
         <AreaChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E2E8F0" stopOpacity={0.8}/>
-              <stop offset="100%" stopColor="#F8FAFC" stopOpacity={0.2}/>
+              <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#94A3B8" stopOpacity={0.1}/>
             </linearGradient>
             <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0FD396" stopOpacity={0.8}/>
-              <stop offset="100%" stopColor="#E6FEF6" stopOpacity={0.2}/>
+              <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
             </linearGradient>
           </defs>
-          <CartesianGrid 
-            vertical={false} 
-            horizontal={true} 
-            stroke="#E2E8F0" 
-            strokeDasharray="3 3"
-          />
+          <CartesianGrid vertical={false} horizontal={true} stroke="#e5e7eb" />
           <XAxis 
             dataKey="date"
-            tick={{ fontSize: 12, fill: '#64748B' }}
-            tickLine={false}
-            axisLine={false}
+            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tickLine={{ stroke: '#9CA3AF' }}
             tickFormatter={(value) => {
               try {
                 if (!value) return '';
@@ -209,26 +203,15 @@ export const TimelineChart = ({
               }
             }}
             interval="preserveStartEnd"
-            minTickGap={60}
+            minTickGap={30}
           />
           <YAxis 
             tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
-            tick={{ fontSize: 12, fill: '#64748B' }}
-            tickLine={false}
-            axisLine={false}
-            tickCount={6}
+            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tickLine={{ stroke: '#9CA3AF' }}
           />
           <Tooltip content={<TooltipComponent />} />
-          <Legend 
-            verticalAlign="bottom"
-            height={36}
-            iconType="circle"
-            formatter={(value) => (
-              <span style={{ color: '#64748B', fontSize: '14px' }}>
-                {value}
-              </span>
-            )}
-          />
+          <Legend />
           
           {oneTimeFundings.map((funding, index) => (
             <ReferenceLine
@@ -245,15 +228,16 @@ export const TimelineChart = ({
             />
           ))}
 
+          {/* Add vertical line for accelerated payoff date */}
           {acceleratedPayoffDate && (
             <ReferenceLine
               x={acceleratedPayoffDate}
-              stroke="#0FD396"
+              stroke="#10B981"
               strokeWidth={2}
               label={{
                 value: "Debt-Free!",
                 position: 'top',
-                fill: '#0FD396',
+                fill: '#10B981',
                 fontSize: 12,
                 fontWeight: 'bold'
               }}
@@ -275,8 +259,8 @@ export const TimelineChart = ({
             type="monotone"
             dataKey="acceleratedBalance"
             name="Accelerated Timeline"
-            stroke="#0FD396"
-            strokeWidth={2}
+            stroke="#10B981"
+            strokeWidth={3}
             fillOpacity={1}
             fill="url(#acceleratedGradient)"
             dot={false}
