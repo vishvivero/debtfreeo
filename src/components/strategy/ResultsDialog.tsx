@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, DollarSign, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, DollarSign, Clock, Calendar, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
@@ -13,6 +13,7 @@ import { useState } from "react";
 import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { PersonalizedActionPlan } from "@/components/strategy/sections/PersonalizedActionPlan";
+import { useNavigate } from "react-router-dom";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -35,11 +36,10 @@ export const ResultsDialog = ({
   selectedStrategy,
   currencySymbol = '£'
 }: ResultsDialogProps) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [currentView, setCurrentView] = useState<'initial' | 'timeline' | 'insights'>('initial');
   const hasOneTimeFundings = oneTimeFundings.length > 0;
+  const navigate = useNavigate();
   
   if (isOpen) {
     confetti({
@@ -84,6 +84,11 @@ export const ResultsDialog = ({
       setCurrentView('timeline');
     }
   };
+
+  const handleViewFullResults = () => {
+    onClose();
+    navigate("/results-history");
+  };
   
   return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -112,9 +117,14 @@ export const ResultsDialog = ({
                     <ChevronLeft className="h-4 w-4" />
                     Back
                   </Button>
-                  <Button variant="outline" onClick={onClose}>
-                    Close
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={onClose}>
+                      Close
+                    </Button>
+                    <Button onClick={handleViewFullResults}>
+                      View Full Results
+                    </Button>
+                  </div>
                 </div>
               </div>
             </motion.div>}
@@ -281,10 +291,7 @@ export const ResultsDialog = ({
               y: 0
             }} transition={{
               delay: 0.5
-            }} className="flex flex-col sm:flex-row justify-between pt-4 gap-4">
-                  <Button variant="outline" onClick={onClose} className="w-full">
-                    Close
-                  </Button>
+            }} className="flex justify-center pt-4">
                   <Button className="w-full gap-2 bg-[#00D382] hover:bg-[#00D382]/90 text-white" onClick={handleNext}>
                     Next
                     <ChevronRight className="h-4 w-4" />

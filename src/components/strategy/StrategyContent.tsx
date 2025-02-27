@@ -75,10 +75,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     setIsResultsDialogOpen(true);
   };
 
-  const handleViewResultsPage = () => {
-    navigate("/results-history");
-  };
-
   const handleStrategyChange = async (strategy: Strategy) => {
     console.log('Changing strategy to:', strategy.id);
     
@@ -224,21 +220,12 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              className="flex-1"
-              onClick={handleResultsClick}
-            >
-              Get Results
-            </Button>
-            <Button 
-              className="flex-1"
-              variant="outline"
-              onClick={handleViewResultsPage}
-            >
-              View Full Results
-            </Button>
-          </div>
+          <Button 
+            className="w-full"
+            onClick={handleResultsClick}
+          >
+            Get Results
+          </Button>
         </div>
       </motion.div>
 
