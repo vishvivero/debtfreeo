@@ -138,7 +138,11 @@ export const DebtCard = ({
 
   // Check if this is a debt with interest included
   const isInterestIncluded = debt.metadata?.interest_included === true;
+  const originalRate = debt.metadata?.original_rate || debt.interest_rate;
   const payoffDetails = getPayoffDetails(debt);
+
+  // Determine what interest rate to display
+  const displayInterestRate = isInterestIncluded ? originalRate : debt.interest_rate;
 
   return (
     <>
@@ -185,7 +189,7 @@ export const DebtCard = ({
           <div>
             <p className="text-gray-600 mb-1">APR</p>
             <p className="text-2xl font-semibold">
-              {debt.interest_rate}%
+              {displayInterestRate}%
               {isInterestIncluded && (
                 <span className="ml-2 text-xs font-normal text-blue-500 bg-blue-50 px-2 py-1 rounded-full">
                   Interest Included

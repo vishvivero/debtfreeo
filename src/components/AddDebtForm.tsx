@@ -71,12 +71,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         console.log("Using calculated interest rate:", finalInterestRate);
       }
       
-      // If interest is already included in balance, set to 0
-      if (isInterestIncluded) {
-        finalInterestRate = 0;
-        console.log("Interest included in balance, setting rate to 0");
-      }
-
       const newDebt = {
         name,
         balance: Number(balance),
@@ -90,7 +84,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         // Add metadata for these special cases
         metadata: {
           interest_included: isInterestIncluded,
-          remaining_months: useRemainingMonths ? Number(remainingMonths) : null,
+          remaining_months: (isInterestIncluded || useRemainingMonths) ? Number(remainingMonths) : null,
+          original_rate: isInterestIncluded ? finalInterestRate : null,
         }
       };
 
@@ -222,40 +217,38 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           </div>
         </div>
 
-        {!useRemainingMonths && (
-          <div className="relative space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Enter the Annual Percentage Rate (APR) for this debt. For loans with pre-calculated interest in the balance, you can enter 0% if you don't want additional interest calculations.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Percent className="h-5 w-5 text-gray-400" />
-              </div>
-              <Input
-                type="number"
-                value={interestRate}
-                onChange={(e) => setInterestRate(e.target.value)}
-                className="pl-10 bg-white hover:border-primary/50 transition-colors"
-                placeholder="5.5"
-                required={!isInterestIncluded && !useRemainingMonths}
-                disabled={isInterestIncluded || useRemainingMonths}
-                min="0"
-                max="100"
-                step="0.1"
-              />
-            </div>
+        <div className="relative space-y-2">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Enter the Annual Percentage Rate (APR) for this debt. For loans with pre-calculated interest in the balance, enter the original interest rate.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-        )}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Percent className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              type="number"
+              value={interestRate}
+              onChange={(e) => setInterestRate(e.target.value)}
+              className="pl-10 bg-white hover:border-primary/50 transition-colors"
+              placeholder="5.5"
+              required={!useRemainingMonths}
+              disabled={useRemainingMonths}
+              min="0"
+              max="100"
+              step="0.1"
+            />
+          </div>
+        </div>
 
         <div className="relative space-y-2">
           <div className="flex items-center gap-2">
@@ -325,7 +318,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
                         <Info className="h-4 w-4 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Turn this on if your loan balance already includes all future interest. Common for personal loans and auto loans in some countries. If enabled, the interest rate will be set to 0% to avoid double-counting interest.</p>
+                        <p>Turn this on if your loan balance already includes all future interest. Common for personal loans and auto loans in some countries. We'll calculate the original principal based on your interest rate and payment schedule.</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -342,10 +335,43 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
                   // Can't use both options at once
                   if (checked) {
                     setUseRemainingMonths(false);
+                    // Require remaining months if interest is included
+                    if (!remainingMonths) {
+                      setRemainingMonths("12");
+                    }
                   }
                 }}
               />
             </div>
+
+            {isInterestIncluded && (
+              <div className="mt-4">
+                <Label htmlFor="remaining-months" className="text-sm font-medium">
+                  Remaining Months
+                </Label>
+                <Input
+                  id="remaining-months"
+                  type="number"
+                  value={remainingMonths}
+                  onChange={(e) => setRemainingMonths(e.target.value)}
+                  placeholder="36"
+                  className="mt-1"
+                  min="1"
+                  required={isInterestIncluded}
+                />
+                
+                {balance && minimumPayment && remainingMonths && interestRate && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                    <p className="text-sm font-medium text-blue-800">
+                      Estimated payoff: {format(addMonths(new Date(), parseInt(remainingMonths)), 'MMMM yyyy')}
+                    </p>
+                    <p className="text-sm font-medium text-blue-800 mt-1">
+                      Original interest rate will be preserved: {interestRate}%
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
