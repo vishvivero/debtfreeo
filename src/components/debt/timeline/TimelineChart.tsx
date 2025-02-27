@@ -171,6 +171,9 @@ export const TimelineChart = ({
     );
   }
 
+  // Find the accelerated payoff date
+  const acceleratedPayoffDate = chartData.find(point => point.acceleratedBalance === 0)?.date;
+
   return (
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -181,8 +184,8 @@ export const TimelineChart = ({
               <stop offset="95%" stopColor="#94A3B8" stopOpacity={0.1}/>
             </linearGradient>
             <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#34D399" stopOpacity={0.6}/>
-              <stop offset="95%" stopColor="#34D399" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} horizontal={true} stroke="#e5e7eb" />
@@ -224,6 +227,22 @@ export const TimelineChart = ({
               }}
             />
           ))}
+
+          {/* Add vertical line for accelerated payoff date */}
+          {acceleratedPayoffDate && (
+            <ReferenceLine
+              x={acceleratedPayoffDate}
+              stroke="#10B981"
+              strokeWidth={2}
+              label={{
+                value: "Debt-Free!",
+                position: 'top',
+                fill: '#10B981',
+                fontSize: 12,
+                fontWeight: 'bold'
+              }}
+            />
+          )}
           
           <Area
             type="monotone"
@@ -240,7 +259,7 @@ export const TimelineChart = ({
             type="monotone"
             dataKey="acceleratedBalance"
             name="Accelerated Timeline"
-            stroke="#34D399"
+            stroke="#10B981"
             strokeWidth={3}
             fillOpacity={1}
             fill="url(#acceleratedGradient)"
