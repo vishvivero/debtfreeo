@@ -123,7 +123,7 @@ export const OneTimeFundingSection = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground -mt-4">
-          Add extra payments to accelerate your debt payoff
+          Schedule lump sum payments to pay off debt faster and save on interest
         </p>
         
         {fundingEntries.length > 0 && (
