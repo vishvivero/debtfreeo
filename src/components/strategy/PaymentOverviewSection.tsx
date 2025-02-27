@@ -1,10 +1,8 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DollarSign, ArrowRight, RotateCw, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
-
 interface PaymentOverviewSectionProps {
   totalMinimumPayments: number;
   extraPayment: number;
@@ -13,23 +11,22 @@ interface PaymentOverviewSectionProps {
   currencySymbol?: string;
   totalDebtValue: number;
 }
-
 export const PaymentOverviewSection = ({
   totalMinimumPayments,
   extraPayment,
   onExtraPaymentChange,
   onOpenExtraPaymentDialog,
   currencySymbol = "£",
-  totalDebtValue,
+  totalDebtValue
 }: PaymentOverviewSectionProps) => {
-  console.log('PaymentOverviewSection render:', { extraPayment, totalMinimumPayments });
-
+  console.log('PaymentOverviewSection render:', {
+    extraPayment,
+    totalMinimumPayments
+  });
   const handleReset = () => {
     onExtraPaymentChange(0);
   };
-
-  return (
-    <Card className="bg-white/95">
+  return <Card className="bg-white/95">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-emerald-500" />
@@ -55,29 +52,15 @@ export const PaymentOverviewSection = ({
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
                   <DollarSign className="h-4 w-4 text-gray-500" />
                 </div>
-                <Input
-                  type="number"
-                  value={extraPayment || ''}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    const maxValue = totalDebtValue;
-                    onExtraPaymentChange(Math.min(value, maxValue));
-                  }}
-                  max={totalDebtValue}
-                  className="pl-9 text-emerald-600 font-medium"
-                  placeholder="0"
-                />
+                <Input type="number" value={extraPayment || ''} onChange={e => {
+                const value = Number(e.target.value);
+                const maxValue = totalDebtValue;
+                onExtraPaymentChange(Math.min(value, maxValue));
+              }} max={totalDebtValue} className="pl-9 text-emerald-600 font-medium" placeholder="0" />
               </div>
-              {extraPayment > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleReset}
-                  className="h-10 w-10 rounded-full hover:bg-emerald-100/80"
-                >
+              {extraPayment > 0 && <Button variant="ghost" size="icon" onClick={handleReset} className="h-10 w-10 rounded-full hover:bg-emerald-100/80">
                   <RotateCw className="h-4 w-4 text-emerald-500" />
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
         </div>
@@ -90,16 +73,9 @@ export const PaymentOverviewSection = ({
                 {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
               </div>
             </div>
-            <Button
-              onClick={onOpenExtraPaymentDialog}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 w-full md:w-auto"
-            >
-              <span>Calculate Impact</span>
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
