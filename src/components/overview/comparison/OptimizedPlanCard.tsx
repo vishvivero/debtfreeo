@@ -1,8 +1,10 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Target, Info, DollarSign, Plane, Smartphone, Palmtree } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface OptimizedPlanCardProps {
   comparison: {
@@ -20,199 +22,134 @@ interface OptimizedPlanCardProps {
 
 export const OptimizedPlanCard = ({ comparison, currencySymbol }: OptimizedPlanCardProps) => {
   return (
-    <Card className="bg-gradient-to-br from-gray-50 to-emerald-50 border-0 shadow-lg transition-shadow duration-300 hover:shadow-xl">
-      <CardHeader className="pb-2 p-6">
-        <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
-          <div className="p-3 rounded-full bg-emerald-100">
-            <Target className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-600" />
+    <Card className="bg-white dark:bg-gray-800 border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
+      <CardHeader className="pb-2 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-emerald-50 dark:bg-emerald-900">
+            <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <span className="bg-gradient-to-r from-emerald-700 to-emerald-500 bg-clip-text text-transparent leading-tight">
+          <CardTitle className="text-xl font-bold">
             What Debtfreeo Can Save You
-          </span>
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <button className="cursor-help p-2">
-                <Info className="w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors" />
-              </button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80 p-4 bg-white/95 backdrop-blur-sm border-gray-200 shadow-lg">
-              <div className="space-y-2">
-                <h4 className="font-semibold text-base">Optimized Strategy</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  See how much you could save with our optimized payment strategy
-                </p>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-        </CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-4 h-4 text-gray-400 inline ml-2 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>See how much you could save with our optimized strategy</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </CardTitle>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6 p-6">
-        {/* Time Savings Section */}
-        <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
-          <div className="flex flex-col space-y-3">
-            <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                <Target className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2">
-                  Optimized Debt-Free Date
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="cursor-help p-1">
-                        <Info className="w-5 h-5 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white/95 backdrop-blur-sm border-gray-200 shadow-lg">
-                        Your projected debt-free date with our optimized strategy.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </h3>
-                <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {comparison.timeSaved.years > 0 && <>
-                    Become debt-free{' '}
-                    {comparison.timeSaved.years} {comparison.timeSaved.years === 1 ? 'year' : 'years'}
-                    {comparison.timeSaved.months > 0 && ' and '}
-                    {comparison.timeSaved.months > 0 && <>{comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}</>}
-                    {' '}sooner with our optimized plan!
-                  </>}
-                  {!comparison.timeSaved.years && comparison.timeSaved.months > 0 && <>
-                    Become debt-free{' '}
-                    {comparison.timeSaved.months} {comparison.timeSaved.months === 1 ? 'month' : 'months'}{' '}
-                    sooner with our optimized plan!
-                  </>}
-                  {!comparison.timeSaved.years && !comparison.timeSaved.months && <>
-                    Start your journey to become debt-free today!
-                  </>}
-                </div>
-              </div>
+
+      <CardContent className="space-y-6">
+        {/* Optimized Debt-Free Date Section */}
+        <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-xl">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-full bg-emerald-200 dark:bg-emerald-800">
+              <Target className="w-5 h-5 text-emerald-700 dark:text-emerald-300" />
             </div>
-            <span className="text-base sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-              {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+                Optimized Debt-Free Date
+                <Badge variant="secondary" className="text-xs">
+                  {comparison.timeSaved.years > 0 ? `${comparison.timeSaved.years}y` : ''} 
+                  {comparison.timeSaved.months > 0 ? ` ${comparison.timeSaved.months}m` : ''} sooner!
+                </Badge>
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Become debt-free earlier with our optimized plan
+              </p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-2xl font-bold text-emerald-700 dark:text-emerald-300"
+              >
+                {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </motion.div>
+            </div>
           </div>
         </div>
 
         {/* Interest Savings Section */}
-        <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
-          <div className="flex flex-col space-y-3">
-            <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-full bg-emerald-100 dark:bg-emerald-900 shrink-0">
-                <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-sm sm:text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  Total Interest (Optimized)
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="cursor-help">
-                        <Info className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                        The total interest you'll pay with our optimized strategy.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </span>
-                <div className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
-                  Our optimized plan helps you save{' '}
-                  {currencySymbol}{Math.ceil(comparison.moneySaved).toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })}{' '}
-                  in total interest.
-                </div>
-              </div>
+        <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="p-3 rounded-full bg-blue-200 dark:bg-blue-800">
+              <DollarSign className="w-5 h-5 text-blue-700 dark:text-blue-300" />
             </div>
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
-                <span className="text-gray-600 dark:text-gray-300">
-                  Original Interest: <span className="font-semibold text-red-600">{currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()}</span>
-                </span>
-                <span className="text-gray-600 dark:text-gray-300">
-                  Optimized Interest: <span className="font-semibold text-emerald-600">{currencySymbol}{Math.ceil(comparison.optimizedTotalInterest).toLocaleString()}</span>
-                </span>
-              </div>
-              <div className="w-full h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div className="h-full flex">
-                  <motion.div initial={{
-                    width: 0
-                  }} animate={{
-                    width: `${comparison.optimizedTotalInterest / comparison.originalTotalInterest * 100}%`
-                  }} transition={{
-                    duration: 1,
-                    ease: "easeOut"
-                  }} className="h-full bg-emerald-500" />
-                  <motion.div initial={{
-                    width: 0
-                  }} animate={{
-                    width: `${(comparison.originalTotalInterest - comparison.optimizedTotalInterest) / comparison.originalTotalInterest * 100}%`
-                  }} transition={{
-                    duration: 1,
-                    ease: "easeOut"
-                  }} className="h-full bg-red-500" />
-                </div>
-              </div>
-              <div className="text-xs sm:text-sm text-center text-gray-500 dark:text-gray-400">
-                You save {(comparison.moneySaved / comparison.originalTotalInterest * 100).toFixed(1)}% on interest payments
-              </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold">Interest Savings</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Total interest saved with our plan
+              </p>
             </div>
-
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-4"
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Original Interest</span>
+              <span className="text-red-500 font-semibold">
+                {currencySymbol}{Math.ceil(comparison.originalTotalInterest).toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Optimized Interest</span>
+              <span className="text-emerald-500 font-semibold">
+                {currencySymbol}{Math.ceil(comparison.optimizedTotalInterest).toLocaleString()}
+              </span>
+            </div>
+            <div className="h-px bg-gray-200 dark:bg-gray-700" />
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Total Savings</span>
+              <span className="text-lg font-bold text-emerald-600">
+                {currencySymbol}{Math.ceil(comparison.moneySaved).toLocaleString()}
+              </span>
+            </div>
+            <div className="text-center text-sm text-emerald-600 font-medium">
+              Save {((comparison.moneySaved / comparison.originalTotalInterest) * 100).toFixed(1)}% on interest!
+            </div>
+          </motion.div>
         </div>
 
         {/* What You Could Do Section */}
-        <div className="p-6 bg-white/95 dark:bg-gray-800/95 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900">
-              <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">With your savings, you could get</span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="w-4 h-4 text-gray-400" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60] max-w-[300px] p-4 bg-white border-gray-200 shadow-lg">
-                    Real-world examples of what you could do with your savings.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                  <Plane className="w-4 h-4 text-emerald-600" /> International Trips
-                </span>
-                <span className="font-semibold text-emerald-600">
-                  {Math.floor(comparison.moneySaved / 1000)} trips
-                </span>
+        <div className="p-4 border border-gray-100 dark:border-gray-700 rounded-xl">
+          <h3 className="font-semibold mb-4">With your savings, you could get</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Plane className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm">International Trips</span>
               </div>
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-emerald-600" /> Premium Smartphones
-                </span>
-                <span className="font-semibold text-emerald-600">
-                  {Math.floor(comparison.moneySaved / 800)} phones
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                  <Palmtree className="w-4 h-4 text-emerald-600" /> Dream Family Vacation
-                </span>
-                <span className="font-semibold text-emerald-600">
-                  1 trip
-                </span>
-              </div>
+              <span className="font-medium text-sm">
+                {Math.floor(comparison.moneySaved / 1000)} trips
+              </span>
             </div>
-            <div className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">
-              Make your savings work for you!
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm">Premium Smartphones</span>
+              </div>
+              <span className="font-medium text-sm">
+                {Math.floor(comparison.moneySaved / 800)} phones
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palmtree className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm">Dream Family Vacation</span>
+              </div>
+              <span className="font-medium text-sm">1 trip</span>
             </div>
           </div>
         </div>
