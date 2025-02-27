@@ -1,3 +1,4 @@
+
 import { Debt } from "../types/debt";
 
 interface PayoffDetails {
@@ -25,14 +26,33 @@ export const calculatePayoffDetails = (
   const balances = new Map<string, number>();
   debts.forEach(debt => {
     balances.set(debt.id, debt.balance);
-    results[debt.id] = {
-      months: 0,
-      totalInterest: 0,
-      proposedPayment: debt.minimum_payment,
-      payoffDate: new Date()
-    };
+    
+    // For zero-interest debts, calculate direct months to pay off
+    if (debt.interest_rate === 0 && debt.minimum_payment > 0) {
+      const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
+      const payoffDate = new Date();
+      payoffDate.setMonth(payoffDate.getMonth() + monthsToPayoff);
+      
+      results[debt.id] = {
+        months: monthsToPayoff,
+        totalInterest: 0,
+        proposedPayment: debt.minimum_payment,
+        payoffDate: payoffDate
+      };
+    } else {
+      // Initialize with default values for debts with interest
+      results[debt.id] = {
+        months: 0,
+        totalInterest: 0,
+        proposedPayment: debt.minimum_payment,
+        payoffDate: new Date()
+      };
+    }
   });
 
+  // Filter out zero-interest debts that we've already calculated
+  remainingDebts = remainingDebts.filter(debt => !(debt.interest_rate === 0 && debt.minimum_payment > 0));
+  
   // Continue until all debts are paid or we hit the cap
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     let availablePayment = monthlyPayment;
