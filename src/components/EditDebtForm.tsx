@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDebts } from "@/hooks/use-debts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { addMonths, format } from "date-fns";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 interface EditDebtFormProps {
   debt: Debt;
@@ -46,6 +47,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
   const [isInterestIncluded, setIsInterestIncluded] = useState(metadata.interest_included || false);
   const [remainingMonths, setRemainingMonths] = useState(metadata.remaining_months?.toString() || "");
   const [useRemainingMonths, setUseRemainingMonths] = useState(!!metadata.remaining_months && !metadata.interest_included);
+  const [calculatedPrincipal, setCalculatedPrincipal] = useState<number | null>(null);
   
   // Calculate projected payoff date based on remaining months
   const projectedPayoffDate = useRemainingMonths && remainingMonths ? 
@@ -59,6 +61,22 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
       Number(minimumPayment), 
       Number(remainingMonths)
     ) : null;
+
+  // Calculate the original principal when interest is included
+  useEffect(() => {
+    if (isInterestIncluded && remainingMonths && balance && minimumPayment && interestRate) {
+      const principal = InterestCalculator.calculatePrincipalFromTotal(
+        Number(balance),
+        Number(interestRate),
+        Number(minimumPayment),
+        Number(remainingMonths)
+      );
+      setCalculatedPrincipal(principal);
+      console.log("Calculated principal:", principal);
+    } else {
+      setCalculatedPrincipal(null);
+    }
+  }, [isInterestIncluded, remainingMonths, balance, minimumPayment, interestRate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -353,8 +371,18 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
                       Estimated payoff: {format(addMonths(new Date(), parseInt(remainingMonths)), 'MMMM yyyy')}
                     </p>
                     <p className="text-sm font-medium text-blue-800 mt-1">
-                      Original interest rate will be preserved: {interestRate}%
+                      Original interest rate: {interestRate}%
                     </p>
+                    {calculatedPrincipal !== null && (
+                      <>
+                        <p className="text-sm font-medium text-blue-800 mt-1">
+                          Calculated principal: {currencySymbol}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </p>
+                        <p className="text-sm font-medium text-blue-800 mt-1">
+                          Interest amount: {currencySymbol}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

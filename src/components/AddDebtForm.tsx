@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { addMonths, format } from "date-fns";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -43,6 +44,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const [isInterestIncluded, setIsInterestIncluded] = useState(false);
   const [remainingMonths, setRemainingMonths] = useState("");
   const [useRemainingMonths, setUseRemainingMonths] = useState(false);
+  const [calculatedPrincipal, setCalculatedPrincipal] = useState<number | null>(null);
   
   // Calculate projected payoff date based on remaining months
   const projectedPayoffDate = useRemainingMonths && remainingMonths ? 
@@ -56,6 +58,22 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       Number(minimumPayment), 
       Number(remainingMonths)
     ) : null;
+
+  // Calculate the original principal when interest is included
+  useEffect(() => {
+    if (isInterestIncluded && remainingMonths && balance && minimumPayment && interestRate) {
+      const principal = InterestCalculator.calculatePrincipalFromTotal(
+        Number(balance),
+        Number(interestRate),
+        Number(minimumPayment),
+        Number(remainingMonths)
+      );
+      setCalculatedPrincipal(principal);
+      console.log("Calculated principal:", principal);
+    } else {
+      setCalculatedPrincipal(null);
+    }
+  }, [isInterestIncluded, remainingMonths, balance, minimumPayment, interestRate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -366,8 +384,18 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
                       Estimated payoff: {format(addMonths(new Date(), parseInt(remainingMonths)), 'MMMM yyyy')}
                     </p>
                     <p className="text-sm font-medium text-blue-800 mt-1">
-                      Original interest rate will be preserved: {interestRate}%
+                      Original interest rate: {interestRate}%
                     </p>
+                    {calculatedPrincipal !== null && (
+                      <>
+                        <p className="text-sm font-medium text-blue-800 mt-1">
+                          Calculated principal: {currencySymbol}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </p>
+                        <p className="text-sm font-medium text-blue-800 mt-1">
+                          Interest amount: {currencySymbol}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
