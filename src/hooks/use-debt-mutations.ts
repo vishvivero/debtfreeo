@@ -46,9 +46,26 @@ export function useDebtMutations() {
       if (!user?.id) throw new Error("No user ID available");
 
       console.log("Updating debt:", updatedDebt);
+      
+      // Create a new object with only the properties that should be sent to the database
+      const debtToUpdate = {
+        id: updatedDebt.id,
+        name: updatedDebt.name,
+        banker_name: updatedDebt.banker_name,
+        balance: updatedDebt.balance,
+        interest_rate: updatedDebt.interest_rate,
+        minimum_payment: updatedDebt.minimum_payment,
+        currency_symbol: updatedDebt.currency_symbol,
+        next_payment_date: updatedDebt.next_payment_date,
+        category: updatedDebt.category,
+        closed_date: updatedDebt.closed_date,
+        status: updatedDebt.status,
+        metadata: updatedDebt.metadata
+      };
+
       const { data, error } = await supabase
         .from("debts")
-        .update(updatedDebt)
+        .update(debtToUpdate)
         .eq("id", updatedDebt.id)
         .select()
         .single();
@@ -60,8 +77,8 @@ export function useDebtMutations() {
 
       // Ensure status is of correct type before passing to updateDebtAndProfile
       const typedDebt: Debt = {
-        ...updatedDebt,
-        status: updatedDebt.status as 'active' | 'paid'
+        ...data,
+        status: data.status as 'active' | 'paid'
       };
 
       await updateDebtAndProfile(typedDebt);
@@ -97,6 +114,7 @@ export function useDebtMutations() {
 
       console.log("Adding new debt with minimum payment:", newDebt.minimum_payment);
       
+      // Create a new object with only the properties that should be sent to the database
       const debtToInsert = {
         ...newDebt,
         user_id: user.id,

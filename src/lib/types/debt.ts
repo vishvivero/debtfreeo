@@ -18,7 +18,7 @@ export interface Debt {
     interest_included?: boolean;
     remaining_months?: number | null;
     [key: string]: any;
-  };
+  } | null;
 }
 
 export interface PaymentHistory {
