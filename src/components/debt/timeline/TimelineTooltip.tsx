@@ -1,6 +1,5 @@
 
 import { formatDate } from "@/lib/utils/dateUtils";
-import { parseISO } from "date-fns";
 
 interface TimelineTooltipProps {
   active?: boolean;
@@ -19,8 +18,6 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
     const currencySymbol = payload[0]?.payload?.currencySymbol || '£';
     const date = formatDate(label, 'MMMM yyyy');
     const oneTimePayment = payload[0]?.payload?.oneTimePayment;
-    const paymentDetails = payload[0]?.payload?.paymentDetails;
-    const pointType = getPointType(payload[0]?.payload);
     const difference = Math.max(0, baselineBalance - acceleratedBalance);
     const percentSaved = baselineBalance > 0 ? ((difference / baselineBalance) * 100).toFixed(1) : "0.0";
     
@@ -30,9 +27,9 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
       }`}>
         <div className="flex justify-between items-center mb-2">
           <p className="font-medium text-gray-700">{date}</p>
-          {pointType && (
-            <span className={`text-xs px-2 py-0.5 rounded-full ${getPointTypeStyles(pointType)}`}>
-              {pointType}
+          {oneTimePayment && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+              One-Time Payment
             </span>
           )}
         </div>
@@ -80,18 +77,6 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
               This one-time payment of {currencySymbol}{oneTimePayment.toLocaleString()} accelerates your debt payoff timeline.
             </div>
           )}
-          
-          {pointType === 'Before Funding' && (
-            <div className="mt-2 pt-2 border-t text-xs text-yellow-700">
-              Balance before one-time payment is applied.
-            </div>
-          )}
-          
-          {pointType === 'After Funding' && (
-            <div className="mt-2 pt-2 border-t text-xs text-green-700">
-              Balance after one-time payment is applied.
-            </div>
-          )}
         </div>
       </div>
     );
@@ -104,34 +89,3 @@ export const TimelineTooltip = ({ active, payload, label }: TimelineTooltipProps
     );
   }
 };
-
-function getPointType(dataPoint: any): string | null {
-  if (!dataPoint) return null;
-  
-  if (dataPoint.oneTimePayment) {
-    return 'One-Time Payment';
-  }
-  
-  if (dataPoint.paymentDetails?.isPrefundingPoint) {
-    return 'Before Funding';
-  }
-  
-  if (dataPoint.paymentDetails?.isPostfundingPoint) {
-    return 'After Funding';
-  }
-  
-  return null;
-}
-
-function getPointTypeStyles(pointType: string): string {
-  switch (pointType) {
-    case 'One-Time Payment':
-      return 'bg-purple-100 text-purple-800';
-    case 'Before Funding':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'After Funding':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-}
