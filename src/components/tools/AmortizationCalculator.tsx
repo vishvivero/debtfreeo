@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AmortizationTable } from "@/components/debt/AmortizationTable";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
-import { AmortizationEntry } from "@/lib/utils/payment/standardizedCalculations";
+import { CalculationResult } from "@/lib/utils/payment/standardizedCalculations";
+import { Debt } from "@/lib/types";
 
 export const AmortizationCalculator = () => {
   const { profile } = useProfile();
@@ -16,7 +17,7 @@ export const AmortizationCalculator = () => {
   const [interestRate, setInterestRate] = useState("");
   const [loanTerm, setLoanTerm] = useState("");
   const [currency, setCurrency] = useState(profile?.preferred_currency || "£");
-  const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationEntry[]>([]);
+  const [amortizationSchedule, setAmortizationSchedule] = useState<CalculationResult[]>([]);
 
   const calculateAmortization = () => {
     const principal = parseFloat(loanAmount);
@@ -29,29 +30,38 @@ export const AmortizationCalculator = () => {
       (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
       (Math.pow(1 + monthlyRate, months) - 1);
 
-    const schedule: AmortizationEntry[] = [];
+    const schedule: CalculationResult[] = [];
     let balance = principal;
     let currentDate = new Date();
 
     for (let i = 0; i < months; i++) {
       const interest = balance * monthlyRate;
       const principalPaid = monthlyPayment - interest;
-      const startingBalance = balance;
       balance -= principalPaid;
       const endingBalance = Math.max(0, balance);
 
       schedule.push({
-        date: new Date(currentDate.setMonth(currentDate.getMonth() + 1)),
-        startingBalance,
+        date: new Date(currentDate.getFullYear(), currentDate.getMonth() + i + 1),
         payment: monthlyPayment,
-        principal: principalPaid,
-        interest: interest,
-        endingBalance,
+        principalPayment: principalPaid,
+        interestPayment: interest,
         remainingBalance: endingBalance
       });
     }
 
     setAmortizationSchedule(schedule);
+  };
+
+  // Create a mock debt object with required properties for the AmortizationTable
+  const mockDebt: Debt = {
+    id: "calculator",
+    name: "Calculator",
+    banker_name: "Calculator",
+    balance: parseFloat(loanAmount) || 0,
+    interest_rate: parseFloat(interestRate) || 0,
+    minimum_payment: 0,
+    currency_symbol: currency,
+    status: "active"
   };
 
   return (
@@ -126,7 +136,7 @@ export const AmortizationCalculator = () => {
           {amortizationSchedule.length > 0 && (
             <div className="mt-8">
               <AmortizationTable
-                debt={{ name: "Calculator" }}
+                debt={mockDebt}
                 amortizationData={amortizationSchedule}
                 currencySymbol={currency}
               />
