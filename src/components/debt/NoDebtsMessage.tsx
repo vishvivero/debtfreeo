@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
@@ -36,17 +37,24 @@ export const NoDebtsMessage = () => {
       animate={{ opacity: 1, y: 0 }}
       className="text-center space-y-6 py-8"
     >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className="inline-block p-4 bg-emerald-50 rounded-full"
+      <Button 
+        onClick={() => setIsDialogOpen(true)}
+        className="inline-flex flex-col items-center justify-center bg-transparent hover:bg-emerald-50 transition-colors duration-200 p-0"
       >
-        <Plus className="w-12 h-12 text-emerald-600" />
-      </motion.div>
-      <h2 className="text-2xl font-bold text-gray-900">No Debts Added Yet!</h2>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="p-4 bg-emerald-50 rounded-full mb-2"
+        >
+          <Plus className="w-12 h-12 text-emerald-600" />
+        </motion.div>
+        <h2 className="text-2xl font-bold text-gray-900">No Debts Added Yet!</h2>
+      </Button>
+      
       <p className="text-gray-600 max-w-md mx-auto">
         Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
       </p>
+      
       <Button 
         onClick={() => setIsDialogOpen(true)}
         className="bg-emerald-600 hover:bg-emerald-700"
