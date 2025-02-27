@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Calendar, Crown, Info, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { CreditCard, Calendar, Crown, Info, ChevronDown, ChevronUp, HelpCircle, Wallet, Percent, DollarSign } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/tabs";
 import { addMonths, format } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
+import { countryCurrencies } from "@/lib/utils/currency-data";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -38,7 +40,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
   const [minimumPayment, setMinimumPayment] = useState("");
   const [date, setDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState("");
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState("basics");
+  const [selectedCurrency, setSelectedCurrency] = useState(currencySymbol);
   
   // Advanced options
   const [isInterestIncluded, setIsInterestIncluded] = useState(false);
@@ -98,7 +101,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         interest_rate: finalInterestRate,
         minimum_payment: Number(minimumPayment),
         banker_name: "Not specified",
-        currency_symbol: currencySymbol,
+        currency_symbol: selectedCurrency,
         next_payment_date: date.toISOString(),
         category,
         status: 'active' as const,
@@ -192,11 +195,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
     return parseFloat(rate.toFixed(2));
   }
 
-  // Format date to display
-  const formatDateForDisplay = (date: Date) => {
-    return format(date, 'MM/dd/yyyy');
-  };
-
   // Format date for input value
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split('T')[0];
@@ -207,210 +205,367 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
       <div className="p-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="border-b">
-            <div className="px-6">
-              <TabsList className="h-14 bg-transparent space-x-8 p-0">
+            <div className="px-4">
+              <TabsList className="h-12 bg-transparent space-x-5 p-0">
                 <TabsTrigger 
-                  value="details" 
-                  className="text-base font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-14 px-1 bg-transparent"
+                  value="basics" 
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
                 >
-                  Loan Description
+                  Basic Info
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="terms" 
-                  className="text-base font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-14 px-1 bg-transparent"
+                  value="advanced" 
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
                 >
-                  Terms
+                  Advanced Settings
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="payment" 
-                  className="text-base font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-14 px-1 bg-transparent"
+                  value="currency" 
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
                 >
-                  Payment Details
+                  Currency
                 </TabsTrigger>
               </TabsList>
             </div>
           </div>
 
-          <div className="p-6">
-            <TabsContent value="details" className="mt-0 space-y-4">
-              {/* Debt Name */}
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">Debt Name</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="border-gray-300"
-                  placeholder="E.g. Personal Loan, Credit Card, etc."
-                  required
-                />
-              </div>
+          <div className="p-4">
+            <TabsContent value="basics" className="mt-0 space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Left Column */}
+                <div className="space-y-3">
+                  {/* Debt Name */}
+                  <div className="space-y-1">
+                    <Label className="text-gray-700 text-sm">Debt Name *</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <CreditCard className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <Input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-9 border-gray-300 h-9"
+                        placeholder="E.g. Personal Loan, Credit Card"
+                        required
+                      />
+                    </div>
+                  </div>
 
-              {/* Debt Category */}
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">Debt Category</Label>
-                <DebtCategorySelect value={category} onChange={setCategory} />
+                  {/* Balance */}
+                  <div className="space-y-1">
+                    <Label className="text-gray-700 text-sm">Current Balance *</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <span className="text-gray-500">{selectedCurrency}</span>
+                      </div>
+                      <Input
+                        type="number"
+                        value={balance}
+                        onChange={(e) => setBalance(e.target.value)}
+                        className="pl-9 border-gray-300 h-9"
+                        placeholder="Enter balance amount"
+                        required
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Debt Category */}
+                  <div className="space-y-1">
+                    <Label className="text-gray-700 text-sm">Debt Category</Label>
+                    <DebtCategorySelect value={category} onChange={setCategory} />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-3">
+                  {/* Interest Rate */}
+                  <div className="space-y-1">
+                    <Label className="text-gray-700 text-sm">Interest Rate (%) *</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <Percent className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <Input
+                        type="number"
+                        value={interestRate}
+                        onChange={(e) => setInterestRate(e.target.value)}
+                        className="pl-9 border-gray-300 h-9"
+                        placeholder="E.g. 5.99"
+                        required={!useRemainingMonths}
+                        disabled={useRemainingMonths}
+                        min="0"
+                        max="100"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Minimum Payment */}
+                  <div className="space-y-1">
+                    <Label className="text-gray-700 text-sm">Minimum Payment *</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <span className="text-gray-500">{selectedCurrency}</span>
+                      </div>
+                      <Input
+                        type="number"
+                        value={minimumPayment}
+                        onChange={(e) => setMinimumPayment(e.target.value)}
+                        className="pl-9 border-gray-300 h-9"
+                        placeholder="Monthly payment"
+                        required
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Next Payment Date */}
+                  <div className="space-y-1">
+                    <Label className="text-gray-700 text-sm">Next Payment Due Date *</Label>
+                    <div className="relative">
+                      <Input
+                        type="date"
+                        value={formatDateForInput(date)}
+                        onChange={(e) => {
+                          if (e.target.valueAsDate) {
+                            setDate(e.target.valueAsDate);
+                          }
+                        }}
+                        className="border-gray-300 h-9 pl-9"
+                        min={formatDateForInput(new Date())}
+                        required
+                      />
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="terms" className="mt-0 space-y-4">
-              {/* Balance */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-700 font-medium">Current Balance</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="cursor-help">
-                        <HelpCircle className="h-5 w-5 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Enter the current outstanding balance from your latest statement</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500">{currencySymbol}</span>
+            <TabsContent value="advanced" className="mt-0 space-y-3">
+              <div className="space-y-4">
+                {/* Interest Already Included */}
+                <div className="p-3 border rounded-md bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Interest Already Included in Balance
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enable if total balance includes future interest
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <Label className="mr-2 text-xs">
+                        {isInterestIncluded ? "On" : "Off"}
+                      </Label>
+                      <div className="relative inline-flex h-5 w-10 items-center rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-white data-[state=checked]:bg-blue-500">
+                        <input
+                          type="checkbox"
+                          checked={isInterestIncluded}
+                          onChange={(e) => {
+                            setIsInterestIncluded(e.target.checked);
+                            if (e.target.checked) {
+                              setUseRemainingMonths(false);
+                              if (!remainingMonths) {
+                                setRemainingMonths("12");
+                              }
+                            } else {
+                              setUsePrincipalAsBalance(false);
+                            }
+                          }}
+                          className="peer absolute h-0 w-0 opacity-0"
+                        />
+                        <span className="pointer-events-none block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />
+                      </div>
+                    </div>
                   </div>
-                  <Input
-                    type="number"
-                    value={balance}
-                    onChange={(e) => setBalance(e.target.value)}
-                    className="pl-8 border-gray-300"
-                    placeholder="Enter balance amount"
-                    required
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
 
-              {/* Interest Rate */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-700 font-medium">Interest Rate (%)</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="cursor-help">
-                        <HelpCircle className="h-5 w-5 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Enter the Annual Percentage Rate (APR) for this debt</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {isInterestIncluded && (
+                    <div className="mt-3">
+                      <Label className="text-xs font-medium">Months Until Payoff</Label>
+                      <Input
+                        type="number"
+                        value={remainingMonths}
+                        onChange={(e) => setRemainingMonths(e.target.value)}
+                        placeholder="36"
+                        className="mt-1 text-xs h-8"
+                        min="1"
+                        required={isInterestIncluded}
+                      />
+                      
+                      {balance && minimumPayment && remainingMonths && interestRate && (
+                        <div className="mt-2 p-2 bg-blue-50 border border-blue-100 rounded-md text-xs">
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                            {calculatedPrincipal !== null && (
+                              <>
+                                <div>
+                                  <p className="text-xs font-medium text-blue-800">Principal:</p>
+                                  <p className="text-xs text-blue-600">
+                                    {selectedCurrency}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium text-blue-800">Interest Amount:</p>
+                                  <p className="text-xs text-blue-600">
+                                    {selectedCurrency}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          
+                          <div className="mt-2 flex items-center justify-between">
+                            <Label className="text-xs font-medium text-blue-800">
+                              Use principal as balance
+                            </Label>
+                            <div className="relative inline-flex h-5 w-10 items-center rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-white data-[state=checked]:bg-blue-500">
+                              <input
+                                type="checkbox"
+                                checked={usePrincipalAsBalance}
+                                onChange={(e) => setUsePrincipalAsBalance(e.target.checked)}
+                                className="peer absolute h-0 w-0 opacity-0"
+                              />
+                              <span className="pointer-events-none block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={interestRate}
-                    onChange={(e) => setInterestRate(e.target.value)}
-                    className="border-gray-300"
-                    placeholder="E.g. 5.99"
-                    required={!useRemainingMonths}
-                    disabled={useRemainingMonths}
-                    min="0"
-                    max="100"
-                    step="0.01"
-                  />
-                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500">%</span>
+                
+                {/* Calculate Interest from Remaining Months */}
+                <div className="p-3 border rounded-md bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Calculate Interest From Payment Term
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Determine interest rate based on payment schedule
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <Label className="mr-2 text-xs">
+                        {useRemainingMonths ? "On" : "Off"}
+                      </Label>
+                      <div className="relative inline-flex h-5 w-10 items-center rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-white data-[state=checked]:bg-blue-500">
+                        <input
+                          type="checkbox"
+                          checked={useRemainingMonths}
+                          onChange={(e) => {
+                            setUseRemainingMonths(e.target.checked);
+                            if (e.target.checked) {
+                              setIsInterestIncluded(false);
+                              setUsePrincipalAsBalance(false);
+                            }
+                          }}
+                          className="peer absolute h-0 w-0 opacity-0"
+                        />
+                        <span className="pointer-events-none block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="payment" className="mt-0 space-y-4">
-              {/* Minimum Payment */}
-              <div>
-                <div className="mb-1 text-gray-600">Minimum payment calculation</div>
-                <div className="text-xl text-gray-700 font-normal mb-4">Fixed amount</div>
-                <div className="border-t border-gray-200 pt-4"></div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <Label className="text-gray-700 font-medium">Minimum payment *</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="ml-1 cursor-help">
-                        <HelpCircle className="h-4 w-4 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Enter your fixed monthly payment (EMI) or minimum payment amount</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {useRemainingMonths && (
+                    <div className="mt-3">
+                      <Label className="text-xs font-medium">Months Until Payoff</Label>
+                      <Input
+                        type="number"
+                        value={remainingMonths}
+                        onChange={(e) => setRemainingMonths(e.target.value)}
+                        placeholder="36"
+                        className="mt-1 text-xs h-8"
+                        min="1"
+                        required={useRemainingMonths}
+                      />
+                      
+                      {balance && minimumPayment && remainingMonths && (
+                        <div className="mt-2 p-2 bg-blue-50 border border-blue-100 rounded-md text-xs">
+                          <div className="grid grid-cols-2 gap-1">
+                            <div>
+                              <p className="text-xs font-medium text-blue-800">Payoff Date:</p>
+                              <p className="text-xs text-blue-600">{format(addMonths(new Date(), parseInt(remainingMonths)), 'MMM yyyy')}</p>
+                            </div>
+                            {estimatedInterestRate !== null && (
+                              <div>
+                                <p className="text-xs font-medium text-blue-800">Est. Interest Rate:</p>
+                                <p className="text-xs text-blue-600">{estimatedInterestRate}%</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500">{currencySymbol}</span>
-                  </div>
-                  <Input
-                    type="number"
-                    value={minimumPayment}
-                    onChange={(e) => setMinimumPayment(e.target.value)}
-                    className="pl-8 border-gray-300"
-                    placeholder="Enter minimum payment"
-                    required
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <div className="mb-1 text-gray-600">Payment frequency</div>
-                <div className="text-xl text-gray-700 font-normal mb-4 flex items-center">
-                  Once per month
-                  <div className="ml-auto">
-                    <Crown className="h-6 w-6 text-amber-400" />
-                  </div>
-                </div>
-                <div className="border-t border-gray-200 pt-4"></div>
-              </div>
-
-              {/* Next Payment Date */}
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <Label className="text-gray-700 font-medium">Next payment due date *</Label>
-                </div>
-                <div className="relative">
-                  <Input
-                    type="date"
-                    value={formatDateForInput(date)}
-                    onChange={(e) => {
-                      if (e.target.valueAsDate) {
-                        setDate(e.target.valueAsDate);
-                      }
-                    }}
-                    className="border-gray-300"
-                    min={formatDateForInput(new Date())}
-                    required
-                  />
-                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div className="space-y-2">
-                <div className="mb-1 text-gray-600">Custom note</div>
-                <div className="border-t border-gray-200 pt-4"></div>
-                <div className="relative">
+                {/* Notes Section */}
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Notes (Optional)</Label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-3 h-24 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-md p-2 h-20 resize-none text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Add any additional notes about this debt..."
                     maxLength={500}
                   />
-                  <div className="text-right text-sm text-gray-500 mt-1">
+                  <div className="text-right text-xs text-gray-500">
                     {notes.length}/500
                   </div>
-                  <div className="absolute top-2 right-2">
-                    <Crown className="h-6 w-6 text-amber-400" />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="currency" className="mt-0">
+              <div className="space-y-4">
+                <div className="p-4 border rounded-md bg-gray-50">
+                  <div className="flex items-center mb-3">
+                    <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
+                    <h3 className="text-base font-semibold">Select Currency</h3>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 mb-4">
+                    Choose the currency for this debt. This will affect how the debt is displayed and calculated.
+                  </p>
+                  
+                  <div className="space-y-1">
+                    <Label className="text-sm font-medium">Currency</Label>
+                    <Select 
+                      value={selectedCurrency} 
+                      onValueChange={setSelectedCurrency}
+                    >
+                      <SelectTrigger className="w-full border-gray-300">
+                        <SelectValue placeholder="Select currency" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[200px]">
+                        {countryCurrencies.map((item) => (
+                          <SelectItem key={item.symbol} value={item.symbol}>
+                            <span className="flex items-center gap-2">
+                              <span className="font-medium">{item.symbol}</span>
+                              <span className="text-sm text-gray-600">{item.country} - {item.currency}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                    <p className="text-sm font-medium text-blue-800">Current Selection:</p>
+                    <div className="flex items-center mt-1">
+                      <span className="text-xl font-bold text-blue-600 mr-2">{selectedCurrency}</span>
+                      <span className="text-sm text-blue-700">
+                        {countryCurrencies.find(c => c.symbol === selectedCurrency)?.country || 'Unknown'} - 
+                        {countryCurrencies.find(c => c.symbol === selectedCurrency)?.currency || 'Unknown'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -419,25 +574,24 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         </Tabs>
       </div>
 
-      <div className="mt-auto flex justify-between items-center p-6 border-t">
+      <div className="mt-auto flex justify-between items-center p-4 border-t">
         <Button 
           type="button" 
           variant="outline"
           className="text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50"
           onClick={() => {
-            // Handle cancel/delete action
             if (onClose) {
               onClose();
             }
           }}
         >
-          Delete
+          Cancel
         </Button>
         <Button 
           type="submit" 
-          className="bg-blue-500 hover:bg-blue-600 text-white px-10"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6"
         >
-          Save changes
+          Add Debt
         </Button>
       </div>
     </form>
