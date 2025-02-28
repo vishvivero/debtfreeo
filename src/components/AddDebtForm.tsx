@@ -252,7 +252,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Balance */}
+                  {/* Balance - Updated the label to "Current Outstanding Balance" */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Current Outstanding Balance *</Label>
                     <div className="relative">
@@ -303,7 +303,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Minimum Payment */}
+                  {/* Minimum Payment - Updated to "Minimum Payment/EMI" */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Minimum Payment/EMI *</Label>
                     <div className="relative">
