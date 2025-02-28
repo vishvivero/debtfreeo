@@ -212,6 +212,11 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
     `${currencySymbol} ${selectedCurrency.country} - ${selectedCurrency.currency}` : 
     currencySymbol;
 
+  // Handle cancel click - fixed type mismatch
+  const handleCancel = () => {
+    onSubmit(debt); // Pass the original debt back to close the dialog
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
       <div className="p-0">
@@ -590,7 +595,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
           type="button" 
           variant="outline"
           className="text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50"
-          onClick={onSubmit}
+          onClick={handleCancel}
         >
           Cancel
         </Button>
