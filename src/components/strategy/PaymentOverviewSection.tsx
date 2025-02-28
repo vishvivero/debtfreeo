@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RotateCw, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
-import { KeyboardEvent, useState } from "react";
+import { KeyboardEvent, useState, useEffect } from "react";
 
 interface PaymentOverviewSectionProps {
   totalMinimumPayments: number;
@@ -29,11 +29,14 @@ export const PaymentOverviewSection = ({
   
   const [localExtraPayment, setLocalExtraPayment] = useState<string | number>(extraPayment || '');
 
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalExtraPayment(extraPayment || '');
+  }, [extraPayment]);
+
   const handleExtraPaymentChange = (value: string) => {
     setLocalExtraPayment(value);
-    // Convert to number and update temporary state
-    const numericValue = Number(value) || 0;
-    onExtraPaymentChange(numericValue);
+    // Don't update parent state with each keystroke - only on blur/enter
   };
   
   const handleBlur = () => {
@@ -42,9 +45,13 @@ export const PaymentOverviewSection = ({
     const maxValue = totalDebtValue;
     const finalValue = Math.min(numericValue, maxValue);
     
-    // Update both local state and parent state
+    // Update local state
     setLocalExtraPayment(finalValue);
-    onExtraPaymentChange(finalValue);
+    
+    // Only call parent update if the value actually changed
+    if (finalValue !== extraPayment) {
+      onExtraPaymentChange(finalValue);
+    }
   };
   
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -121,7 +128,7 @@ export const PaymentOverviewSection = ({
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">Total Monthly Payment</div>
             <div className="text-2xl font-bold text-gray-900">
-              {formatCurrency(totalMinimumPayments + Number(localExtraPayment), currencySymbol)}
+              {formatCurrency(totalMinimumPayments + Number(localExtraPayment || 0), currencySymbol)}
             </div>
           </div>
         </div>
