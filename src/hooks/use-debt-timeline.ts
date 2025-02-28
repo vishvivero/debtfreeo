@@ -21,6 +21,7 @@ export const useDebtTimeline = (
 
     console.log('useDebtTimeline: Starting calculation with params:', {
       debtsTotal: debts.reduce((sum, debt) => sum + debt.balance, 0),
+      debtsCurrencies: debts.map(d => d.currency_symbol),
       monthlyPayment,
       strategy: strategy.name,
       zeroInterestDebts: debts.filter(d => d.interest_rate === 0).map(d => ({
@@ -37,7 +38,8 @@ export const useDebtTimeline = (
       baselineInterest: results.baselineInterest,
       acceleratedInterest: results.acceleratedInterest,
       interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved
+      monthsSaved: results.monthsSaved,
+      currenciesInvolved: debts.map(d => d.currency_symbol).filter((v, i, a) => a.indexOf(v) === i)
     });
 
     return results;

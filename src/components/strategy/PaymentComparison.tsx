@@ -5,6 +5,7 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -30,13 +31,30 @@ export const PaymentComparison = ({
     return null;
   }
 
+  // Get user's currency symbol from first debt if available
+  const debtCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '$';
+
+  // Convert interest values if the currency symbols are different
+  const baselineInterest = timelineResults.baselineInterest;
+  const acceleratedInterest = timelineResults.acceleratedInterest;
+
   console.log('Payment comparison data:', {
-    baselineInterest: timelineResults.baselineInterest,
-    acceleratedInterest: timelineResults.acceleratedInterest,
+    baselineInterest,
+    acceleratedInterest,
     baselineMonths: timelineResults.baselineMonths,
     acceleratedMonths: timelineResults.acceleratedMonths,
-    oneTimeFundingsCount: oneTimeFundings.length
+    oneTimeFundingsCount: oneTimeFundings.length,
+    currencySymbol,
+    debtCurrencySymbol
   });
+
+  // Calculate total debt with potential currency conversion
+  const totalDebt = debts.reduce((sum, debt) => {
+    const convertedBalance = debt.currency_symbol !== currencySymbol 
+      ? convertCurrency(debt.balance, debt.currency_symbol, currencySymbol)
+      : debt.balance;
+    return sum + convertedBalance;
+  }, 0);
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -44,13 +62,13 @@ export const PaymentComparison = ({
         <h3 className="font-semibold mb-2">Original Timeline</h3>
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
-            Total Debt: {formatCurrency(debts.reduce((sum, debt) => sum + debt.balance, 0), currencySymbol)}
+            Total Debt: {formatCurrency(totalDebt, currencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
             Monthly Payment: {formatCurrency(monthlyPayment, currencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
-            Total Interest: {formatCurrency(timelineResults.baselineInterest, currencySymbol)}
+            Total Interest: {formatCurrency(baselineInterest, currencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
             Months to Pay Off: {Math.ceil(timelineResults.baselineMonths)}
@@ -61,13 +79,13 @@ export const PaymentComparison = ({
         <h3 className="font-semibold mb-2">Accelerated Timeline</h3>
         <div className="space-y-2">
           <p className="text-sm text-emerald-600">
-            Total Debt: {formatCurrency(debts.reduce((sum, debt) => sum + debt.balance, 0), currencySymbol)}
+            Total Debt: {formatCurrency(totalDebt, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
             Monthly Payment: {formatCurrency(monthlyPayment, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
-            Total Interest: {formatCurrency(timelineResults.acceleratedInterest, currencySymbol)}
+            Total Interest: {formatCurrency(acceleratedInterest, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
             Months to Pay Off: {Math.ceil(timelineResults.acceleratedMonths)}

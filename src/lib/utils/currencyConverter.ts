@@ -32,8 +32,12 @@ export const convertCurrency = (
   fromCurrency: string,
   toCurrency: string
 ): number => {
+  // Log the conversion request for debugging
+  console.log(`Converting ${amount} from ${fromCurrency} to ${toCurrency}`);
+  
   // If currencies are the same, no conversion needed
   if (fromCurrency === toCurrency) {
+    console.log(`No conversion needed, currencies are the same: ${fromCurrency}`);
     return amount;
   }
 
@@ -45,6 +49,7 @@ export const convertCurrency = (
   const amountInUSD = amount / fromRate;
   const convertedAmount = amountInUSD * toRate;
 
+  console.log(`Conversion result: ${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency} (via USD)`);
   return Number(convertedAmount.toFixed(2));
 };
 
@@ -55,7 +60,25 @@ export const formatCurrency = (
   amount: number,
   currencySymbol: string = "$"
 ): string => {
-  return `${currencySymbol}${amount.toLocaleString()}`;
+  // Handle potentially large numbers with appropriate formatting
+  if (amount >= 1000000) {
+    const millions = (amount / 1000000).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    return `${currencySymbol}${millions}M`;
+  } else if (amount >= 1000) {
+    const thousands = (amount / 1000).toLocaleString(undefined, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    });
+    return `${currencySymbol}${thousands}K`;
+  } else {
+    return `${currencySymbol}${amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
 };
 
 /**

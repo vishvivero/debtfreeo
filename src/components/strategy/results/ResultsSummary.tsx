@@ -6,6 +6,7 @@ import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { formatCurrency } from "@/lib/strategies";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface ResultsSummaryProps {
   debts: Debt[];
@@ -45,15 +46,25 @@ export const ResultsSummary = ({
     return null;
   }
 
+  // Get debt's original currency symbol
+  const debtCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '$';
+
+  // Calculate interest values with potential currency conversion
+  const baselineInterest = timelineResults.baselineInterest;
+  const acceleratedInterest = timelineResults.acceleratedInterest;
+  const interestSaved = baselineInterest - acceleratedInterest;
+
   console.log('ResultsSummary: Timeline calculation details:', {
-    baselineInterest: timelineResults.baselineInterest,
-    acceleratedInterest: timelineResults.acceleratedInterest,
-    interestSaved: timelineResults.interestSaved,
+    baselineInterest,
+    acceleratedInterest,
+    interestSaved,
+    currencySymbol,
+    debtCurrencySymbol,
     monthsSaved: timelineResults.monthsSaved,
     payoffDate: timelineResults.payoffDate.toISOString(),
     baselineMonths: timelineResults.baselineMonths,
     acceleratedMonths: timelineResults.acceleratedMonths,
-    totalSavings: timelineResults.interestSaved + (timelineResults.monthsSaved * monthlyPayment)
+    totalSavings: interestSaved + (timelineResults.monthsSaved * monthlyPayment)
   });
 
   return (
@@ -72,7 +83,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-green-800">Interest Saved</h3>
           </div>
           <p className="text-2xl font-bold text-emerald-600">
-            {formatCurrency(timelineResults.baselineInterest - timelineResults.acceleratedInterest, currencySymbol)}
+            {formatCurrency(interestSaved, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
         </motion.div>
