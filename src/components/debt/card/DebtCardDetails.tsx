@@ -3,12 +3,18 @@ import { Debt } from "@/lib/types/debt";
 import { calculatePrincipal } from "../utils/debtPayoffCalculator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { useProfile } from "@/hooks/use-profile";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface DebtCardDetailsProps {
   debt: Debt;
+  usePreferredCurrency?: boolean;
 }
 
-export const DebtCardDetails = ({ debt }: DebtCardDetailsProps) => {
+export const DebtCardDetails = ({ debt, usePreferredCurrency = false }: DebtCardDetailsProps) => {
+  const { profile } = useProfile();
+  const preferredCurrency = profile?.preferred_currency || "£";
+  
   // Check if this is a debt with interest included
   const isInterestIncluded = debt.metadata?.interest_included === true;
   const originalRate = debt.metadata?.original_rate || debt.interest_rate;
@@ -17,9 +23,22 @@ export const DebtCardDetails = ({ debt }: DebtCardDetailsProps) => {
   const calculatedPrincipal = calculatePrincipal(debt);
   
   // Determine what to display for balance
-  const displayBalance = isInterestIncluded && calculatedPrincipal !== null 
+  let displayBalance = isInterestIncluded && calculatedPrincipal !== null 
     ? calculatedPrincipal 
     : debt.balance;
+  
+  // Determine which currency to use
+  const displayCurrency = usePreferredCurrency ? preferredCurrency : debt.currency_symbol;
+  
+  // Convert values if using preferred currency
+  if (usePreferredCurrency && debt.currency_symbol !== preferredCurrency) {
+    displayBalance = convertCurrency(displayBalance, debt.currency_symbol, preferredCurrency);
+  }
+  
+  // Convert minimum payment if needed
+  const displayMinimumPayment = usePreferredCurrency && debt.currency_symbol !== preferredCurrency
+    ? convertCurrency(debt.minimum_payment, debt.currency_symbol, preferredCurrency)
+    : debt.minimum_payment;
 
   // Determine what interest rate to display
   const displayInterestRate = isInterestIncluded ? originalRate : debt.interest_rate;
@@ -43,13 +62,13 @@ export const DebtCardDetails = ({ debt }: DebtCardDetailsProps) => {
           )}
         </div>
         <p className="text-base font-semibold">
-          {debt.currency_symbol}{displayBalance.toLocaleString()}
+          {displayCurrency}{displayBalance.toLocaleString()}
         </p>
       </div>
       <div className="space-y-1">
         <p className="text-xs text-gray-600">Monthly Payment</p>
         <p className="text-base font-semibold">
-          {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
+          {displayCurrency}{displayMinimumPayment.toLocaleString()}
         </p>
       </div>
       <div className="space-y-1">
