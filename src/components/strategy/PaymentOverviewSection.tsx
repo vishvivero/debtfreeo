@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,59 +22,33 @@ export const PaymentOverviewSection = ({
   currencySymbol = "£",
   totalDebtValue
 }: PaymentOverviewSectionProps) => {
-  // Add local input state to track user input without immediately updating the database
-  const [inputValue, setInputValue] = useState<string>(extraPayment.toString());
-
   console.log('PaymentOverviewSection render:', {
     extraPayment,
-    totalMinimumPayments,
-    inputValue
+    totalMinimumPayments
   });
 
   const handleReset = () => {
-    setInputValue("0");
     onExtraPaymentChange(0);
   };
 
-  // Handle input changes without immediately updating the database
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Update the local input value as the user types
-    setInputValue(e.target.value);
-  };
-
-  // Handle blur and Enter key to commit the changes
-  const handleCommitChange = () => {
+  const handleExtraPaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Parse input value and ensure it's a valid number
-    const trimmedValue = inputValue.trim();
+    const inputValue = e.target.value.trim();
     
     // If the input is empty, set extra payment to 0
-    if (!trimmedValue) {
-      setInputValue("0");
+    if (!inputValue) {
       onExtraPaymentChange(0);
       return;
     }
     
     // Convert to number and validate
-    const value = parseFloat(trimmedValue);
+    const value = parseFloat(inputValue);
     
     // Only update if the value is a valid number
     if (!isNaN(value)) {
       // Ensure it doesn't exceed total debt value
       const validValue = Math.max(0, Math.min(value, totalDebtValue));
-      
-      // Update both local state and parent state
-      setInputValue(validValue.toString());
       onExtraPaymentChange(validValue);
-    } else {
-      // Reset to current extra payment value if input is invalid
-      setInputValue(extraPayment.toString());
-    }
-  };
-
-  // Handle Enter key press
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleCommitChange();
     }
   };
 
@@ -117,10 +90,8 @@ export const PaymentOverviewSection = ({
                   type="number" 
                   min="0"
                   step="any"
-                  value={inputValue} 
-                  onChange={handleInputChange}
-                  onBlur={handleCommitChange}
-                  onKeyDown={handleKeyDown}
+                  value={extraPayment} 
+                  onChange={handleExtraPaymentChange}
                   className="pl-9 text-emerald-600 font-medium" 
                   placeholder="0" 
                 />
