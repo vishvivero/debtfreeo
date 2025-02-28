@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -71,9 +72,30 @@ export const DebtComparison = () => {
       ? new Date(acceleratedPayoffPoint.date)
       : new Date(lastDataPoint.date);
 
+    // Apply currency conversion as needed
+    const convertIfNeeded = (value: number, debtCurrencySymbol: string) => {
+      if (debtCurrencySymbol === currencySymbol) {
+        return value;
+      }
+      return convertCurrency(value, debtCurrencySymbol, currencySymbol);
+    };
+
+    // Get the original debt currency from first debt or fallback to profile currency
+    const originalCurrency = debts[0]?.currency_symbol || currencySymbol;
+    
+    // Convert interest values if currencies differ
+    const baselineInterest = convertIfNeeded(lastDataPoint.baselineInterest, originalCurrency);
+    const acceleratedInterest = convertIfNeeded(lastDataPoint.acceleratedInterest, originalCurrency);
+
     // Calculate payment efficiency from original timeline
-    const totalPayment = lastDataPoint.baselineInterest + debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const interestPercentage = (lastDataPoint.baselineInterest / totalPayment) * 100;
+    // Ensure we're using the converted values for these calculations
+    const totalBalance = debts.reduce((sum, debt) => {
+      const convertedBalance = convertIfNeeded(debt.balance, debt.currency_symbol);
+      return sum + convertedBalance;
+    }, 0);
+    
+    const totalPayment = baselineInterest + totalBalance;
+    const interestPercentage = (baselineInterest / totalPayment) * 100;
     const principalPercentage = 100 - interestPercentage;
 
     // Calculate months for baseline scenario
@@ -88,22 +110,32 @@ export const DebtComparison = () => {
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
     // Calculate interest savings percentages for the progress bar
-    const totalInterest = lastDataPoint.baselineInterest;
-    const interestSaved = lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest;
-    const interestSavedPercentage = totalInterest > 0 ? (interestSaved / totalInterest) * 100 : 0;
+    const interestSaved = baselineInterest - acceleratedInterest;
+    const interestSavedPercentage = baselineInterest > 0 ? (interestSaved / baselineInterest) * 100 : 0;
     
     // For the progress bar percentages
     const originalInterestPercentage = 100;
-    const optimizedInterestPercentage = totalInterest > 0 
-      ? (lastDataPoint.acceleratedInterest / lastDataPoint.baselineInterest) * 100 
+    const optimizedInterestPercentage = baselineInterest > 0 
+      ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
+
+    console.log('Debt comparison calculations after currency conversion:', {
+      originalCurrency,
+      preferredCurrency: currencySymbol,
+      originalBaselineInterest: lastDataPoint.baselineInterest,
+      convertedBaselineInterest: baselineInterest,
+      originalAcceleratedInterest: lastDataPoint.acceleratedInterest,
+      convertedAcceleratedInterest: acceleratedInterest,
+      interestSaved,
+      interestSavedPercentage
+    });
 
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
-      originalTotalInterest: lastDataPoint.baselineInterest,
+      originalTotalInterest: baselineInterest,
       optimizedPayoffDate,
-      optimizedTotalInterest: lastDataPoint.acceleratedInterest,
+      optimizedTotalInterest: acceleratedInterest,
       moneySaved: interestSaved,
       baselineYears,
       baselineMonths: remainingMonths,
@@ -291,7 +323,11 @@ export const DebtComparison = () => {
                     {debts?.map((debt, index) => (
                       <div key={debt.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                         <span>{debt.name}</span>
-                        <span>{currencySymbol}{debt.balance.toLocaleString()}</span>
+                        <span>{currencySymbol}{
+                          debt.currency_symbol !== currencySymbol 
+                            ? convertCurrency(debt.balance, debt.currency_symbol, currencySymbol).toLocaleString()
+                            : debt.balance.toLocaleString()
+                        }</span>
                       </div>
                     ))}
                   </div>

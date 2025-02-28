@@ -16,6 +16,7 @@ export interface TimelineCalculationResult {
     debtId: string;
     amount: number;
   }[];
+  originalCurrency: string;
 }
 
 export class DebtTimelineCalculator {
