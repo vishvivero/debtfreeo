@@ -23,6 +23,7 @@ import { addMonths, format } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { countryCurrencies } from "@/lib/utils/currency-data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -245,15 +246,15 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="pl-9 border-gray-300 h-9"
-                        placeholder="E.g. Personal Loan, Credit Card"
+                        placeholder="Personal Loan, Credit Card etc."
                         required
                       />
                     </div>
                   </div>
 
-                  {/* Balance */}
+                  {/* Balance - Updated the label to "Current Outstanding Balance" */}
                   <div className="space-y-1">
-                    <Label className="text-gray-700 text-sm">Current Balance *</Label>
+                    <Label className="text-gray-700 text-sm">Current Outstanding Balance *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                         <span className="text-gray-500">{selectedCurrency}</span>
@@ -271,7 +272,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Debt Category */}
+                  {/* Debt Category - Removed the duplicated label */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Debt Category</Label>
                     <DebtCategorySelect value={category} onChange={setCategory} />
@@ -292,7 +293,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                         value={interestRate}
                         onChange={(e) => setInterestRate(e.target.value)}
                         className="pl-9 border-gray-300 h-9"
-                        placeholder="E.g. 5.99"
+                        placeholder="5.99"
                         required={!useRemainingMonths}
                         disabled={useRemainingMonths}
                         min="0"
@@ -302,9 +303,9 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Minimum Payment */}
+                  {/* Minimum Payment - Updated to "Minimum Payment/EMI" */}
                   <div className="space-y-1">
-                    <Label className="text-gray-700 text-sm">Minimum Payment *</Label>
+                    <Label className="text-gray-700 text-sm">Minimum Payment/EMI *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                         <span className="text-gray-500">{selectedCurrency}</span>
@@ -364,25 +365,20 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       <Label className="mr-2 text-xs">
                         {isInterestIncluded ? "On" : "Off"}
                       </Label>
-                      <div className="relative inline-flex h-5 w-10 items-center rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-white data-[state=checked]:bg-blue-500">
-                        <input
-                          type="checkbox"
-                          checked={isInterestIncluded}
-                          onChange={(e) => {
-                            setIsInterestIncluded(e.target.checked);
-                            if (e.target.checked) {
-                              setUseRemainingMonths(false);
-                              if (!remainingMonths) {
-                                setRemainingMonths("12");
-                              }
-                            } else {
-                              setUsePrincipalAsBalance(false);
+                      <Switch
+                        checked={isInterestIncluded}
+                        onCheckedChange={(checked) => {
+                          setIsInterestIncluded(checked);
+                          if (checked) {
+                            setUseRemainingMonths(false);
+                            if (!remainingMonths) {
+                              setRemainingMonths("12");
                             }
-                          }}
-                          className="peer absolute h-0 w-0 opacity-0"
-                        />
-                        <span className="pointer-events-none block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />
-                      </div>
+                          } else {
+                            setUsePrincipalAsBalance(false);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -424,15 +420,11 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                             <Label className="text-xs font-medium text-blue-800">
                               Use principal as balance
                             </Label>
-                            <div className="relative inline-flex h-5 w-10 items-center rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-white data-[state=checked]:bg-blue-500">
-                              <input
-                                type="checkbox"
-                                checked={usePrincipalAsBalance}
-                                onChange={(e) => setUsePrincipalAsBalance(e.target.checked)}
-                                className="peer absolute h-0 w-0 opacity-0"
-                              />
-                              <span className="pointer-events-none block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />
-                            </div>
+                            <Switch
+                              checked={usePrincipalAsBalance}
+                              onCheckedChange={setUsePrincipalAsBalance}
+                              size="sm"
+                            />
                           </div>
                         </div>
                       )}
@@ -455,21 +447,16 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       <Label className="mr-2 text-xs">
                         {useRemainingMonths ? "On" : "Off"}
                       </Label>
-                      <div className="relative inline-flex h-5 w-10 items-center rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-white data-[state=checked]:bg-blue-500">
-                        <input
-                          type="checkbox"
-                          checked={useRemainingMonths}
-                          onChange={(e) => {
-                            setUseRemainingMonths(e.target.checked);
-                            if (e.target.checked) {
-                              setIsInterestIncluded(false);
-                              setUsePrincipalAsBalance(false);
-                            }
-                          }}
-                          className="peer absolute h-0 w-0 opacity-0"
-                        />
-                        <span className="pointer-events-none block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />
-                      </div>
+                      <Switch
+                        checked={useRemainingMonths}
+                        onCheckedChange={(checked) => {
+                          setUseRemainingMonths(checked);
+                          if (checked) {
+                            setIsInterestIncluded(false);
+                            setUsePrincipalAsBalance(false);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -508,7 +495,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
 
                 {/* Notes Section */}
                 <div className="space-y-1">
-                  <Label className="text-sm font-medium">Notes (Optional)</Label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -544,7 +530,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       <SelectTrigger className="w-full border-gray-300">
                         <SelectValue placeholder="Select currency" />
                       </SelectTrigger>
-                      <SelectContent className="max-h-[200px]">
+                      <SelectContent className="max-h-[200px] bg-white">
                         {countryCurrencies.map((item) => (
                           <SelectItem key={item.symbol} value={item.symbol}>
                             <span className="flex items-center gap-2">

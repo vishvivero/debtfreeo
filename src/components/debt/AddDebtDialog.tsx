@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
+
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
   currencySymbol: string;
   isOpen?: boolean;
   onClose?: () => void;
 }
+
 export const AddDebtDialog = ({
   onAddDebt,
   currencySymbol,
@@ -21,15 +23,11 @@ export const AddDebtDialog = ({
       onClose();
     }
   };
+
   const dialogContent = <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden">
       <DialogHeader className="flex items-center justify-between p-4 border-b">
         <DialogTitle className="text-xl font-semibold text-gray-800">Add New Debt</DialogTitle>
-        <button 
-          onClick={onClose}
-          className="rounded-full p-1 hover:bg-gray-100 transition-colors"
-        >
-          <X className="h-5 w-5 text-gray-500" />
-        </button>
+        
       </DialogHeader>
       <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} onClose={onClose} />
     </DialogContent>;
@@ -44,7 +42,7 @@ export const AddDebtDialog = ({
   // Otherwise render uncontrolled dialog with trigger
   return <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
+        <Button className="bg-[#34D399] hover:bg-[#10B981] text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
         </Button>
       </DialogTrigger>
