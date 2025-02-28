@@ -50,6 +50,8 @@ export const convertCurrency = (
   const convertedAmount = amountInUSD * toRate;
 
   console.log(`Conversion result: ${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency} (via USD)`);
+  console.log(`Used exchange rates: 1 USD = ${fromRate} ${fromCurrency}, 1 USD = ${toRate} ${toCurrency}`);
+  
   return Number(convertedAmount.toFixed(2));
 };
 
@@ -60,6 +62,12 @@ export const formatCurrency = (
   amount: number,
   currencySymbol: string = "$"
 ): string => {
+  // Check for NaN or invalid values
+  if (isNaN(amount) || amount === null || amount === undefined) {
+    console.warn(`Attempted to format invalid currency amount: ${amount}`);
+    amount = 0;
+  }
+
   // Handle potentially large numbers with appropriate formatting
   if (amount >= 1000000) {
     const millions = (amount / 1000000).toLocaleString(undefined, {

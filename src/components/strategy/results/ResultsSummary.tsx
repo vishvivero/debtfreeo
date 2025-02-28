@@ -46,8 +46,8 @@ export const ResultsSummary = ({
     return null;
   }
 
-  // Get debt's original currency symbol
-  const debtCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '$';
+  // Get debt's original currency symbol from timeline results
+  const debtCurrencySymbol = timelineResults.originalCurrency || (debts.length > 0 ? debts[0].currency_symbol : '$');
 
   // Calculate interest values with potential currency conversion
   const baselineInterest = debtCurrencySymbol !== currencySymbol 
@@ -63,16 +63,16 @@ export const ResultsSummary = ({
   console.log('ResultsSummary: Timeline calculation details:', {
     originalBaselineInterest: timelineResults.baselineInterest,
     originalAcceleratedInterest: timelineResults.acceleratedInterest,
+    originalCurrency: debtCurrencySymbol,
+    targetCurrency: currencySymbol,
+    currencyConversionNeeded: debtCurrencySymbol !== currencySymbol,
     convertedBaselineInterest: baselineInterest,
     convertedAcceleratedInterest: acceleratedInterest,
     interestSaved,
-    currencySymbol,
-    debtCurrencySymbol,
     monthsSaved: timelineResults.monthsSaved,
     payoffDate: timelineResults.payoffDate.toISOString(),
     baselineMonths: timelineResults.baselineMonths,
-    acceleratedMonths: timelineResults.acceleratedMonths,
-    totalSavings: interestSaved + (timelineResults.monthsSaved * monthlyPayment)
+    acceleratedMonths: timelineResults.acceleratedMonths
   });
 
   return (

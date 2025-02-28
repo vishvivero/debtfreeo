@@ -32,7 +32,7 @@ export const PaymentComparison = ({
   }
 
   // Get user's currency symbol from first debt if available
-  const debtCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '$';
+  const debtCurrencySymbol = timelineResults.originalCurrency || (debts.length > 0 ? debts[0].currency_symbol : '$');
 
   // Convert interest values if the currency symbols are different
   const baselineInterest = debtCurrencySymbol !== currencySymbol 
@@ -43,16 +43,17 @@ export const PaymentComparison = ({
     ? convertCurrency(timelineResults.acceleratedInterest, debtCurrencySymbol, currencySymbol)
     : timelineResults.acceleratedInterest;
 
+  // Log detailed conversion information for debugging
   console.log('Payment comparison data:', {
     originalBaselineInterest: timelineResults.baselineInterest,
     originalAcceleratedInterest: timelineResults.acceleratedInterest,
+    originalCurrency: debtCurrencySymbol,
+    targetCurrency: currencySymbol,
     convertedBaselineInterest: baselineInterest,
     convertedAcceleratedInterest: acceleratedInterest,
+    currencyConversionNeeded: debtCurrencySymbol !== currencySymbol,
     baselineMonths: timelineResults.baselineMonths,
-    acceleratedMonths: timelineResults.acceleratedMonths,
-    oneTimeFundingsCount: oneTimeFundings.length,
-    currencySymbol,
-    debtCurrencySymbol
+    acceleratedMonths: timelineResults.acceleratedMonths
   });
 
   // Calculate total debt with potential currency conversion
@@ -63,6 +64,11 @@ export const PaymentComparison = ({
     return sum + convertedBalance;
   }, 0);
 
+  // Monthly payment may also need conversion if displayed in a different currency
+  const convertedMonthlyPayment = debtCurrencySymbol !== currencySymbol
+    ? convertCurrency(monthlyPayment, debtCurrencySymbol, currencySymbol)
+    : monthlyPayment;
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="p-4 rounded-lg bg-gray-50">
@@ -72,7 +78,7 @@ export const PaymentComparison = ({
             Total Debt: {formatCurrency(totalDebt, currencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
-            Monthly Payment: {formatCurrency(monthlyPayment, currencySymbol)}
+            Monthly Payment: {formatCurrency(convertedMonthlyPayment, currencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
             Total Interest: {formatCurrency(baselineInterest, currencySymbol)}
@@ -89,7 +95,7 @@ export const PaymentComparison = ({
             Total Debt: {formatCurrency(totalDebt, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
-            Monthly Payment: {formatCurrency(monthlyPayment, currencySymbol)}
+            Monthly Payment: {formatCurrency(convertedMonthlyPayment, currencySymbol)}
           </p>
           <p className="text-sm text-emerald-600">
             Total Interest: {formatCurrency(acceleratedInterest, currencySymbol)}
