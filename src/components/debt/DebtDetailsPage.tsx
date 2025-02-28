@@ -21,6 +21,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -32,6 +35,7 @@ export const DebtDetailsPage = () => {
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
   const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
+  const [useOriginalCurrency, setUseOriginalCurrency] = useState(false);
 
   if (!debt || !profile) {
     console.log('Debt not found for id:', debtId);
@@ -40,7 +44,18 @@ export const DebtDetailsPage = () => {
 
   const isPayable = isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
-  const currencySymbol = profile.preferred_currency || '£';
+  
+  // Either use original currency or preferred currency based on toggle
+  const currencySymbol = useOriginalCurrency ? debt.currency_symbol : (profile.preferred_currency || '£');
+  
+  // Convert values if needed
+  const displayBalance = useOriginalCurrency ? 
+    debt.balance : 
+    convertCurrency(debt.balance, debt.currency_symbol, currencySymbol);
+    
+  const displayMinimumPayment = useOriginalCurrency ? 
+    debt.minimum_payment : 
+    convertCurrency(debt.minimum_payment, debt.currency_symbol, currencySymbol);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -123,17 +138,40 @@ export const DebtDetailsPage = () => {
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Currency Toggle */}
+        <div className="flex items-center justify-end space-x-2">
+          <Label htmlFor="currency-toggle" className="cursor-pointer text-sm text-gray-600">
+            {useOriginalCurrency ? 
+              `Showing in original currency (${debt.currency_symbol})` : 
+              `Showing in preferred currency (${profile.preferred_currency || '£'})`}
+          </Label>
+          <Switch 
+            id="currency-toggle" 
+            checked={useOriginalCurrency} 
+            onCheckedChange={setUseOriginalCurrency}
+          />
+        </div>
+
         <DebtHeroSection 
-          debt={debt}
+          debt={{
+            ...debt,
+            balance: displayBalance,
+            minimum_payment: displayMinimumPayment
+          }}
           totalPaid={totalPaid}
           payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
+          isOriginalCurrency={useOriginalCurrency}
         />
 
         <Separator className="my-8" />
 
         <PaymentOverview
-          debt={debt}
+          debt={{
+            ...debt,
+            balance: displayBalance,
+            minimum_payment: displayMinimumPayment
+          }}
           totalPaid={totalPaid}
           totalInterest={totalInterest}
           currencySymbol={currencySymbol}

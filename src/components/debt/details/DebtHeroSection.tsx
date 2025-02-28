@@ -13,9 +13,16 @@ interface DebtHeroSectionProps {
   totalPaid: number;
   payoffDate: Date;
   currencySymbol: string;
+  isOriginalCurrency?: boolean;
 }
 
-export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }: DebtHeroSectionProps) => {
+export const DebtHeroSection = ({ 
+  debt, 
+  totalPaid, 
+  payoffDate, 
+  currencySymbol, 
+  isOriginalCurrency = false 
+}: DebtHeroSectionProps) => {
   // Calculate progress percentage based on total paid vs current balance
   const totalAmount = totalPaid + debt.balance;
   const progressPercentage = totalAmount > 0 
@@ -42,7 +49,8 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }:
     totalAmount,
     progressPercentage,
     isInterestIncluded,
-    calculatedPrincipal
+    calculatedPrincipal,
+    isOriginalCurrency
   });
 
   // Determine what to display as the balance
@@ -96,6 +104,14 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }:
                 {isInterestIncluded && calculatedPrincipal && (
                   <span className="text-xs text-blue-600">
                     Principal only (interest excluded)
+                  </span>
+                )}
+                {!isOriginalCurrency && (
+                  <span className="text-xs text-gray-500 block">
+                    Original: {debt.currency_symbol}{(isInterestIncluded && calculatedPrincipal 
+                      ? calculatedPrincipal 
+                      : debt.metadata?.original_balance || debt.balance
+                    ).toLocaleString()}
                   </span>
                 )}
               </div>
