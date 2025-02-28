@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -11,17 +12,20 @@ import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
 import { Badge } from "@/components/ui/badge";
 import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 import { calculatePaymentSchedule } from "@/components/debt/utils/paymentSchedule";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
   totalMonthlyPayment: number;
   selectedStrategy: Strategy;
+  preferredCurrency?: string;
 }
 
 export const DebtRepaymentPlan = ({
   debts,
   totalMonthlyPayment,
   selectedStrategy,
+  preferredCurrency,
 }: DebtRepaymentPlanProps) => {
   const { toast } = useToast();
   
@@ -35,12 +39,34 @@ export const DebtRepaymentPlan = ({
   
   // Calculate payment allocations based on the strategy
   const allocations = new Map<string, number>();
-  const totalMinPayments = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  
+  // Calculate total minimum payments with currency conversion
+  const totalMinPayments = sortedDebts.reduce((sum, debt) => {
+    if (preferredCurrency) {
+      const convertedAmount = convertCurrency(
+        debt.minimum_payment,
+        debt.currency_symbol,
+        preferredCurrency
+      );
+      return sum + convertedAmount;
+    }
+    return sum + debt.minimum_payment;
+  }, 0);
+  
   const extraPayment = Math.max(0, totalMonthlyPayment - totalMinPayments);
 
   // Distribute minimum payments
   sortedDebts.forEach(debt => {
-    allocations.set(debt.id, debt.minimum_payment);
+    // Convert minimum payment to preferred currency if needed
+    const minPayment = preferredCurrency
+      ? convertCurrency(
+          debt.minimum_payment,
+          debt.currency_symbol,
+          preferredCurrency
+        )
+      : debt.minimum_payment;
+    
+    allocations.set(debt.id, minPayment);
   });
 
   // Add extra payment to highest priority debt
@@ -133,7 +159,7 @@ export const DebtRepaymentPlan = ({
         optimizedTotalInterest,
         selectedStrategy,
         [], // empty array for oneTimeFundings since we don't have them in this context
-        debts[0]?.currency_symbol || '£'
+        preferredCurrency || debts[0]?.currency_symbol || '£'
       );
       doc.save('debt-payoff-strategy.pdf');
       
