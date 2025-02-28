@@ -63,7 +63,8 @@ export const DebtDetailsPage = () => {
   const minimumViablePayment = getMinimumViablePayment(debt);
   const convertedMinimumViablePayment = getConvertedValue(minimumViablePayment);
 
-  // Create a version of the debt with converted values for calculations
+  // Create a version of the debt with converted values for display only
+  // For calculations that affect dates, we'll use the original debt values
   const convertedDebt = useNativeCurrency 
     ? debt 
     : {
@@ -72,6 +73,10 @@ export const DebtDetailsPage = () => {
         minimum_payment: convertedMinimumPayment,
         currency_symbol: profileCurrency
       };
+
+  // Calculate payoff date using original debt values to ensure consistency
+  const payoffInfo = calculateSingleDebtPayoff(debt, debt.minimum_payment, strategy);
+  const payoffDate = payoffInfo.payoffDate;
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -168,7 +173,7 @@ export const DebtDetailsPage = () => {
         <DebtHeroSection 
           debt={convertedDebt}
           totalPaid={convertedTotalPaid}
-          payoffDate={calculateSingleDebtPayoff(convertedDebt, monthlyPayment, strategy).payoffDate}
+          payoffDate={payoffDate} 
           currencySymbol={currencySymbol}
         />
 
@@ -186,16 +191,16 @@ export const DebtDetailsPage = () => {
         <Separator className="my-8" />
 
         <PayoffTimeline 
-          debts={[convertedDebt]}
-          extraPayment={monthlyPayment - convertedDebt.minimum_payment}
-          enableOneTimeFundings={false} // Explicitly disable one-time fundings for individual debt view
+          debts={[debt]} 
+          extraPayment={0}
+          enableOneTimeFundings={false}
         />
 
         <Separator className="my-8" />
 
         <AmortizationTable 
           debt={convertedDebt} 
-          amortizationData={calculateAmortizationSchedule(convertedDebt, monthlyPayment)}
+          amortizationData={calculateAmortizationSchedule(debt, debt.minimum_payment)}
           currencySymbol={currencySymbol}
         />
       </div>
