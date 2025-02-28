@@ -29,7 +29,9 @@ export const PaymentOverview = ({
     principalReduction,
     debtId: debt.id,
     isPayable,
-    minimumViablePayment
+    minimumViablePayment,
+    debtCurrency: debt.currency_symbol,
+    displayCurrency: currencySymbol
   });
 
   const cards = [

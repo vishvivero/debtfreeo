@@ -38,9 +38,11 @@ export const DebtDetailsPage = () => {
     return <div>Debt not found</div>;
   }
 
+  // Use the debt's own currency symbol instead of the profile's preferred currency
+  const currencySymbol = debt.currency_symbol || profile.preferred_currency || '£';
+  
   const isPayable = isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
-  const currencySymbol = profile.preferred_currency || '£';
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -71,7 +73,8 @@ export const DebtDetailsPage = () => {
       console.log('Payment history summary:', {
         totalPaid: total,
         totalInterest: interest,
-        paymentCount: payments.length
+        paymentCount: payments.length,
+        debtCurrency: debt.currency_symbol
       });
     };
 
