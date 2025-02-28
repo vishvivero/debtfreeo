@@ -50,13 +50,21 @@ export const ResultsSummary = ({
   const debtCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '$';
 
   // Calculate interest values with potential currency conversion
-  const baselineInterest = timelineResults.baselineInterest;
-  const acceleratedInterest = timelineResults.acceleratedInterest;
+  const baselineInterest = debtCurrencySymbol !== currencySymbol 
+    ? convertCurrency(timelineResults.baselineInterest, debtCurrencySymbol, currencySymbol)
+    : timelineResults.baselineInterest;
+    
+  const acceleratedInterest = debtCurrencySymbol !== currencySymbol 
+    ? convertCurrency(timelineResults.acceleratedInterest, debtCurrencySymbol, currencySymbol)
+    : timelineResults.acceleratedInterest;
+    
   const interestSaved = baselineInterest - acceleratedInterest;
 
   console.log('ResultsSummary: Timeline calculation details:', {
-    baselineInterest,
-    acceleratedInterest,
+    originalBaselineInterest: timelineResults.baselineInterest,
+    originalAcceleratedInterest: timelineResults.acceleratedInterest,
+    convertedBaselineInterest: baselineInterest,
+    convertedAcceleratedInterest: acceleratedInterest,
     interestSaved,
     currencySymbol,
     debtCurrencySymbol,

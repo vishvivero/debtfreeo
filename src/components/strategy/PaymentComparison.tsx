@@ -35,12 +35,19 @@ export const PaymentComparison = ({
   const debtCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '$';
 
   // Convert interest values if the currency symbols are different
-  const baselineInterest = timelineResults.baselineInterest;
-  const acceleratedInterest = timelineResults.acceleratedInterest;
+  const baselineInterest = debtCurrencySymbol !== currencySymbol 
+    ? convertCurrency(timelineResults.baselineInterest, debtCurrencySymbol, currencySymbol)
+    : timelineResults.baselineInterest;
+    
+  const acceleratedInterest = debtCurrencySymbol !== currencySymbol 
+    ? convertCurrency(timelineResults.acceleratedInterest, debtCurrencySymbol, currencySymbol)
+    : timelineResults.acceleratedInterest;
 
   console.log('Payment comparison data:', {
-    baselineInterest,
-    acceleratedInterest,
+    originalBaselineInterest: timelineResults.baselineInterest,
+    originalAcceleratedInterest: timelineResults.acceleratedInterest,
+    convertedBaselineInterest: baselineInterest,
+    convertedAcceleratedInterest: acceleratedInterest,
     baselineMonths: timelineResults.baselineMonths,
     acceleratedMonths: timelineResults.acceleratedMonths,
     oneTimeFundingsCount: oneTimeFundings.length,

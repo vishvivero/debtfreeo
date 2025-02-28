@@ -16,6 +16,7 @@ export interface UnifiedTimelineResults {
     debtId: string;
     amount: number;
   }[];
+  originalCurrency: string;
 }
 
 export class UnifiedDebtTimelineCalculator {
@@ -43,7 +44,8 @@ export class UnifiedDebtTimelineCalculator {
       baselineInterest: results.baselineInterest,
       acceleratedInterest: results.acceleratedInterest,
       interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved
+      monthsSaved: results.monthsSaved,
+      originalCurrency: results.originalCurrency
     });
 
     return results;
