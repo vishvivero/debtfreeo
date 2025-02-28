@@ -108,10 +108,7 @@ export const DebtHeroSection = ({
                 )}
                 {!isOriginalCurrency && (
                   <span className="text-xs text-gray-500 block">
-                    Original: {debt.currency_symbol}{(isInterestIncluded && calculatedPrincipal 
-                      ? calculatedPrincipal 
-                      : debt.metadata?.original_balance || debt.balance
-                    ).toLocaleString()}
+                    Original: {debt.currency_symbol}{debt.balance.toLocaleString()}
                   </span>
                 )}
               </div>
