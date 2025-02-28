@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
+import { CreditCard, ArrowUpRight, LineChart, Info } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
@@ -119,7 +119,9 @@ export const OverviewMetrics = () => {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <InfoIcon className="h-4 w-4 text-gray-400" />
+                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300">
+                            <InfoIcon className="h-3.5 w-3.5" />
+                          </div>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="text-sm">{card.tooltipContent}</p>
