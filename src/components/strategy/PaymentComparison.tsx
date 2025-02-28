@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
@@ -36,19 +35,26 @@ export const PaymentComparison = ({
     oneTimeFundingsCount: oneTimeFundings.length
   });
 
+  // Keep original debts currency for baseline values
+  const totalDebtInOriginalCurrency = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const baselineInterestInOriginalCurrency = timelineResults.baselineInterest;
+  
+  // For display purposes, use the first debt's currency symbol as the original currency
+  const originalCurrencySymbol = debts.length > 0 ? debts[0].currency_symbol : '£';
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="p-4 rounded-lg bg-gray-50">
         <h3 className="font-semibold mb-2">Original Timeline</h3>
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
-            Total Debt: {formatCurrency(debts.reduce((sum, debt) => sum + debt.balance, 0), currencySymbol)}
+            Total Debt: {formatCurrency(totalDebtInOriginalCurrency, originalCurrencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
-            Monthly Payment: {formatCurrency(monthlyPayment, currencySymbol)}
+            Monthly Payment: {formatCurrency(monthlyPayment, originalCurrencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
-            Total Interest: {formatCurrency(timelineResults.baselineInterest, currencySymbol)}
+            Total Interest: {formatCurrency(baselineInterestInOriginalCurrency, originalCurrencySymbol)}
           </p>
           <p className="text-sm text-gray-600">
             Months to Pay Off: {Math.ceil(timelineResults.baselineMonths)}
