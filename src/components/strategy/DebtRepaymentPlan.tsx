@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -12,20 +11,17 @@ import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
 import { Badge } from "@/components/ui/badge";
 import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 import { calculatePaymentSchedule } from "@/components/debt/utils/paymentSchedule";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
   totalMonthlyPayment: number;
   selectedStrategy: Strategy;
-  preferredCurrency?: string;
 }
 
 export const DebtRepaymentPlan = ({
   debts,
   totalMonthlyPayment,
   selectedStrategy,
-  preferredCurrency,
 }: DebtRepaymentPlanProps) => {
   const { toast } = useToast();
   
@@ -39,34 +35,12 @@ export const DebtRepaymentPlan = ({
   
   // Calculate payment allocations based on the strategy
   const allocations = new Map<string, number>();
-  
-  // Calculate total minimum payments with currency conversion
-  const totalMinPayments = sortedDebts.reduce((sum, debt) => {
-    if (preferredCurrency && debt.currency_symbol !== preferredCurrency) {
-      const convertedAmount = convertCurrency(
-        debt.minimum_payment,
-        debt.currency_symbol,
-        preferredCurrency
-      );
-      return sum + convertedAmount;
-    }
-    return sum + debt.minimum_payment;
-  }, 0);
-  
+  const totalMinPayments = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const extraPayment = Math.max(0, totalMonthlyPayment - totalMinPayments);
 
   // Distribute minimum payments
   sortedDebts.forEach(debt => {
-    // Convert minimum payment to preferred currency if needed
-    const minPayment = preferredCurrency && debt.currency_symbol !== preferredCurrency
-      ? convertCurrency(
-          debt.minimum_payment,
-          debt.currency_symbol,
-          preferredCurrency
-        )
-      : debt.minimum_payment;
-    
-    allocations.set(debt.id, minPayment);
+    allocations.set(debt.id, debt.minimum_payment);
   });
 
   // Add extra payment to highest priority debt
@@ -103,22 +77,11 @@ export const DebtRepaymentPlan = ({
 
         if (nextUnpaidDebt) {
           const currentRedistributions = redistributionHistory.get(nextUnpaidDebt.id) || [];
-          
-          // Convert the redistributed amount if needed
-          let redistributedAmount = releasedAmount;
-          if (preferredCurrency && debt.currency_symbol !== preferredCurrency) {
-            redistributedAmount = convertCurrency(
-              releasedAmount,
-              debt.currency_symbol,
-              preferredCurrency
-            );
-          }
-          
           redistributionHistory.set(nextUnpaidDebt.id, [
             ...currentRedistributions,
             {
               fromDebtId: debt.id,
-              amount: redistributedAmount,
+              amount: releasedAmount,
               month: monthIndex + 1
             }
           ]);
@@ -138,21 +101,11 @@ export const DebtRepaymentPlan = ({
     const months = payoffMonth !== -1 ? payoffMonth + 1 : timelineData.length;
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + months);
-    
-    // Convert interest values if needed
-    let totalInterest = timelineData[months - 1]?.acceleratedInterest || 0;
-    if (preferredCurrency && debt.currency_symbol !== preferredCurrency) {
-      totalInterest = convertCurrency(
-        totalInterest,
-        debt.currency_symbol,
-        preferredCurrency
-      );
-    }
 
     acc[debt.id] = {
       months,
       payoffDate,
-      totalInterest,
+      totalInterest: timelineData[months - 1]?.acceleratedInterest || 0,
       redistributionHistory: redistributionHistory.get(debt.id) || []
     };
     return acc;
@@ -167,17 +120,8 @@ export const DebtRepaymentPlan = ({
     try {
       const baseMonths = timelineData.length;
       const optimizedMonths = timelineData.length;
-      
-      // Ensure interest values are properly converted
-      let baseTotalInterest = timelineData.reduce((sum, data) => sum + data.baselineInterest, 0);
-      let optimizedTotalInterest = timelineData.reduce((sum, data) => sum + data.acceleratedInterest, 0);
-      
-      // Convert interest totals if needed
-      const originalCurrency = debts[0]?.currency_symbol || '£';
-      if (preferredCurrency && originalCurrency !== preferredCurrency) {
-        baseTotalInterest = convertCurrency(baseTotalInterest, originalCurrency, preferredCurrency);
-        optimizedTotalInterest = convertCurrency(optimizedTotalInterest, originalCurrency, preferredCurrency);
-      }
+      const baseTotalInterest = timelineData.reduce((sum, data) => sum + data.baselineInterest, 0);
+      const optimizedTotalInterest = timelineData.reduce((sum, data) => sum + data.acceleratedInterest, 0);
       
       const doc = generateDebtOverviewPDF(
         sortedDebts,
@@ -189,7 +133,7 @@ export const DebtRepaymentPlan = ({
         optimizedTotalInterest,
         selectedStrategy,
         [], // empty array for oneTimeFundings since we don't have them in this context
-        preferredCurrency || debts[0]?.currency_symbol || '£'
+        debts[0]?.currency_symbol || '£'
       );
       doc.save('debt-payoff-strategy.pdf');
       
@@ -234,80 +178,68 @@ export const DebtRepaymentPlan = ({
         <CardContent>
           <ScrollArea className="w-full">
             <div className="debt-cards-container flex space-x-4 p-4">
-              {sortedDebts.map((debt, index) => {
-                // Create a display debt object with converted values if needed
-                const displayDebt = {...debt};
-                const displayCurrency = preferredCurrency || debt.currency_symbol;
-                
-                if (preferredCurrency && debt.currency_symbol !== preferredCurrency) {
-                  displayDebt.balance = convertCurrency(debt.balance, debt.currency_symbol, preferredCurrency);
-                  displayDebt.minimum_payment = convertCurrency(debt.minimum_payment, debt.currency_symbol, preferredCurrency);
-                  displayDebt.currency_symbol = preferredCurrency;
-                }
-                
-                return (
-                  <div key={debt.id} className="flex-none w-[350px]">
-                    <Card className="h-full">
-                      <CardHeader>
-                        <div className="space-y-1">
-                          <CardTitle>{debt.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {debt.banker_name || "Not specified"}
+              {sortedDebts.map((debt, index) => (
+                <div key={debt.id} className="flex-none w-[350px]">
+                  <Card className="h-full">
+                    <CardHeader>
+                      <div className="space-y-1">
+                        <CardTitle>{debt.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {debt.banker_name || "Not specified"}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Current Balance:</p>
+                          <p className="text-lg font-semibold">
+                            {debt.currency_symbol}{debt.balance.toLocaleString()}
                           </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <p className="text-sm text-muted-foreground">Current Balance:</p>
-                            <p className="text-lg font-semibold">
-                              {displayCurrency}{displayDebt.balance.toLocaleString()}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Interest Rate:</p>
-                            <p className="text-lg font-semibold">
-                              {debt.interest_rate}%
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Monthly Payment:</p>
-                            <p className="text-lg font-semibold">
-                              {displayCurrency}{(allocations.get(debt.id) || 0).toLocaleString()}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Payoff Date:</p>
-                            <p className="text-lg font-semibold">
-                              {payoffDetails[debt.id].payoffDate.toLocaleDateString('en-US', {
-                                month: 'long',
-                                year: 'numeric'
-                              })}
-                            </p>
-                          </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Interest Rate:</p>
+                          <p className="text-lg font-semibold">
+                            {debt.interest_rate}%
+                          </p>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold">Payment Schedule</h4>
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                              {index === 0 ? 'Priority' : 'Upcoming'}
-                            </Badge>
-                          </div>
-                          <PaymentSchedule
-                            payments={calculatePaymentSchedule(
-                              displayDebt,
-                              payoffDetails[debt.id],
-                              allocations.get(debt.id) || displayDebt.minimum_payment,
-                              index === 0
-                            )}
-                            currencySymbol={displayCurrency}
-                          />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Monthly Payment:</p>
+                          <p className="text-lg font-semibold">
+                            {debt.currency_symbol}{(allocations.get(debt.id) || 0).toLocaleString()}
+                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                );
-              })}
+                        <div>
+                          <p className="text-sm text-muted-foreground">Payoff Date:</p>
+                          <p className="text-lg font-semibold">
+                            {payoffDetails[debt.id].payoffDate.toLocaleDateString('en-US', {
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold">Payment Schedule</h4>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                            {index === 0 ? 'Priority' : 'Upcoming'}
+                          </Badge>
+                        </div>
+                        <PaymentSchedule
+                          payments={calculatePaymentSchedule(
+                            debt,
+                            payoffDetails[debt.id],
+                            allocations.get(debt.id) || debt.minimum_payment,
+                            index === 0
+                          )}
+                          currencySymbol={debt.currency_symbol}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

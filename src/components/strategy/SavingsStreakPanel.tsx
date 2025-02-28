@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flame } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
@@ -10,7 +9,7 @@ interface SavingsStreakPanelProps {
 }
 
 export const SavingsStreakPanel = ({
-  extraPayment = 0,
+  extraPayment,
   oneTimeFundingTotal = 0,
   currencySymbol = "£"
 }: SavingsStreakPanelProps) => {

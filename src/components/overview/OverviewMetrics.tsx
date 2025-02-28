@@ -119,11 +119,9 @@ export const OverviewMetrics = () => {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="bg-gray-100 rounded-full p-1 flex items-center justify-center">
-                            <InfoIcon className="h-4 w-4 text-gray-600" />
-                          </div>
+                          <InfoIcon className="h-4 w-4 text-gray-400" />
                         </TooltipTrigger>
-                        <TooltipContent className="bg-white border shadow-md p-2">
+                        <TooltipContent>
                           <p className="text-sm">{card.tooltipContent}</p>
                         </TooltipContent>
                       </Tooltip>

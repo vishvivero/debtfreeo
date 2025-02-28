@@ -1,24 +1,110 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2 } from "lucide-react";
-import { OneTimeFunding } from "@/lib/types/payment";
+import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
+import { OneTimeFundingDialog } from "./OneTimeFundingDialog";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface OneTimeFundingSectionProps {
-  oneTimeFundings: OneTimeFunding[];
-  onAddFunding: () => void;
-  onRemoveFunding: (id: string) => void;
-  currencySymbol?: string;
+interface FundingEntry {
+  id: string;
+  amount: number;
+  payment_date: string;
+  notes: string | null;
+  currency_symbol: string;
 }
 
-export const OneTimeFundingSection = ({
-  oneTimeFundings,
-  onAddFunding,
-  onRemoveFunding,
-  currencySymbol = "£"
-}: OneTimeFundingSectionProps) => {
-  const totalFunding = oneTimeFundings.reduce((sum, entry) => sum + entry.amount, 0);
+export const OneTimeFundingSection = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [fundingEntries, setFundingEntries] = useState<FundingEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchFundingEntries = async () => {
+    console.log('Fetching one-time funding entries');
+    try {
+      const { data, error } = await supabase
+        .from('one_time_funding')
+        .select('*')
+        .order('payment_date', { ascending: true })
+        .eq('is_applied', false);
+
+      if (error) throw error;
+      
+      setFundingEntries(data || []);
+      console.log('Fetched funding entries:', {
+        count: data?.length,
+        entries: data?.map(entry => ({
+          date: entry.payment_date,
+          amount: entry.amount,
+          isApplied: entry.is_applied
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching funding entries:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load funding entries",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFundingEntries();
+
+    const channel = supabase
+      .channel('one_time_funding_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'one_time_funding'
+        },
+        (payload) => {
+          console.log('One-time funding changed:', payload);
+          fetchFundingEntries();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    console.log('Deleting funding entry:', id);
+    try {
+      const { error } = await supabase
+        .from('one_time_funding')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setFundingEntries(entries => entries.filter(entry => entry.id !== id));
+      toast({
+        title: "Success",
+        description: "Funding entry deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting funding entry:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete funding entry",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const totalFunding = fundingEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
   return (
     <Card className="bg-white/95">
@@ -30,7 +116,7 @@ export const OneTimeFundingSection = ({
           </div>
           {totalFunding > 0 && (
             <span className="text-sm font-normal text-muted-foreground">
-              Total: {currencySymbol}{totalFunding.toLocaleString()}
+              Total: {fundingEntries[0]?.currency_symbol}{totalFunding.toLocaleString()}
             </span>
           )}
         </CardTitle>
@@ -40,16 +126,27 @@ export const OneTimeFundingSection = ({
           Schedule lump sum payments to pay off debt faster and save on interest
         </p>
         
-        {oneTimeFundings.length > 0 ? (
+        {fundingEntries.length > 0 && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              One-time funding will be applied on the specified dates and will accelerate your debt payoff
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {isLoading ? (
+          <div className="text-center py-4 text-muted-foreground">Loading...</div>
+        ) : fundingEntries.length > 0 ? (
           <div className="space-y-3">
-            {oneTimeFundings.map((entry) => (
+            {fundingEntries.map((entry) => (
               <div
                 key={entry.id}
                 className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
               >
                 <div>
                   <p className="font-medium text-primary">
-                    {currencySymbol}{entry.amount.toLocaleString()}
+                    {entry.currency_symbol}{entry.amount.toLocaleString()}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {format(new Date(entry.payment_date), "PPP")}
@@ -63,7 +160,7 @@ export const OneTimeFundingSection = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onRemoveFunding(entry.id)}
+                  onClick={() => handleDelete(entry.id)}
                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -78,12 +175,19 @@ export const OneTimeFundingSection = ({
         )}
 
         <Button
-          onClick={onAddFunding}
+          onClick={() => setIsDialogOpen(true)}
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           Add One-time Funding
         </Button>
       </CardContent>
+      <OneTimeFundingDialog 
+        isOpen={isDialogOpen} 
+        onClose={() => {
+          setIsDialogOpen(false);
+          fetchFundingEntries();
+        }} 
+      />
     </Card>
   );
 };

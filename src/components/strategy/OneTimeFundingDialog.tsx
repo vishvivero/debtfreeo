@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,22 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
 import { addDays, format } from "date-fns";
-import { OneTimeFunding } from "@/lib/types/payment";
-import { v4 as uuidv4 } from "uuid";
 
 interface OneTimeFundingDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (funding: OneTimeFunding) => void;
-  currencySymbol?: string;
 }
 
-export const OneTimeFundingDialog = ({ 
-  isOpen, 
-  onClose,
-  onSubmit,
-  currencySymbol = "£"
-}: OneTimeFundingDialogProps) => {
+export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogProps) => {
   const tomorrow = addDays(new Date(), 1);
   const [date, setDate] = useState<Date>(tomorrow);
   const [amount, setAmount] = useState("");
@@ -42,18 +32,23 @@ export const OneTimeFundingDialog = ({
     console.log('Submitting one-time funding:', { amount, date, notes, currency: profile.preferred_currency });
 
     try {
-      const funding: OneTimeFunding = {
-        id: uuidv4(),
-        user_id: user.id,
-        amount: Number(amount),
-        payment_date: date.toISOString(),
-        notes: notes || null,
-        is_applied: false,
-        currency_symbol: profile.preferred_currency || currencySymbol
-      };
+      const { error } = await supabase
+        .from('one_time_funding')
+        .insert([{
+          user_id: user.id,
+          amount: Number(amount),
+          payment_date: date.toISOString(),
+          notes: notes || null,
+          currency_symbol: profile.preferred_currency
+        }]);
 
-      onSubmit(funding);
-      
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "One-time funding has been added successfully",
+      });
+      onClose();
       setAmount("");
       setDate(tomorrow);
       setNotes("");
