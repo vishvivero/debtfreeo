@@ -1,143 +1,95 @@
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { formatCurrency } from "@/lib/strategies";
+import { OneTimeFunding } from "@/lib/types/payment";
+import { useDebtTimeline } from "@/hooks/use-debt-timeline";
+import { Calendar, Clock4, CreditCard, PiggyBank } from "lucide-react";
 
 interface PaymentCalculatorProps {
   debts: Debt[];
   totalMonthlyPayment: number;
-  selectedStrategy: Strategy;
+  extraPayment: number;
+  strategy: Strategy;
+  oneTimeFundings: OneTimeFunding[];
+  currencySymbol?: string;
 }
 
-export const calculateMonthlyAllocations = (
-  debts: Debt[],
-  totalMonthlyPayment: number,
-  selectedStrategy: Strategy
-) => {
-  console.log('🔄 Starting allocation calculation:', {
-    totalDebts: debts.length,
-    totalMonthlyPayment,
-    strategy: selectedStrategy.name,
-    debts: debts.map(d => ({
-      name: d.name,
-      balance: d.balance,
-      minimumPayment: d.minimum_payment,
-      interestRate: d.interest_rate
-    }))
-  });
-
-  const sortedDebts = selectedStrategy.calculate([...debts]);
-  console.log('📊 Debts sorted by strategy:', sortedDebts.map(d => ({
-    name: d.name,
-    balance: d.balance,
-    interestRate: d.interest_rate,
-    priority: selectedStrategy.name === 'avalanche' ? 'Interest Rate' : 'Balance'
-  })));
-
-  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  console.log('💰 Total minimum payments required:', totalMinimumPayments);
-
-  const payoffDetails = calculatePayoffDetails(sortedDebts, totalMonthlyPayment, selectedStrategy, []);
-  const allocations = new Map<string, number>();
-
-  // Initialize with minimum payments
-  sortedDebts.forEach(debt => {
-    allocations.set(debt.id, debt.minimum_payment);
-    console.log(`📌 Initial minimum payment for ${debt.name}:`, {
-      debtId: debt.id,
-      payment: debt.minimum_payment,
-      currentBalance: debt.balance
-    });
-  });
-
-  // Distribute remaining payment according to strategy
-  let remainingPayment = totalMonthlyPayment - totalMinimumPayments;
-  console.log('💵 Extra payment available for distribution:', remainingPayment);
-  
-  // Sort debts by strategy and filter out paid off debts
-  const activeDebts = sortedDebts.filter(debt => {
-    const payoffDate = payoffDetails[debt.id]?.payoffDate;
-    const isActive = !payoffDate || payoffDate >= new Date();
-    const hasRedistributions = payoffDetails[debt.id]?.redistributionHistory?.length > 0;
-    
-    console.log(`🎯 Debt status check for ${debt.name}:`, {
-      debtId: debt.id,
-      currentBalance: debt.balance,
-      payoffDate: payoffDate?.toISOString(),
-      isActive,
-      hasRedistributions,
-      redistributionCount: hasRedistributions ? payoffDetails[debt.id].redistributionHistory.length : 0
-    });
-    
-    return isActive;
-  });
-
-  if (activeDebts.length > 0) {
-    // Get highest priority active debt
-    const highestPriorityDebt = activeDebts[0];
-    const currentAllocation = allocations.get(highestPriorityDebt.id) || 0;
-    
-    // Add remaining payment to highest priority debt
-    const newAllocation = currentAllocation + remainingPayment;
-    allocations.set(highestPriorityDebt.id, newAllocation);
-
-    console.log(`🎉 Final allocation for ${highestPriorityDebt.name}:`, {
-      debtId: highestPriorityDebt.id,
-      minimumPayment: highestPriorityDebt.minimum_payment,
-      extraPayment: remainingPayment,
-      totalAllocation: newAllocation,
-      projectedPayoffMonths: payoffDetails[highestPriorityDebt.id].months
-    });
-
-    // Track redistributions from paid off debts
-    sortedDebts.forEach(debt => {
-      const details = payoffDetails[debt.id];
-      if (details?.redistributionHistory?.length > 0) {
-        console.log(`♻️ Redistribution history for ${debt.name}:`, {
-          debtId: debt.id,
-          totalRedistributions: details.redistributionHistory.length,
-          redistributions: details.redistributionHistory.map(r => ({
-            month: r.month,
-            amount: r.amount,
-            fromDebt: debts.find(d => d.id === r.fromDebtId)?.name
-          }))
-        });
-      }
-    });
-  }
-
-  // Log final allocations and payoff details
-  console.log('📊 Final allocation summary:', {
-    totalMonthlyPayment,
-    totalMinimumPayments,
-    extraPaymentDistributed: remainingPayment,
-    allocations: Array.from(allocations.entries()).map(([debtId, amount]) => ({
-      debtName: debts.find(d => d.id === debtId)?.name,
-      allocation: amount,
-      minimumPayment: debts.find(d => d.id === debtId)?.minimum_payment,
-      extraPayment: amount - (debts.find(d => d.id === debtId)?.minimum_payment || 0)
-    })),
-    payoffDetails: Object.entries(payoffDetails).map(([debtId, details]) => ({
-      debtName: debts.find(d => d.id === debtId)?.name,
-      months: details.months,
-      payoffDate: details.payoffDate.toISOString(),
-      totalInterest: details.totalInterest,
-      redistributions: details.redistributionHistory?.length || 0
-    }))
-  });
-
-  return { allocations, payoffDetails };
-};
-
-export const PaymentCalculator: React.FC<PaymentCalculatorProps> = ({
+export const PaymentCalculator = ({
   debts,
   totalMonthlyPayment,
-  selectedStrategy,
-}) => {
-  const { allocations, payoffDetails } = calculateMonthlyAllocations(
+  extraPayment,
+  strategy,
+  oneTimeFundings,
+  currencySymbol = "£"
+}: PaymentCalculatorProps) => {
+  const { timelineResults } = useDebtTimeline(
     debts,
     totalMonthlyPayment,
-    selectedStrategy
+    strategy,
+    oneTimeFundings
   );
 
-  return null; // This is a logic-only component
+  if (!timelineResults || debts.length === 0) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-muted-foreground">Add debts to see payment calculations</p>
+      </div>
+    );
+  }
+
+  const { payoffDate, acceleratedMonths, baselineMonths, monthsSaved, interestSaved } = timelineResults;
+
+  const metrics = [
+    {
+      label: "Payoff Date",
+      value: payoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      icon: <Calendar className="h-4 w-4 text-emerald-500" />,
+      description: "Estimated completion"
+    },
+    {
+      label: "Time to Payoff",
+      value: `${acceleratedMonths} months`,
+      icon: <Clock4 className="h-4 w-4 text-blue-500" />,
+      description: extraPayment > 0 ? `${monthsSaved} months saved` : "With current payments"
+    },
+    {
+      label: "Interest Savings",
+      value: formatCurrency(interestSaved, currencySymbol),
+      icon: <PiggyBank className="h-4 w-4 text-indigo-500" />,
+      description: extraPayment > 0 ? "From extra payments" : "Potential savings"
+    },
+    {
+      label: "Monthly Payment",
+      value: formatCurrency(totalMonthlyPayment, currencySymbol),
+      icon: <CreditCard className="h-4 w-4 text-orange-500" />,
+      description: extraPayment > 0 ? `${formatCurrency(extraPayment, currencySymbol)} extra` : "Required payment"
+    }
+  ];
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-gray-800">Payment Summary</h3>
+      <div className="space-y-3">
+        {metrics.map((metric, index) => (
+          <div 
+            key={index}
+            className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                {metric.icon}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{metric.label}</p>
+                <p className="text-xs text-gray-500">{metric.description}</p>
+              </div>
+            </div>
+            <div className="text-right font-medium">{metric.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };

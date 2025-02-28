@@ -1,21 +1,15 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-
-export interface OneTimeFunding {
-  id: string;
-  user_id: string;
-  amount: number;
-  payment_date: string;
-  notes: string | null;
-  is_applied: boolean;
-  currency_symbol: string;
-}
+import { OneTimeFunding } from "@/lib/types/payment";
+import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from "uuid";
 
 export const useOneTimeFunding = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const {
     data: oneTimeFundings,
@@ -46,6 +40,70 @@ export const useOneTimeFunding = () => {
     enabled: !!user?.id
   });
 
+  // Add a one-time funding
+  const addOneTimeFunding = async (funding: OneTimeFunding) => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add funding",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('one_time_funding')
+        .insert([{
+          ...funding,
+          user_id: user.id,
+          is_applied: false
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "One-time funding added successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error adding one-time funding:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add one-time funding",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Remove a one-time funding
+  const removeOneTimeFunding = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('one_time_funding')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "One-time funding removed successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error removing one-time funding:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove one-time funding",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -73,6 +131,8 @@ export const useOneTimeFunding = () => {
 
   return {
     oneTimeFundings: oneTimeFundings || [],
-    isLoading
+    isLoading,
+    addOneTimeFunding,
+    removeOneTimeFunding
   };
 };

@@ -66,9 +66,17 @@ export const StrategyContent = ({
     setIsOneTimeFundingDialogOpen(false);
   };
 
+  const handleExtraPaymentSubmit = (amount: number) => {
+    setExtraPayment(amount);
+    setIsExtraPaymentDialogOpen(false);
+  };
+
   const handleViewResults = () => {
     setIsResultsDialogOpen(true);
   };
+
+  // Calculate one-time funding total
+  const oneTimeFundingTotal = oneTimeFundings.reduce((sum, funding) => sum + funding.amount, 0);
 
   // Calculate payment allocations
   const paymentAllocations = PaymentAllocator.allocatePayments(
@@ -90,7 +98,11 @@ export const StrategyContent = ({
           />
         </div>
         <div>
-          <SavingsStreakPanel currencySymbol={currencySymbol} />
+          <SavingsStreakPanel 
+            extraPayment={extraPayment} 
+            oneTimeFundingTotal={oneTimeFundingTotal}
+            currencySymbol={currencySymbol} 
+          />
         </div>
       </div>
 
@@ -118,7 +130,7 @@ export const StrategyContent = ({
             <CardContent className="pt-6">
               <PaymentCalculator
                 debts={debts}
-                monthlyPayment={totalMonthlyPayment}
+                totalMonthlyPayment={totalMonthlyPayment}
                 extraPayment={extraPayment}
                 strategy={selectedStrategy}
                 oneTimeFundings={oneTimeFundings}
@@ -147,7 +159,7 @@ export const StrategyContent = ({
       <ExtraPaymentDialog
         isOpen={isExtraPaymentDialogOpen}
         onClose={() => setIsExtraPaymentDialogOpen(false)}
-        onAddExtraPayment={setExtraPayment}
+        onSubmit={handleExtraPaymentSubmit}
         currencySymbol={currencySymbol}
         currentExtraPayment={extraPayment}
         totalMinimumPayments={totalMinimumPayments}
