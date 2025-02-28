@@ -5,37 +5,64 @@ import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
+import { calculatePrincipal } from "@/components/debt/utils/debtPayoffCalculator";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
 
 export const OverviewMetrics = () => {
   const { debts, profile, isLoading } = useDebts();
   
-  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
+  const preferredCurrency = profile?.preferred_currency || "$";
+  
+  // Calculate total debt with currency conversion
+  const totalDebt = debts?.reduce((sum, debt) => {
+    let debtAmount = debt.balance;
+    
+    // If interest is included, use principal amount
+    if (debt.metadata?.interest_included) {
+      const principal = calculatePrincipal(debt);
+      debtAmount = principal !== null ? principal : debt.balance;
+    }
+    
+    // Convert to preferred currency if needed
+    const convertedAmount = convertCurrency(
+      debtAmount,
+      debt.currency_symbol,
+      preferredCurrency
+    );
+    
+    return sum + convertedAmount;
+  }, 0) || 0;
+  
   const monthlyPayment = profile?.monthly_payment || 0;
   const progress = totalDebt > 0 ? Math.round((monthlyPayment / totalDebt) * 100) : 0;
-  
-  const currencySymbol = profile?.preferred_currency || "$";
 
   const cards = [
     {
       title: "Total Debt",
-      value: `${currencySymbol}${totalDebt.toLocaleString()}`,
+      value: `${preferredCurrency}${totalDebt.toLocaleString()}`,
       icon: CreditCard,
       bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-500"
+      iconColor: "text-emerald-500",
+      hasTooltip: true,
+      tooltipContent: "Total debt converted to your preferred currency"
     },
     {
       title: "Monthly Payment",
-      value: `${currencySymbol}${monthlyPayment.toLocaleString()}`,
+      value: `${preferredCurrency}${monthlyPayment.toLocaleString()}`,
       icon: ArrowUpRight,
       bgColor: "bg-blue-50",
-      iconColor: "text-blue-500"
+      iconColor: "text-blue-500",
+      hasTooltip: false
     },
     {
       title: "Debt Payment Progress",
       value: "Coming Soon",
       icon: LineChart,
       bgColor: "bg-purple-50",
-      iconColor: "text-purple-500"
+      iconColor: "text-purple-500",
+      hasTooltip: false
     }
   ];
 
@@ -43,7 +70,6 @@ export const OverviewMetrics = () => {
     return <div className="h-24 animate-pulse bg-gray-100 rounded-lg" />;
   }
 
-  // Hide KPI metrics when there are no debts
   if (!debts || debts.length === 0) {
     return null;
   }
@@ -61,7 +87,21 @@ export const OverviewMetrics = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-gray-600 text-sm font-medium">{card.title}</p>
-                <p className="text-2xl font-bold mt-1">{card.value}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-2xl font-bold">{card.value}</p>
+                  {card.hasTooltip && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <InfoIcon className="h-4 w-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-sm">{card.tooltipContent}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
               </div>
               <div className={`p-3 rounded-full ${card.bgColor}`}>
                 <card.icon className={`w-5 h-5 ${card.iconColor}`} />
@@ -73,4 +113,3 @@ export const OverviewMetrics = () => {
     </div>
   );
 };
-
