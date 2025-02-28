@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Debt } from "@/lib/types/debt";
-import { FolderIcon, CreditCard, Percent, Wallet, Coins, Info, Calculator, Calendar } from "lucide-react";
+import { FolderIcon, CreditCard, Percent, Wallet, Coins, Info, Calculator, Calendar, ChevronDown } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -23,7 +23,6 @@ import {
 import { addMonths, format } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { CurrencySelector } from "@/components/profile/CurrencySelector";
-import { ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { countryCurrencies } from "@/lib/utils/currency-data";
 
@@ -253,7 +252,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">Select the currency for this debt</p>
@@ -285,7 +284,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">Enter the current outstanding balance from your latest statement</p>
@@ -318,7 +317,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">Enter the Annual Percentage Rate (APR) for this debt</p>
@@ -353,7 +352,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">Enter your fixed monthly payment (EMI) or minimum payment amount</p>

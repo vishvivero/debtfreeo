@@ -2,9 +2,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditDebtForm } from "@/components/EditDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { X } from "lucide-react";
+import { X, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
 import { getExchangeRateUpdateDate } from "@/lib/utils/currencyConverter";
 
 interface EditDebtDialogProps {
@@ -23,7 +22,7 @@ export const EditDebtDialog = ({ debt, isOpen, onClose }: EditDebtDialogProps) =
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">
