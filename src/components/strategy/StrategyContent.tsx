@@ -37,15 +37,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   preferredCurrency,
   totalDebtValue
 }) => {
-  const { 
-    currentPayment, 
-    minimumPayment, 
-    extraPayment, 
-    updateMonthlyPayment,
-    setTempMonthlyPayment,
-    hasPendingChanges
-  } = useMonthlyPayment();
-  
+  const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile, updateProfile } = useProfile();
@@ -78,22 +70,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     }
   }, [profile]);
 
-  // Handle form submission
-  useEffect(() => {
-    // If there are pending changes, save them when navigating or unmounting
-    return () => {
-      if (hasPendingChanges) {
-        updateMonthlyPayment(currentPayment);
-      }
-    };
-  }, [hasPendingChanges, currentPayment, updateMonthlyPayment]);
-
   const handleResultsClick = () => {
-    // First save any pending changes
-    if (hasPendingChanges) {
-      updateMonthlyPayment(currentPayment);
-    }
-    
     setHasViewedResults(true);
     setIsResultsDialogOpen(true);
   };
@@ -197,7 +174,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <PaymentOverviewSection
                 totalMinimumPayments={minimumPayment}
                 extraPayment={extraPayment}
-                onExtraPaymentChange={amount => setTempMonthlyPayment(amount + minimumPayment)}
+                onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
                 onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
                 currencySymbol={preferredCurrency}
                 totalDebtValue={totalDebtValue}

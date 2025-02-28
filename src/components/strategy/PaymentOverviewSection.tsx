@@ -4,8 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RotateCw, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
-import { KeyboardEvent, useState } from "react";
-
 interface PaymentOverviewSectionProps {
   totalMinimumPayments: number;
   extraPayment: number;
@@ -26,39 +24,9 @@ export const PaymentOverviewSection = ({
     extraPayment,
     totalMinimumPayments
   });
-  
-  const [localExtraPayment, setLocalExtraPayment] = useState<string | number>(extraPayment || '');
-
-  const handleExtraPaymentChange = (value: string) => {
-    setLocalExtraPayment(value);
-    // Convert to number and update temporary state
-    const numericValue = Number(value) || 0;
-    onExtraPaymentChange(numericValue);
-  };
-  
-  const handleBlur = () => {
-    // When input loses focus, commit the change
-    const numericValue = Number(localExtraPayment) || 0;
-    const maxValue = totalDebtValue;
-    const finalValue = Math.min(numericValue, maxValue);
-    
-    // Update both local state and parent state
-    setLocalExtraPayment(finalValue);
-    onExtraPaymentChange(finalValue);
-  };
-  
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // Commit changes when pressing Enter
-    if (e.key === 'Enter') {
-      e.currentTarget.blur(); // This will trigger onBlur
-    }
-  };
-
   const handleReset = () => {
-    setLocalExtraPayment(0);
     onExtraPaymentChange(0);
   };
-
   return <Card className="bg-white/95">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -92,27 +60,15 @@ export const PaymentOverviewSection = ({
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
                   <span className="text-gray-500">{currencySymbol}</span>
                 </div>
-                <Input 
-                  type="number" 
-                  value={localExtraPayment} 
-                  onChange={e => handleExtraPaymentChange(e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                  max={totalDebtValue} 
-                  className="pl-9 text-emerald-600 font-medium" 
-                  placeholder="0" 
-                />
+                <Input type="number" value={extraPayment || ''} onChange={e => {
+                const value = Number(e.target.value);
+                const maxValue = totalDebtValue;
+                onExtraPaymentChange(Math.min(value, maxValue));
+              }} max={totalDebtValue} className="pl-9 text-emerald-600 font-medium" placeholder="0" />
               </div>
-              {(Number(localExtraPayment) > 0 || extraPayment > 0) && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleReset} 
-                  className="h-10 w-10 rounded-full hover:bg-emerald-100/80"
-                >
+              {extraPayment > 0 && <Button variant="ghost" size="icon" onClick={handleReset} className="h-10 w-10 rounded-full hover:bg-emerald-100/80">
                   <RotateCw className="h-4 w-4 text-emerald-500" />
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
         </div>
@@ -121,7 +77,7 @@ export const PaymentOverviewSection = ({
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">Total Monthly Payment</div>
             <div className="text-2xl font-bold text-gray-900">
-              {formatCurrency(totalMinimumPayments + Number(localExtraPayment), currencySymbol)}
+              {formatCurrency(totalMinimumPayments + extraPayment, currencySymbol)}
             </div>
           </div>
         </div>
