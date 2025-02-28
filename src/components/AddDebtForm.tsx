@@ -272,7 +272,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Debt Category */}
+                  {/* Debt Category - Removed the duplicated label */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Debt Category</Label>
                     <DebtCategorySelect value={category} onChange={setCategory} />
