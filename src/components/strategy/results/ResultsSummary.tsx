@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { TrendingUp, Calendar, Target } from "lucide-react";
 import { Debt } from "@/lib/types";
@@ -10,7 +9,6 @@ import { formatCurrency } from "@/lib/strategies";
 interface ResultsSummaryProps {
   debts: Debt[];
   monthlyPayment: number;
-  extraPayment: number;
   strategy: Strategy;
   oneTimeFundings: OneTimeFunding[];
   currencySymbol?: string;
@@ -19,7 +17,6 @@ interface ResultsSummaryProps {
 export const ResultsSummary = ({
   debts,
   monthlyPayment,
-  extraPayment,
   strategy,
   oneTimeFundings,
   currencySymbol = '£'
@@ -27,7 +24,6 @@ export const ResultsSummary = ({
   console.log('ResultsSummary: Rendering with:', {
     totalDebts: debts.length,
     monthlyPayment,
-    extraPayment,
     strategy: strategy.name,
     oneTimeFundings: oneTimeFundings.length,
     currencySymbol
