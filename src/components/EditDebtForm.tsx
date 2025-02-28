@@ -150,7 +150,6 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
     }
 
     // Simple estimation using trial and error approach
-    // Start with a reasonable guess (e.g., 5%)
     let rate = 5.0;
     const maxIterations = 100;
     const tolerance = 0.01;
@@ -211,7 +210,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="pl-10 py-6 rounded-md border-gray-300"
+              className="pl-10 py-3 rounded-md border-gray-300"
               placeholder="Enter debt name"
               required
             />
@@ -220,10 +219,24 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
 
         {/* Currency Selector */}
         <div className="space-y-2">
+          <div className="flex items-center gap-1">
+            <Label className="text-gray-700 font-medium">Currency</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Select the currency for this debt</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <CurrencySelector 
             value={currencySymbol} 
             onValueChange={setCurrencySymbol}
-            label="Currency"
+            label=""
+            showTooltip={false}
           />
         </div>
 
@@ -250,7 +263,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
               type="number"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
-              className="pl-10 py-6 rounded-md border-gray-300"
+              className="pl-10 py-3 rounded-md border-gray-300"
               placeholder="Enter balance amount"
               required
               min="0"
@@ -282,7 +295,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
               type="number"
               value={interestRate}
               onChange={(e) => setInterestRate(e.target.value)}
-              className="pl-10 py-6 rounded-md border-gray-300"
+              className="pl-10 py-3 rounded-md border-gray-300"
               placeholder="Enter interest rate"
               required={!useRemainingMonths}
               disabled={useRemainingMonths}
@@ -316,7 +329,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
               type="number"
               value={minimumPayment}
               onChange={(e) => setMinimumPayment(e.target.value)}
-              className="pl-10 py-6 rounded-md border-gray-300"
+              className="pl-10 py-3 rounded-md border-gray-300"
               placeholder="Enter minimum payment"
               required
               min="0"
@@ -328,40 +341,38 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
         {/* Next Payment Date */}
         <div className="space-y-2">
           <Label className="text-gray-700 font-medium">Next Payment Date</Label>
-          <div className="relative">
+          <div className="relative flex">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <Calendar className="h-5 w-5 text-gray-400" />
             </div>
-            <div className="flex">
+            <Input
+              type="text"
+              value={formatDateForDisplay(date)}
+              readOnly
+              className="pl-10 py-3 rounded-l-md border-gray-300 bg-white flex-1"
+            />
+            <div className="relative">
               <Input
-                type="text"
-                value={formatDateForDisplay(date)}
-                readOnly
-                className="pl-10 py-6 rounded-l-md border-gray-300 bg-white flex-1"
+                type="date"
+                value={formatDateForInput(date)}
+                onChange={(e) => e.target.valueAsDate && setDate(e.target.valueAsDate)}
+                className="sr-only"
+                min={formatDateForInput(new Date())}
+                required
               />
-              <div className="relative">
-                <Input
-                  type="date"
-                  value={formatDateForInput(date)}
-                  onChange={(e) => e.target.valueAsDate && setDate(e.target.valueAsDate)}
-                  className="sr-only"
-                  min={formatDateForInput(new Date())}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-full rounded-l-none border-l-0 px-3 py-6"
-                  onClick={() => {
-                    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
-                    if (dateInput) {
-                      dateInput.showPicker();
-                    }
-                  }}
-                >
-                  <Calendar className="h-5 w-5 text-gray-500" />
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-full rounded-l-none border-l-0 px-3 py-3"
+                onClick={() => {
+                  const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
+                  if (dateInput) {
+                    dateInput.showPicker();
+                  }
+                }}
+              >
+                <Calendar className="h-5 w-5 text-gray-500" />
+              </Button>
             </div>
           </div>
         </div>
@@ -540,7 +551,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
 
       <Button 
         type="submit" 
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-6"
+        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3"
       >
         Save Changes
       </Button>
