@@ -4,7 +4,6 @@ import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { InterestCalculator } from "./core/InterestCalculator";
 import { ScenarioCalculator } from "./core/ScenarioCalculator";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 export interface CalculationResult {
   baselineMonths: number;
@@ -18,7 +17,6 @@ export interface CalculationResult {
     debtId: string;
     amount: number;
   }[];
-  originalCurrency: string;
 }
 
 export class StandardizedDebtCalculator {
@@ -42,9 +40,6 @@ export class StandardizedDebtCalculator {
         monthsToPayoff: d.minimum_payment > 0 ? Math.ceil(d.balance / d.minimum_payment) : 'infinite'
       }))
     });
-
-    // Get original currency from first debt
-    const originalCurrency = debts.length > 0 ? debts[0].currency_symbol : '$';
 
     // Calculate baseline scenario (minimum payments only)
     const baselineResult = ScenarioCalculator.calculateScenario(
@@ -72,8 +67,7 @@ export class StandardizedDebtCalculator {
       baselineInterest: baselineResult.totalInterest,
       acceleratedInterest: acceleratedResult.totalInterest,
       monthsSaved,
-      interestSaved,
-      originalCurrency
+      interestSaved
     });
 
     return {
@@ -84,8 +78,7 @@ export class StandardizedDebtCalculator {
       monthsSaved,
       interestSaved,
       payoffDate: acceleratedResult.finalPayoffDate,
-      monthlyPayments: acceleratedResult.payments,
-      originalCurrency
+      monthlyPayments: acceleratedResult.payments
     };
   }
 }

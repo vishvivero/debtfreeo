@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
@@ -17,7 +16,6 @@ interface TimelineResults {
     debtId: string;
     amount: number;
   }[];
-  originalCurrency: string;
 }
 
 interface DebtCalculationContextType {

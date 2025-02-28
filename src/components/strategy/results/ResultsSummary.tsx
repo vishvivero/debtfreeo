@@ -4,9 +4,8 @@ import { TrendingUp, Calendar, Target } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { useDebtTimeline, TimelineResults } from "@/hooks/use-debt-timeline";
+import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { formatCurrency } from "@/lib/strategies";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface ResultsSummaryProps {
   debts: Debt[];
@@ -46,33 +45,15 @@ export const ResultsSummary = ({
     return null;
   }
 
-  // Get debt's original currency symbol from timeline results
-  const debtCurrencySymbol = timelineResults.originalCurrency || (debts.length > 0 ? debts[0].currency_symbol : '$');
-
-  // Calculate interest values with potential currency conversion
-  const baselineInterest = debtCurrencySymbol !== currencySymbol 
-    ? convertCurrency(timelineResults.baselineInterest, debtCurrencySymbol, currencySymbol)
-    : timelineResults.baselineInterest;
-    
-  const acceleratedInterest = debtCurrencySymbol !== currencySymbol 
-    ? convertCurrency(timelineResults.acceleratedInterest, debtCurrencySymbol, currencySymbol)
-    : timelineResults.acceleratedInterest;
-    
-  const interestSaved = baselineInterest - acceleratedInterest;
-
   console.log('ResultsSummary: Timeline calculation details:', {
-    originalBaselineInterest: timelineResults.baselineInterest,
-    originalAcceleratedInterest: timelineResults.acceleratedInterest,
-    originalCurrency: debtCurrencySymbol,
-    targetCurrency: currencySymbol,
-    currencyConversionNeeded: debtCurrencySymbol !== currencySymbol,
-    convertedBaselineInterest: baselineInterest,
-    convertedAcceleratedInterest: acceleratedInterest,
-    interestSaved,
+    baselineInterest: timelineResults.baselineInterest,
+    acceleratedInterest: timelineResults.acceleratedInterest,
+    interestSaved: timelineResults.interestSaved,
     monthsSaved: timelineResults.monthsSaved,
     payoffDate: timelineResults.payoffDate.toISOString(),
     baselineMonths: timelineResults.baselineMonths,
-    acceleratedMonths: timelineResults.acceleratedMonths
+    acceleratedMonths: timelineResults.acceleratedMonths,
+    totalSavings: timelineResults.interestSaved + (timelineResults.monthsSaved * monthlyPayment)
   });
 
   return (
@@ -91,7 +72,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-green-800">Interest Saved</h3>
           </div>
           <p className="text-2xl font-bold text-emerald-600">
-            {formatCurrency(interestSaved, currencySymbol)}
+            {formatCurrency(timelineResults.baselineInterest - timelineResults.acceleratedInterest, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
         </motion.div>

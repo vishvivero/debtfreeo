@@ -5,21 +5,6 @@ import { Strategy } from '@/lib/strategies';
 import { OneTimeFunding } from '@/lib/types/payment';
 import { useDebtCalculation } from '@/contexts/DebtCalculationContext';
 
-export interface TimelineResults {
-  baselineMonths: number;
-  acceleratedMonths: number;
-  baselineInterest: number;
-  acceleratedInterest: number;
-  monthsSaved: number;
-  interestSaved: number;
-  payoffDate: Date;
-  monthlyPayments: {
-    debtId: string;
-    amount: number;
-  }[];
-  originalCurrency: string;
-}
-
 export const useDebtTimeline = (
   debts: Debt[],
   monthlyPayment: number,
@@ -36,7 +21,6 @@ export const useDebtTimeline = (
 
     console.log('useDebtTimeline: Starting calculation with params:', {
       debtsTotal: debts.reduce((sum, debt) => sum + debt.balance, 0),
-      debtsCurrencies: debts.map(d => d.currency_symbol),
       monthlyPayment,
       strategy: strategy.name,
       zeroInterestDebts: debts.filter(d => d.interest_rate === 0).map(d => ({
@@ -53,8 +37,7 @@ export const useDebtTimeline = (
       baselineInterest: results.baselineInterest,
       acceleratedInterest: results.acceleratedInterest,
       interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved,
-      currenciesInvolved: debts.map(d => d.currency_symbol).filter((v, i, a) => a.indexOf(v) === i)
+      monthsSaved: results.monthsSaved
     });
 
     return results;

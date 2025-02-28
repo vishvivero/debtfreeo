@@ -42,9 +42,7 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate, currencySymbol }:
     totalAmount,
     progressPercentage,
     isInterestIncluded,
-    calculatedPrincipal,
-    debtCurrency: debt.currency_symbol,
-    displayCurrency: currencySymbol
+    calculatedPrincipal
   });
 
   // Determine what to display as the balance

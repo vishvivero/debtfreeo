@@ -8,7 +8,6 @@ import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
 import { DebtHeroSection } from "./details/DebtHeroSection";
 import { PaymentOverview } from "./details/PaymentOverview";
-import { CurrencyToggle } from "./details/CurrencyToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { 
@@ -22,7 +21,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -34,53 +32,15 @@ export const DebtDetailsPage = () => {
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
   const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
-  const [useNativeCurrency, setUseNativeCurrency] = useState(true);
 
   if (!debt || !profile) {
     console.log('Debt not found for id:', debtId);
     return <div>Debt not found</div>;
   }
 
-  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
-  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
-  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
-
-  // Determine which currency symbol to use based on toggle state
-  const debtCurrency = debt.currency_symbol || '£';
-  const profileCurrency = profile.preferred_currency || '£';
-  const currencySymbol = useNativeCurrency ? debtCurrency : profileCurrency;
-  
-  // Convert values if using profile currency
-  const getConvertedValue = (value: number) => {
-    if (useNativeCurrency || debtCurrency === profileCurrency) {
-      return value;
-    }
-    return convertCurrency(value, debtCurrency, profileCurrency);
-  };
-
-  const convertedBalance = getConvertedValue(debt.balance);
-  const convertedMinimumPayment = getConvertedValue(debt.minimum_payment);
-  const convertedTotalPaid = getConvertedValue(totalPaid);
-  const convertedTotalInterest = getConvertedValue(totalInterest);
-  
   const isPayable = isDebtPayable(debt);
   const minimumViablePayment = getMinimumViablePayment(debt);
-  const convertedMinimumViablePayment = getConvertedValue(minimumViablePayment);
-
-  // Create a version of the debt with converted values for display only
-  // For calculations that affect dates, we'll use the original debt values
-  const convertedDebt = useNativeCurrency 
-    ? debt 
-    : {
-        ...debt,
-        balance: convertedBalance,
-        minimum_payment: convertedMinimumPayment,
-        currency_symbol: profileCurrency
-      };
-
-  // Calculate payoff date using original debt values to ensure consistency
-  const payoffInfo = calculateSingleDebtPayoff(debt, debt.minimum_payment, strategy);
-  const payoffDate = payoffInfo.payoffDate;
+  const currencySymbol = profile.preferred_currency || '£';
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
@@ -111,13 +71,16 @@ export const DebtDetailsPage = () => {
       console.log('Payment history summary:', {
         totalPaid: total,
         totalInterest: interest,
-        paymentCount: payments.length,
-        debtCurrency: debt.currency_symbol
+        paymentCount: payments.length
       });
     };
 
     fetchPaymentHistory();
   }, [debt]);
+
+  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
   if (!isPayable) {
     return (
@@ -137,8 +100,8 @@ export const DebtDetailsPage = () => {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Minimum Payment Insufficient</AlertTitle>
               <AlertDescription className="mt-2">
-                Your current minimum payment of {currencySymbol}{convertedMinimumPayment.toLocaleString()} is insufficient 
-                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{convertedMinimumViablePayment.toLocaleString()} &nbsp;
+                Your current minimum payment of {currencySymbol}{debt.minimum_payment.toLocaleString()} is insufficient 
+                to cover the monthly interest. You need to set a minimum payment of at least {currencySymbol}{minimumViablePayment.toLocaleString()} &nbsp;
                 to make progress on this debt.
               </AlertDescription>
             </Alert>
@@ -160,48 +123,37 @@ export const DebtDetailsPage = () => {
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Loan Details</h1>
-          <CurrencyToggle
-            useNativeCurrency={useNativeCurrency}
-            setUseNativeCurrency={setUseNativeCurrency}
-            debtCurrency={debtCurrency}
-            profileCurrency={profileCurrency}
-          />
-        </div>
-
         <DebtHeroSection 
-          debt={convertedDebt}
-          totalPaid={convertedTotalPaid}
-          payoffDate={payoffDate} 
+          debt={debt}
+          totalPaid={totalPaid}
+          payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
         />
 
         <Separator className="my-8" />
 
         <PaymentOverview
-          debt={convertedDebt}
-          totalPaid={convertedTotalPaid}
-          totalInterest={convertedTotalInterest}
+          debt={debt}
+          totalPaid={totalPaid}
+          totalInterest={totalInterest}
           currencySymbol={currencySymbol}
           isPayable={isPayable}
-          minimumViablePayment={convertedMinimumViablePayment}
+          minimumViablePayment={minimumViablePayment}
         />
 
         <Separator className="my-8" />
 
         <PayoffTimeline 
-          debts={[debt]} 
-          extraPayment={0}
-          enableOneTimeFundings={false}
+          debts={[debt]}
+          extraPayment={monthlyPayment - debt.minimum_payment}
+          enableOneTimeFundings={false} // Explicitly disable one-time fundings for individual debt view
         />
 
         <Separator className="my-8" />
 
         <AmortizationTable 
-          debt={convertedDebt} 
-          amortizationData={calculateAmortizationSchedule(useNativeCurrency ? debt : convertedDebt, 
-                                                         useNativeCurrency ? debt.minimum_payment : convertedMinimumPayment)}
+          debt={debt} 
+          amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
           currencySymbol={currencySymbol}
         />
       </div>

@@ -21,24 +21,15 @@ export const PaymentOverview = ({
   isPayable,
   minimumViablePayment 
 }: PaymentOverviewProps) => {
-  // For high-value, high-interest loans, use a fixed interest amount
-  let calculatedInterest = totalInterest;
-  if (debt.balance > 4000000 && debt.interest_rate > 10) {
-    calculatedInterest = 94088; // Use the corrected interest amount
-  }
-
-  const principalReduction = totalPaid - calculatedInterest;
+  const principalReduction = totalPaid - totalInterest;
 
   console.log('Payment overview calculations:', {
     totalPaid,
-    originalTotalInterest: totalInterest,
-    calculatedInterest,
+    totalInterest,
     principalReduction,
     debtId: debt.id,
     isPayable,
-    minimumViablePayment,
-    debtCurrency: debt.currency_symbol,
-    displayCurrency: currencySymbol
+    minimumViablePayment
   });
 
   const cards = [
@@ -50,7 +41,7 @@ export const PaymentOverview = ({
     },
     {
       title: "Interest Paid",
-      amount: calculatedInterest,
+      amount: totalInterest,
       icon: Percent,
       color: "blue"
     },
