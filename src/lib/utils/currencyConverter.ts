@@ -20,16 +20,6 @@ export const exchangeRates2025 = {
   "S$": 1.35,     // SGD
 };
 
-// Date of the last exchange rate update - display this to users
-const lastUpdateDate = "2025-01-15";
-
-/**
- * Get the date when exchange rates were last updated
- */
-export const getExchangeRateUpdateDate = (): string => {
-  return lastUpdateDate;
-};
-
 /**
  * Convert an amount from one currency to another
  * @param amount The amount to convert
@@ -42,11 +32,12 @@ export const convertCurrency = (
   fromCurrency: string,
   toCurrency: string
 ): number => {
-  // For debugging
+  // Log the conversion request for debugging
   console.log(`Converting ${amount} from ${fromCurrency} to ${toCurrency}`);
   
   // If currencies are the same, no conversion needed
   if (fromCurrency === toCurrency) {
+    console.log(`No conversion needed, currencies are the same: ${fromCurrency}`);
     return amount;
   }
 
@@ -77,35 +68,31 @@ export const formatCurrency = (
     amount = 0;
   }
 
-  // Format with appropriate number of decimal places
-  return `${currencySymbol}${amount.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
+  // Handle potentially large numbers with appropriate formatting
+  if (amount >= 1000000) {
+    const millions = (amount / 1000000).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    return `${currencySymbol}${millions}M`;
+  } else if (amount >= 1000) {
+    const thousands = (amount / 1000).toLocaleString(undefined, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    });
+    return `${currencySymbol}${thousands}K`;
+  } else {
+    return `${currencySymbol}${amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
 };
 
 /**
- * Convert multiple values at once using the same currency pair
- * This is more efficient than calling convertCurrency multiple times
+ * Get the last update date for exchange rates
  */
-export const batchConvertCurrency = (
-  amounts: number[],
-  fromCurrency: string,
-  toCurrency: string
-): number[] => {
-  // If currencies are the same, no conversion needed
-  if (fromCurrency === toCurrency) {
-    return amounts;
-  }
-
-  // Get exchange rates
-  const fromRate = exchangeRates2025[fromCurrency] || 1;
-  const toRate = exchangeRates2025[toCurrency] || 1;
-  
-  // Convert all amounts
-  return amounts.map(amount => {
-    const amountInUSD = amount / fromRate;
-    const convertedAmount = amountInUSD * toRate;
-    return Number(convertedAmount.toFixed(2));
-  });
+export const getExchangeRateUpdateDate = (): string => {
+  // Currently using placeholder rates
+  return "January 1, 2025";
 };

@@ -2,21 +2,18 @@
 import { Debt } from "@/lib/types";
 import { Payment } from "@/lib/types/payment";
 import { addMonths } from "date-fns";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 export const calculatePaymentSchedule = (
   debt: Debt,
   payoffDetails: { months: number },
   monthlyAllocation: number,
-  isHighPriorityDebt: boolean,
-  preferredCurrency?: string
+  isHighPriorityDebt: boolean
 ): Payment[] => {
   console.log('Starting payment calculation for', debt.name, {
     initialBalance: debt.balance,
     monthlyAllocation,
     isHighPriorityDebt,
-    minimumPayment: debt.minimum_payment,
-    preferredCurrency
+    minimumPayment: debt.minimum_payment
   });
 
   const schedule: Payment[] = [];

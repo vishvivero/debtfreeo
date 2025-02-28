@@ -20,11 +20,6 @@ export class PaymentAllocator {
     
     // With preferred currency, convert each payment before summing
     const total = debts.reduce((sum, debt) => {
-      // Only convert if the currencies are different
-      if (debt.currency_symbol === preferredCurrency) {
-        return sum + debt.minimum_payment;
-      }
-      
       const convertedAmount = convertCurrency(
         debt.minimum_payment,
         debt.currency_symbol,
@@ -39,15 +34,11 @@ export class PaymentAllocator {
       payments: debts.map(d => ({
         name: d.name,
         original: `${d.currency_symbol}${d.minimum_payment}`,
-        converted: `${preferredCurrency}${
-          d.currency_symbol === preferredCurrency ? 
-          d.minimum_payment : 
-          convertCurrency(
-            d.minimum_payment,
-            d.currency_symbol,
-            preferredCurrency
-          )
-        }`
+        converted: `${preferredCurrency}${convertCurrency(
+          d.minimum_payment,
+          d.currency_symbol,
+          preferredCurrency
+        )}`
       }))
     });
     
@@ -73,30 +64,21 @@ export class PaymentAllocator {
 
     // First allocate minimum payments
     sortedDebts.forEach(debt => {
-      // If no currency conversion is needed
-      if (!preferredCurrency || debt.currency_symbol === preferredCurrency) {
-        const minPayment = Math.min(debt.minimum_payment, debt.balance);
-        allocations.push({
-          debtId: debt.id,
-          amount: minPayment,
-          isMinimumPayment: true
-        });
-        remainingPayment -= minPayment;
-      } else {
-        // Convert minimum payment to preferred currency
-        const convertedMinPayment = convertCurrency(
-          Math.min(debt.minimum_payment, debt.balance),
-          debt.currency_symbol, 
-          preferredCurrency
-        );
-          
-        allocations.push({
-          debtId: debt.id,
-          amount: convertedMinPayment,
-          isMinimumPayment: true
-        });
-        remainingPayment -= convertedMinPayment;
-      }
+      // Convert minimum payment to preferred currency if needed
+      const minPayment = preferredCurrency
+        ? convertCurrency(
+            Math.min(debt.minimum_payment, debt.balance),
+            debt.currency_symbol, 
+            preferredCurrency
+          )
+        : Math.min(debt.minimum_payment, debt.balance);
+        
+      allocations.push({
+        debtId: debt.id,
+        amount: minPayment,
+        isMinimumPayment: true
+      });
+      remainingPayment -= minPayment;
     });
 
     // Allocate remaining payment to highest priority debt
