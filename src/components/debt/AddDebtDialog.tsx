@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
@@ -41,7 +42,7 @@ export const AddDebtDialog = ({
   // Otherwise render uncontrolled dialog with trigger
   return <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
+        <Button className="bg-[#34D399] hover:bg-[#10B981] text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
         </Button>
       </DialogTrigger>
