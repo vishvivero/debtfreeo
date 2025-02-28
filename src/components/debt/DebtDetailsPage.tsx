@@ -200,7 +200,8 @@ export const DebtDetailsPage = () => {
 
         <AmortizationTable 
           debt={convertedDebt} 
-          amortizationData={calculateAmortizationSchedule(debt, debt.minimum_payment)}
+          amortizationData={calculateAmortizationSchedule(useNativeCurrency ? debt : convertedDebt, 
+                                                         useNativeCurrency ? debt.minimum_payment : convertedMinimumPayment)}
           currencySymbol={currencySymbol}
         />
       </div>
