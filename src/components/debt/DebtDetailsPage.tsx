@@ -41,6 +41,10 @@ export const DebtDetailsPage = () => {
     return <div>Debt not found</div>;
   }
 
+  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
+
   // Determine which currency symbol to use based on toggle state
   const debtCurrency = debt.currency_symbol || '£';
   const profileCurrency = profile.preferred_currency || '£';
@@ -114,10 +118,6 @@ export const DebtDetailsPage = () => {
 
     fetchPaymentHistory();
   }, [debt]);
-
-  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
-  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
-  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
 
   if (!isPayable) {
     return (
