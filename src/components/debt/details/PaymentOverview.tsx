@@ -3,8 +3,6 @@ import { Debt } from "@/lib/types/debt";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { DollarSign, Percent, MinusCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface PaymentOverviewProps {
   debt: Debt;
@@ -18,54 +16,16 @@ export interface PaymentOverviewProps {
 export const PaymentOverview = ({ 
   debt, 
   totalPaid, 
-  totalInterest: providedTotalInterest, 
+  totalInterest, 
   currencySymbol,
   isPayable,
   minimumViablePayment 
 }: PaymentOverviewProps) => {
-  const [calculatedInterest, setCalculatedInterest] = useState(providedTotalInterest);
-  
-  useEffect(() => {
-    // Calculate more accurate interest based on loan details
-    const calculateAccurateInterest = async () => {
-      try {
-        // For larger loans, estimate interest based on loan terms if available
-        if (debt.balance > 100000 && debt.interest_rate > 0) {
-          // Calculate approximate total interest over life of loan
-          const monthlyRate = debt.interest_rate / 1200;
-          const loanTermMonths = debt.loan_term_months || 240; // Default to 20 years if not specified
-          
-          // Simple interest calculation based on current balance
-          const estimatedTotalInterest = debt.balance * (debt.interest_rate / 100) * (loanTermMonths / 12);
-          
-          // For paid portion, calculate a proportional amount of interest
-          // Assuming total = original principal + total interest
-          const estimatedOriginalPrincipal = debt.balance / (1 - totalPaid / (debt.balance + totalPaid));
-          const interestPortion = estimatedTotalInterest * (totalPaid / (estimatedOriginalPrincipal + estimatedTotalInterest));
-          
-          // Use a fixed value for this specific debt (based on the correction provided)
-          if (debt.balance > 4000000 && debt.interest_rate > 10) {
-            setCalculatedInterest(94088);
-          } else {
-            setCalculatedInterest(interestPortion);
-          }
-        }
-      } catch (error) {
-        console.error("Error calculating interest:", error);
-        // Fallback to provided interest if calculation fails
-        setCalculatedInterest(providedTotalInterest);
-      }
-    };
-    
-    calculateAccurateInterest();
-  }, [debt, totalPaid, providedTotalInterest]);
-
-  const principalReduction = totalPaid - calculatedInterest;
+  const principalReduction = totalPaid - totalInterest;
 
   console.log('Payment overview calculations:', {
     totalPaid,
-    providedTotalInterest,
-    calculatedInterest,
+    totalInterest,
     principalReduction,
     debtId: debt.id,
     isPayable,
@@ -83,7 +43,7 @@ export const PaymentOverview = ({
     },
     {
       title: "Interest Paid",
-      amount: calculatedInterest,
+      amount: totalInterest,
       icon: Percent,
       color: "blue"
     },

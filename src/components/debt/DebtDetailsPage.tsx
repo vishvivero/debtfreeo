@@ -31,13 +31,7 @@ export const DebtDetailsPage = () => {
   
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
-  const [monthlyPayment, setMonthlyPayment] = useState(0);
-
-  useEffect(() => {
-    if (debt) {
-      setMonthlyPayment(debt.minimum_payment || 0);
-    }
-  }, [debt]);
+  const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
 
   if (!debt || !profile) {
     console.log('Debt not found for id:', debtId);
@@ -70,27 +64,17 @@ export const DebtDetailsPage = () => {
       const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
       setTotalPaid(total);
 
-      // Basic interest calculation - this will be refined in the PaymentOverview component
-      let calculatedInterest = payments.reduce((sum, payment) => {
+      const interest = payments.reduce((sum, payment) => {
         const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
         return sum + interestPortion;
       }, 0);
-      
-      // For special cases, set accurate interest amount
-      if (debt.balance > 4000000 && debt.interest_rate > 10) {
-        console.log('Using corrected interest amount for large high-interest loan');
-        calculatedInterest = total * 0.3; // Approximate interest calculation
-      }
-      
-      setTotalInterest(calculatedInterest);
+      setTotalInterest(interest);
 
       console.log('Payment history summary:', {
         totalPaid: total,
-        totalInterest: calculatedInterest,
+        totalInterest: interest,
         paymentCount: payments.length,
-        debtCurrency: debt.currency_symbol,
-        debtBalance: debt.balance,
-        debtInterestRate: debt.interest_rate
+        debtCurrency: debt.currency_symbol
       });
     };
 
