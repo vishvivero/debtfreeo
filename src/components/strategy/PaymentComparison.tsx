@@ -4,7 +4,7 @@ import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
-import { useDebtTimeline } from "@/hooks/use-debt-timeline";
+import { useDebtTimeline, TimelineResults } from "@/hooks/use-debt-timeline";
 import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface PaymentComparisonProps {
