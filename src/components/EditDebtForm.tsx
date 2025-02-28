@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Debt } from "@/lib/types/debt";
-import { CreditCard, Percent, Wallet, Coins, Info, ChevronDown, ChevronUp, Calculator, Calendar } from "lucide-react";
+import { FolderIcon, CreditCard, Percent, Wallet, Coins, Info, Calculator, Calendar } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -23,6 +23,9 @@ import {
 import { addMonths, format } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { CurrencySelector } from "@/components/profile/CurrencySelector";
+import { ChevronDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { countryCurrencies } from "@/lib/utils/currency-data";
 
 interface EditDebtFormProps {
   debt: Debt;
@@ -191,79 +194,115 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
     return date.toISOString().split('T')[0];
   };
 
+  // Find the selected currency details
+  const selectedCurrency = countryCurrencies.find(item => item.symbol === currencySymbol);
+  const currencyDisplayText = selectedCurrency ? 
+    `${currencySymbol} ${selectedCurrency.country} - ${selectedCurrency.currency}` : 
+    currencySymbol;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+      <div className="space-y-6">
         {/* Debt Category */}
         <div className="space-y-2">
-          <Label className="text-gray-700 font-medium">Debt Category</Label>
-          <DebtCategorySelect value={category} onChange={setCategory} />
+          <Label htmlFor="category" className="text-base text-gray-700 font-medium">Debt Category</Label>
+          <div className="relative rounded-md border border-gray-200">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+              <FolderIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="pl-10 py-6 h-auto text-base rounded-md border-0 shadow-none">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Credit Card">Credit Card</SelectItem>
+                <SelectItem value="Personal Loan">Personal Loan</SelectItem>
+                <SelectItem value="Student Loan">Student Loan</SelectItem>
+                <SelectItem value="Mortgage">Mortgage</SelectItem>
+                <SelectItem value="Auto Loan">Auto Loan</SelectItem>
+                <SelectItem value="Medical Debt">Medical Debt</SelectItem>
+                <SelectItem value="Business Loan">Business Loan</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Debt Name */}
         <div className="space-y-2">
-          <Label className="text-gray-700 font-medium">Debt Name</Label>
+          <Label htmlFor="name" className="text-base text-gray-700 font-medium">Debt Name</Label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <CreditCard className="h-5 w-5 text-gray-400" />
             </div>
             <Input
+              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="pl-10 py-3 rounded-md border-gray-300"
+              className="pl-10 py-6 h-auto text-base rounded-md"
               placeholder="Enter debt name"
               required
             />
           </div>
         </div>
 
-        {/* Currency Selector */}
+        {/* Currency */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1">
-            <Label className="text-gray-700 font-medium">Currency</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="currency" className="text-base text-gray-700 font-medium">Currency</Label>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Select the currency for this debt</p>
+                  <p className="text-sm">Select the currency for this debt</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          <CurrencySelector 
-            value={currencySymbol} 
-            onValueChange={setCurrencySymbol}
-            label=""
-            showTooltip={false}
-          />
+          <Select value={currencySymbol} onValueChange={setCurrencySymbol}>
+            <SelectTrigger id="currency" className="py-6 h-auto text-base rounded-md">
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px]">
+              {countryCurrencies.map((item) => (
+                <SelectItem key={item.symbol} value={item.symbol}>
+                  <span className="flex items-center gap-2">
+                    <span className="font-medium">{item.symbol}</span>
+                    <span>{item.country} - {item.currency}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Balance */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1">
-            <Label className="text-gray-700 font-medium">Balance</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="balance" className="text-base text-gray-700 font-medium">Balance</Label>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Enter the current outstanding balance from your latest statement</p>
+                  <p className="text-sm">Enter the current outstanding balance from your latest statement</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
           <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <Wallet className="h-5 w-5 text-gray-400" />
             </div>
             <Input
+              id="balance"
               type="number"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
-              className="pl-10 py-3 rounded-md border-gray-300"
+              className="pl-10 py-6 h-auto text-base rounded-md"
               placeholder="Enter balance amount"
               required
               min="0"
@@ -274,28 +313,29 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
 
         {/* Interest Rate */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1">
-            <Label className="text-gray-700 font-medium">Interest Rate (%)</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="interestRate" className="text-base text-gray-700 font-medium">Interest Rate (%)</Label>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Enter the Annual Percentage Rate (APR) for this debt</p>
+                  <p className="text-sm">Enter the Annual Percentage Rate (APR) for this debt</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
           <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <Percent className="h-5 w-5 text-gray-400" />
             </div>
             <Input
+              id="interestRate"
               type="number"
               value={interestRate}
               onChange={(e) => setInterestRate(e.target.value)}
-              className="pl-10 py-3 rounded-md border-gray-300"
+              className="pl-10 py-6 h-auto text-base rounded-md"
               placeholder="Enter interest rate"
               required={!useRemainingMonths}
               disabled={useRemainingMonths}
@@ -308,28 +348,29 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
 
         {/* Minimum Payment */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1">
-            <Label className="text-gray-700 font-medium">Minimum Payment</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="minimumPayment" className="text-base text-gray-700 font-medium">Minimum Payment</Label>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Enter your fixed monthly payment (EMI) or minimum payment amount</p>
+                  <p className="text-sm">Enter your fixed monthly payment (EMI) or minimum payment amount</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
           <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <Coins className="h-5 w-5 text-gray-400" />
             </div>
             <Input
+              id="minimumPayment"
               type="number"
               value={minimumPayment}
               onChange={(e) => setMinimumPayment(e.target.value)}
-              className="pl-10 py-3 rounded-md border-gray-300"
+              className="pl-10 py-6 h-auto text-base rounded-md"
               placeholder="Enter minimum payment"
               required
               min="0"
@@ -340,19 +381,22 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
 
         {/* Next Payment Date */}
         <div className="space-y-2">
-          <Label className="text-gray-700 font-medium">Next Payment Date</Label>
-          <div className="relative flex">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Calendar className="h-5 w-5 text-gray-400" />
+          <Label htmlFor="nextPaymentDate" className="text-base text-gray-700 font-medium">Next Payment Date</Label>
+          <div className="flex">
+            <div className="relative flex-grow">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                <Calendar className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="text"
+                value={formatDateForDisplay(date)}
+                readOnly
+                className="pl-10 py-6 h-auto text-base rounded-l-md"
+              />
             </div>
-            <Input
-              type="text"
-              value={formatDateForDisplay(date)}
-              readOnly
-              className="pl-10 py-3 rounded-l-md border-gray-300 bg-white flex-1"
-            />
             <div className="relative">
               <Input
+                id="nextPaymentDate"
                 type="date"
                 value={formatDateForInput(date)}
                 onChange={(e) => e.target.valueAsDate && setDate(e.target.valueAsDate)}
@@ -363,7 +407,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
               <Button
                 type="button"
                 variant="outline"
-                className="h-full rounded-l-none border-l-0 px-3 py-3"
+                className="h-full rounded-l-none border-l-0 px-4 py-6"
                 onClick={() => {
                   const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
                   if (dateInput) {
@@ -386,13 +430,9 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
           <CollapsibleTrigger className="flex items-center justify-between w-full p-4">
             <div className="flex items-center gap-2">
               <Calculator className="h-5 w-5 text-emerald-500" />
-              <span className="font-medium">Advanced Options</span>
+              <span className="font-medium text-base">Advanced Options</span>
             </div>
-            {showAdvanced ? (
-              <ChevronUp className="h-5 w-5" />
-            ) : (
-              <ChevronDown className="h-5 w-5" />
-            )}
+            <ChevronDown className="h-5 w-5 transition-transform duration-200" style={{ transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)' }} />
           </CollapsibleTrigger>
           <CollapsibleContent className="p-4 pt-0 border-t border-gray-200">
             <div className="grid grid-cols-2 gap-4">
@@ -551,7 +591,7 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
 
       <Button 
         type="submit" 
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3"
+        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-4 text-base mt-4"
       >
         Save Changes
       </Button>
