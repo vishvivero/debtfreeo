@@ -1,23 +1,37 @@
+
 import { motion } from "framer-motion";
 import { Calendar, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
+import { Debt } from "@/lib/types";
+import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
+import { PaymentAllocator } from "@/lib/services/calculations/PaymentAllocator";
 
 interface NextStepsLayoutProps {
+  debts: Debt[];
   monthlyPayment: number;
-  minimumPayment: number;
   extraPayment: number;
-  oneTimeFundings: OneTimeFunding[];
+  selectedStrategy: Strategy;
   currencySymbol?: string;
 }
 
 export const NextStepsLayout = ({
+  debts,
   monthlyPayment,
-  minimumPayment,
   extraPayment,
-  oneTimeFundings,
+  selectedStrategy,
   currencySymbol = '£'
 }: NextStepsLayoutProps) => {
+  // Get all one-time fundings (for future implementation)
+  const oneTimeFundings: OneTimeFunding[] = [];
+  
+  // Calculate total minimum payments
+  const minimumPayment = PaymentAllocator.calculateTotalMinimumPayments(
+    debts,
+    currencySymbol
+  );
+
+  // Sort one-time fundings by date if they exist
   const sortedFundings = [...oneTimeFundings].sort(
     (a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()
   );

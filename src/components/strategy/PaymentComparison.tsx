@@ -9,7 +9,8 @@ import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 interface PaymentComparisonProps {
   debts: Debt[];
   monthlyPayment: number;
-  strategy: Strategy;
+  extraPayment: number;
+  selectedStrategy: Strategy;
   oneTimeFundings: OneTimeFunding[];
   currencySymbol?: string;
 }
@@ -17,7 +18,8 @@ interface PaymentComparisonProps {
 export const PaymentComparison = ({
   debts,
   monthlyPayment,
-  strategy,
+  extraPayment,
+  selectedStrategy: strategy,
   oneTimeFundings,
   currencySymbol = '£'
 }: PaymentComparisonProps) => {
