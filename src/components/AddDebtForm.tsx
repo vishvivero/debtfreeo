@@ -210,19 +210,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
               <TabsList className="h-12 bg-transparent space-x-5 p-0">
                 <TabsTrigger 
                   value="basics" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#9b87f5] data-[state=active]:text-[#7E69AB] rounded-none h-12 px-1 bg-transparent"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#34D399] data-[state=active]:text-[#10B981] rounded-none h-12 px-1 bg-transparent"
                 >
                   Basic Info
                 </TabsTrigger>
                 <TabsTrigger 
                   value="advanced" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#9b87f5] data-[state=active]:text-[#7E69AB] rounded-none h-12 px-1 bg-transparent"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#34D399] data-[state=active]:text-[#10B981] rounded-none h-12 px-1 bg-transparent"
                 >
                   Advanced Settings
                 </TabsTrigger>
                 <TabsTrigger 
                   value="currency" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#9b87f5] data-[state=active]:text-[#7E69AB] rounded-none h-12 px-1 bg-transparent"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#34D399] data-[state=active]:text-[#10B981] rounded-none h-12 px-1 bg-transparent"
                 >
                   Currency
                 </TabsTrigger>
@@ -240,12 +240,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     <Label className="text-gray-700 text-sm">Debt Name *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <CreditCard className="h-4 w-4 text-[#9b87f5]" />
+                        <CreditCard className="h-4 w-4 text-[#34D399]" />
                       </div>
                       <Input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="pl-9 border-gray-300 h-9 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="pl-9 border-gray-300 h-9 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         placeholder="Personal Loan, Credit Card etc."
                         required
                       />
@@ -257,13 +257,13 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     <Label className="text-gray-700 text-sm">Current Outstanding Balance *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <span className="text-[#9b87f5]">{selectedCurrency}</span>
+                        <span className="text-[#34D399]">{selectedCurrency}</span>
                       </div>
                       <Input
                         type="number"
                         value={balance}
                         onChange={(e) => setBalance(e.target.value)}
-                        className="pl-9 border-gray-300 h-9 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="pl-9 border-gray-300 h-9 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         placeholder="Enter balance amount"
                         required
                         min="0"
@@ -286,13 +286,13 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     <Label className="text-gray-700 text-sm">Interest Rate (%) *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Percent className="h-4 w-4 text-[#9b87f5]" />
+                        <Percent className="h-4 w-4 text-[#34D399]" />
                       </div>
                       <Input
                         type="number"
                         value={interestRate}
                         onChange={(e) => setInterestRate(e.target.value)}
-                        className="pl-9 border-gray-300 h-9 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="pl-9 border-gray-300 h-9 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         placeholder="5.99"
                         required={!useRemainingMonths}
                         disabled={useRemainingMonths}
@@ -308,13 +308,13 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     <Label className="text-gray-700 text-sm">Minimum Payment/EMI *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <span className="text-[#9b87f5]">{selectedCurrency}</span>
+                        <span className="text-[#34D399]">{selectedCurrency}</span>
                       </div>
                       <Input
                         type="number"
                         value={minimumPayment}
                         onChange={(e) => setMinimumPayment(e.target.value)}
-                        className="pl-9 border-gray-300 h-9 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="pl-9 border-gray-300 h-9 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         placeholder="Monthly payment"
                         required
                         min="0"
@@ -335,12 +335,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                             setDate(e.target.valueAsDate);
                           }
                         }}
-                        className="border-gray-300 h-9 pl-9 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="border-gray-300 h-9 pl-9 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         min={formatDateForInput(new Date())}
                         required
                       />
                       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Calendar className="h-4 w-4 text-[#9b87f5]" />
+                        <Calendar className="h-4 w-4 text-[#34D399]" />
                       </div>
                     </div>
                   </div>
@@ -351,7 +351,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
             <TabsContent value="advanced" className="mt-0 space-y-3">
               <div className="space-y-4">
                 {/* Interest Already Included */}
-                <div className="p-3 border rounded-md bg-[#F1F0FB]">
+                <div className="p-3 border rounded-md bg-[#F2FCE2]">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <Label className="text-sm font-medium">
@@ -378,7 +378,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                             setUsePrincipalAsBalance(false);
                           }
                         }}
-                        className="data-[state=checked]:bg-[#9b87f5]"
+                        className="data-[state=checked]:bg-[#34D399]"
                       />
                     </div>
                   </div>
@@ -391,25 +391,25 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                         value={remainingMonths}
                         onChange={(e) => setRemainingMonths(e.target.value)}
                         placeholder="36"
-                        className="mt-1 text-xs h-8 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="mt-1 text-xs h-8 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         min="1"
                         required={isInterestIncluded}
                       />
                       
                       {balance && minimumPayment && remainingMonths && interestRate && (
-                        <div className="mt-2 p-2 bg-[#E5DEFF] border border-[#D6BCFA] rounded-md text-xs">
+                        <div className="mt-2 p-2 bg-[#E1FAF0] border border-[#A7F3D0] rounded-md text-xs">
                           <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                             {calculatedPrincipal !== null && (
                               <>
                                 <div>
-                                  <p className="text-xs font-medium text-[#7E69AB]">Principal:</p>
-                                  <p className="text-xs text-[#9b87f5]">
+                                  <p className="text-xs font-medium text-[#10B981]">Principal:</p>
+                                  <p className="text-xs text-[#34D399]">
                                     {selectedCurrency}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-xs font-medium text-[#7E69AB]">Interest Amount:</p>
-                                  <p className="text-xs text-[#9b87f5]">
+                                  <p className="text-xs font-medium text-[#10B981]">Interest Amount:</p>
+                                  <p className="text-xs text-[#34D399]">
                                     {selectedCurrency}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
                                   </p>
                                 </div>
@@ -418,14 +418,14 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                           </div>
                           
                           <div className="mt-2 flex items-center justify-between">
-                            <Label className="text-xs font-medium text-[#7E69AB]">
+                            <Label className="text-xs font-medium text-[#10B981]">
                               Use principal as balance
                             </Label>
                             <Switch
                               checked={usePrincipalAsBalance}
                               onCheckedChange={setUsePrincipalAsBalance}
                               size="sm"
-                              className="data-[state=checked]:bg-[#9b87f5]"
+                              className="data-[state=checked]:bg-[#34D399]"
                             />
                           </div>
                         </div>
@@ -435,7 +435,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                 </div>
                 
                 {/* Calculate Interest from Remaining Months */}
-                <div className="p-3 border rounded-md bg-[#F1F0FB]">
+                <div className="p-3 border rounded-md bg-[#F2FCE2]">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <Label className="text-sm font-medium">
@@ -458,7 +458,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                             setUsePrincipalAsBalance(false);
                           }
                         }}
-                        className="data-[state=checked]:bg-[#9b87f5]"
+                        className="data-[state=checked]:bg-[#34D399]"
                       />
                     </div>
                   </div>
@@ -471,22 +471,22 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                         value={remainingMonths}
                         onChange={(e) => setRemainingMonths(e.target.value)}
                         placeholder="36"
-                        className="mt-1 text-xs h-8 focus:border-[#9b87f5] focus:ring-[#E5DEFF]"
+                        className="mt-1 text-xs h-8 focus:border-[#34D399] focus:ring-[#E1FAF0]"
                         min="1"
                         required={useRemainingMonths}
                       />
                       
                       {balance && minimumPayment && remainingMonths && (
-                        <div className="mt-2 p-2 bg-[#E5DEFF] border border-[#D6BCFA] rounded-md text-xs">
+                        <div className="mt-2 p-2 bg-[#E1FAF0] border border-[#A7F3D0] rounded-md text-xs">
                           <div className="grid grid-cols-2 gap-1">
                             <div>
-                              <p className="text-xs font-medium text-[#7E69AB]">Payoff Date:</p>
-                              <p className="text-xs text-[#9b87f5]">{format(addMonths(new Date(), parseInt(remainingMonths)), 'MMM yyyy')}</p>
+                              <p className="text-xs font-medium text-[#10B981]">Payoff Date:</p>
+                              <p className="text-xs text-[#34D399]">{format(addMonths(new Date(), parseInt(remainingMonths)), 'MMM yyyy')}</p>
                             </div>
                             {estimatedInterestRate !== null && (
                               <div>
-                                <p className="text-xs font-medium text-[#7E69AB]">Est. Interest Rate:</p>
-                                <p className="text-xs text-[#9b87f5]">{estimatedInterestRate}%</p>
+                                <p className="text-xs font-medium text-[#10B981]">Est. Interest Rate:</p>
+                                <p className="text-xs text-[#34D399]">{estimatedInterestRate}%</p>
                               </div>
                             )}
                           </div>
@@ -501,7 +501,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2 h-20 resize-none text-sm focus:ring-2 focus:ring-[#9b87f5] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-md p-2 h-20 resize-none text-sm focus:ring-2 focus:ring-[#34D399] focus:border-transparent"
                     placeholder="Add any additional notes about this debt..."
                     maxLength={500}
                   />
@@ -514,9 +514,9 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
 
             <TabsContent value="currency" className="mt-0">
               <div className="space-y-4">
-                <div className="p-4 border rounded-md bg-[#F1F0FB]">
+                <div className="p-4 border rounded-md bg-[#F2FCE2]">
                   <div className="flex items-center mb-3">
-                    <DollarSign className="h-5 w-5 mr-2 text-[#9b87f5]" />
+                    <DollarSign className="h-5 w-5 mr-2 text-[#34D399]" />
                     <h3 className="text-base font-semibold">Select Currency</h3>
                   </div>
                   
@@ -530,7 +530,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       value={selectedCurrency} 
                       onValueChange={setSelectedCurrency}
                     >
-                      <SelectTrigger className="w-full border-gray-300 focus:border-[#9b87f5] focus:ring-[#E5DEFF]">
+                      <SelectTrigger className="w-full border-gray-300 focus:border-[#34D399] focus:ring-[#E1FAF0]">
                         <SelectValue placeholder="Select currency" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[200px] bg-white">
@@ -546,11 +546,11 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </Select>
                   </div>
 
-                  <div className="mt-4 p-3 bg-[#E5DEFF] border border-[#D6BCFA] rounded-md">
-                    <p className="text-sm font-medium text-[#7E69AB]">Current Selection:</p>
+                  <div className="mt-4 p-3 bg-[#E1FAF0] border border-[#A7F3D0] rounded-md">
+                    <p className="text-sm font-medium text-[#10B981]">Current Selection:</p>
                     <div className="flex items-center mt-1">
-                      <span className="text-xl font-bold text-[#9b87f5] mr-2">{selectedCurrency}</span>
-                      <span className="text-sm text-[#7E69AB]">
+                      <span className="text-xl font-bold text-[#34D399] mr-2">{selectedCurrency}</span>
+                      <span className="text-sm text-[#10B981]">
                         {countryCurrencies.find(c => c.symbol === selectedCurrency)?.country || 'Unknown'} - 
                         {countryCurrencies.find(c => c.symbol === selectedCurrency)?.currency || 'Unknown'}
                       </span>
@@ -578,7 +578,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         </Button>
         <Button 
           type="submit" 
-          className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white px-6"
+          className="bg-[#34D399] hover:bg-[#10B981] text-white px-6"
         >
           Add Debt
         </Button>

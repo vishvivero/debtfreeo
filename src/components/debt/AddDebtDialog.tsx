@@ -24,13 +24,13 @@ export const AddDebtDialog = ({
     }
   };
 
-  const dialogContent = <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden border-purple-100 shadow-lg">
-      <DialogHeader className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-50 to-white">
+  const dialogContent = <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden border-green-100 shadow-lg">
+      <DialogHeader className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-green-50 to-white">
         <DialogTitle className="text-xl font-semibold text-gray-800">Add New Debt</DialogTitle>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 rounded-full hover:bg-purple-100"
+          className="h-8 w-8 rounded-full hover:bg-green-100"
           onClick={onClose}
         >
           <X className="h-4 w-4 text-gray-500" />
@@ -49,7 +49,7 @@ export const AddDebtDialog = ({
   // Otherwise render uncontrolled dialog with trigger
   return <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white">
+        <Button className="bg-[#34D399] hover:bg-[#10B981] text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
         </Button>
       </DialogTrigger>
