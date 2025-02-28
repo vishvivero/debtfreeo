@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/collapsible";
 import { addMonths, format } from "date-fns";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
+import { CurrencySelector } from "@/components/profile/CurrencySelector";
 
 interface EditDebtFormProps {
   debt: Debt;
@@ -215,6 +216,15 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
               required
             />
           </div>
+        </div>
+
+        {/* Currency Selector */}
+        <div className="space-y-2">
+          <CurrencySelector 
+            value={currencySymbol} 
+            onValueChange={setCurrencySymbol}
+            label="Currency"
+          />
         </div>
 
         {/* Balance */}
