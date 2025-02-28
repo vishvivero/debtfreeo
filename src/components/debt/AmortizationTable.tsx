@@ -13,9 +13,15 @@ interface AmortizationTableProps {
   debt: Debt;
   amortizationData: CalculationResult[];
   currencySymbol: string;
+  displayInitialBalance?: number;
 }
 
-export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: AmortizationTableProps) => {
+export const AmortizationTable = ({ 
+  debt, 
+  amortizationData, 
+  currencySymbol, 
+  displayInitialBalance 
+}: AmortizationTableProps) => {
   const [visibleRows, setVisibleRows] = useState(12); // Show first 12 months by default
   
   const isInterestIncluded = debt.metadata?.interest_included === true;
@@ -32,7 +38,8 @@ export const AmortizationTable = ({ debt, amortizationData, currencySymbol }: Am
     : null;
 
   // Starting balance for the amortization table should be the calculated principal, if applicable
-  const initialBalance = isInterestIncluded && calculatedPrincipal ? calculatedPrincipal : debt.balance;
+  const initialBalance = displayInitialBalance || 
+    (isInterestIncluded && calculatedPrincipal ? calculatedPrincipal : debt.balance);
   
   // If there's no amortization data, show a message
   if (!amortizationData || amortizationData.length === 0) {

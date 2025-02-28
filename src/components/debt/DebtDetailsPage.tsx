@@ -57,6 +57,19 @@ export const DebtDetailsPage = () => {
     debt.minimum_payment : 
     convertCurrency(debt.minimum_payment, debt.currency_symbol, currencySymbol);
 
+  // Calculate amortization schedule with proper currency conversion
+  const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment);
+  // If not using original currency, convert all monetary values
+  const convertedAmortizationData = useOriginalCurrency 
+    ? amortizationData 
+    : amortizationData.map(row => ({
+        ...row,
+        payment: convertCurrency(row.payment, debt.currency_symbol, currencySymbol),
+        principalPayment: convertCurrency(row.principalPayment, debt.currency_symbol, currencySymbol),
+        interestPayment: convertCurrency(row.interestPayment, debt.currency_symbol, currencySymbol),
+        remainingBalance: convertCurrency(row.remainingBalance, debt.currency_symbol, currencySymbol)
+      }));
+
   useEffect(() => {
     const fetchPaymentHistory = async () => {
       if (!debt) return;
@@ -190,9 +203,14 @@ export const DebtDetailsPage = () => {
         <Separator className="my-8" />
 
         <AmortizationTable 
-          debt={debt} 
-          amortizationData={calculateAmortizationSchedule(debt, monthlyPayment)}
+          debt={{
+            ...debt,
+            balance: displayBalance,
+            minimum_payment: displayMinimumPayment
+          }}
+          amortizationData={convertedAmortizationData}
           currencySymbol={currencySymbol}
+          displayInitialBalance={useOriginalCurrency ? debt.balance : displayBalance}
         />
       </div>
     </MainLayout>
