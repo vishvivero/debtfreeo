@@ -1,3 +1,4 @@
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -12,6 +13,7 @@ import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import { useState } from "react";
 import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
+import { PaymentAllocator } from "@/lib/services/calculations/PaymentAllocator";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
@@ -78,6 +80,12 @@ export default function Strategy() {
   };
 
   const totalDebtValue = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  
+  // Calculate total minimum payments with currency conversion
+  const totalMinimumPayments = PaymentAllocator.calculateTotalMinimumPayments(
+    debts,
+    profile?.preferred_currency
+  );
 
   return (
     <MainLayout>
@@ -94,6 +102,7 @@ export default function Strategy() {
               onSelectStrategy={handleStrategyChange}
               preferredCurrency={profile?.preferred_currency}
               totalDebtValue={totalDebtValue}
+              totalMinimumPayments={totalMinimumPayments}
             />
           </DebtCalculationProvider>
         </div>

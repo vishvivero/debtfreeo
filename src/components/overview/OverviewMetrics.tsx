@@ -35,8 +35,33 @@ export const OverviewMetrics = () => {
     return sum + convertedAmount;
   }, 0) || 0;
   
-  const monthlyPayment = profile?.monthly_payment || 0;
-  const progress = totalDebt > 0 ? Math.round((monthlyPayment / totalDebt) * 100) : 0;
+  // Calculate total monthly payment with currency conversion
+  const totalMonthlyPayment = debts?.reduce((sum, debt) => {
+    // Convert to preferred currency if needed
+    const convertedAmount = convertCurrency(
+      debt.minimum_payment,
+      debt.currency_symbol,
+      preferredCurrency
+    );
+    
+    return sum + convertedAmount;
+  }, 0) || 0;
+  
+  const progress = totalDebt > 0 ? Math.round((totalMonthlyPayment / totalDebt) * 100) : 0;
+
+  console.log('Monthly payment calculations:', {
+    preferredCurrency,
+    totalMonthlyPayment,
+    payments: debts?.map(d => ({
+      name: d.name,
+      original: `${d.currency_symbol}${d.minimum_payment}`,
+      converted: `${preferredCurrency}${convertCurrency(
+        d.minimum_payment,
+        d.currency_symbol,
+        preferredCurrency
+      )}`
+    }))
+  });
 
   const cards = [
     {
@@ -50,11 +75,12 @@ export const OverviewMetrics = () => {
     },
     {
       title: "Monthly Payment",
-      value: `${preferredCurrency}${monthlyPayment.toLocaleString()}`,
+      value: `${preferredCurrency}${totalMonthlyPayment.toLocaleString()}`,
       icon: ArrowUpRight,
       bgColor: "bg-blue-50",
       iconColor: "text-blue-500",
-      hasTooltip: false
+      hasTooltip: true,
+      tooltipContent: "Total minimum payments converted to your preferred currency"
     },
     {
       title: "Debt Payment Progress",

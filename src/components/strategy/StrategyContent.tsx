@@ -26,6 +26,7 @@ interface StrategyContentProps {
   onSelectStrategy: (strategy: Strategy) => void;
   preferredCurrency?: string;
   totalDebtValue: number;
+  totalMinimumPayments?: number;
 }
 
 export const StrategyContent: React.FC<StrategyContentProps> = ({
@@ -35,7 +36,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   onDeleteDebt,
   onSelectStrategy: parentOnSelectStrategy,
   preferredCurrency,
-  totalDebtValue
+  totalDebtValue,
+  totalMinimumPayments
 }) => {
   const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
@@ -69,6 +71,19 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
       setShowOneTimeFunding(profile.show_lump_sum_payments || false);
     }
   }, [profile]);
+  
+  // Initialize minimum payment with currency-converted value
+  useEffect(() => {
+    if (totalMinimumPayments !== undefined) {
+      // Only update if minimumPayment doesn't match the calculated totalMinimumPayments
+      // Include a small epsilon to handle floating point comparison issues
+      const epsilon = 0.01;
+      if (Math.abs(minimumPayment - totalMinimumPayments) > epsilon) {
+        console.log('Updating minimum payment with currency-converted value:', totalMinimumPayments);
+        updateMonthlyPayment(totalMinimumPayments + extraPayment);
+      }
+    }
+  }, [totalMinimumPayments, debts]);
 
   const handleResultsClick = () => {
     setHasViewedResults(true);
@@ -172,9 +187,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             
             {showExtraPayment && (
               <PaymentOverviewSection
-                totalMinimumPayments={minimumPayment}
+                totalMinimumPayments={totalMinimumPayments || minimumPayment}
                 extraPayment={extraPayment}
-                onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
+                onExtraPaymentChange={amount => updateMonthlyPayment(amount + (totalMinimumPayments || minimumPayment))}
                 onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
                 currencySymbol={preferredCurrency}
                 totalDebtValue={totalDebtValue}

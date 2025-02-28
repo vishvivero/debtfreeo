@@ -15,7 +15,7 @@ interface EditDebtDialogProps {
 export const EditDebtDialog = ({ debt, isOpen, onClose }: EditDebtDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden">
+      <DialogContent className="sm:max-w-[550px] w-full p-0 bg-white rounded-xl overflow-hidden">
         <DialogHeader className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             <DialogTitle className="text-xl font-semibold text-gray-800">Edit Debt: {debt.name}</DialogTitle>
@@ -34,7 +34,7 @@ export const EditDebtDialog = ({ debt, isOpen, onClose }: EditDebtDialogProps) =
             </TooltipProvider>
           </div>
         </DialogHeader>
-        <div className="p-4">
+        <div className="p-0">
           <EditDebtForm debt={debt} onSubmit={onClose} />
         </div>
       </DialogContent>
