@@ -1,15 +1,22 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
+import { calculatePrincipal } from "@/components/debt/utils/debtPayoffCalculator";
 
 export const OverviewMetrics = () => {
   const { debts, profile, isLoading } = useDebts();
   
-  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
+  const totalDebt = debts?.reduce((sum, debt) => {
+    if (debt.metadata?.interest_included) {
+      const principal = calculatePrincipal(debt);
+      return sum + (principal !== null ? principal : debt.balance);
+    }
+    return sum + debt.balance;
+  }, 0) || 0;
+  
   const monthlyPayment = profile?.monthly_payment || 0;
   const progress = totalDebt > 0 ? Math.round((monthlyPayment / totalDebt) * 100) : 0;
   
@@ -43,7 +50,6 @@ export const OverviewMetrics = () => {
     return <div className="h-24 animate-pulse bg-gray-100 rounded-lg" />;
   }
 
-  // Hide KPI metrics when there are no debts
   if (!debts || debts.length === 0) {
     return null;
   }
@@ -73,4 +79,3 @@ export const OverviewMetrics = () => {
     </div>
   );
 };
-
