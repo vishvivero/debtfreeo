@@ -5,6 +5,21 @@ import { Strategy } from '@/lib/strategies';
 import { OneTimeFunding } from '@/lib/types/payment';
 import { useDebtCalculation } from '@/contexts/DebtCalculationContext';
 
+export interface TimelineResults {
+  baselineMonths: number;
+  acceleratedMonths: number;
+  baselineInterest: number;
+  acceleratedInterest: number;
+  monthsSaved: number;
+  interestSaved: number;
+  payoffDate: Date;
+  monthlyPayments: {
+    debtId: string;
+    amount: number;
+  }[];
+  originalCurrency: string;
+}
+
 export const useDebtTimeline = (
   debts: Debt[],
   monthlyPayment: number,
