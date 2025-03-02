@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Calendar, Crown, Info, ChevronDown, ChevronUp, HelpCircle, Wallet, Percent, DollarSign } from "lucide-react";
+import { CreditCard, Calendar, Info, DollarSign, Percent } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -24,6 +24,7 @@ import { InterestCalculator } from "@/lib/services/calculations/core/InterestCal
 import { countryCurrencies } from "@/lib/utils/currency-data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -34,6 +35,7 @@ export interface AddDebtFormProps {
 export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDebtFormProps) => {
   const { addDebt } = useDebts();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Credit Card");
   const [balance, setBalance] = useState("");
@@ -205,9 +207,9 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
     <form onSubmit={handleSubmit} className="flex flex-col">
       <div className="p-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="border-b">
-            <div className="px-4">
-              <TabsList className="h-12 bg-transparent space-x-5 p-0">
+          <div className={`border-b ${isMobile ? "overflow-x-auto" : ""}`}>
+            <div className={`${isMobile ? "px-2" : "px-4"}`}>
+              <TabsList className={`h-12 bg-transparent ${isMobile ? "space-x-2 w-full justify-start" : "space-x-5"} p-0`}>
                 <TabsTrigger 
                   value="basics" 
                   className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
@@ -216,7 +218,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                 </TabsTrigger>
                 <TabsTrigger 
                   value="advanced" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent whitespace-nowrap"
                 >
                   Advanced Settings
                 </TabsTrigger>
@@ -230,10 +232,10 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
             </div>
           </div>
 
-          <div className="p-4">
+          <div className={`${isMobile ? "p-3" : "p-4"}`}>
             <TabsContent value="basics" className="mt-0 space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Left Column */}
+              <div className={`${isMobile ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-4"}`}>
+                {/* Left Column or Full Width on Mobile */}
                 <div className="space-y-3">
                   {/* Debt Name */}
                   <div className="space-y-1">
@@ -252,7 +254,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Balance - Updated the label to "Current Outstanding Balance" */}
+                  {/* Balance */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Current Outstanding Balance *</Label>
                     <div className="relative">
@@ -272,14 +274,14 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Debt Category - Removed the duplicated label */}
+                  {/* Debt Category - Mobile Only Shows Categories Here */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Debt Category</Label>
                     <DebtCategorySelect value={category} onChange={setCategory} />
                   </div>
                 </div>
 
-                {/* Right Column */}
+                {/* Right Column or Second Part of Mobile View */}
                 <div className="space-y-3">
                   {/* Interest Rate */}
                   <div className="space-y-1">
@@ -303,7 +305,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Minimum Payment - Updated to "Minimum Payment/EMI" */}
+                  {/* Minimum Payment */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Minimum Payment/EMI *</Label>
                     <div className="relative">
@@ -351,7 +353,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
             <TabsContent value="advanced" className="mt-0 space-y-3">
               <div className="space-y-4">
                 {/* Interest Already Included */}
-                <div className="p-3 border rounded-md bg-gray-50">
+                <div className={`${isMobile ? "p-2" : "p-3"} border rounded-md bg-gray-50`}>
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <Label className="text-sm font-medium">
@@ -433,7 +435,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                 </div>
                 
                 {/* Calculate Interest from Remaining Months */}
-                <div className="p-3 border rounded-md bg-gray-50">
+                <div className={`${isMobile ? "p-2" : "p-3"} border rounded-md bg-gray-50`}>
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <Label className="text-sm font-medium">
@@ -511,7 +513,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
 
             <TabsContent value="currency" className="mt-0">
               <div className="space-y-4">
-                <div className="p-4 border rounded-md bg-gray-50">
+                <div className={`${isMobile ? "p-3" : "p-4"} border rounded-md bg-gray-50`}>
                   <div className="flex items-center mb-3">
                     <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
                     <h3 className="text-base font-semibold">Select Currency</h3>
