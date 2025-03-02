@@ -577,7 +577,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         </Button>
         <Button 
           type="submit" 
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6"
+          className="bg-emerald-500 hover:bg-emerald-600 text-white px-6"
         >
           Add Debt
         </Button>

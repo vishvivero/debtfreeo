@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
@@ -102,7 +101,7 @@ const DebtList = () => {
                 {isMobile ? (
                   <Button 
                     onClick={() => document.getElementById("add-debt-trigger")?.click()}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center"
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add New Debt
