@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -272,84 +273,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       />
                     </div>
                   </div>
-                  
-                  {/* Interest Already Included Switch - New Addition */}
-                  <div className="flex items-center justify-between p-2 bg-blue-50 rounded-md border border-blue-100">
-                    <div>
-                      <Label htmlFor="interest-included" className="text-sm font-medium text-gray-700 cursor-pointer">
-                        Interest Already Included in Balance
-                      </Label>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <Info className="h-3.5 w-3.5 text-blue-500" />
-                        <p className="text-xs text-gray-600">Total balance includes future interest</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="interest-included"
-                        checked={isInterestIncluded}
-                        onCheckedChange={(checked) => {
-                          setIsInterestIncluded(checked);
-                          if (checked) {
-                            setUseRemainingMonths(false);
-                            setActiveTab("basics");
-                            if (!remainingMonths) {
-                              setRemainingMonths("12");
-                            }
-                          } else {
-                            setUsePrincipalAsBalance(false);
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Months field that appears when interest is included */}
-                  {isInterestIncluded && (
-                    <div className="space-y-1">
-                      <Label className="text-gray-700 text-sm">Months Until Payoff *</Label>
-                      <Input
-                        type="number"
-                        value={remainingMonths}
-                        onChange={(e) => setRemainingMonths(e.target.value)}
-                        className="border-gray-300 h-9"
-                        placeholder="36"
-                        required={isInterestIncluded}
-                        min="1"
-                      />
-                      
-                      {/* Principal calculation result */}
-                      {balance && minimumPayment && remainingMonths && interestRate && calculatedPrincipal !== null && (
-                        <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md text-xs">
-                          <div className="grid grid-cols-2 gap-1">
-                            <div>
-                              <p className="text-xs font-medium text-blue-800">Principal:</p>
-                              <p className="text-xs text-blue-600">
-                                {selectedCurrency}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-blue-800">Interest Amount:</p>
-                              <p className="text-xs text-blue-600">
-                                {selectedCurrency}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-2 flex items-center justify-between">
-                            <Label className="text-xs font-medium text-blue-800">
-                              Use principal as balance
-                            </Label>
-                            <Switch
-                              checked={usePrincipalAsBalance}
-                              onCheckedChange={setUsePrincipalAsBalance}
-                              size="sm"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* Debt Category - Mobile Only Shows Categories Here */}
                   <div className="space-y-1">
@@ -428,7 +351,89 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
             </TabsContent>
 
             <TabsContent value="advanced" className="mt-0 space-y-3">
-              <div className="space-y-4">                
+              <div className="space-y-4">
+                {/* Interest Already Included */}
+                <div className={`${isMobile ? "p-2" : "p-3"} border rounded-md bg-gray-50`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Interest Already Included in Balance
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enable if total balance includes future interest
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <Label className="mr-2 text-xs">
+                        {isInterestIncluded ? "On" : "Off"}
+                      </Label>
+                      <Switch
+                        checked={isInterestIncluded}
+                        onCheckedChange={(checked) => {
+                          setIsInterestIncluded(checked);
+                          if (checked) {
+                            setUseRemainingMonths(false);
+                            if (!remainingMonths) {
+                              setRemainingMonths("12");
+                            }
+                          } else {
+                            setUsePrincipalAsBalance(false);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {isInterestIncluded && (
+                    <div className="mt-3">
+                      <Label className="text-xs font-medium">Months Until Payoff</Label>
+                      <Input
+                        type="number"
+                        value={remainingMonths}
+                        onChange={(e) => setRemainingMonths(e.target.value)}
+                        placeholder="36"
+                        className="mt-1 text-xs h-8"
+                        min="1"
+                        required={isInterestIncluded}
+                      />
+                      
+                      {balance && minimumPayment && remainingMonths && interestRate && (
+                        <div className="mt-2 p-2 bg-blue-50 border border-blue-100 rounded-md text-xs">
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                            {calculatedPrincipal !== null && (
+                              <>
+                                <div>
+                                  <p className="text-xs font-medium text-blue-800">Principal:</p>
+                                  <p className="text-xs text-blue-600">
+                                    {selectedCurrency}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium text-blue-800">Interest Amount:</p>
+                                  <p className="text-xs text-blue-600">
+                                    {selectedCurrency}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          
+                          <div className="mt-2 flex items-center justify-between">
+                            <Label className="text-xs font-medium text-blue-800">
+                              Use principal as balance
+                            </Label>
+                            <Switch
+                              checked={usePrincipalAsBalance}
+                              onCheckedChange={setUsePrincipalAsBalance}
+                              size="sm"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
                 {/* Calculate Interest from Remaining Months */}
                 <div className={`${isMobile ? "p-2" : "p-3"} border rounded-md bg-gray-50`}>
                   <div className="flex justify-between items-start mb-2">
