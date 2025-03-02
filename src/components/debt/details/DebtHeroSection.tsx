@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { DollarSign, Calendar, Tag, Info } from "lucide-react";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface DebtHeroSectionProps {
   debt: Debt;

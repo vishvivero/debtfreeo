@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
@@ -166,11 +165,7 @@ export const DebtDetailsPage = () => {
         </div>
 
         <DebtHeroSection 
-          debt={{
-            ...debt,
-            balance: displayBalance,
-            minimum_payment: displayMinimumPayment
-          }}
+          debt={debt}
           totalPaid={totalPaid}
           payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
