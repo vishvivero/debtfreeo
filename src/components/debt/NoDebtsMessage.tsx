@@ -7,11 +7,13 @@ import { useDebts } from "@/hooks/use-debts";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import type { Debt } from "@/lib/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const NoDebtsMessage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { addDebt, profile } = useDebts();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     try {
@@ -39,20 +41,20 @@ export const NoDebtsMessage = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-center space-y-6 py-8"
+      className="text-center space-y-4 sm:space-y-6 py-4 sm:py-8"
     >
       <div onClick={handleIconClick} className="cursor-pointer">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="inline-block p-4 bg-emerald-50 rounded-full mb-2"
+          className="inline-block p-3 sm:p-4 bg-emerald-50 rounded-full mb-2"
         >
-          <Plus className="w-12 h-12 text-emerald-600" />
+          <Plus className={`${isMobile ? "w-8 h-8" : "w-12 h-12"} text-emerald-600`} />
         </motion.div>
-        <h2 className="text-2xl font-bold text-gray-900">No Debts Added Yet!</h2>
+        <h2 className={`${isMobile ? "text-xl" : "text-2xl"} font-bold text-gray-900`}>No Debts Added Yet!</h2>
       </div>
       
-      <p className="text-gray-600 max-w-md mx-auto">
+      <p className="text-gray-600 max-w-md mx-auto text-sm sm:text-base">
         Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
       </p>
       

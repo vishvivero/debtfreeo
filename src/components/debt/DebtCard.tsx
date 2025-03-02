@@ -10,6 +10,7 @@ import { DebtCardProgress } from "./card/DebtCardProgress";
 import { useDebtPaymentHistory } from "@/hooks/use-debt-payment-history";
 import { calculatePayoffDetails } from "./utils/debtPayoffCalculator";
 import { Card } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DebtCardProps {
   debt: Debt;
@@ -25,6 +26,7 @@ export const DebtCard = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { totalPaid } = useDebtPaymentHistory(debt);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,8 +42,8 @@ export const DebtCard = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="p-4 hover:shadow-md transition-shadow">
-          <div className="space-y-3">
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="space-y-2 sm:space-y-3">
             <DebtCardHeader 
               debt={debt} 
               onDelete={onDelete} 
@@ -54,6 +56,7 @@ export const DebtCard = ({
               progressPercentage={payoffDetails.progressPercentage} 
               onViewDetails={handleViewDetails}
               payoffTime={payoffDetails.formattedTime}
+              isMobile={isMobile}
             />
           </div>
         </Card>

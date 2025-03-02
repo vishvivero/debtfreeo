@@ -2,6 +2,7 @@
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DebtCardHeaderProps {
   debt: Debt;
@@ -14,9 +15,11 @@ export const DebtCardHeader = ({
   onDelete, 
   onEdit 
 }: DebtCardHeaderProps) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="flex justify-between items-center">
-      <h3 className="text-xl font-bold text-gray-900 truncate">{debt.name}</h3>
+      <h3 className={`${isMobile ? "text-lg" : "text-xl"} font-bold text-gray-900 truncate`}>{debt.name}</h3>
       <div className="flex gap-1">
         <Button
           variant="ghost"

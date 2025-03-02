@@ -9,10 +9,14 @@ import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import type { Debt } from "@/lib/types";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
@@ -28,14 +32,14 @@ const DebtList = () => {
     return (
       <MainLayout>
         <div className="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
-          <div className="container py-8">
-            <div className="flex justify-between items-center mb-8">
+          <div className="container py-4 sm:py-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-8 gap-2">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
-                <p className="text-gray-600 mt-1">Track and manage all your debts in one place</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Debt Management</h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">Track and manage all your debts in one place</p>
               </div>
             </div>
-            <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+            <div className="glassmorphism rounded-xl p-4 sm:p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
               <NoDebtsMessage />
             </div>
           </div>
@@ -71,11 +75,11 @@ const DebtList = () => {
   return (
     <MainLayout>
       <div className="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
-        <div className="container py-8">
-          <div className="flex justify-between items-center mb-8">
+        <div className="container py-4 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-8 gap-2">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
-              <p className="text-gray-600 mt-1">Track and manage all your debts in one place</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Debt Management</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Track and manage all your debts in one place</p>
             </div>
           </div>
 
@@ -85,27 +89,46 @@ const DebtList = () => {
             transition={{ delay: 0.2 }}
             className="w-full"
           >
-            <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
-              <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="glassmorphism rounded-xl p-4 sm:p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+              <div className={`${isMobile ? "flex flex-col gap-3" : "flex items-center justify-between gap-4"} mb-6`}>
                 <Input
                   type="search"
                   placeholder="Search debts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-sm"
+                  className={isMobile ? "w-full" : "max-w-sm"}
                 />
-                <AddDebtDialog 
-                  onAddDebt={addDebt.mutateAsync} 
-                  currencySymbol={profile?.preferred_currency || '£'} 
-                />
+                
+                {isMobile ? (
+                  <Button 
+                    onClick={() => document.getElementById("add-debt-trigger")?.click()}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Debt
+                  </Button>
+                ) : (
+                  <AddDebtDialog 
+                    onAddDebt={addDebt.mutateAsync} 
+                    currencySymbol={profile?.preferred_currency || '£'} 
+                  />
+                )}
+                
+                {/* Hidden trigger for mobile */}
+                <span id="add-debt-trigger" className="hidden">
+                  <AddDebtDialog 
+                    onAddDebt={addDebt.mutateAsync} 
+                    currencySymbol={profile?.preferred_currency || '£'} 
+                  />
+                </span>
               </div>
 
               <Tabs defaultValue="active" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="active">
+                <TabsList className={`mb-4 ${isMobile ? "w-full" : ""}`}>
+                  <TabsTrigger value="active" className={isMobile ? "flex-1" : ""}>
                     Active Debts ({activeDebts.length})
                   </TabsTrigger>
-                  <TabsTrigger value="completed">
+                  <TabsTrigger value="completed" className={isMobile ? "flex-1" : ""}>
                     Completed ({completedDebts.length})
                   </TabsTrigger>
                 </TabsList>
