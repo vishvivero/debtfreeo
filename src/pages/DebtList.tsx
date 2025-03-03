@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
+  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -100,7 +102,7 @@ const DebtList = () => {
                 
                 {isMobile ? (
                   <Button 
-                    onClick={() => document.getElementById("add-debt-trigger")?.click()}
+                    onClick={() => setIsAddDebtOpen(true)}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -113,13 +115,15 @@ const DebtList = () => {
                   />
                 )}
                 
-                {/* Hidden trigger for mobile */}
-                <span id="add-debt-trigger" className="hidden">
+                {/* Mobile dialog */}
+                {isMobile && (
                   <AddDebtDialog 
+                    isOpen={isAddDebtOpen}
+                    onClose={() => setIsAddDebtOpen(false)}
                     onAddDebt={addDebt.mutateAsync} 
                     currencySymbol={profile?.preferred_currency || '£'} 
                   />
-                </span>
+                )}
               </div>
 
               <Tabs defaultValue="active" className="w-full">
