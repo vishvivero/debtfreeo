@@ -28,6 +28,10 @@ export const DebtCard = ({ debt, onDelete, calculatePayoffYears }: DebtCardProps
     navigate(`/overview/debt/${debt.id}`);
   };
   
+  // Calculate progress percentage
+  const progressPercentage = 0; // This should be calculated based on debt payment history
+  const payoffTime = calculatePayoffYears(debt);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -52,7 +56,12 @@ export const DebtCard = ({ debt, onDelete, calculatePayoffYears }: DebtCardProps
           
           {/* Show progress bar if debt is active and has some minimum payment */}
           {debt.status === 'active' && debt.minimum_payment > 0 && (
-            <DebtCardProgress debt={debt} />
+            <DebtCardProgress 
+              debt={debt}
+              progressPercentage={progressPercentage}
+              payoffTime={payoffTime}
+              onViewDetails={handleViewDetails}
+            />
           )}
           
           <CollapsibleTrigger className="w-full flex items-center justify-center py-1 hover:bg-gray-50 text-gray-500">

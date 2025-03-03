@@ -6,9 +6,12 @@ import { Info } from "lucide-react";
 
 interface DebtCardDetailsProps {
   debt: Debt;
+  calculatePayoffYears: (debt: Debt) => string;
+  onViewDetails?: () => void;
+  isExpanded?: boolean;
 }
 
-export const DebtCardDetails = ({ debt }: DebtCardDetailsProps) => {
+export const DebtCardDetails = ({ debt, calculatePayoffYears, onViewDetails, isExpanded }: DebtCardDetailsProps) => {
   // Check if this is a debt with interest included
   const isInterestIncluded = debt.metadata?.interest_included === true;
   const originalRate = debt.metadata?.original_rate || debt.interest_rate;
