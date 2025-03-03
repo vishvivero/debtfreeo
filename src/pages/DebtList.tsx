@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
+  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -37,6 +39,12 @@ const DebtList = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Debt Management</h1>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">Track and manage all your debts in one place</p>
               </div>
+              <AddDebtDialog 
+                onAddDebt={addDebt.mutateAsync} 
+                currencySymbol={profile?.preferred_currency || '£'}
+                isOpen={isAddDebtOpen}
+                onClose={() => setIsAddDebtOpen(false)}
+              />
             </div>
             <div className="glassmorphism rounded-xl p-4 sm:p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
               <NoDebtsMessage />
@@ -100,7 +108,7 @@ const DebtList = () => {
                 
                 {isMobile ? (
                   <Button 
-                    onClick={() => document.getElementById("add-debt-trigger")?.click()}
+                    onClick={() => setIsAddDebtOpen(true)}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -113,13 +121,15 @@ const DebtList = () => {
                   />
                 )}
                 
-                {/* Hidden trigger for mobile */}
-                <span id="add-debt-trigger" className="hidden">
+                {/* Hidden dialog for mobile */}
+                {isMobile && (
                   <AddDebtDialog 
                     onAddDebt={addDebt.mutateAsync} 
-                    currencySymbol={profile?.preferred_currency || '£'} 
+                    currencySymbol={profile?.preferred_currency || '£'}
+                    isOpen={isAddDebtOpen}
+                    onClose={() => setIsAddDebtOpen(false)}
                   />
-                </span>
+                )}
               </div>
 
               <Tabs defaultValue="active" className="w-full">
