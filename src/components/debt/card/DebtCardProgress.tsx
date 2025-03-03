@@ -3,21 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronRight, AlarmClock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Debt } from "@/lib/types/debt";
 
 interface DebtCardProgressProps {
-  debt: Debt;
-  progressPercentage?: number;
-  onViewDetails?: (e: React.MouseEvent) => void;
-  payoffTime?: string;
+  progressPercentage: number;
+  onViewDetails: (e: React.MouseEvent) => void;
+  payoffTime: string;
   isMobile?: boolean;
 }
 
 export const DebtCardProgress = ({ 
-  debt,
-  progressPercentage = 0, 
-  onViewDetails = () => {},
-  payoffTime = "Unknown",
+  progressPercentage, 
+  onViewDetails,
+  payoffTime,
   isMobile = false
 }: DebtCardProgressProps) => {
   return (

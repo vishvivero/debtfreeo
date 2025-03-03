@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -66,7 +65,7 @@ export const AddDebtDialog = ({
     return (
       <Sheet>
         <SheetTrigger asChild>
-          <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
+          <Button className="bg-[#34D399] hover:bg-[#10B981] text-white">
             <Plus className="mr-2 h-4 w-4" /> Add
           </Button>
         </SheetTrigger>
@@ -92,9 +91,9 @@ export const AddDebtDialog = ({
     );
   }
 
-  // For desktop, use the original Dialog with updated styling
+  // For desktop, use the original Dialog
   const dialogContent = (
-    <DialogContent className="sm:max-w-[500px] p-0 bg-white rounded-xl overflow-hidden">
+    <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden">
       <DialogHeader className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
           <DialogTitle className="text-xl font-semibold text-gray-800">Add New Debt</DialogTitle>
@@ -127,7 +126,7 @@ export const AddDebtDialog = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
+        <Button className="bg-[#34D399] hover:bg-[#10B981] text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
         </Button>
       </DialogTrigger>

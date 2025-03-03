@@ -1,16 +1,16 @@
 
-import { useState } from "react";
 import { Debt } from "@/lib/types/debt";
-import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { EditDebtDialog } from "./EditDebtDialog";
 import { DebtCardHeader } from "./card/DebtCardHeader";
 import { DebtCardDetails } from "./card/DebtCardDetails";
 import { DebtCardProgress } from "./card/DebtCardProgress";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { EditDebtDialog } from "./EditDebtDialog";
-import { motion } from "framer-motion";
-import { useDebtMutations } from "@/hooks/use-debt-mutations";
+import { useDebtPaymentHistory } from "@/hooks/use-debt-payment-history";
+import { calculatePayoffDetails } from "./utils/debtPayoffCalculator";
+import { Card } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DebtCardProps {
   debt: Debt;
@@ -18,68 +18,55 @@ interface DebtCardProps {
   calculatePayoffYears: (debt: Debt) => string;
 }
 
-export const DebtCard = ({ debt, onDelete, calculatePayoffYears }: DebtCardProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const DebtCard = ({
+  debt,
+  onDelete,
+  calculatePayoffYears
+}: DebtCardProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { totalPaid } = useDebtPaymentHistory(debt);
   const navigate = useNavigate();
-  const { updateDebt } = useDebtMutations();
+  const isMobile = useIsMobile();
 
-  const handleViewDetails = () => {
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.scrollTo(0, 0);
     navigate(`/overview/debt/${debt.id}`);
   };
-  
-  // Calculate progress percentage
-  const progressPercentage = 0; // This should be calculated based on debt payment history
-  const payoffTime = calculatePayoffYears(debt);
-  
+
+  const payoffDetails = calculatePayoffDetails(debt, totalPaid);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 bg-white border border-gray-100">
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <DebtCardHeader 
-            debt={debt} 
-            onEdit={() => setIsEditDialogOpen(true)}
-            onDelete={() => onDelete(debt.id)}
-          />
-          
-          <DebtCardDetails 
-            debt={debt}
-            calculatePayoffYears={calculatePayoffYears}
-            onViewDetails={handleViewDetails}
-            isExpanded={isOpen}
-          />
-          
-          {/* Show progress bar if debt is active and has some minimum payment */}
-          {debt.status === 'active' && debt.minimum_payment > 0 && (
-            <DebtCardProgress 
-              debt={debt}
-              progressPercentage={progressPercentage}
-              payoffTime={payoffTime}
-              onViewDetails={handleViewDetails}
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="space-y-2 sm:space-y-3">
+            <DebtCardHeader 
+              debt={debt} 
+              onDelete={onDelete} 
+              onEdit={() => setIsEditDialogOpen(true)} 
             />
-          )}
-          
-          <CollapsibleTrigger className="w-full flex items-center justify-center py-1 hover:bg-gray-50 text-gray-500">
-            {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </CollapsibleTrigger>
-          
-          <CollapsibleContent>
-            {/* Additional content when expanded */}
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
-      
-      {/* Edit Debt Dialog */}
+            
+            <DebtCardDetails debt={debt} />
+            
+            <DebtCardProgress 
+              progressPercentage={payoffDetails.progressPercentage} 
+              onViewDetails={handleViewDetails}
+              payoffTime={payoffDetails.formattedTime}
+              isMobile={isMobile}
+            />
+          </div>
+        </Card>
+      </motion.div>
+
       <EditDebtDialog 
-        debt={debt} 
-        isOpen={isEditDialogOpen} 
-        onClose={() => setIsEditDialogOpen(false)} 
+        debt={debt}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
       />
-    </motion.div>
+    </>
   );
 };
