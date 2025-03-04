@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { DollarSign, Calendar, Tag, Info } from "lucide-react";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface DebtHeroSectionProps {
   debt: Debt;
@@ -23,6 +24,8 @@ export const DebtHeroSection = ({
   currencySymbol, 
   isOriginalCurrency = false 
 }: DebtHeroSectionProps) => {
+  const { getCurrencyDisplayInfo } = useCurrency();
+  
   // Calculate progress percentage based on total paid vs current balance
   const totalAmount = totalPaid + debt.balance;
   const progressPercentage = totalAmount > 0 
@@ -50,7 +53,8 @@ export const DebtHeroSection = ({
     progressPercentage,
     isInterestIncluded,
     calculatedPrincipal,
-    isOriginalCurrency
+    isOriginalCurrency,
+    currencySymbol
   });
 
   // Determine what to display as the balance
@@ -58,6 +62,13 @@ export const DebtHeroSection = ({
     ? calculatedPrincipal 
     : debt.balance;
 
+  // Get currency display info
+  const balanceInfo = getCurrencyDisplayInfo(displayBalance, debt.currency_symbol);
+  
+  // Use either the original or converted value based on isOriginalCurrency
+  const balanceToShow = isOriginalCurrency ? displayBalance : balanceInfo.convertedAmount;
+  const currencyToShow = isOriginalCurrency ? debt.currency_symbol : currencySymbol;
+  
   // Get original currency symbol from the debt object
   const originalCurrencySymbol = debt.currency_symbol;
 
@@ -92,7 +103,7 @@ export const DebtHeroSection = ({
                         <TooltipContent className="bg-white">
                           <p className="text-sm">
                             {isInterestIncluded 
-                              ? `Showing principal amount only (total with interest: ${currencySymbol}${debt.balance.toLocaleString()})` 
+                              ? `Showing principal amount only (total with interest: ${currencyToShow}${debt.balance.toLocaleString()})` 
                               : 'Current outstanding balance'
                             }
                           </p>
@@ -102,14 +113,14 @@ export const DebtHeroSection = ({
                   )}
                 </div>
                 <p className="text-lg font-semibold">
-                  {currencySymbol}{displayBalance.toLocaleString()}
+                  {currencyToShow}{balanceToShow.toLocaleString()}
                 </p>
                 {isInterestIncluded && calculatedPrincipal && (
                   <span className="text-xs text-blue-600">
                     Principal only (interest excluded)
                   </span>
                 )}
-                {!isOriginalCurrency && (
+                {!isOriginalCurrency && originalCurrencySymbol !== currencySymbol && (
                   <span className="text-xs text-gray-500 block">
                     Original: {originalCurrencySymbol}{debt.balance.toLocaleString()}
                   </span>

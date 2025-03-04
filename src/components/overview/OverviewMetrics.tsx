@@ -1,19 +1,17 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, ArrowUpRight, LineChart, Info } from "lucide-react";
+import { CreditCard, ArrowUpRight, LineChart } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import { calculatePrincipal } from "@/components/debt/utils/debtPayoffCalculator";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 
 export const OverviewMetrics = () => {
-  const { debts, profile, isLoading } = useDebts();
-  
-  const preferredCurrency = profile?.preferred_currency || "$";
+  const { debts, isLoading } = useDebts();
+  const { preferredCurrency, convertToPreferredCurrency } = useCurrency();
   
   // Calculate total debt with currency conversion
   const totalDebt = debts?.reduce((sum, debt) => {
@@ -26,10 +24,9 @@ export const OverviewMetrics = () => {
     }
     
     // Convert to preferred currency if needed
-    const convertedAmount = convertCurrency(
+    const convertedAmount = convertToPreferredCurrency(
       debtAmount,
-      debt.currency_symbol,
-      preferredCurrency
+      debt.currency_symbol
     );
     
     return sum + convertedAmount;
@@ -38,10 +35,9 @@ export const OverviewMetrics = () => {
   // Calculate total monthly payment with currency conversion
   const totalMonthlyPayment = debts?.reduce((sum, debt) => {
     // Convert to preferred currency if needed
-    const convertedAmount = convertCurrency(
+    const convertedAmount = convertToPreferredCurrency(
       debt.minimum_payment,
-      debt.currency_symbol,
-      preferredCurrency
+      debt.currency_symbol
     );
     
     return sum + convertedAmount;
@@ -55,10 +51,9 @@ export const OverviewMetrics = () => {
     payments: debts?.map(d => ({
       name: d.name,
       original: `${d.currency_symbol}${d.minimum_payment}`,
-      converted: `${preferredCurrency}${convertCurrency(
+      converted: `${preferredCurrency}${convertToPreferredCurrency(
         d.minimum_payment,
-        d.currency_symbol,
-        preferredCurrency
+        d.currency_symbol
       )}`
     }))
   });

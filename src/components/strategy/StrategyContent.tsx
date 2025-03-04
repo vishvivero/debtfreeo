@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
@@ -17,6 +16,7 @@ import { DecimalToggle } from "@/components/DecimalToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -54,8 +54,10 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
   const navigate = useNavigate();
   const [extraPayment, setExtraPayment] = useState(Math.max(0, currentPayment - minimumPayment));
+  const { preferredCurrency: currencyFromHook } = useCurrency();
 
-  // Initialize strategy from profile only once when component mounts
+  const effectiveCurrency = preferredCurrency || currencyFromHook;
+
   useEffect(() => {
     if (profile?.selected_strategy) {
       const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
@@ -65,9 +67,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         parentOnSelectStrategy(savedStrategy);
       }
     }
-  }, [profile?.selected_strategy]); // Only depend on profile.selected_strategy
+  }, [profile?.selected_strategy]);
 
-  // Initialize UI preferences from profile
   useEffect(() => {
     if (profile) {
       setShowExtraPayment(profile.show_extra_payments || false);
@@ -75,7 +76,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     }
   }, [profile]);
 
-  // Set extraPayment from props
   useEffect(() => {
     setExtraPayment(Math.max(0, currentPayment - minimumPayment));
   }, [currentPayment, minimumPayment]);
@@ -160,7 +160,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     updateMonthlyPayment(amount + minimumPayment);
   };
 
-  // Get the active one-time fundings based on the toggle state
   const getActiveOneTimeFundings = () => {
     return showOneTimeFunding ? oneTimeFundings : [];
   };
@@ -191,7 +190,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
                 extraPayment={extraPayment}
                 onExtraPaymentChange={handleExtraPaymentChange}
                 onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
-                currencySymbol={preferredCurrency}
+                currencySymbol={effectiveCurrency}
                 totalDebtValue={totalDebtValue}
               />
             )}
@@ -265,7 +264,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         extraPayment={extraPayment}
         oneTimeFundings={getActiveOneTimeFundings()}
         selectedStrategy={selectedStrategy}
-        currencySymbol={preferredCurrency}
+        currencySymbol={effectiveCurrency}
       />
     </div>
   );

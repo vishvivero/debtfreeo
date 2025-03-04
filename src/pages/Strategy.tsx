@@ -14,6 +14,7 @@ import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import { useState, useEffect } from "react";
 import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
+import { useCurrency } from "@/hooks/use-currency";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
@@ -21,6 +22,7 @@ export default function Strategy() {
   const { oneTimeFundings } = useOneTimeFunding();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   const { currentPayment, minimumPayment } = useMonthlyPayment();
+  const { preferredCurrency } = useCurrency();
   
   const isLoading = isDebtsLoading || isProfileLoading;
 
@@ -105,7 +107,7 @@ export default function Strategy() {
               onUpdateDebt={handleDebtUpdate}
               onDeleteDebt={handleDebtDelete}
               onSelectStrategy={handleStrategyChange}
-              preferredCurrency={profile?.preferred_currency}
+              preferredCurrency={preferredCurrency}
               totalDebtValue={totalDebtValue}
               currentPayment={currentPayment}
               minimumPayment={minimumPayment}
