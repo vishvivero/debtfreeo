@@ -24,7 +24,6 @@ export function useCurrency() {
       return amount;
     }
     
-    console.log(`Converting ${fromCurrency}${amount} to ${preferredCurrency}`);
     return convertCurrency(amount, fromCurrency, preferredCurrency);
   };
   
