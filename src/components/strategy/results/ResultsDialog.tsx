@@ -36,7 +36,6 @@ export const ResultsDialog = ({
   const { toast } = useToast();
   const [showTimeline, setShowTimeline] = useState(false);
 
-  // Trigger confetti on dialog open
   if (isOpen) {
     confetti({
       particleCount: 100,
@@ -162,7 +161,6 @@ export const ResultsDialog = ({
               monthlyPayment={monthlyPayment}
               strategy={selectedStrategy}
               oneTimeFundings={oneTimeFundings}
-              currencySymbol={currencySymbol}
             />
           </motion.div>
 

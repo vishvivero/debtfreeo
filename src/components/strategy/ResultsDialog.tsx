@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Sparkles, DollarSign, Clock, Calendar, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight } from "lucide-react";
@@ -257,7 +256,12 @@ export const ResultsDialog = ({
             }} transition={{
               delay: 0.4
             }}>
-                  <PaymentComparison debts={debts} monthlyPayment={monthlyPayment} strategy={selectedStrategy} oneTimeFundings={oneTimeFundings} currencySymbol={currencySymbol} />
+                  <PaymentComparison 
+                    debts={debts} 
+                    monthlyPayment={monthlyPayment} 
+                    strategy={selectedStrategy} 
+                    oneTimeFundings={oneTimeFundings} 
+                  />
                 </motion.div>
 
                 {/* Only show one-time payment information if they are enabled */}
