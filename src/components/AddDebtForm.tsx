@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,14 +45,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
   const [activeTab, setActiveTab] = useState("basics");
   const [selectedCurrency, setSelectedCurrency] = useState(currencySymbol);
   
-  // Advanced options
   const [isInterestIncluded, setIsInterestIncluded] = useState(false);
   const [remainingMonths, setRemainingMonths] = useState("");
   const [useRemainingMonths, setUseRemainingMonths] = useState(false);
   const [calculatedPrincipal, setCalculatedPrincipal] = useState<number | null>(null);
   const [usePrincipalAsBalance, setUsePrincipalAsBalance] = useState(false);
   
-  // Calculate the original principal when interest is included
   useEffect(() => {
     if (isInterestIncluded && remainingMonths && balance && minimumPayment && interestRate) {
       const principal = InterestCalculator.calculatePrincipalFromTotal(
@@ -64,7 +61,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
       );
       setCalculatedPrincipal(principal);
       
-      // If usePrincipalAsBalance is enabled, update the balance field
       if (usePrincipalAsBalance) {
         setBalance(principal.toFixed(2));
       }
@@ -73,7 +69,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
     }
   }, [isInterestIncluded, remainingMonths, balance, minimumPayment, interestRate, usePrincipalAsBalance]);
 
-  // Calculate estimated interest rate if possible
   const estimatedInterestRate = useRemainingMonths && balance && minimumPayment && remainingMonths ? 
     calculateEstimatedInterestRate(
       Number(balance), 
@@ -85,15 +80,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
     e.preventDefault();
     
     try {
-      // Calculate final interest rate based on advanced settings
       let finalInterestRate = Number(interestRate);
       
-      // If using remaining months to calculate interest
       if (useRemainingMonths && estimatedInterestRate !== null) {
         finalInterestRate = estimatedInterestRate;
       }
       
-      // Determine the final balance to use (either original or principal)
       const finalBalance = usePrincipalAsBalance && calculatedPrincipal !== null
         ? calculatedPrincipal
         : Number(balance);
@@ -108,7 +100,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         next_payment_date: date.toISOString(),
         category,
         status: 'active' as const,
-        // Add metadata for these special cases
         metadata: {
           interest_included: isInterestIncluded,
           remaining_months: (isInterestIncluded || useRemainingMonths) ? Number(remainingMonths) : null,
@@ -129,7 +120,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         description: "Debt added successfully",
       });
 
-      // Reset form fields
       setName("");
       setCategory("Credit Card");
       setBalance("");
@@ -142,7 +132,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
       setUseRemainingMonths(false);
       setUsePrincipalAsBalance(false);
       
-      // Close the dialog if onClose is provided
       if (onClose) {
         onClose();
       }
@@ -156,7 +145,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
     }
   };
 
-  // Calculate estimated interest rate based on loan amount, payment and months
   function calculateEstimatedInterestRate(
     principal: number, 
     monthlyPayment: number, 
@@ -166,7 +154,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
       return null;
     }
 
-    // Simple estimation using trial and error approach
     let rate = 5.0;
     const maxIterations = 100;
     const tolerance = 0.01;
@@ -183,14 +170,12 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         break;
       }
       
-      // Adjust rate based on the difference
       if (diff > 0) {
         rate -= 0.1;
       } else {
         rate += 0.1;
       }
       
-      // Ensure rate stays reasonable
       if (rate < 0) rate = 0;
       if (rate > 100) rate = 100;
     }
@@ -198,7 +183,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
     return parseFloat(rate.toFixed(2));
   }
 
-  // Format date for input value
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
@@ -212,19 +196,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
               <TabsList className={`h-12 bg-transparent ${isMobile ? "space-x-2 w-full justify-start" : "space-x-5"} p-0`}>
                 <TabsTrigger 
                   value="basics" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:text-emerald-600 rounded-none h-12 px-1 bg-transparent"
                 >
                   Basic Info
                 </TabsTrigger>
                 <TabsTrigger 
                   value="advanced" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent whitespace-nowrap"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:text-emerald-600 rounded-none h-12 px-1 bg-transparent whitespace-nowrap"
                 >
                   Advanced Settings
                 </TabsTrigger>
                 <TabsTrigger 
                   value="currency" 
-                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none h-12 px-1 bg-transparent"
+                  className="text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:text-emerald-600 rounded-none h-12 px-1 bg-transparent"
                 >
                   Currency
                 </TabsTrigger>
@@ -235,9 +219,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
           <div className={`${isMobile ? "p-3" : "p-4"}`}>
             <TabsContent value="basics" className="mt-0 space-y-3">
               <div className={`${isMobile ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-4"}`}>
-                {/* Left Column or Full Width on Mobile */}
                 <div className="space-y-3">
-                  {/* Debt Name */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Debt Name *</Label>
                     <div className="relative">
@@ -254,7 +236,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Balance */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Current Outstanding Balance *</Label>
                     <div className="relative">
@@ -274,16 +255,13 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Debt Category - Mobile Only Shows Categories Here */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Debt Category</Label>
                     <DebtCategorySelect value={category} onChange={setCategory} />
                   </div>
                 </div>
 
-                {/* Right Column or Second Part of Mobile View */}
                 <div className="space-y-3">
-                  {/* Interest Rate */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Interest Rate (%) *</Label>
                     <div className="relative">
@@ -305,7 +283,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Minimum Payment */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Minimum Payment/EMI *</Label>
                     <div className="relative">
@@ -325,7 +302,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   </div>
 
-                  {/* Next Payment Date */}
                   <div className="space-y-1">
                     <Label className="text-gray-700 text-sm">Next Payment Due Date *</Label>
                     <div className="relative">
@@ -352,7 +328,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
 
             <TabsContent value="advanced" className="mt-0 space-y-3">
               <div className="space-y-4">
-                {/* Interest Already Included */}
                 <div className={`${isMobile ? "p-2" : "p-3"} border rounded-md bg-gray-50`}>
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -398,19 +373,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       />
                       
                       {balance && minimumPayment && remainingMonths && interestRate && (
-                        <div className="mt-2 p-2 bg-blue-50 border border-blue-100 rounded-md text-xs">
+                        <div className="mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded-md text-xs">
                           <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                             {calculatedPrincipal !== null && (
                               <>
                                 <div>
-                                  <p className="text-xs font-medium text-blue-800">Principal:</p>
-                                  <p className="text-xs text-blue-600">
+                                  <p className="text-xs font-medium text-emerald-800">Principal:</p>
+                                  <p className="text-xs text-emerald-600">
                                     {selectedCurrency}{calculatedPrincipal.toLocaleString(undefined, {maximumFractionDigits: 2})}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-xs font-medium text-blue-800">Interest Amount:</p>
-                                  <p className="text-xs text-blue-600">
+                                  <p className="text-xs font-medium text-emerald-800">Interest Amount:</p>
+                                  <p className="text-xs text-emerald-600">
                                     {selectedCurrency}{(Number(balance) - calculatedPrincipal).toLocaleString(undefined, {maximumFractionDigits: 2})}
                                   </p>
                                 </div>
@@ -419,7 +394,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                           </div>
                           
                           <div className="mt-2 flex items-center justify-between">
-                            <Label className="text-xs font-medium text-blue-800">
+                            <Label className="text-xs font-medium text-emerald-800">
                               Use principal as balance
                             </Label>
                             <Switch
@@ -434,7 +409,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                   )}
                 </div>
                 
-                {/* Calculate Interest from Remaining Months */}
                 <div className={`${isMobile ? "p-2" : "p-3"} border rounded-md bg-gray-50`}>
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -476,16 +450,16 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                       />
                       
                       {balance && minimumPayment && remainingMonths && (
-                        <div className="mt-2 p-2 bg-blue-50 border border-blue-100 rounded-md text-xs">
+                        <div className="mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded-md text-xs">
                           <div className="grid grid-cols-2 gap-1">
                             <div>
-                              <p className="text-xs font-medium text-blue-800">Payoff Date:</p>
-                              <p className="text-xs text-blue-600">{format(addMonths(new Date(), parseInt(remainingMonths)), 'MMM yyyy')}</p>
+                              <p className="text-xs font-medium text-emerald-800">Payoff Date:</p>
+                              <p className="text-xs text-emerald-600">{format(addMonths(new Date(), parseInt(remainingMonths)), 'MMM yyyy')}</p>
                             </div>
                             {estimatedInterestRate !== null && (
                               <div>
-                                <p className="text-xs font-medium text-blue-800">Est. Interest Rate:</p>
-                                <p className="text-xs text-blue-600">{estimatedInterestRate}%</p>
+                                <p className="text-xs font-medium text-emerald-800">Est. Interest Rate:</p>
+                                <p className="text-xs text-emerald-600">{estimatedInterestRate}%</p>
                               </div>
                             )}
                           </div>
@@ -494,8 +468,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </div>
                   )}
                 </div>
-
-                {/* Notes section has been removed */}
               </div>
             </TabsContent>
 
@@ -503,7 +475,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
               <div className="space-y-4">
                 <div className={`${isMobile ? "p-3" : "p-4"} border rounded-md bg-gray-50`}>
                   <div className="flex items-center mb-3">
-                    <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
+                    <DollarSign className="h-5 w-5 mr-2 text-emerald-500" />
                     <h3 className="text-base font-semibold">Select Currency</h3>
                   </div>
                   
@@ -533,11 +505,11 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     </Select>
                   </div>
 
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-                    <p className="text-sm font-medium text-blue-800">Current Selection:</p>
+                  <div className="mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-md">
+                    <p className="text-sm font-medium text-emerald-800">Current Selection:</p>
                     <div className="flex items-center mt-1">
-                      <span className="text-xl font-bold text-blue-600 mr-2">{selectedCurrency}</span>
-                      <span className="text-sm text-blue-700">
+                      <span className="text-xl font-bold text-emerald-600 mr-2">{selectedCurrency}</span>
+                      <span className="text-sm text-emerald-700">
                         {countryCurrencies.find(c => c.symbol === selectedCurrency)?.country || 'Unknown'} - 
                         {countryCurrencies.find(c => c.symbol === selectedCurrency)?.currency || 'Unknown'}
                       </span>
