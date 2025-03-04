@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
@@ -66,8 +67,10 @@ export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = 
       return funding;
     });
 
+    // Use the normalized amounts for calculation
+    // We're passing the original debts here, but will use the normalized values internally
     const results = DebtTimelineCalculator.calculateTimeline(
-      debts,
+      normalizedDebts,
       monthlyPayment,
       strategy,
       normalizedFundings

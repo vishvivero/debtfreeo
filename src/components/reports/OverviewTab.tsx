@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimelineCalculator";
 import { Debt } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -20,11 +20,13 @@ interface OverviewTabProps {
 export const OverviewTab = ({ debts }: OverviewTabProps) => {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const currencySymbol = profile?.preferred_currency || '£';
+  const { preferredCurrency, convertToPreferredCurrency, formatCurrency } = useCurrency();
 
   const handleDownloadReport = () => {
     try {
-      const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+      const totalMinimumPayments = debts.reduce((sum, debt) => {
+        return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
+      }, 0);
       
       const timelineResults = DebtTimelineCalculator.calculateTimeline(
         debts,
@@ -43,7 +45,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         timelineResults.acceleratedInterest,
         strategies[0],
         [],
-        currencySymbol
+        preferredCurrency
       );
       
       doc.save('debt-overview-report.pdf');
@@ -63,20 +65,26 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     }
   };
 
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const totalDebt = debts.reduce((sum, debt) => {
+    return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
+  }, 0);
+  
   const averageInterestRate = debts.length > 0 
     ? debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length 
     : 0;
-  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+    
+  const totalMinimumPayment = debts.reduce((sum, debt) => {
+    return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol); 
+  }, 0);
 
-  const categories = debts.reduce((acc, debt) => {
-    acc[debt.category] = (acc[debt.category] || 0) + debt.balance;
-    return acc;
-  }, {} as Record<string, number>);
+  const categories: Record<string, number> = {};
+  debts.forEach(debt => {
+    const convertedBalance = convertToPreferredCurrency(debt.balance, debt.currency_symbol);
+    categories[debt.category] = (categories[debt.category] || 0) + convertedBalance;
+  });
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -91,7 +99,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{currencySymbol}{totalDebt.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalDebt)}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -127,7 +135,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{currencySymbol}{totalMinimumPayment.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalMinimumPayment)}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -151,7 +159,6 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         </motion.div>
       </div>
 
-      {/* Chart and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div 
           className="lg:col-span-2"
@@ -189,7 +196,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     <div key={category} className="flex justify-between items-center">
                       <span className="font-medium">{category}</span>
                       <span className="text-muted-foreground">
-                        {debts[0]?.currency_symbol || '£'}{amount.toLocaleString()}
+                        {formatCurrency(amount)}
                       </span>
                     </div>
                   ))}
@@ -200,7 +207,6 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         </motion.div>
       </div>
 
-      {/* Redesigned Download Report Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

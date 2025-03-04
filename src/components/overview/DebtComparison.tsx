@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -19,12 +18,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useCurrency } from "@/hooks/use-currency";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
   const navigate = useNavigate();
-  const currencySymbol = profile?.preferred_currency || "£";
+  const { preferredCurrency, convertToPreferredCurrency, formatCurrency } = useCurrency();
   const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
 
   const calculateComparison = () => {
@@ -51,10 +51,12 @@ export const DebtComparison = () => {
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
-    // Calculate minimum payments total
-    const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+    // Calculate minimum payments total with currency conversion
+    const totalMinimumPayment = debts.reduce((sum, debt) => {
+      return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
+    }, 0);
     
-    // Get timeline data
+    // Get timeline data with currency conversion in mind
     const timelineData = calculateTimelineData(
       debts,
       profile.monthly_payment,
@@ -71,9 +73,17 @@ export const DebtComparison = () => {
       ? new Date(acceleratedPayoffPoint.date)
       : new Date(lastDataPoint.date);
 
+    // Convert interest values to preferred currency
+    const baselineInterest = lastDataPoint.baselineInterest;
+    const acceleratedInterest = lastDataPoint.acceleratedInterest;
+    
     // Calculate payment efficiency from original timeline
-    const totalPayment = lastDataPoint.baselineInterest + debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const interestPercentage = (lastDataPoint.baselineInterest / totalPayment) * 100;
+    const totalDebtValue = debts.reduce((sum, debt) => {
+      return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
+    }, 0);
+    
+    const totalPayment = baselineInterest + totalDebtValue;
+    const interestPercentage = (baselineInterest / totalPayment) * 100;
     const principalPercentage = 100 - interestPercentage;
 
     // Calculate months for baseline scenario
@@ -88,22 +98,30 @@ export const DebtComparison = () => {
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
     // Calculate interest savings percentages for the progress bar
-    const totalInterest = lastDataPoint.baselineInterest;
-    const interestSaved = lastDataPoint.baselineInterest - lastDataPoint.acceleratedInterest;
+    const totalInterest = baselineInterest;
+    const interestSaved = baselineInterest - acceleratedInterest;
     const interestSavedPercentage = totalInterest > 0 ? (interestSaved / totalInterest) * 100 : 0;
     
     // For the progress bar percentages
     const originalInterestPercentage = 100;
     const optimizedInterestPercentage = totalInterest > 0 
-      ? (lastDataPoint.acceleratedInterest / lastDataPoint.baselineInterest) * 100 
+      ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
+
+    console.log('Currency conversion in comparison data:', {
+      preferredCurrency,
+      baselineInterest,
+      acceleratedInterest,
+      interestSaved,
+      totalDebtValue
+    });
 
     return {
       totalDebts: debts.length,
       originalPayoffDate: new Date(lastDataPoint.date),
-      originalTotalInterest: lastDataPoint.baselineInterest,
+      originalTotalInterest: baselineInterest,
       optimizedPayoffDate,
-      optimizedTotalInterest: lastDataPoint.acceleratedInterest,
+      optimizedTotalInterest: acceleratedInterest,
       moneySaved: interestSaved,
       baselineYears,
       baselineMonths: remainingMonths,
@@ -247,10 +265,7 @@ export const DebtComparison = () => {
                   </div>
                 </div>
                 <div className="mt-4 text-xs text-center text-gray-500">
-                  {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })} goes to interest
+                  {formatCurrency(comparison.originalTotalInterest)} goes to interest
                 </div>
               </div>
 
@@ -288,10 +303,10 @@ export const DebtComparison = () => {
                 </Button>
                 {isDebtListExpanded && (
                   <div className="mt-2 space-y-2">
-                    {debts?.map((debt, index) => (
+                    {debts?.map((debt) => (
                       <div key={debt.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                         <span>{debt.name}</span>
-                        <span>{currencySymbol}{debt.balance.toLocaleString()}</span>
+                        <span>{formatCurrency(debt.balance, debt.currency_symbol, true)}</span>
                       </div>
                     ))}
                   </div>
@@ -400,16 +415,10 @@ export const DebtComparison = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs mb-2">
                       <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                        Original Interest: <span className="font-medium text-red-600">{currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })}</span>
+                        Original Interest: <span className="font-medium text-red-600">{formatCurrency(comparison.originalTotalInterest)}</span>
                       </span>
                       <span className="text-gray-600 dark:text-gray-300">
-                        Optimized Interest: <span className="font-medium text-emerald-600">{currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })}</span>
+                        Optimized Interest: <span className="font-medium text-emerald-600">{formatCurrency(comparison.optimizedTotalInterest)}</span>
                       </span>
                     </div>
                     <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">

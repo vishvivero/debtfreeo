@@ -4,39 +4,53 @@ import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { StandardizedDebtCalculator } from "./StandardizedDebtCalculator";
 
-export interface TimelineCalculationResult {
-  baselineMonths: number;
-  acceleratedMonths: number;
-  baselineInterest: number;
-  acceleratedInterest: number;
-  monthsSaved: number;
-  interestSaved: number;
-  payoffDate: Date;
-  monthlyPayments: {
-    debtId: string;
-    amount: number;
-  }[];
-}
-
+/**
+ * Main service for calculating debt timelines and payment plans
+ */
 export class DebtTimelineCalculator {
-  static calculateTimeline(
+  /**
+   * Calculate the debt payoff timeline with additional metrics
+   * 
+   * @param debts List of debts to process
+   * @param monthlyPayment Total monthly payment amount
+   * @param strategy Debt payoff strategy to apply
+   * @param oneTimeFundings Optional list of one-time funding payments
+   * @returns Timeline calculation results
+   */
+  public static calculateTimeline(
     debts: Debt[],
     monthlyPayment: number,
     strategy: Strategy,
     oneTimeFundings: OneTimeFunding[] = []
-  ): TimelineCalculationResult {
-    console.log('Starting timeline calculation:', {
-      totalDebts: debts.length,
+  ) {
+    console.log('DebtTimelineCalculator: Starting calculation with:', {
+      debtsCount: debts.length,
       monthlyPayment,
       strategy: strategy.name,
-      oneTimeFundings: oneTimeFundings.length
+      oneTimeFundingsCount: oneTimeFundings.length
     });
 
-    return StandardizedDebtCalculator.calculateTimeline(
-      debts,
+    // Normalize the input debts to ensure consistent calculation
+    // Note: Currency conversion now happens in the components that use this class
+    
+    // First order debts according to the selected strategy
+    const orderedDebts = strategy.calculate([...debts]);
+    
+    // Call the standardized calculator to get the detailed timeline
+    const results = StandardizedDebtCalculator.calculateTimeline(
+      orderedDebts,
       monthlyPayment,
       strategy,
       oneTimeFundings
     );
+
+    console.log('DebtTimelineCalculator: Calculation complete:', {
+      baselineInterest: results.baselineInterest,
+      acceleratedInterest: results.acceleratedInterest,
+      interestSaved: results.interestSaved,
+      monthsSaved: results.monthsSaved
+    });
+
+    return results;
   }
 }
