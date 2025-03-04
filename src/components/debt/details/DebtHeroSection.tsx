@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { DollarSign, Calendar, Tag, Info } from "lucide-react";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { convertCurrency } from "@/lib/utils/currencyConverter";
 
 interface DebtHeroSectionProps {
   debt: Debt;
@@ -59,6 +58,9 @@ export const DebtHeroSection = ({
     ? calculatedPrincipal 
     : debt.balance;
 
+  // Get original currency symbol from the debt object
+  const originalCurrencySymbol = debt.currency_symbol;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -109,7 +111,7 @@ export const DebtHeroSection = ({
                 )}
                 {!isOriginalCurrency && (
                   <span className="text-xs text-gray-500 block">
-                    Original: {debt.currency_symbol}{debt.balance.toLocaleString()}
+                    Original: {originalCurrencySymbol}{debt.balance.toLocaleString()}
                   </span>
                 )}
               </div>

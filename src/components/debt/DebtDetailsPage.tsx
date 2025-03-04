@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
@@ -47,7 +48,7 @@ export const DebtDetailsPage = () => {
   // Either use original currency or preferred currency based on toggle
   const currencySymbol = useOriginalCurrency ? debt.currency_symbol : (profile.preferred_currency || '£');
   
-  // Convert values if needed
+  // Convert values if needed - fix proper conversion for display values
   const displayBalance = useOriginalCurrency ? 
     debt.balance : 
     convertCurrency(debt.balance, debt.currency_symbol, currencySymbol);
@@ -147,6 +148,15 @@ export const DebtDetailsPage = () => {
     );
   }
 
+  // Convert total paid and total interest based on currency toggle
+  const displayTotalPaid = useOriginalCurrency ? 
+    totalPaid : 
+    convertCurrency(totalPaid, debt.currency_symbol, currencySymbol);
+    
+  const displayTotalInterest = useOriginalCurrency ? 
+    totalInterest : 
+    convertCurrency(totalInterest, debt.currency_symbol, currencySymbol);
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -165,8 +175,12 @@ export const DebtDetailsPage = () => {
         </div>
 
         <DebtHeroSection 
-          debt={debt}
-          totalPaid={totalPaid}
+          debt={{
+            ...debt,
+            balance: displayBalance,
+            minimum_payment: displayMinimumPayment
+          }}
+          totalPaid={displayTotalPaid}
           payoffDate={calculateSingleDebtPayoff(debt, monthlyPayment, strategy).payoffDate}
           currencySymbol={currencySymbol}
           isOriginalCurrency={useOriginalCurrency}
@@ -180,8 +194,8 @@ export const DebtDetailsPage = () => {
             balance: displayBalance,
             minimum_payment: displayMinimumPayment
           }}
-          totalPaid={totalPaid}
-          totalInterest={totalInterest}
+          totalPaid={displayTotalPaid}
+          totalInterest={displayTotalInterest}
           currencySymbol={currencySymbol}
           isPayable={isPayable}
           minimumViablePayment={minimumViablePayment}
@@ -190,7 +204,11 @@ export const DebtDetailsPage = () => {
         <Separator className="my-8" />
 
         <PayoffTimeline 
-          debts={[debt]}
+          debts={[{
+            ...debt,
+            balance: useOriginalCurrency ? debt.balance : displayBalance,
+            minimum_payment: useOriginalCurrency ? debt.minimum_payment : displayMinimumPayment
+          }]}
           extraPayment={monthlyPayment - debt.minimum_payment}
           enableOneTimeFundings={false} // Explicitly disable one-time fundings for individual debt view
         />
