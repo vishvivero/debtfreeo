@@ -495,19 +495,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                   )}
                 </div>
 
-                {/* Notes Section */}
-                <div className="space-y-1">
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2 h-20 resize-none text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Add any additional notes about this debt..."
-                    maxLength={500}
-                  />
-                  <div className="text-right text-xs text-gray-500">
-                    {notes.length}/500
-                  </div>
-                </div>
+                {/* Notes section has been removed */}
               </div>
             </TabsContent>
 
