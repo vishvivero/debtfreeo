@@ -1,14 +1,10 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { getExchangeRateUpdateDate } from "@/lib/utils/currencyConverter";
 
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -48,22 +44,8 @@ export const AddDebtDialog = ({
         <Sheet open={isOpen} onOpenChange={handleOpenChange}>
           <SheetContent side="bottom" className="h-[90%] sm:max-w-full p-0 bg-white overflow-y-auto">
             <SheetHeader className="border-b p-4">
-              <SheetTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+              <SheetTitle className="text-xl font-semibold text-gray-800">
                 Add New Debt
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" align="start" className="max-w-[300px]">
-                      <p className="text-sm">
-                        You can select a different currency for this debt. <br />
-                        All totals will be converted to your preferred currency.<br />
-                        Exchange rates last updated: {getExchangeRateUpdateDate()}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </SheetTitle>
             </SheetHeader>
             {formContent}
@@ -82,22 +64,8 @@ export const AddDebtDialog = ({
         </SheetTrigger>
         <SheetContent side="bottom" className="h-[90%] sm:max-w-full p-0 bg-white overflow-y-auto">
           <SheetHeader className="border-b p-4">
-            <SheetTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <SheetTitle className="text-xl font-semibold text-gray-800">
               Add New Debt
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" align="start" className="max-w-[300px]">
-                    <p className="text-sm">
-                      You can select a different currency for this debt. <br />
-                      All totals will be converted to your preferred currency.<br />
-                      Exchange rates last updated: {getExchangeRateUpdateDate()}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </SheetTitle>
           </SheetHeader>
           {formContent}
@@ -110,23 +78,7 @@ export const AddDebtDialog = ({
   const dialogContent = (
     <DialogContent className="sm:max-w-[550px] p-0 bg-white rounded-xl overflow-hidden">
       <DialogHeader className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <DialogTitle className="text-xl font-semibold text-gray-800">Add New Debt</DialogTitle>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="max-w-[300px]">
-                <p className="text-sm">
-                  You can select a different currency for this debt. <br />
-                  All totals will be converted to your preferred currency.<br />
-                  Exchange rates last updated: {getExchangeRateUpdateDate()}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        <DialogTitle className="text-xl font-semibold text-gray-800">Add New Debt</DialogTitle>
       </DialogHeader>
       {formContent}
     </DialogContent>
