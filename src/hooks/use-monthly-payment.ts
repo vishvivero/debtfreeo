@@ -1,13 +1,24 @@
+
 import { useProfile } from "@/hooks/use-profile";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebts } from "@/hooks/use-debts";
+import { useCurrency } from "@/hooks/use-currency";
 
 export const useMonthlyPayment = () => {
   const { profile, updateProfile } = useProfile();
   const { debts } = useDebts();
   const { toast } = useToast();
+  const { convertToPreferredCurrency } = useCurrency();
 
-  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  // Calculate total minimum payments with currency conversion
+  const totalMinimumPayments = debts?.reduce((sum, debt) => {
+    // Convert to preferred currency if needed
+    const convertedPayment = convertToPreferredCurrency(
+      debt.minimum_payment,
+      debt.currency_symbol
+    );
+    return sum + convertedPayment;
+  }, 0) ?? 0;
 
   const updateMonthlyPayment = async (amount: number) => {
     if (!profile) return;

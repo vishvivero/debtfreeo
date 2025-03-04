@@ -1,4 +1,3 @@
-
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -22,7 +21,7 @@ export default function Strategy() {
   const { oneTimeFundings } = useOneTimeFunding();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   const { currentPayment, minimumPayment } = useMonthlyPayment();
-  const { preferredCurrency } = useCurrency();
+  const { preferredCurrency, convertToPreferredCurrency } = useCurrency();
   
   const isLoading = isDebtsLoading || isProfileLoading;
 
@@ -92,7 +91,9 @@ export default function Strategy() {
     }
   };
 
-  const totalDebtValue = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const totalDebtValue = debts.reduce((sum, debt) => {
+    return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
+  }, 0);
 
   return (
     <MainLayout>

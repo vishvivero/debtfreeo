@@ -3,6 +3,7 @@ import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
 import { OneTimeFunding } from '@/lib/types/payment';
 import { DebtTimelineCalculator } from '@/lib/services/calculations/DebtTimelineCalculator';
+import { useCurrency } from '@/hooks/use-currency';
 
 interface TimelineResults {
   baselineMonths: number;
@@ -31,6 +32,8 @@ interface DebtCalculationContextType {
 const DebtCalculationContext = createContext<DebtCalculationContextType | undefined>(undefined);
 
 export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { convertToPreferredCurrency } = useCurrency();
+  
   const calculateTimeline = useCallback((
     debts: Debt[],
     monthlyPayment: number,
@@ -44,11 +47,30 @@ export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = 
       oneTimeFundingsCount: oneTimeFundings.length
     });
 
+    // Normalize all debts to the preferred currency for calculation
+    const normalizedDebts = debts.map(debt => ({
+      ...debt,
+      // Keep original values but add normalized ones for calculation
+      normalizedBalance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
+      normalizedMinimumPayment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
+    }));
+
+    // Normalize one-time fundings if they have different currencies
+    const normalizedFundings = oneTimeFundings.map(funding => {
+      if (funding.currency_symbol && funding.currency_symbol !== debts[0]?.currency_symbol) {
+        return {
+          ...funding,
+          amount: convertToPreferredCurrency(funding.amount, funding.currency_symbol || '$')
+        };
+      }
+      return funding;
+    });
+
     const results = DebtTimelineCalculator.calculateTimeline(
       debts,
       monthlyPayment,
       strategy,
-      oneTimeFundings
+      normalizedFundings
     );
 
     console.log('DebtCalculationContext: Calculation complete:', {
@@ -59,7 +81,7 @@ export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = 
     });
 
     return results;
-  }, []);
+  }, [convertToPreferredCurrency]);
 
   const value = useMemo(() => ({
     calculateTimeline,
