@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,14 +25,21 @@ import { countryCurrencies } from "@/lib/utils/currency-data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getExchangeRateUpdateDate, exchangeRates2025 } from "@/lib/utils/currencyConverter";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
   currencySymbol?: string;
   onClose?: () => void;
+  showCancelButton?: boolean;
 }
 
-export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDebtFormProps) => {
+export const AddDebtForm = ({ 
+  onAddDebt, 
+  currencySymbol = "£", 
+  onClose, 
+  showCancelButton = true 
+}: AddDebtFormProps) => {
   const { addDebt } = useDebts();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -41,7 +49,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
   const [interestRate, setInterestRate] = useState("");
   const [minimumPayment, setMinimumPayment] = useState("");
   const [date, setDate] = useState<Date>(new Date());
-  const [notes, setNotes] = useState("");
   const [activeTab, setActiveTab] = useState("basics");
   const [selectedCurrency, setSelectedCurrency] = useState(currencySymbol);
   
@@ -104,8 +111,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
           interest_included: isInterestIncluded,
           remaining_months: (isInterestIncluded || useRemainingMonths) ? Number(remainingMonths) : null,
           original_rate: isInterestIncluded ? finalInterestRate : null,
-          total_with_interest: isInterestIncluded && !usePrincipalAsBalance ? Number(balance) : null,
-          notes: notes || null
+          total_with_interest: isInterestIncluded && !usePrincipalAsBalance ? Number(balance) : null
         }
       };
 
@@ -126,7 +132,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
       setInterestRate("");
       setMinimumPayment("");
       setDate(new Date());
-      setNotes("");
       setIsInterestIncluded(false);
       setRemainingMonths("");
       setUseRemainingMonths(false);
@@ -186,6 +191,21 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
+
+  // Get base currency conversion rate
+  const getConversionRate = (fromCurrency: string, toCurrency: string) => {
+    if (fromCurrency === toCurrency) return 1;
+    
+    const fromRate = exchangeRates2025[fromCurrency] || 1;
+    const toRate = exchangeRates2025[toCurrency] || 1;
+    
+    return (1 / fromRate) * toRate;
+  };
+
+  // Get selected currency details
+  const selectedCurrencyDetails = countryCurrencies.find(c => c.symbol === selectedCurrency);
+  const baseCurrencyDetails = countryCurrencies.find(c => c.symbol === currencySymbol);
+  const conversionRate = getConversionRate(selectedCurrency, currencySymbol);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
@@ -480,7 +500,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                   </div>
                   
                   <p className="text-sm text-gray-600 mb-4">
-                    Choose the currency for this debt. This will affect how the debt is displayed and calculated.
+                    Choose the currency for this debt. This will help you track debts in multiple currencies,
+                    and all amounts will be automatically converted to your preferred currency for unified reporting.
                   </p>
                   
                   <div className="space-y-1">
@@ -510,10 +531,22 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
                     <div className="flex items-center mt-1">
                       <span className="text-xl font-bold text-emerald-600 mr-2">{selectedCurrency}</span>
                       <span className="text-sm text-emerald-700">
-                        {countryCurrencies.find(c => c.symbol === selectedCurrency)?.country || 'Unknown'} - 
-                        {countryCurrencies.find(c => c.symbol === selectedCurrency)?.currency || 'Unknown'}
+                        {selectedCurrencyDetails?.country || 'Unknown'} - 
+                        {selectedCurrencyDetails?.currency || 'Unknown'}
                       </span>
                     </div>
+                    
+                    {selectedCurrency !== currencySymbol && (
+                      <div className="mt-3 pt-3 border-t border-emerald-200">
+                        <p className="text-xs font-medium text-emerald-800">Conversion Rate (Annual Average):</p>
+                        <p className="text-sm text-emerald-600 mt-1">
+                          1 {selectedCurrency} = {conversionRate.toFixed(4)} {currencySymbol}
+                        </p>
+                        <p className="text-xs text-emerald-700 mt-1">
+                          Exchange rates last updated: {getExchangeRateUpdateDate()}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -522,19 +555,21 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£", onClose }: AddDe
         </Tabs>
       </div>
 
-      <div className="mt-auto flex justify-between items-center p-4 border-t">
-        <Button 
-          type="button" 
-          variant="outline"
-          className="text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50"
-          onClick={() => {
-            if (onClose) {
-              onClose();
-            }
-          }}
-        >
-          Cancel
-        </Button>
+      <div className="mt-auto flex justify-end items-center p-4 border-t">
+        {showCancelButton && (
+          <Button 
+            type="button" 
+            variant="outline"
+            className="text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50 mr-auto"
+            onClick={() => {
+              if (onClose) {
+                onClose();
+              }
+            }}
+          >
+            Cancel
+          </Button>
+        )}
         <Button 
           type="submit" 
           className="bg-emerald-500 hover:bg-emerald-600 text-white px-6"

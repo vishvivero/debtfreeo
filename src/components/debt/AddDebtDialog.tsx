@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -7,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { InfoIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { getExchangeRateUpdateDate } from "@/lib/utils/currencyConverter";
 
 interface AddDebtDialogProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -30,7 +32,12 @@ export const AddDebtDialog = ({
   };
 
   const formContent = (
-    <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} onClose={onClose} />
+    <AddDebtForm 
+      onAddDebt={onAddDebt} 
+      currencySymbol={currencySymbol} 
+      onClose={onClose} 
+      showCancelButton={false}
+    />
   );
 
   // If on mobile, use Sheet instead of Dialog
@@ -46,10 +53,14 @@ export const AddDebtDialog = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <InfoIcon className="h-4 w-4 text-gray-400" />
+                      <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm">You can select a different currency for this debt. <br />All totals will be converted to your preferred currency.</p>
+                    <TooltipContent side="bottom" align="start" className="max-w-[300px]">
+                      <p className="text-sm">
+                        You can select a different currency for this debt. <br />
+                        All totals will be converted to your preferred currency.<br />
+                        Exchange rates last updated: {getExchangeRateUpdateDate()}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -76,10 +87,14 @@ export const AddDebtDialog = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <InfoIcon className="h-4 w-4 text-gray-400" />
+                    <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">You can select a different currency for this debt. <br />All totals will be converted to your preferred currency.</p>
+                  <TooltipContent side="bottom" align="start" className="max-w-[300px]">
+                    <p className="text-sm">
+                      You can select a different currency for this debt. <br />
+                      All totals will be converted to your preferred currency.<br />
+                      Exchange rates last updated: {getExchangeRateUpdateDate()}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -100,10 +115,14 @@ export const AddDebtDialog = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-gray-400" />
+                <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
               </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-sm">You can select a different currency for this debt. <br />All totals will be converted to your preferred currency.</p>
+              <TooltipContent side="bottom" align="start" className="max-w-[300px]">
+                <p className="text-sm">
+                  You can select a different currency for this debt. <br />
+                  All totals will be converted to your preferred currency.<br />
+                  Exchange rates last updated: {getExchangeRateUpdateDate()}
+                </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

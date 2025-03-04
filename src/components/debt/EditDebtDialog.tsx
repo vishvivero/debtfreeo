@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditDebtForm } from "@/components/EditDebtForm";
 import { Debt } from "@/lib/types/debt";
-import { X, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getExchangeRateUpdateDate } from "@/lib/utils/currencyConverter";
 
@@ -22,9 +22,9 @@ export const EditDebtDialog = ({ debt, isOpen, onClose }: EditDebtDialogProps) =
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400 cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="bottom" align="start" className="max-w-[300px]">
                   <p className="text-sm">
                     You can select a different currency for this debt. <br />
                     Exchange rates last updated: {getExchangeRateUpdateDate()}

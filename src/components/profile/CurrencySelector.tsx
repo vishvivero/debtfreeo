@@ -30,7 +30,7 @@ export function CurrencySelector({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <InfoIcon className="h-4 w-4 text-gray-400" />
+                <InfoIcon className="h-4 w-4 text-gray-400 cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
                 <p className="text-sm">
@@ -51,7 +51,11 @@ export function CurrencySelector({
         </SelectTrigger>
         <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px]">
           {countryCurrencies.map((item) => (
-            <SelectItem key={item.symbol} value={item.symbol}>
+            <SelectItem 
+              key={item.symbol} 
+              value={item.symbol}
+              className="data-[highlighted]:bg-emerald-50 data-[highlighted]:text-emerald-900"
+            >
               <span className="flex items-center gap-2">
                 <span className="font-medium">{item.symbol}</span>
                 <span>{item.country} - {item.currency}</span>
