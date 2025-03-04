@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { CheckCircle2, HelpCircle } from "lucide-react";
@@ -55,7 +55,9 @@ export const AmortizationTable = ({
     );
   }
 
+  // Calculate totals for all payments, not just visible ones
   const totalInterest = amortizationData.reduce((sum, row) => sum + row.interestPayment, 0);
+  const totalPrincipal = amortizationData.reduce((sum, row) => sum + row.principalPayment, 0);
   const totalPayments = amortizationData.reduce((sum, row) => sum + row.payment, 0);
   
   const loadMoreRows = () => {
@@ -91,12 +93,15 @@ export const AmortizationTable = ({
           </CardTitle>
           
           <div className="text-sm font-medium text-gray-500">
-            Total interest: {currencySymbol}{totalInterest.toLocaleString()}
+            Total interest: {currencySymbol}{totalInterest.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -155,6 +160,30 @@ export const AmortizationTable = ({
                 </TableRow>
               ))}
             </TableBody>
+            <TableFooter className="bg-primary-50 font-medium border-t-2 border-primary-100 sticky bottom-0">
+              <TableRow>
+                <TableCell colSpan={2} className="text-gray-700">TOTAL</TableCell>
+                <TableCell className="text-gray-700">
+                  {currencySymbol}{totalPayments.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </TableCell>
+                <TableCell className="text-gray-700">
+                  {currencySymbol}{totalPrincipal.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </TableCell>
+                <TableCell className="text-gray-700">
+                  {currencySymbol}{totalInterest.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </TableCell>
+                <TableCell className="text-gray-700">-</TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
         </div>
         
