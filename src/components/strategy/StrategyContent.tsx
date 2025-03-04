@@ -26,6 +26,8 @@ interface StrategyContentProps {
   onSelectStrategy: (strategy: Strategy) => void;
   preferredCurrency?: string;
   totalDebtValue: number;
+  currentPayment: number;
+  minimumPayment: number;
 }
 
 export const StrategyContent: React.FC<StrategyContentProps> = ({
@@ -35,9 +37,11 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   onDeleteDebt,
   onSelectStrategy: parentOnSelectStrategy,
   preferredCurrency,
-  totalDebtValue
+  totalDebtValue,
+  currentPayment,
+  minimumPayment
 }) => {
-  const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
+  const { updateMonthlyPayment } = useMonthlyPayment();
   const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile, updateProfile } = useProfile();
@@ -49,6 +53,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const { toast } = useToast();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(initialStrategy);
   const navigate = useNavigate();
+  const [extraPayment, setExtraPayment] = useState(Math.max(0, currentPayment - minimumPayment));
 
   // Initialize strategy from profile only once when component mounts
   useEffect(() => {
@@ -69,6 +74,11 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
       setShowOneTimeFunding(profile.show_lump_sum_payments || false);
     }
   }, [profile]);
+
+  // Set extraPayment from props
+  useEffect(() => {
+    setExtraPayment(Math.max(0, currentPayment - minimumPayment));
+  }, [currentPayment, minimumPayment]);
 
   const handleResultsClick = () => {
     setHasViewedResults(true);
@@ -145,6 +155,11 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     }
   };
 
+  const handleExtraPaymentChange = (amount: number) => {
+    setExtraPayment(amount);
+    updateMonthlyPayment(amount + minimumPayment);
+  };
+
   // Get the active one-time fundings based on the toggle state
   const getActiveOneTimeFundings = () => {
     return showOneTimeFunding ? oneTimeFundings : [];
@@ -174,7 +189,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               <PaymentOverviewSection
                 totalMinimumPayments={minimumPayment}
                 extraPayment={extraPayment}
-                onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
+                onExtraPaymentChange={handleExtraPaymentChange}
                 onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
                 currencySymbol={preferredCurrency}
                 totalDebtValue={totalDebtValue}

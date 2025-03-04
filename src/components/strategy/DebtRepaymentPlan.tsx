@@ -1,8 +1,9 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Download, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
@@ -27,7 +28,8 @@ export const DebtRepaymentPlan = ({
   
   if (!debts || debts.length === 0) return null;
 
-  console.log('DebtRepaymentPlan: Starting calculation with strategy:', selectedStrategy.name);
+  console.log('DebtRepaymentPlan: Starting calculation with strategy:', selectedStrategy.name, 'totalMonthlyPayment:', totalMonthlyPayment);
+  // Apply strategy to sort the debts according to the chosen strategy
   const sortedDebts = selectedStrategy.calculate([...debts]);
   
   // Calculate timeline data using the accelerated timeline logic

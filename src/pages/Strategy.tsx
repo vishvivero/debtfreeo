@@ -1,3 +1,4 @@
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -10,16 +11,28 @@ import { Loader2 } from "lucide-react";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
+import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
   const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
   const { oneTimeFundings } = useOneTimeFunding();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
+  const { currentPayment, minimumPayment } = useMonthlyPayment();
   
   const isLoading = isDebtsLoading || isProfileLoading;
+
+  // Use profile's selected strategy when available
+  useEffect(() => {
+    if (profile?.selected_strategy) {
+      const savedStrategy = strategies.find(s => s.id === profile.selected_strategy);
+      if (savedStrategy) {
+        setSelectedStrategy(savedStrategy);
+      }
+    }
+  }, [profile]);
 
   if (isLoading) {
     return (
@@ -94,6 +107,8 @@ export default function Strategy() {
               onSelectStrategy={handleStrategyChange}
               preferredCurrency={profile?.preferred_currency}
               totalDebtValue={totalDebtValue}
+              currentPayment={currentPayment}
+              minimumPayment={minimumPayment}
             />
           </DebtCalculationProvider>
         </div>
