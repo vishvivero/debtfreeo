@@ -38,6 +38,22 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings: oneTimeFundings.length
     });
 
+    // Check for debts with interest already included
+    const debtsWithInterestIncluded = debts.filter(debt => 
+      debt.metadata?.interest_already_calculated === true || 
+      debt.metadata?.interest_included === true
+    );
+    
+    if (debtsWithInterestIncluded.length > 0) {
+      console.log('Detected debts with interest already included in balance:', 
+        debtsWithInterestIncluded.map(d => ({ 
+          name: d.name, 
+          balance: d.balance, 
+          interestRate: d.interest_rate 
+        }))
+      );
+    }
+
     // Quick sanity check on input values
     if (debts.some(debt => debt.balance > 10000000 || debt.interest_rate > 100)) {
       console.log('Warning: Potentially anomalous debt values detected:', 
@@ -46,15 +62,41 @@ export class UnifiedDebtTimelineCalculator {
     }
 
     // Calculate alternative interest estimate as fallback using simple interest formula
+    // but exclude debts that already have interest included
     const heuristicInterestEstimate = debts.reduce((sum, debt) => {
+      // Skip if interest is already included in the balance
+      if (debt.metadata?.interest_already_calculated === true || 
+          debt.metadata?.interest_included === true) {
+        console.log(`Skipping heuristic interest for ${debt.name} - interest already included`);
+        return sum;
+      }
+      
+      // Also skip zero interest loans
+      if (debt.interest_rate === 0) {
+        return sum;
+      }
+      
       // Simple interest calculation: Principal * Rate * Time
-      return sum + (debt.balance * (debt.interest_rate / 100) * this.INTEREST_RATE_YEARS_HEURISTIC);
+      const interest = debt.balance * (debt.interest_rate / 100) * this.INTEREST_RATE_YEARS_HEURISTIC;
+      console.log(`Heuristic interest for ${debt.name}: ${interest}`);
+      return sum + interest;
     }, 0);
 
     console.log('Heuristic interest estimate:', heuristicInterestEstimate);
 
+    // Make a copy of debts with adjusted interest rates for those with interest already included
+    const adjustedDebts = debts.map(debt => {
+      if (debt.metadata?.interest_already_calculated === true || 
+          debt.metadata?.interest_included === true) {
+        // Set interest rate to 0 for calculation purposes to avoid double counting
+        return { ...debt, interest_rate: 0 };
+      }
+      return debt;
+    });
+
+    // Use the adjusted debts for calculation
     const results = StandardizedDebtCalculator.calculateTimeline(
-      debts,
+      adjustedDebts,
       monthlyPayment,
       strategy,
       oneTimeFundings
