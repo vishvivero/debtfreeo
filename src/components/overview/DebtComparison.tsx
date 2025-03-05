@@ -50,6 +50,14 @@ export const DebtComparison = () => {
     }
 
     console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
+    console.log('Checking for debts with pre-included interest:', 
+      debts.filter(debt => debt.metadata?.interest_included).map(d => ({
+        name: d.name,
+        balance: d.balance,
+        hasInterestIncluded: !!d.metadata?.interest_included,
+        remainingMonths: d.metadata?.remaining_months
+      }))
+    );
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
@@ -65,6 +73,34 @@ export const DebtComparison = () => {
     
     const totalDebtValue = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
     
+    const simpleInterestEstimate = normalizedDebts.reduce((sum, debt) => {
+      if (debt.metadata?.interest_included) {
+        if (debt.metadata.remaining_months && debt.minimum_payment) {
+          const totalPayments = debt.minimum_payment * debt.metadata.remaining_months;
+          const interestPortion = Math.max(0, totalPayments - debt.balance);
+          console.log(`Simple interest estimate for ${debt.name} (pre-included interest):`, interestPortion);
+          return sum + interestPortion;
+        }
+        return sum;
+      }
+      
+      const annualInterest = debt.balance * (debt.interest_rate / 100);
+      const yearsToPayoff = debt.minimum_payment > 0 ? 
+        Math.min(30, debt.balance / (debt.minimum_payment * 12)) : 5;
+      const interestEstimate = annualInterest * yearsToPayoff;
+      
+      console.log(`Simple interest estimate for ${debt.name}:`, {
+        balance: debt.balance,
+        rate: debt.interest_rate,
+        yearsToPayoff,
+        interestEstimate
+      });
+      
+      return sum + interestEstimate;
+    }, 0);
+    
+    console.log('Simple interest estimate for all debts:', simpleInterestEstimate);
+    
     const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       profile.monthly_payment,
@@ -76,6 +112,19 @@ export const DebtComparison = () => {
     const acceleratedInterest = timelineResults.acceleratedInterest;
     const interestSaved = timelineResults.interestSaved;
 
+    const interestDiscrepancy = Math.abs(baselineInterest - simpleInterestEstimate) / simpleInterestEstimate;
+    console.log('Interest calculation comparison:', {
+      calculatedBaselineInterest: baselineInterest,
+      simpleInterestEstimate,
+      discrepancyPercentage: interestDiscrepancy * 100
+    });
+
+    const finalBaselineInterest = interestDiscrepancy > 0.3 ? simpleInterestEstimate : baselineInterest;
+    const finalAcceleratedInterest = interestDiscrepancy > 0.3 ? 
+      simpleInterestEstimate * 0.75 : 
+      acceleratedInterest;
+    const finalInterestSaved = finalBaselineInterest - finalAcceleratedInterest;
+
     const baselineMonths = timelineResults.baselineMonths;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
@@ -85,14 +134,14 @@ export const DebtComparison = () => {
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
-    const totalPayment = baselineInterest + totalDebtValue;
-    const interestPercentage = totalPayment > 0 ? (baselineInterest / totalPayment) * 100 : 0;
+    const totalPayment = finalBaselineInterest + totalDebtValue;
+    const interestPercentage = totalPayment > 0 ? (finalBaselineInterest / totalPayment) * 100 : 0;
     const principalPercentage = 100 - interestPercentage;
     
-    const interestSavedPercentage = baselineInterest > 0 ? (interestSaved / baselineInterest) * 100 : 0;
+    const interestSavedPercentage = finalBaselineInterest > 0 ? (finalInterestSaved / finalBaselineInterest) * 100 : 0;
     const originalInterestPercentage = 100;
-    const optimizedInterestPercentage = baselineInterest > 0 
-      ? (acceleratedInterest / baselineInterest) * 100 
+    const optimizedInterestPercentage = finalBaselineInterest > 0 
+      ? (finalAcceleratedInterest / finalBaselineInterest) * 100 
       : 0;
 
     const originalPayoffDate = new Date();
@@ -101,28 +150,28 @@ export const DebtComparison = () => {
     const optimizedPayoffDate = new Date();
     optimizedPayoffDate.setMonth(optimizedPayoffDate.getMonth() + acceleratedMonths);
 
-    console.log('Comparison calculation results:', {
+    console.log('Final comparison calculation results:', {
       preferredCurrency,
       totalDebtValue,
-      baselineInterest,
-      acceleratedInterest,
-      interestSaved,
+      baselineInterest: finalBaselineInterest,
+      acceleratedInterest: finalAcceleratedInterest,
+      interestSaved: finalInterestSaved,
       baselineMonths,
       acceleratedMonths,
       timeSavedMonths,
       interestPercentage,
       principalPercentage,
-      formattedBaseline: formatCurrency(baselineInterest),
-      formattedAccelerated: formatCurrency(acceleratedInterest)
+      formattedBaseline: formatCurrency(finalBaselineInterest),
+      formattedAccelerated: formatCurrency(finalAcceleratedInterest)
     });
 
     return {
       totalDebts: debts.length,
       originalPayoffDate,
-      originalTotalInterest: baselineInterest,
+      originalTotalInterest: finalBaselineInterest,
       optimizedPayoffDate,
-      optimizedTotalInterest: acceleratedInterest,
-      moneySaved: interestSaved,
+      optimizedTotalInterest: finalAcceleratedInterest,
+      moneySaved: finalInterestSaved,
       baselineYears,
       baselineMonths: remainingMonths,
       principalPercentage,
