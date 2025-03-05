@@ -19,8 +19,10 @@ export interface UnifiedTimelineResults {
 }
 
 export class UnifiedDebtTimelineCalculator {
-  // Reasonable limit for interest as a multiple of principal
+  // Reasonable limits for interest calculation
   private static readonly MAX_INTEREST_MULTIPLIER = 1.5; // 150% of principal
+  private static readonly ABSOLUTE_MAX_INTEREST = 1000000; // Hard cap of 1M
+  private static readonly INTEREST_RATE_YEARS_HEURISTIC = 5; // Reasonable loan term for heuristic calculation
 
   public static calculateTimeline(
     debts: Debt[],
@@ -36,6 +38,21 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings: oneTimeFundings.length
     });
 
+    // Quick sanity check on input values
+    if (debts.some(debt => debt.balance > 10000000 || debt.interest_rate > 100)) {
+      console.log('Warning: Potentially anomalous debt values detected:', 
+        debts.map(d => ({ name: d.name, balance: d.balance, rate: d.interest_rate }))
+      );
+    }
+
+    // Calculate alternative interest estimate as fallback using simple interest formula
+    const heuristicInterestEstimate = debts.reduce((sum, debt) => {
+      // Simple interest calculation: Principal * Rate * Time
+      return sum + (debt.balance * (debt.interest_rate / 100) * this.INTEREST_RATE_YEARS_HEURISTIC);
+    }, 0);
+
+    console.log('Heuristic interest estimate:', heuristicInterestEstimate);
+
     const results = StandardizedDebtCalculator.calculateTimeline(
       debts,
       monthlyPayment,
@@ -43,31 +60,43 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings
     );
 
-    // Safety check - verify the calculated interest is reasonable
+    // Get the total principal balance
     const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
-    if (results.baselineInterest > totalBalance * this.MAX_INTEREST_MULTIPLIER) {
-      console.log('Warning: Calculated interest exceeds reasonable limit, applying cap:', {
+
+    // Comprehensive validation of the interest values
+    if (results.baselineInterest > this.ABSOLUTE_MAX_INTEREST || 
+        results.baselineInterest > totalBalance * this.MAX_INTEREST_MULTIPLIER ||
+        results.baselineInterest / totalBalance > this.MAX_INTEREST_MULTIPLIER) {
+      
+      console.log('Warning: Calculated interest exceeds reasonable limits, applying correction:', {
         calculatedInterest: results.baselineInterest,
         totalBalance,
-        cappedInterest: totalBalance * this.MAX_INTEREST_MULTIPLIER
+        interestToBalanceRatio: results.baselineInterest / totalBalance,
+        heuristicEstimate: heuristicInterestEstimate
       });
       
-      // Cap the interest at a reasonable percentage of the principal
-      results.baselineInterest = Math.min(results.baselineInterest, totalBalance * this.MAX_INTEREST_MULTIPLIER);
+      // Use the better of the two approaches - heuristic or capped value
+      const cappedInterest = Math.min(
+        totalBalance * this.MAX_INTEREST_MULTIPLIER, 
+        this.ABSOLUTE_MAX_INTEREST
+      );
       
-      // Also cap accelerated interest accordingly
-      results.acceleratedInterest = Math.min(results.acceleratedInterest, results.baselineInterest);
+      // Choose the more reasonable value between the heuristic and the cap
+      results.baselineInterest = Math.min(heuristicInterestEstimate, cappedInterest);
+      
+      // Also adjust accelerated interest proportionally
+      const originalRatio = results.acceleratedInterest / results.baselineInterest;
+      results.acceleratedInterest = results.baselineInterest * originalRatio;
       
       // Recalculate interest saved
       results.interestSaved = results.baselineInterest - results.acceleratedInterest;
+      
+      console.log('Interest values after correction:', {
+        baselineInterest: results.baselineInterest,
+        acceleratedInterest: results.acceleratedInterest,
+        interestSaved: results.interestSaved
+      });
     }
-
-    console.log('Unified calculation complete:', {
-      baselineInterest: results.baselineInterest,
-      acceleratedInterest: results.acceleratedInterest,
-      interestSaved: results.interestSaved,
-      monthsSaved: results.monthsSaved
-    });
 
     return results;
   }

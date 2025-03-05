@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCurrency } from "@/hooks/use-currency";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
+import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/core/UnifiedDebtTimelineCalculator";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -55,64 +56,69 @@ export const DebtComparison = () => {
     const totalMinimumPayment = debts.reduce((sum, debt) => {
       return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
     }, 0);
+
+    const normalizedDebts = debts.map(debt => ({
+      ...debt,
+      balance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
+      minimum_payment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
+    }));
     
-    const timelineData = calculateTimelineData(
-      debts,
+    const totalDebtValue = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
+    
+    const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
+      normalizedDebts,
       profile.monthly_payment,
       selectedStrategy,
       oneTimeFundings
     );
-
-    const lastDataPoint = timelineData[timelineData.length - 1];
     
-    const acceleratedPayoffPoint = timelineData.find(d => d.acceleratedBalance <= 0);
-    const optimizedPayoffDate = acceleratedPayoffPoint 
-      ? new Date(acceleratedPayoffPoint.date)
-      : new Date(lastDataPoint.date);
+    const baselineInterest = timelineResults.baselineInterest;
+    const acceleratedInterest = timelineResults.acceleratedInterest;
+    const interestSaved = timelineResults.interestSaved;
 
-    // Use InterestCalculator to ensure consistent precision
-    const baselineInterest = InterestCalculator.ensurePrecision(lastDataPoint.baselineInterest);
-    const acceleratedInterest = InterestCalculator.ensurePrecision(lastDataPoint.acceleratedInterest);
-    
-    const totalDebtValue = debts.reduce((sum, debt) => {
-      return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
-    }, 0);
-    
-    const totalPayment = baselineInterest + totalDebtValue;
-    const interestPercentage = (baselineInterest / totalPayment) * 100;
-    const principalPercentage = 100 - interestPercentage;
-
-    const baselineMonths = timelineData.length;
+    const baselineMonths = timelineResults.baselineMonths;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
 
-    const acceleratedMonths = timelineData.findIndex(d => d.acceleratedBalance <= 0);
-    const timeSavedMonths = baselineMonths - (acceleratedMonths > 0 ? acceleratedMonths : baselineMonths);
+    const acceleratedMonths = timelineResults.acceleratedMonths;
+    const timeSavedMonths = Math.max(0, baselineMonths - acceleratedMonths);
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
-    const totalInterest = baselineInterest;
-    const interestSaved = InterestCalculator.ensurePrecision(baselineInterest - acceleratedInterest);
-    const interestSavedPercentage = totalInterest > 0 ? (interestSaved / totalInterest) * 100 : 0;
+    const totalPayment = baselineInterest + totalDebtValue;
+    const interestPercentage = totalPayment > 0 ? (baselineInterest / totalPayment) * 100 : 0;
+    const principalPercentage = 100 - interestPercentage;
     
+    const interestSavedPercentage = baselineInterest > 0 ? (interestSaved / baselineInterest) * 100 : 0;
     const originalInterestPercentage = 100;
-    const optimizedInterestPercentage = totalInterest > 0 
+    const optimizedInterestPercentage = baselineInterest > 0 
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
-    console.log('Currency conversion in comparison data:', {
+    const originalPayoffDate = new Date();
+    originalPayoffDate.setMonth(originalPayoffDate.getMonth() + baselineMonths);
+    
+    const optimizedPayoffDate = new Date();
+    optimizedPayoffDate.setMonth(optimizedPayoffDate.getMonth() + acceleratedMonths);
+
+    console.log('Comparison calculation results:', {
       preferredCurrency,
+      totalDebtValue,
       baselineInterest,
       acceleratedInterest,
       interestSaved,
-      totalDebtValue,
+      baselineMonths,
+      acceleratedMonths,
+      timeSavedMonths,
+      interestPercentage,
+      principalPercentage,
       formattedBaseline: formatCurrency(baselineInterest),
       formattedAccelerated: formatCurrency(acceleratedInterest)
     });
 
     return {
       totalDebts: debts.length,
-      originalPayoffDate: new Date(lastDataPoint.date),
+      originalPayoffDate,
       originalTotalInterest: baselineInterest,
       optimizedPayoffDate,
       optimizedTotalInterest: acceleratedInterest,

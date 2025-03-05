@@ -3,7 +3,7 @@ import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
 import { OneTimeFunding } from '@/lib/types/payment';
-import { DebtTimelineCalculator } from '@/lib/services/calculations/DebtTimelineCalculator';
+import { UnifiedDebtTimelineCalculator } from '@/lib/services/calculations/UnifiedDebtTimelineCalculator';
 import { useCurrency } from '@/hooks/use-currency';
 
 interface TimelineResults {
@@ -83,8 +83,8 @@ export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = 
     const totalNormalizedBalance = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
     console.log('Total normalized balance:', totalNormalizedBalance);
 
-    // Use the fully normalized values for calculation
-    const results = DebtTimelineCalculator.calculateTimeline(
+    // Use UnifiedDebtTimelineCalculator directly for more robust calculation
+    const results = UnifiedDebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       monthlyPayment,
       strategy,
