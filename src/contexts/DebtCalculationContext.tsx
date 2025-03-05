@@ -48,13 +48,25 @@ export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = 
       oneTimeFundingsCount: oneTimeFundings.length
     });
 
-    // Normalize all debts to the preferred currency for calculation
-    const normalizedDebts = debts.map(debt => ({
-      ...debt,
-      // Keep original values but add normalized ones for calculation
-      normalizedBalance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
-      normalizedMinimumPayment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
-    }));
+    // Properly normalize all debts to the preferred currency for calculation
+    const normalizedDebts = debts.map(debt => {
+      // Create a new debt object with normalized values
+      const normalizedDebt = {
+        ...debt,
+        // Override the original values with normalized ones
+        balance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
+        minimum_payment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
+      };
+      
+      console.log('Normalized debt values:', {
+        name: debt.name,
+        originalBalance: debt.balance,
+        normalizedBalance: normalizedDebt.balance,
+        originalCurrency: debt.currency_symbol
+      });
+      
+      return normalizedDebt;
+    });
 
     // Normalize one-time fundings if they have different currencies
     const normalizedFundings = oneTimeFundings.map(funding => {
@@ -67,8 +79,11 @@ export const DebtCalculationProvider: React.FC<{ children: React.ReactNode }> = 
       return funding;
     });
 
-    // Use the normalized amounts for calculation
-    // We're passing the original debts here, but will use the normalized values internally
+    // Double-check total balance after normalization
+    const totalNormalizedBalance = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
+    console.log('Total normalized balance:', totalNormalizedBalance);
+
+    // Use the fully normalized values for calculation
     const results = DebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       monthlyPayment,

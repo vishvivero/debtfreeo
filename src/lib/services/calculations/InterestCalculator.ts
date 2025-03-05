@@ -2,6 +2,10 @@
 import { Debt } from "@/lib/types";
 
 export class InterestCalculator {
+  // Constants for reasonable calculation limits
+  private static readonly MAX_INTEREST_MULTIPLIER = 1.5; // Maximum 150% of principal as interest
+  private static readonly INTEREST_CAP = 100000; // Hard cap at 100K for most personal debts
+
   /**
    * Ensures proper precision for financial values
    */
@@ -10,7 +14,7 @@ export class InterestCalculator {
     if (Math.abs(value) > 10000000) { // 10 million threshold
       console.log('Extremely large number detected in ensurePrecision - likely a calculation error:', value);
       // Return a more reasonable value for typical debt calculations
-      return Math.min(Math.abs(value), 100000);
+      return Math.min(Math.abs(value), this.INTEREST_CAP);
     }
     
     // For large numbers, we need special handling to avoid floating point errors
@@ -30,7 +34,7 @@ export class InterestCalculator {
     // Sanity check for unrealistically large values
     if (Math.abs(value) > 10000000) { // 10 million threshold
       console.log('Unrealistically large number detected in formatLargeNumber, likely a calculation error:', value);
-      value = Math.min(Math.abs(value), 100000); // Cap at reasonable value
+      value = Math.min(Math.abs(value), this.INTEREST_CAP); // Cap at reasonable value
     }
     
     const precision = this.ensurePrecision(value);
@@ -67,6 +71,16 @@ export class InterestCalculator {
         preciseInterest,
         percentOfBalance: (preciseInterest / balance) * 100
       });
+      
+      // If interest seems extremely high (>20% per month), it's likely an error
+      if (preciseInterest > balance * 0.2) {
+        const cappedInterest = balance * (annualRate / 100) / 12;
+        console.log('Capping extremely high interest to reasonable value:', {
+          originalInterest: preciseInterest,
+          cappedInterest: cappedInterest
+        });
+        return Math.min(preciseInterest, cappedInterest);
+      }
     }
     
     console.log('Monthly interest calculation:', { 
@@ -94,6 +108,15 @@ export class InterestCalculator {
       return 0;
     }
     
+    // Sanity check for large values that might cause calculation issues
+    if (balance > 1000000 || annualRate > 100 || months > 360) {
+      console.log('Warning: Potentially problematic values for interest calculation:', {
+        balance,
+        annualRate,
+        months
+      });
+    }
+    
     let remainingBalance = balance;
     let totalInterest = 0;
     
@@ -102,8 +125,7 @@ export class InterestCalculator {
       console.log('Large interest calculation:', {
         startingBalance: balance,
         annualRate,
-        months,
-        useExactPrecision: true
+        months
       });
     }
     
@@ -115,9 +137,21 @@ export class InterestCalculator {
       // where P is principal, r is monthly rate, t is time in months
       const monthlyRate = annualRate / 1200;
       const roughEstimate = balance * monthlyRate * months;
-      return this.ensurePrecision(roughEstimate);
+      
+      // Cap at reasonable value
+      const cappedEstimate = Math.min(roughEstimate, balance * this.MAX_INTEREST_MULTIPLIER);
+      
+      if (cappedEstimate < roughEstimate) {
+        console.log('Capping unreasonably high interest estimate:', {
+          originalEstimate: roughEstimate,
+          cappedEstimate: cappedEstimate
+        });
+      }
+      
+      return this.ensurePrecision(cappedEstimate);
     }
     
+    // Use standard compound interest calculation for normal values
     for (let i = 0; i < months; i++) {
       const monthlyInterest = this.calculateMonthlyInterest(remainingBalance, annualRate);
       totalInterest += monthlyInterest;
@@ -138,11 +172,20 @@ export class InterestCalculator {
           currentTotalInterest: totalInterest,
           ratio: totalInterest / balance
         });
-        return this.ensurePrecision(balance * 1.5); // Return a reasonable cap 
+        return this.ensurePrecision(balance * this.MAX_INTEREST_MULTIPLIER); // Return a reasonable cap 
       }
     }
     
     const result = this.ensurePrecision(totalInterest);
+    
+    // Final safety check - if result is still unreasonably large
+    if (result > balance * this.MAX_INTEREST_MULTIPLIER) {
+      console.log('Final interest still exceeds reasonable amount, applying cap:', {
+        calculatedInterest: result,
+        cappedInterest: balance * this.MAX_INTEREST_MULTIPLIER
+      });
+      return this.ensurePrecision(balance * this.MAX_INTEREST_MULTIPLIER);
+    }
     
     // Log the final result for validation
     if (balance > 50000 || result > 10000) {

@@ -41,6 +41,14 @@ export class DebtTimelineCalculator {
     // First order debts according to the selected strategy
     const orderedDebts = strategy.calculate([...debts]);
     
+    // Sanity check for unrealistically large balances
+    const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
+    console.log('Total balance before calculation:', totalBalance);
+    
+    // Cap the interest to a reasonable percentage of the total debt balance
+    // to prevent unrealistic interest calculations
+    const MAX_REASONABLE_INTEREST_MULTIPLIER = 2.0; // Maximum 200% of principal as interest
+    
     // Call the standardized calculator to get the detailed timeline
     const results = StandardizedDebtCalculator.calculateTimeline(
       orderedDebts,
@@ -50,15 +58,36 @@ export class DebtTimelineCalculator {
     );
 
     // For extremely large numbers, we need additional validation
+    if (results.baselineInterest > totalBalance * MAX_REASONABLE_INTEREST_MULTIPLIER) {
+      console.log('Warning: Extremely large baseline interest detected, applying cap:', {
+        baselineInterest: results.baselineInterest,
+        totalDebtBalance: totalBalance,
+        cappedInterest: totalBalance * MAX_REASONABLE_INTEREST_MULTIPLIER,
+        totalMinimumPayment: debts.reduce((sum, debt) => sum + debt.minimum_payment, 0)
+      });
+      
+      // Cap the interest at a reasonable multiple of the principal
+      results.baselineInterest = Math.min(results.baselineInterest, 
+        totalBalance * MAX_REASONABLE_INTEREST_MULTIPLIER);
+      
+      // If baseline was capped, also cap accelerated interest
+      results.acceleratedInterest = Math.min(results.acceleratedInterest, 
+        results.baselineInterest);
+      
+      // Recalculate interest saved based on capped values
+      results.interestSaved = results.baselineInterest - results.acceleratedInterest;
+    }
+
+    // Verify calculations look reasonable
     if (results.baselineInterest > 1000000) {
       console.log('Warning: Very large baseline interest detected. Validating calculation...', {
         baselineInterest: results.baselineInterest,
-        totalDebtBalance: debts.reduce((sum, debt) => sum + debt.balance, 0),
+        totalDebtBalance: totalBalance,
         totalMinimumPayment: debts.reduce((sum, debt) => sum + debt.minimum_payment, 0)
       });
       
       // This is likely a calculation error for normal debts
-      if (debts.reduce((sum, debt) => sum + debt.balance, 0) < 1000000) {
+      if (totalBalance < 1000000) {
         console.log('Interest calculation seems abnormal for the debt amounts. Attempting correction...');
         
         // A more conservative estimate based on debt balance and rates

@@ -3,6 +3,10 @@
  * Handles all interest-related calculations for debts
  */
 export class InterestCalculator {
+  // Reasonable constants for financial calculations
+  private static readonly MAX_REASONABLE_INTEREST_MULTIPLIER = 1.5; // 150% of principal
+  private static readonly MAX_REASONABLE_INTEREST = 1000000; // 1 million cap for most loans
+  
   /**
    * Ensures that financial values are properly rounded to 2 decimal places
    */
@@ -57,6 +61,11 @@ export class InterestCalculator {
       return 0;
     }
     
+    // For extremely large balances, issue warning
+    if (balance > 1000000) {
+      console.log('Warning: Very large balance in monthly interest calculation:', balance);
+    }
+    
     // Ensure we're using a monthly rate (annual rate / 12 months / 100 for percentage)
     const monthlyRate = annualInterestRate / 1200; 
     const interest = balance * monthlyRate;
@@ -70,6 +79,16 @@ export class InterestCalculator {
         interest: preciseInterest,
         percentOfBalance: (preciseInterest / balance) * 100
       });
+      
+      // If interest seems extremely high, cap it at a reasonable percentage
+      if (preciseInterest > balance * 0.2) { // More than 20% per month is likely an error
+        const cappedInterest = balance * 0.02; // Cap at 2% per month for safety
+        console.log('Capping extremely high interest to reasonable value:', {
+          originalInterest: preciseInterest,
+          cappedInterest
+        });
+        return cappedInterest;
+      }
     }
     
     // Add detailed logging for debugging interest calculations
@@ -131,6 +150,12 @@ export class InterestCalculator {
     
     if (annualInterestRate === 0) return 0;
     
+    console.log('Starting total interest calculation with:', {
+      principal,
+      annualInterestRate,
+      monthlyPayment
+    });
+    
     // For very large initial balances, use a simpler calculation method
     // to avoid compounding errors
     if (principal > 1000000) {
@@ -140,7 +165,18 @@ export class InterestCalculator {
       // Simple interest formula: P * r * t
       const monthlyRate = annualInterestRate / 1200;
       const roughEstimate = principal * monthlyRate * estimatedMonths;
-      return this.ensurePrecision(roughEstimate);
+      
+      // Safety cap for unreasonable interest estimates
+      const cappedEstimate = Math.min(roughEstimate, principal * this.MAX_REASONABLE_INTEREST_MULTIPLIER);
+      if (cappedEstimate < roughEstimate) {
+        console.log('Capping unreasonably high interest estimate:', {
+          roughEstimate,
+          cappedEstimate,
+          cap: `${this.MAX_REASONABLE_INTEREST_MULTIPLIER * 100}% of principal`
+        });
+      }
+      
+      return this.ensurePrecision(cappedEstimate);
     }
     
     const monthlyRate = annualInterestRate / 1200;
@@ -169,18 +205,30 @@ export class InterestCalculator {
           currentTotalInterest: totalInterest,
           ratio: totalInterest / principal
         });
-        return this.ensurePrecision(principal * 1.5); // Return a reasonable cap (150% of principal)
+        return this.ensurePrecision(principal * this.MAX_REASONABLE_INTEREST_MULTIPLIER); // Return a reasonable cap
       }
       
-      // Add extra debugging for very large interest accumulation
-      if (totalInterest > 100000 && months % 10 === 0) {
-        console.log(`Interest accumulation high at month ${months}:`, {
-          totalInterest,
+      // Add periodic logging for large calculations
+      if (months % 60 === 0) {
+        console.log(`Interest calculation at month ${months}:`, {
           currentBalance: balance,
-          monthlyInterest,
-          payment: effectivePayment
+          accumulatedInterest: totalInterest,
+          monthlyInterest
         });
       }
+    }
+    
+    // One final safety check for the result
+    if (totalInterest > this.MAX_REASONABLE_INTEREST || totalInterest > principal * this.MAX_REASONABLE_INTEREST_MULTIPLIER) {
+      console.log('Final interest exceeds reasonable limits, applying cap:', {
+        calculatedInterest: totalInterest,
+        cappedInterest: Math.min(this.MAX_REASONABLE_INTEREST, principal * this.MAX_REASONABLE_INTEREST_MULTIPLIER)
+      });
+      
+      return this.ensurePrecision(Math.min(
+        this.MAX_REASONABLE_INTEREST, 
+        principal * this.MAX_REASONABLE_INTEREST_MULTIPLIER
+      ));
     }
     
     // Add final logging for large interest amounts

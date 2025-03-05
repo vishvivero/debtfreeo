@@ -8,11 +8,15 @@ import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtSc
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
+import { useCurrency } from "@/hooks/use-currency";
+
 export const DebtScoreCard = () => {
   const {
     debts,
     profile
   } = useDebts();
+  const { convertToPreferredCurrency } = useCurrency();
+  
   console.log('Rendering DebtScoreCard with:', {
     debtCount: debts?.length,
     totalBalance: debts?.reduce((sum, debt) => sum + debt.balance, 0),
@@ -20,23 +24,46 @@ export const DebtScoreCard = () => {
     profile
   });
 
-  // Calculate total debt and minimum payments
-  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
-  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) || 0;
+  // Calculate total debt and minimum payments - properly normalize currency
+  const totalDebt = debts?.reduce((sum, debt) => sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol), 0) || 0;
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol), 0) || 0;
   const hasNoDebts = !debts || debts.length === 0;
   const isDebtFree = debts && debts.length > 0 && totalDebt === 0;
+  
   const calculateScore = () => {
     if (!debts || debts.length === 0) return null;
+
+    // Create normalized debts for calculation
+    const normalizedDebts = debts.map(debt => ({
+      ...debt,
+      balance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
+      minimum_payment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
+    }));
 
     // Use either the profile's monthly payment or total minimum payments if monthly payment is not set
     const effectiveMonthlyPayment = profile?.monthly_payment || totalMinimumPayments;
     const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
-    const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(debts, totalMinimumPayments, selectedStrategy, []);
-    const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(debts, effectiveMonthlyPayment, selectedStrategy, []);
-    return calculateDebtScore(debts, originalPayoff, optimizedPayoff, selectedStrategy, effectiveMonthlyPayment);
+    
+    console.log('Calculating score with normalized debts:', {
+      totalNormalizedDebt: normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0),
+      totalNormalizedMinPayments: normalizedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+      effectiveMonthlyPayment
+    });
+    
+    const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(normalizedDebts, totalMinimumPayments, selectedStrategy, []);
+    const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(normalizedDebts, effectiveMonthlyPayment, selectedStrategy, []);
+    
+    console.log('Score calculation results:', {
+      originalPayoffInterest: originalPayoff.baselineInterest,
+      optimizedPayoffInterest: optimizedPayoff.acceleratedInterest
+    });
+    
+    return calculateDebtScore(normalizedDebts, originalPayoff, optimizedPayoff, selectedStrategy, effectiveMonthlyPayment);
   };
+  
   const scoreDetails = calculateScore();
   const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
+  
   const renderCircularProgress = () => {
     if (!scoreDetails) return null;
     return <div className="relative w-64 h-64">
@@ -70,6 +97,7 @@ export const DebtScoreCard = () => {
         </svg>
       </div>;
   };
+  
   const renderScoreBreakdown = () => {
     if (!scoreDetails) return null;
     return <div className="space-y-4 mt-6">
@@ -101,6 +129,7 @@ export const DebtScoreCard = () => {
         </div>
       </div>;
   };
+  
   const renderContent = () => {
     if (hasNoDebts) {
       return <NoDebtsMessage />;
@@ -131,13 +160,12 @@ export const DebtScoreCard = () => {
         </div>;
     }
     return <>
-        
-
         <div className="mt-8 pt-8 border-t border-gray-100">
           <DebtComparison />
         </div>
       </>;
   };
+  
   return <motion.div initial={{
     opacity: 0,
     y: 20
