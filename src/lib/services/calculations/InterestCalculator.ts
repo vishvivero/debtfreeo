@@ -1,10 +1,30 @@
+
 import { Debt } from "@/lib/types";
 
 export class InterestCalculator {
+  /**
+   * Ensures proper precision for financial values
+   */
+  private static ensurePrecision(value: number): number {
+    // For large numbers, we need special handling to avoid floating point errors
+    if (value > 1000000) {
+      return Math.round(value * 100) / 100;
+    }
+    return Number(value.toFixed(2));
+  }
+
   public static calculateMonthlyInterest(balance: number, annualRate: number): number {
-    const interest = Number(((balance * (annualRate / 100)) / 12).toFixed(2));
-    console.log('Monthly interest calculation:', { balance, annualRate, interest });
-    return interest;
+    const interest = balance * (annualRate / 100) / 12;
+    const preciseInterest = this.ensurePrecision(interest);
+    
+    console.log('Monthly interest calculation:', { 
+      balance, 
+      annualRate, 
+      rawInterest: interest,
+      preciseInterest 
+    });
+    
+    return preciseInterest;
   }
 
   public static calculateTotalInterest(
@@ -15,12 +35,42 @@ export class InterestCalculator {
     let remainingBalance = balance;
     let totalInterest = 0;
     
+    // Log input values for debugging large calculations
+    if (balance > 1000000 || months > 120) {
+      console.log('Large interest calculation:', {
+        startingBalance: balance,
+        annualRate,
+        months
+      });
+    }
+    
     for (let i = 0; i < months; i++) {
       const monthlyInterest = this.calculateMonthlyInterest(remainingBalance, annualRate);
       totalInterest += monthlyInterest;
       remainingBalance += monthlyInterest;
+      
+      // Add periodic logging for large calculations
+      if (i > 0 && i % 60 === 0 && balance > 1000000) {
+        console.log(`Interest calculation at month ${i}:`, {
+          currentBalance: remainingBalance,
+          interestSoFar: totalInterest
+        });
+      }
     }
     
-    return Number(totalInterest.toFixed(2));
+    const result = this.ensurePrecision(totalInterest);
+    
+    // Log the final result for validation
+    if (balance > 100000 || result > 100000) {
+      console.log('Total interest calculation complete:', {
+        originalBalance: balance,
+        annualRate,
+        months,
+        rawTotalInterest: totalInterest,
+        finalResult: result
+      });
+    }
+    
+    return result;
   }
 }

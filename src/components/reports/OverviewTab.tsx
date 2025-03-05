@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimeline
 import { Debt } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCurrency } from "@/hooks/use-currency";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -28,6 +30,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
       }, 0);
       
+      // Ensure we're using proper interest calculation
       const timelineResults = DebtTimelineCalculator.calculateTimeline(
         debts,
         totalMinimumPayments,
@@ -35,8 +38,16 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         []
       );
       
-      const baselineInterest = Number(timelineResults.baselineInterest.toFixed(2));
-      const acceleratedInterest = Number(timelineResults.acceleratedInterest.toFixed(2));
+      // Ensure precision for financial values
+      const baselineInterest = InterestCalculator.ensurePrecision(timelineResults.baselineInterest);
+      const acceleratedInterest = InterestCalculator.ensurePrecision(timelineResults.acceleratedInterest);
+      
+      // Log the values for debugging
+      console.log('Interest values for PDF:', {
+        original: timelineResults.baselineInterest,
+        baselineInterest,
+        acceleratedInterest
+      });
       
       const doc = generateDebtOverviewPDF(
         debts,
@@ -85,6 +96,39 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     const convertedBalance = convertToPreferredCurrency(debt.balance, debt.currency_symbol);
     categories[debt.category] = (categories[debt.category] || 0) + convertedBalance;
   });
+
+  // Calculate interest with proper precision
+  const calculateInterest = () => {
+    if (debts.length === 0) return { baseInterest: 0, optimizedInterest: 0 };
+    
+    try {
+      // Calculate timeline with proper interest calculation
+      const results = DebtTimelineCalculator.calculateTimeline(
+        debts,
+        totalMinimumPayment,
+        strategies[0],
+        []
+      );
+      
+      // Apply proper rounding
+      const baseInterest = InterestCalculator.ensurePrecision(results.baselineInterest);
+      const optimizedInterest = InterestCalculator.ensurePrecision(results.acceleratedInterest);
+      
+      console.log('Interest calculation for overview:', {
+        rawBase: results.baselineInterest,
+        rawOptimized: results.acceleratedInterest,
+        rounded: { baseInterest, optimizedInterest }
+      });
+      
+      return { baseInterest, optimizedInterest };
+    } catch (error) {
+      console.error('Error calculating interest:', error);
+      return { baseInterest: 0, optimizedInterest: 0 };
+    }
+  };
+  
+  // Get the interest values with proper calculation
+  const { baseInterest, optimizedInterest } = calculateInterest();
 
   return (
     <div className="space-y-6">

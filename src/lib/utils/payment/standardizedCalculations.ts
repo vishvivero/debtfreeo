@@ -15,7 +15,7 @@ export interface CalculationResult {
  * Ensure proper precision for financial calculations
  */
 function ensurePrecision(value: number): number {
-  return Number(value.toFixed(2));
+  return InterestCalculator.ensurePrecision(value);
 }
 
 /**
