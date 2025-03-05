@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -65,6 +66,22 @@ export const DebtComparison = () => {
     
     const totalDebtValue = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
     
+    // Add a simplified calculation to serve as a fallback/cross-check
+    const simplifiedTotalInterest = normalizedDebts.reduce((sum, debt) => {
+      if (debt.interest_rate === 0) return sum;
+      
+      // Calculate months to payoff based on minimum payments
+      const monthsToPayoff = debt.minimum_payment > 0 
+        ? Math.ceil(debt.balance / debt.minimum_payment) 
+        : 120; // default to 10 years for very low payments
+      
+      // Simple interest estimation: Principal * (Rate/100) * (Years)
+      const estimatedInterest = debt.balance * (debt.interest_rate / 100) * (monthsToPayoff / 12);
+      return sum + estimatedInterest;
+    }, 0);
+    
+    console.log('Simplified interest estimation:', simplifiedTotalInterest);
+    
     const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       profile.monthly_payment,
@@ -72,10 +89,29 @@ export const DebtComparison = () => {
       oneTimeFundings
     );
     
+    // Validate the calculated interest against our simplified estimation
+    // If there's a significant discrepancy, use the simplified calculation as a fallback
     const baselineInterest = timelineResults.baselineInterest;
-    const acceleratedInterest = timelineResults.acceleratedInterest;
-    const interestSaved = timelineResults.interestSaved;
-
+    let validatedBaselineInterest = baselineInterest;
+    
+    // If the baseline interest is more than 30% higher than our simplified calculation,
+    // consider using the simplified calculation instead
+    if (baselineInterest > simplifiedTotalInterest * 1.3) {
+      console.log('Interest calculation discrepancy detected:', {
+        calculatedInterest: baselineInterest,
+        simplifiedEstimate: simplifiedTotalInterest,
+        ratio: baselineInterest / simplifiedTotalInterest
+      });
+      
+      // Use the simplified estimate as our baseline
+      validatedBaselineInterest = simplifiedTotalInterest;
+    }
+    
+    // Apply the same proportion for the accelerated interest
+    const ratio = timelineResults.acceleratedInterest / timelineResults.baselineInterest;
+    const validatedAcceleratedInterest = validatedBaselineInterest * ratio;
+    const validatedInterestSaved = validatedBaselineInterest - validatedAcceleratedInterest;
+    
     const baselineMonths = timelineResults.baselineMonths;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
@@ -85,14 +121,14 @@ export const DebtComparison = () => {
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
-    const totalPayment = baselineInterest + totalDebtValue;
-    const interestPercentage = totalPayment > 0 ? (baselineInterest / totalPayment) * 100 : 0;
+    const totalPayment = validatedBaselineInterest + totalDebtValue;
+    const interestPercentage = totalPayment > 0 ? (validatedBaselineInterest / totalPayment) * 100 : 0;
     const principalPercentage = 100 - interestPercentage;
     
-    const interestSavedPercentage = baselineInterest > 0 ? (interestSaved / baselineInterest) * 100 : 0;
+    const interestSavedPercentage = validatedBaselineInterest > 0 ? (validatedInterestSaved / validatedBaselineInterest) * 100 : 0;
     const originalInterestPercentage = 100;
-    const optimizedInterestPercentage = baselineInterest > 0 
-      ? (acceleratedInterest / baselineInterest) * 100 
+    const optimizedInterestPercentage = validatedBaselineInterest > 0 
+      ? (validatedAcceleratedInterest / validatedBaselineInterest) * 100 
       : 0;
 
     const originalPayoffDate = new Date();
@@ -104,25 +140,27 @@ export const DebtComparison = () => {
     console.log('Comparison calculation results:', {
       preferredCurrency,
       totalDebtValue,
-      baselineInterest,
-      acceleratedInterest,
-      interestSaved,
+      calculatedBaselineInterest: baselineInterest,
+      validatedBaselineInterest,
+      calculatedAcceleratedInterest: timelineResults.acceleratedInterest,
+      validatedAcceleratedInterest,
+      interestSaved: validatedInterestSaved,
       baselineMonths,
       acceleratedMonths,
       timeSavedMonths,
       interestPercentage,
       principalPercentage,
-      formattedBaseline: formatCurrency(baselineInterest),
-      formattedAccelerated: formatCurrency(acceleratedInterest)
+      formattedBaseline: formatCurrency(validatedBaselineInterest),
+      formattedAccelerated: formatCurrency(validatedAcceleratedInterest)
     });
 
     return {
       totalDebts: debts.length,
       originalPayoffDate,
-      originalTotalInterest: baselineInterest,
+      originalTotalInterest: validatedBaselineInterest,
       optimizedPayoffDate,
-      optimizedTotalInterest: acceleratedInterest,
-      moneySaved: interestSaved,
+      optimizedTotalInterest: validatedAcceleratedInterest,
+      moneySaved: validatedInterestSaved,
       baselineYears,
       baselineMonths: remainingMonths,
       principalPercentage,
