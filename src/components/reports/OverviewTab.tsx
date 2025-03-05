@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -128,7 +127,11 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         normalizedDebts: normalizedDebts.map(d => ({ name: d.name, balance: d.balance, minPayment: d.minimum_payment })),
         rawBase: results.baselineInterest,
         rawOptimized: results.acceleratedInterest,
-        rounded: { baseInterest, optimizedInterest }
+        rounded: { baseInterest, optimizedInterest },
+        formatted: { 
+          baseInterest: formatCurrency(baseInterest), 
+          optimizedInterest: formatCurrency(optimizedInterest)
+        }
       });
       
       return { baseInterest, optimizedInterest };

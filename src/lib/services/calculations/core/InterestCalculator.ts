@@ -17,6 +17,24 @@ export class InterestCalculator {
   }
 
   /**
+   * Safely formats very large numbers for display purposes
+   */
+  static formatLargeNumber(value: number): string {
+    const precision = this.ensurePrecision(value);
+    
+    // Format with appropriate suffixes
+    if (precision >= 1000000000) {
+      return `${(precision / 1000000000).toFixed(2)}B`;
+    } else if (precision >= 1000000) {
+      return `${(precision / 1000000).toFixed(2)}M`;
+    } else if (precision >= 1000) {
+      return `${(precision / 1000).toFixed(2)}K`;
+    }
+    
+    return precision.toFixed(2);
+  }
+
+  /**
    * Calculates the monthly interest amount
    */
   static calculateMonthlyInterest(balance: number, annualInterestRate: number): number {

@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCurrency } from "@/hooks/use-currency";
+import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -69,8 +70,9 @@ export const DebtComparison = () => {
       ? new Date(acceleratedPayoffPoint.date)
       : new Date(lastDataPoint.date);
 
-    const baselineInterest = Number(lastDataPoint.baselineInterest.toFixed(2));
-    const acceleratedInterest = Number(lastDataPoint.acceleratedInterest.toFixed(2));
+    // Use InterestCalculator to ensure consistent precision
+    const baselineInterest = InterestCalculator.ensurePrecision(lastDataPoint.baselineInterest);
+    const acceleratedInterest = InterestCalculator.ensurePrecision(lastDataPoint.acceleratedInterest);
     
     const totalDebtValue = debts.reduce((sum, debt) => {
       return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
@@ -90,7 +92,7 @@ export const DebtComparison = () => {
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
     const totalInterest = baselineInterest;
-    const interestSaved = baselineInterest - acceleratedInterest;
+    const interestSaved = InterestCalculator.ensurePrecision(baselineInterest - acceleratedInterest);
     const interestSavedPercentage = totalInterest > 0 ? (interestSaved / totalInterest) * 100 : 0;
     
     const originalInterestPercentage = 100;
@@ -103,7 +105,9 @@ export const DebtComparison = () => {
       baselineInterest,
       acceleratedInterest,
       interestSaved,
-      totalDebtValue
+      totalDebtValue,
+      formattedBaseline: formatCurrency(baselineInterest),
+      formattedAccelerated: formatCurrency(acceleratedInterest)
     });
 
     return {
