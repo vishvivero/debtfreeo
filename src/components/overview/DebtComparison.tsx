@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCurrency } from "@/hooks/use-currency";
 import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
-import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/core/UnifiedDebtTimelineCalculator";
+import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
