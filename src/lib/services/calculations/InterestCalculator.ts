@@ -8,6 +8,7 @@ export class InterestCalculator {
   private static ensurePrecision(value: number): number {
     // For large numbers, we need special handling to avoid floating point errors
     if (Math.abs(value) > 1000000) {
+      console.log('Large number detected in ensurePrecision:', value);
       // For very large numbers, use Math.round for precision to avoid floating point errors
       return Math.round(value * 100) / 100;
     }

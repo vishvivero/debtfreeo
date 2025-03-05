@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,16 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
       }, 0);
       
-      // Calculate timeline for the report using the preferred currency values
+      // First normalize debts to preferred currency for consistent calculations
+      const normalizedDebts = debts.map(debt => ({
+        ...debt,
+        balance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
+        minimum_payment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
+      }));
+      
+      // Calculate timeline for the report using the normalized debts
       const timelineResults = DebtTimelineCalculator.calculateTimeline(
-        debts,
+        normalizedDebts,
         totalMinimumPayments,
         strategies[0],
         []
@@ -44,13 +52,15 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
       
       // Log values for debugging
       console.log('Interest values for PDF:', {
+        normalizedDebts: normalizedDebts.map(d => ({ name: d.name, balance: d.balance, minPayment: d.minimum_payment })),
         original: timelineResults.baselineInterest,
         baselineInterest,
-        acceleratedInterest
+        acceleratedInterest,
+        currencySymbol: preferredCurrency
       });
       
       const doc = generateDebtOverviewPDF(
-        debts,
+        normalizedDebts,
         totalMinimumPayments,
         0,
         timelineResults.baselineMonths,
@@ -104,14 +114,25 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     if (debts.length === 0) return { baseInterest: 0, optimizedInterest: 0 };
     
     try {
-      // First convert all amounts to the preferred currency
+      // First convert all amounts to the preferred currency - this is the key fix
       const normalizedDebts = debts.map(debt => ({
         ...debt,
         balance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
         minimum_payment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
       }));
       
-      // Calculate timeline with proper interest calculation
+      // Log normalized debts for debugging
+      console.log('Normalized debts for interest calculation:', {
+        preferredCurrency,
+        normalizedDebts: normalizedDebts.map(d => ({ 
+          name: d.name, 
+          originalBalance: debts.find(od => od.id === d.id)?.balance || 0,
+          originalCurrency: debts.find(od => od.id === d.id)?.currency_symbol || '$',
+          normalizedBalance: d.balance 
+        }))
+      });
+      
+      // Calculate timeline with properly normalized debts
       const results = DebtTimelineCalculator.calculateTimeline(
         normalizedDebts, // Use currency-normalized debts
         totalMinimumPayment,
