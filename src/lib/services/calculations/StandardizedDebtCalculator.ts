@@ -32,18 +32,6 @@ export class StandardizedDebtCalculator {
     console.log('Using fallback interest calculation');
     
     return debts.reduce((total, debt) => {
-      // Skip if interest is already included in the balance
-      if (debt.metadata?.interest_already_calculated === true || 
-          debt.metadata?.interest_included === true) {
-        console.log(`Skipping fallback interest for ${debt.name} - interest already included`);
-        return total;
-      }
-      
-      // Skip zero interest loans
-      if (debt.interest_rate === 0) {
-        return total;
-      }
-      
       // Simple interest: Principal × Rate × Time
       const yearlyInterest = debt.balance * (debt.interest_rate / 100);
       const fallbackInterest = yearlyInterest * this.FALLBACK_YEARS;
