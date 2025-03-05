@@ -1,62 +1,87 @@
+
 /**
- * Utilities for standard interest calculations
+ * Handles all interest-related calculations for debts
  */
 export class InterestCalculator {
   /**
-   * Calculates monthly interest based on the current balance and annual interest rate
+   * Ensures that financial values are properly rounded to 2 decimal places
+   */
+  static ensurePrecision(value: number): number {
+    return Number(value.toFixed(2));
+  }
+
+  /**
+   * Calculates the monthly interest amount
    */
   static calculateMonthlyInterest(balance: number, annualInterestRate: number): number {
-    // Convert annual rate to monthly rate (divide by 1200 to account for percentage)
-    const monthlyInterestRate = annualInterestRate / 1200;
-    return this.ensurePrecision(balance * monthlyInterestRate);
-  }
-
-  /**
-   * Calculates the remaining loan balance after a payment
-   */
-  static calculateRemainingBalance(
-    currentBalance: number,
-    payment: number,
-    interestAmount: number
-  ): number {
-    // If payment is less than interest, balance increases
-    if (payment < interestAmount) {
-      return this.ensurePrecision(currentBalance + (interestAmount - payment));
-    }
+    const monthlyRate = annualInterestRate / 1200; // Annual rate / (12 * 100)
+    const interest = balance * monthlyRate;
     
-    // Otherwise, reduce balance by payment minus interest
-    return this.ensurePrecision(currentBalance - (payment - interestAmount));
+    console.log('Monthly interest calculation:', {
+      balance,
+      annualRate: annualInterestRate,
+      interest: this.ensurePrecision(interest)
+    });
+    
+    return this.ensurePrecision(interest);
   }
 
   /**
-   * Calculate the principal amount from total loan amount (for loans with pre-calculated interest)
+   * Calculates the principal amount from a total loan amount with pre-calculated interest
+   * For example, if a loan is $10,000 with 5% interest included, this calculates what the
+   * actual principal is.
    */
   static calculatePrincipalFromTotal(
-    totalLoanAmount: number,
+    totalAmount: number,
     annualInterestRate: number,
     monthlyPayment: number,
-    loanTermMonths: number
+    remainingMonths: number
   ): number {
-    // For zero interest loans or invalid parameters
-    if (annualInterestRate <= 0 || loanTermMonths <= 0 || monthlyPayment <= 0) {
-      return totalLoanAmount;
+    // For zero interest or short-term loans, just return the total amount
+    if (annualInterestRate === 0 || remainingMonths === 0) {
+      return totalAmount;
     }
 
-    // Convert annual rate to monthly rate
     const monthlyRate = annualInterestRate / 1200;
     
-    // Calculate present value (principal) from future value (total with interest)
-    // Using the standard formula to solve for principal given payment, rate, and term
-    const principalAmount = monthlyPayment * 
-      (1 - Math.pow(1 + monthlyRate, -loanTermMonths)) / monthlyRate;
+    // Formula for calculating principal when the total (with interest) is known
+    // P = T / (1 + i * n)
+    // Where:
+    // P = Principal
+    // T = Total amount (principal + interest)
+    // i = Monthly interest rate
+    // n = Number of months
     
-    return this.ensurePrecision(principalAmount);
+    const principal = totalAmount / (1 + (monthlyRate * remainingMonths));
+    
+    return this.ensurePrecision(principal);
   }
 
   /**
-   * Ensures consistent decimal precision for monetary values
+   * Calculates how much total interest will be paid over the life of a loan
    */
-  static ensurePrecision(value: number, precision: number = 2): number {
-    return Number(value.toFixed(precision));
+  static calculateTotalInterest(
+    principal: number,
+    annualInterestRate: number,
+    monthlyPayment: number
+  ): number {
+    if (annualInterestRate === 0) return 0;
+    
+    const monthlyRate = annualInterestRate / 1200;
+    let balance = principal;
+    let totalInterest = 0;
+    let months = 0;
+    
+    while (balance > 0 && months < 600) { // 50 years max
+      const monthlyInterest = balance * monthlyRate;
+      totalInterest += monthlyInterest;
+      
+      const effectivePayment = Math.min(monthlyPayment, balance + monthlyInterest);
+      balance = Math.max(0, balance + monthlyInterest - effectivePayment);
+      
+      months++;
+    }
+    
+    return this.ensurePrecision(totalInterest);
   }
 }

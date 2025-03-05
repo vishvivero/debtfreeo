@@ -12,6 +12,13 @@ export interface CalculationResult {
 }
 
 /**
+ * Ensure proper precision for financial calculations
+ */
+function ensurePrecision(value: number): number {
+  return Number(value.toFixed(2));
+}
+
+/**
  * Calculate the amortization schedule for a single debt
  */
 export function calculateAmortizationSchedule(
@@ -45,22 +52,22 @@ export function calculateAmortizationSchedule(
 
   const results: CalculationResult[] = [];
   let currentDate = new Date();
-  let currentBalance = balance;
+  let currentBalance = ensurePrecision(balance);
   const monthlyInterestRate = debt.interest_rate / 1200; // Annual rate / (12 * 100)
 
   // Continue until the debt is fully paid
   while (currentBalance > 0) {
-    // Calculate interest for this month
-    const interestPayment = currentBalance * monthlyInterestRate;
+    // Calculate interest for this month with proper precision
+    const interestPayment = ensurePrecision(currentBalance * monthlyInterestRate);
     
     // Calculate payment for this month (don't pay more than remaining balance + interest)
-    const payment = Math.min(monthlyPayment, currentBalance + interestPayment);
+    const payment = ensurePrecision(Math.min(monthlyPayment, currentBalance + interestPayment));
     
     // Calculate portion of payment going to principal
-    const principalPayment = payment - interestPayment;
+    const principalPayment = ensurePrecision(payment - interestPayment);
     
     // Calculate new balance
-    currentBalance = Math.max(0, currentBalance - principalPayment);
+    currentBalance = ensurePrecision(Math.max(0, currentBalance - principalPayment));
     
     // Add this month's calculation to results
     results.push({
@@ -125,7 +132,7 @@ export function calculateSingleDebtPayoff(
   }
 
   const monthlyInterestRate = debt.interest_rate / 1200; // Annual rate / (12 * 100)
-  let currentBalance = balance;
+  let currentBalance = ensurePrecision(balance);
   let months = 0;
   let totalInterest = 0;
   const payoffDate = new Date();
@@ -144,18 +151,18 @@ export function calculateSingleDebtPayoff(
 
   // For interest-bearing debts
   while (currentBalance > 0 && months < 600) {
-    // Calculate interest for this month
-    const interestForMonth = currentBalance * monthlyInterestRate;
-    totalInterest += interestForMonth;
+    // Calculate interest for this month with proper precision
+    const interestForMonth = ensurePrecision(currentBalance * monthlyInterestRate);
+    totalInterest = ensurePrecision(totalInterest + interestForMonth);
     
     // Calculate payment for this month (don't pay more than remaining balance + interest)
-    const payment = Math.min(monthlyPayment, currentBalance + interestForMonth);
+    const payment = ensurePrecision(Math.min(monthlyPayment, currentBalance + interestForMonth));
     
     // Calculate portion of payment going to principal
-    const principalPayment = payment - interestForMonth;
+    const principalPayment = ensurePrecision(payment - interestForMonth);
     
     // Calculate new balance
-    currentBalance = Math.max(0, currentBalance - principalPayment);
+    currentBalance = ensurePrecision(Math.max(0, currentBalance - principalPayment));
     
     months++;
   }

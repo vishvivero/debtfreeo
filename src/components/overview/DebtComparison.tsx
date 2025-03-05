@@ -51,12 +51,10 @@ export const DebtComparison = () => {
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
-    // Calculate minimum payments total with currency conversion
     const totalMinimumPayment = debts.reduce((sum, debt) => {
       return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
     }, 0);
     
-    // Get timeline data with currency conversion in mind
     const timelineData = calculateTimelineData(
       debts,
       profile.monthly_payment,
@@ -64,20 +62,16 @@ export const DebtComparison = () => {
       oneTimeFundings
     );
 
-    // Get the last data point for final balances and interest
     const lastDataPoint = timelineData[timelineData.length - 1];
     
-    // Find when accelerated balance reaches 0
     const acceleratedPayoffPoint = timelineData.find(d => d.acceleratedBalance <= 0);
     const optimizedPayoffDate = acceleratedPayoffPoint 
       ? new Date(acceleratedPayoffPoint.date)
       : new Date(lastDataPoint.date);
 
-    // Convert interest values to preferred currency
-    const baselineInterest = lastDataPoint.baselineInterest;
-    const acceleratedInterest = lastDataPoint.acceleratedInterest;
+    const baselineInterest = Number(lastDataPoint.baselineInterest.toFixed(2));
+    const acceleratedInterest = Number(lastDataPoint.acceleratedInterest.toFixed(2));
     
-    // Calculate payment efficiency from original timeline
     const totalDebtValue = debts.reduce((sum, debt) => {
       return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
     }, 0);
@@ -86,23 +80,19 @@ export const DebtComparison = () => {
     const interestPercentage = (baselineInterest / totalPayment) * 100;
     const principalPercentage = 100 - interestPercentage;
 
-    // Calculate months for baseline scenario
     const baselineMonths = timelineData.length;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
 
-    // Calculate time saved
     const acceleratedMonths = timelineData.findIndex(d => d.acceleratedBalance <= 0);
     const timeSavedMonths = baselineMonths - (acceleratedMonths > 0 ? acceleratedMonths : baselineMonths);
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
-    // Calculate interest savings percentages for the progress bar
     const totalInterest = baselineInterest;
     const interestSaved = baselineInterest - acceleratedInterest;
     const interestSavedPercentage = totalInterest > 0 ? (interestSaved / totalInterest) * 100 : 0;
     
-    // For the progress bar percentages
     const originalInterestPercentage = 100;
     const optimizedInterestPercentage = totalInterest > 0 
       ? (acceleratedInterest / baselineInterest) * 100 
@@ -146,7 +136,6 @@ export const DebtComparison = () => {
       className="space-y-6"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
@@ -169,7 +158,6 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              {/* Redesigned Current Debt-Free Date */}
               <div className="p-5 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-3 mb-3">
@@ -214,7 +202,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Payment Efficiency */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -269,7 +256,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Total Debts */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
@@ -316,7 +302,6 @@ export const DebtComparison = () => {
           </CardContent>
         </Card>
 
-        {/* Optimized Plan Card */}
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
@@ -336,7 +321,6 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              {/* Redesigned Optimized Debt-Free Date */}
               <div className="p-5 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-3 mb-3">
@@ -389,7 +373,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Redesigned Total Interest (Optimized) with Progress Bar */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">

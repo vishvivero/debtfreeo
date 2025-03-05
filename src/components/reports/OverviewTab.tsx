@@ -35,14 +35,17 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         []
       );
       
+      const baselineInterest = Number(timelineResults.baselineInterest.toFixed(2));
+      const acceleratedInterest = Number(timelineResults.acceleratedInterest.toFixed(2));
+      
       const doc = generateDebtOverviewPDF(
         debts,
         totalMinimumPayments,
         0,
         timelineResults.baselineMonths,
         timelineResults.acceleratedMonths,
-        timelineResults.baselineInterest,
-        timelineResults.acceleratedInterest,
+        baselineInterest,
+        acceleratedInterest,
         strategies[0],
         [],
         preferredCurrency
