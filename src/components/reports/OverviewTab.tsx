@@ -26,11 +26,12 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
 
   const handleDownloadReport = () => {
     try {
+      // Calculate total minimum payments in the user's preferred currency
       const totalMinimumPayments = debts.reduce((sum, debt) => {
         return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol);
       }, 0);
       
-      // Ensure we're using proper interest calculation
+      // Calculate timeline for the report using the preferred currency values
       const timelineResults = DebtTimelineCalculator.calculateTimeline(
         debts,
         totalMinimumPayments,
@@ -38,11 +39,11 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         []
       );
       
-      // Ensure precision for financial values
+      // Ensure precision for financial values and convert large values appropriately
       const baselineInterest = InterestCalculator.ensurePrecision(timelineResults.baselineInterest);
       const acceleratedInterest = InterestCalculator.ensurePrecision(timelineResults.acceleratedInterest);
       
-      // Log the values for debugging
+      // Log values for debugging
       console.log('Interest values for PDF:', {
         original: timelineResults.baselineInterest,
         baselineInterest,
@@ -79,6 +80,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     }
   };
 
+  // Calculate debt metrics with proper currency handling
   const totalDebt = debts.reduce((sum, debt) => {
     return sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol);
   }, 0);
@@ -91,30 +93,39 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     return sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol); 
   }, 0);
 
+  // Calculate debt by category
   const categories: Record<string, number> = {};
   debts.forEach(debt => {
     const convertedBalance = convertToPreferredCurrency(debt.balance, debt.currency_symbol);
     categories[debt.category] = (categories[debt.category] || 0) + convertedBalance;
   });
 
-  // Calculate interest with proper precision
+  // Calculate interest with proper precision and currency handling
   const calculateInterest = () => {
     if (debts.length === 0) return { baseInterest: 0, optimizedInterest: 0 };
     
     try {
+      // First convert all amounts to the preferred currency
+      const normalizedDebts = debts.map(debt => ({
+        ...debt,
+        balance: convertToPreferredCurrency(debt.balance, debt.currency_symbol),
+        minimum_payment: convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol)
+      }));
+      
       // Calculate timeline with proper interest calculation
       const results = DebtTimelineCalculator.calculateTimeline(
-        debts,
+        normalizedDebts, // Use currency-normalized debts
         totalMinimumPayment,
         strategies[0],
         []
       );
       
-      // Apply proper rounding
+      // Apply proper rounding to ensure consistent display
       const baseInterest = InterestCalculator.ensurePrecision(results.baselineInterest);
       const optimizedInterest = InterestCalculator.ensurePrecision(results.acceleratedInterest);
       
       console.log('Interest calculation for overview:', {
+        normalizedDebts: normalizedDebts.map(d => ({ name: d.name, balance: d.balance, minPayment: d.minimum_payment })),
         rawBase: results.baselineInterest,
         rawOptimized: results.acceleratedInterest,
         rounded: { baseInterest, optimizedInterest }

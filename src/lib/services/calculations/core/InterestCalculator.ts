@@ -8,7 +8,7 @@ export class InterestCalculator {
    */
   static ensurePrecision(value: number): number {
     // Handle very large numbers to prevent floating point errors
-    if (value > 1000000) {
+    if (Math.abs(value) > 1000000) {
       console.log('Large number detected in ensurePrecision:', value);
       // For very large numbers, we need to be careful about floating point precision
       return Math.round(value * 100) / 100;
@@ -20,16 +20,19 @@ export class InterestCalculator {
    * Calculates the monthly interest amount
    */
   static calculateMonthlyInterest(balance: number, annualInterestRate: number): number {
-    const monthlyRate = annualInterestRate / 1200; // Annual rate / (12 * 100)
+    // Ensure we're using a monthly rate (annual rate / 12 months / 100 for percentage)
+    const monthlyRate = annualInterestRate / 1200; 
     const interest = balance * monthlyRate;
+    const preciseInterest = this.ensurePrecision(interest);
     
+    // Add detailed logging for debugging interest calculations
     console.log('Monthly interest calculation:', {
       balance,
       annualRate: annualInterestRate,
-      interest: this.ensurePrecision(interest)
+      interest: preciseInterest
     });
     
-    return this.ensurePrecision(interest);
+    return preciseInterest;
   }
 
   /**
@@ -79,21 +82,21 @@ export class InterestCalculator {
     let months = 0;
     
     // Add debug logging for large amounts
-    if (principal > 1000000) {
+    if (principal > 100000) {
       console.log('Large principal in calculateTotalInterest:', principal);
     }
     
     while (balance > 0 && months < 600) { // 50 years max
-      const monthlyInterest = balance * monthlyRate;
-      totalInterest += monthlyInterest;
+      const monthlyInterest = this.ensurePrecision(balance * monthlyRate);
+      totalInterest = this.ensurePrecision(totalInterest + monthlyInterest);
       
       const effectivePayment = Math.min(monthlyPayment, balance + monthlyInterest);
-      balance = Math.max(0, balance + monthlyInterest - effectivePayment);
+      balance = this.ensurePrecision(Math.max(0, balance + monthlyInterest - effectivePayment));
       
       months++;
       
       // Add extra debugging for very large interest accumulation
-      if (totalInterest > 1000000 && months % 10 === 0) {
+      if (totalInterest > 100000 && months % 10 === 0) {
         console.log(`Interest accumulation high at month ${months}:`, {
           totalInterest,
           currentBalance: balance,
@@ -103,14 +106,13 @@ export class InterestCalculator {
       }
     }
     
-    // Add final logging
-    if (totalInterest > 100000) {
-      console.log('Final high interest calculation:', {
+    // Add final logging for large interest amounts
+    if (totalInterest > 10000) {
+      console.log('Final interest calculation:', {
         principal,
         annualRate: annualInterestRate,
         months,
-        totalInterest,
-        result: this.ensurePrecision(totalInterest)
+        totalInterest: this.ensurePrecision(totalInterest)
       });
     }
     
