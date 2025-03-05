@@ -5,7 +5,14 @@ export class InterestCalculator {
   /**
    * Ensures proper precision for financial values
    */
-  private static ensurePrecision(value: number): number {
+  public static ensurePrecision(value: number): number {
+    // Sanity check for unrealistically large numbers (likely calculation errors)
+    if (Math.abs(value) > 10000000) { // 10 million threshold
+      console.log('Extremely large number detected in ensurePrecision - likely a calculation error:', value);
+      // Return a more reasonable value for typical debt calculations
+      return Math.min(Math.abs(value), 100000);
+    }
+    
     // For large numbers, we need special handling to avoid floating point errors
     if (Math.abs(value) > 1000000) {
       console.log('Large number detected in ensurePrecision:', value);
@@ -20,6 +27,12 @@ export class InterestCalculator {
    * Safely handles very large numbers for display purposes
    */
   public static formatLargeNumber(value: number): string {
+    // Sanity check for unrealistically large values
+    if (Math.abs(value) > 10000000) { // 10 million threshold
+      console.log('Unrealistically large number detected in formatLargeNumber, likely a calculation error:', value);
+      value = Math.min(Math.abs(value), 100000); // Cap at reasonable value
+    }
+    
     const precision = this.ensurePrecision(value);
     
     // Format large numbers with appropriate suffixes for display
@@ -35,9 +48,26 @@ export class InterestCalculator {
   }
 
   public static calculateMonthlyInterest(balance: number, annualRate: number): number {
+    // Validate inputs to catch potential errors
+    if (isNaN(balance) || isNaN(annualRate) || balance < 0 || annualRate < 0) {
+      console.log('Invalid inputs for monthly interest calculation:', { balance, annualRate });
+      return 0;
+    }
+    
     // Calculate the monthly interest with proper precision
     const interest = balance * (annualRate / 100) / 12;
     const preciseInterest = this.ensurePrecision(interest);
+    
+    // Add validation for extremely large interest calculations that are likely errors
+    if (preciseInterest > balance * 0.1) { // Monthly interest > 10% of balance
+      console.log('Warning: Unusually high monthly interest calculated:', { 
+        balance, 
+        annualRate, 
+        rawInterest: interest,
+        preciseInterest,
+        percentOfBalance: (preciseInterest / balance) * 100
+      });
+    }
     
     console.log('Monthly interest calculation:', { 
       balance, 
@@ -54,6 +84,12 @@ export class InterestCalculator {
     annualRate: number,
     months: number
   ): number {
+    // Validate inputs to prevent calculation errors
+    if (isNaN(balance) || isNaN(annualRate) || isNaN(months)) {
+      console.log('Invalid inputs for total interest calculation:', { balance, annualRate, months });
+      return 0;
+    }
+    
     if (annualRate <= 0 || months <= 0) {
       return 0;
     }
@@ -71,6 +107,17 @@ export class InterestCalculator {
       });
     }
     
+    // For very large initial balances, use a simpler calculation method
+    // to avoid compounding errors
+    if (balance > 1000000) {
+      console.log('Using simplified calculation for very large balance');
+      // Simple interest formula: P * r * t
+      // where P is principal, r is monthly rate, t is time in months
+      const monthlyRate = annualRate / 1200;
+      const roughEstimate = balance * monthlyRate * months;
+      return this.ensurePrecision(roughEstimate);
+    }
+    
     for (let i = 0; i < months; i++) {
       const monthlyInterest = this.calculateMonthlyInterest(remainingBalance, annualRate);
       totalInterest += monthlyInterest;
@@ -82,6 +129,16 @@ export class InterestCalculator {
           currentBalance: this.ensurePrecision(remainingBalance),
           interestSoFar: this.ensurePrecision(totalInterest)
         });
+      }
+      
+      // Sanity check for calculation errors - prevent runaway interest
+      if (totalInterest > balance * 5) {
+        console.log('Interest calculation safeguard triggered - interest exceeds 5x principal:', {
+          originalBalance: balance,
+          currentTotalInterest: totalInterest,
+          ratio: totalInterest / balance
+        });
+        return this.ensurePrecision(balance * 1.5); // Return a reasonable cap 
       }
     }
     

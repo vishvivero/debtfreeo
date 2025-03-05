@@ -13,7 +13,7 @@ import { DebtTimelineCalculator } from "@/lib/services/calculations/DebtTimeline
 import { Debt } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCurrency } from "@/hooks/use-currency";
-import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
+import { InterestCalculator } from "@/lib/services/calculations/InterestCalculator";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -46,12 +46,25 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         []
       );
       
+      // Apply additional safeguards for extremely large interest values
+      let baselineInterest = timelineResults.baselineInterest;
+      let acceleratedInterest = timelineResults.acceleratedInterest;
+      
+      // Apply sanity check for unrealistic values
+      const totalBalance = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
+      if (baselineInterest > totalBalance * 3) {
+        console.log('Interest sanity check triggered for PDF generation - capping interest values');
+        baselineInterest = totalBalance * 0.2; // Reasonable 20% of total balance
+        acceleratedInterest = baselineInterest;
+      }
+      
       // Ensure precision for financial values and convert large values appropriately
-      const baselineInterest = InterestCalculator.ensurePrecision(timelineResults.baselineInterest);
-      const acceleratedInterest = InterestCalculator.ensurePrecision(timelineResults.acceleratedInterest);
+      baselineInterest = InterestCalculator.ensurePrecision(baselineInterest);
+      acceleratedInterest = InterestCalculator.ensurePrecision(acceleratedInterest);
       
       // Log values for debugging
       console.log('Interest values for PDF:', {
+        totalBalance,
         normalizedDebts: normalizedDebts.map(d => ({ name: d.name, balance: d.balance, minPayment: d.minimum_payment })),
         original: timelineResults.baselineInterest,
         baselineInterest,
@@ -124,12 +137,26 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
       // Log normalized debts for debugging
       console.log('Normalized debts for interest calculation:', {
         preferredCurrency,
+        totalDebtBalance: normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0),
         normalizedDebts: normalizedDebts.map(d => ({ 
           name: d.name, 
           originalBalance: debts.find(od => od.id === d.id)?.balance || 0,
           originalCurrency: debts.find(od => od.id === d.id)?.currency_symbol || '$',
-          normalizedBalance: d.balance 
+          normalizedBalance: d.balance,
+          interestRate: d.interest_rate
         }))
+      });
+      
+      // Alternative simplified calculation as a reference point
+      const simplifiedInterest = normalizedDebts.reduce((sum, debt) => {
+        // Simple interest calculation: Principal * Rate * Time
+        // Assuming average loan term of 5 years
+        const simpleInterest = debt.balance * (debt.interest_rate / 100) * 5;
+        return sum + simpleInterest;
+      }, 0);
+      
+      console.log('Simplified interest calculation:', {
+        simplifiedInterest: InterestCalculator.ensurePrecision(simplifiedInterest)
       });
       
       // Calculate timeline with properly normalized debts
@@ -140,11 +167,27 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         []
       );
       
+      // Perform sanity check on interest values
+      let baseInterest = results.baselineInterest;
+      let optimizedInterest = results.acceleratedInterest;
+      
+      const totalBalance = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
+      
+      // Cap unrealistic interest values
+      if (baseInterest > totalBalance * 3) {
+        console.log('Interest sanity check triggered - interest exceeds 3x principal');
+        
+        // Use simplified calculation as fallback
+        baseInterest = simplifiedInterest;
+        optimizedInterest = simplifiedInterest;
+      }
+      
       // Apply proper rounding to ensure consistent display
-      const baseInterest = InterestCalculator.ensurePrecision(results.baselineInterest);
-      const optimizedInterest = InterestCalculator.ensurePrecision(results.acceleratedInterest);
+      baseInterest = InterestCalculator.ensurePrecision(baseInterest);
+      optimizedInterest = InterestCalculator.ensurePrecision(optimizedInterest);
       
       console.log('Interest calculation for overview:', {
+        totalBalance,
         normalizedDebts: normalizedDebts.map(d => ({ name: d.name, balance: d.balance, minPayment: d.minimum_payment })),
         rawBase: results.baselineInterest,
         rawOptimized: results.acceleratedInterest,

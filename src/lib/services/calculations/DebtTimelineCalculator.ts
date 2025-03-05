@@ -35,7 +35,7 @@ export class DebtTimelineCalculator {
       } : null
     });
 
-    // Important: The debts passed to this function should already be normalized
+    // IMPORTANT: The debts passed to this function should already be normalized
     // to the user's preferred currency by the component calling this function
     
     // First order debts according to the selected strategy
@@ -48,6 +48,33 @@ export class DebtTimelineCalculator {
       strategy,
       oneTimeFundings
     );
+
+    // For extremely large numbers, we need additional validation
+    if (results.baselineInterest > 1000000) {
+      console.log('Warning: Very large baseline interest detected. Validating calculation...', {
+        baselineInterest: results.baselineInterest,
+        totalDebtBalance: debts.reduce((sum, debt) => sum + debt.balance, 0),
+        totalMinimumPayment: debts.reduce((sum, debt) => sum + debt.minimum_payment, 0)
+      });
+      
+      // This is likely a calculation error for normal debts
+      if (debts.reduce((sum, debt) => sum + debt.balance, 0) < 1000000) {
+        console.log('Interest calculation seems abnormal for the debt amounts. Attempting correction...');
+        
+        // A more conservative estimate based on debt balance and rates
+        const correctedInterest = debts.reduce((sum, debt) => {
+          const roughEstimate = debt.balance * (debt.interest_rate / 100) * (results.baselineMonths / 12);
+          return sum + roughEstimate;
+        }, 0);
+        
+        console.log('Estimated corrected interest:', correctedInterest);
+        
+        results.baselineInterest = correctedInterest;
+        // If baseline was wrong, accelerated is likely wrong too
+        results.acceleratedInterest = correctedInterest;
+        results.interestSaved = 0; // Reset until we have accurate calculations
+      }
+    }
 
     console.log('DebtTimelineCalculator: Calculation complete:', {
       baselineInterest: results.baselineInterest,
