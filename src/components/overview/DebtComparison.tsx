@@ -113,12 +113,32 @@ export const DebtComparison = () => {
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
-    // Calculate the dates using actual timeline results for consistent display
-    const originalPayoffDate = new Date();
-    originalPayoffDate.setMonth(originalPayoffDate.getMonth() + baselineMonths);
+    // CRITICAL FIX: Calculate baseline date consistently
+    const today = new Date();
+    const originalPayoffDate = new Date(
+      today.getFullYear(),
+      today.getMonth() + baselineMonths,
+      today.getDate()
+    );
     
-    // Use the payoffDate from the timeline results directly (fixed in UnifiedDebtTimelineCalculator)
+    // Use the payoff date directly from the timeline results
+    // The issue was here - we need to make sure we use the date object directly
     const optimizedPayoffDate = timelineResults.payoffDate;
+
+    // Detailed logging for debugging the date issue
+    console.log('Detailed date calculation debug:', {
+      today: today.toISOString(),
+      baselineMonths,
+      acceleratedMonths,
+      originalPayoffDate: originalPayoffDate.toISOString(),
+      optimizedPayoffDate: optimizedPayoffDate.toISOString(),
+      optimizedPayoffFormatted: optimizedPayoffDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+        day: 'numeric'
+      }),
+      payoffDateType: Object.prototype.toString.call(optimizedPayoffDate)
+    });
 
     console.log('Final comparison calculation results:', {
       preferredCurrency,
@@ -159,7 +179,7 @@ export const DebtComparison = () => {
 
   const comparison = calculateComparison();
 
-  // For debugging
+  // Enhanced debugging for the date issue
   console.log('Debt-free dates from comparison:', {
     originalDate: comparison.originalPayoffDate?.toLocaleDateString('en-US', {
       month: 'long',
@@ -169,7 +189,12 @@ export const DebtComparison = () => {
       month: 'long',
       year: 'numeric'
     }),
-    rawOptimizedDate: comparison.optimizedPayoffDate
+    rawOptimizedDate: comparison.optimizedPayoffDate,
+    dateObject: {
+      year: comparison.optimizedPayoffDate?.getFullYear(),
+      month: comparison.optimizedPayoffDate?.getMonth(),
+      date: comparison.optimizedPayoffDate?.getDate()
+    }
   });
 
   return (
