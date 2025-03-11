@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -19,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCurrency } from "@/hooks/use-currency";
-import { InterestCalculator } from "@/lib/services/calculations/core/InterestCalculator";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 
 export const DebtComparison = () => {
@@ -73,6 +73,7 @@ export const DebtComparison = () => {
     
     const totalDebtValue = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
     
+    // Use the UnifiedDebtTimelineCalculator directly to ensure consistency with the timeline display
     const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       profile.monthly_payment,
@@ -80,22 +81,26 @@ export const DebtComparison = () => {
       oneTimeFundings
     );
     
+    console.log('Overview timeline calculation results:', {
+      baselineMonths: timelineResults.baselineMonths,
+      acceleratedMonths: timelineResults.acceleratedMonths,
+      baselineInterest: timelineResults.baselineInterest,
+      acceleratedInterest: timelineResults.acceleratedInterest,
+      monthsSaved: timelineResults.monthsSaved,
+      interestSaved: timelineResults.interestSaved,
+      payoffDate: timelineResults.payoffDate
+    });
+    
     const baselineInterest = timelineResults.baselineInterest;
     const acceleratedInterest = timelineResults.acceleratedInterest;
     const interestSaved = timelineResults.interestSaved;
-
-    console.log('Interest calculation comparison:', {
-      calculatedBaselineInterest: baselineInterest,
-      calculatedAcceleratedInterest: acceleratedInterest,
-      interestSaved
-    });
     
     const baselineMonths = timelineResults.baselineMonths;
     const baselineYears = Math.floor(baselineMonths / 12);
     const remainingMonths = baselineMonths % 12;
 
     const acceleratedMonths = timelineResults.acceleratedMonths;
-    const timeSavedMonths = Math.max(0, baselineMonths - acceleratedMonths);
+    const timeSavedMonths = timelineResults.monthsSaved;
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
@@ -109,11 +114,13 @@ export const DebtComparison = () => {
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
+    // Calculate the dates using actual timeline results
     const originalPayoffDate = new Date();
     originalPayoffDate.setMonth(originalPayoffDate.getMonth() + baselineMonths);
     
-    const optimizedPayoffDate = new Date();
-    optimizedPayoffDate.setMonth(optimizedPayoffDate.getMonth() + acceleratedMonths);
+    // Use the payoffDate from the timeline results for the optimized date
+    // This ensures consistency with what's shown in the PayoffTimelineContainer
+    const optimizedPayoffDate = timelineResults.payoffDate;
 
     console.log('Final comparison calculation results:', {
       preferredCurrency,
@@ -127,7 +134,9 @@ export const DebtComparison = () => {
       interestPercentage,
       principalPercentage,
       formattedBaseline: formatCurrency(baselineInterest),
-      formattedAccelerated: formatCurrency(acceleratedInterest)
+      formattedAccelerated: formatCurrency(acceleratedInterest),
+      originalPayoffDate,
+      optimizedPayoffDate
     });
 
     return {
@@ -495,4 +504,3 @@ export const DebtComparison = () => {
     </motion.div>
   );
 };
-

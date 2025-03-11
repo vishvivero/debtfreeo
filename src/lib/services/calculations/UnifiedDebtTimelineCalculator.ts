@@ -128,24 +128,41 @@ export class UnifiedDebtTimelineCalculator {
 
     console.log('Total pre-included interest to be added:', preIncludedInterest);
 
-    // FIXED: Always prioritize using the sum of individual amortization-based calculations
+    // Always prioritize using the sum of individual amortization-based calculations
     // as it's more accurate and matches what users see in individual debt pages
     const baselineInterest = sumOfIndividualInterest + preIncludedInterest;
     
-    // Adjust accelerated interest based on the ratio from the standardized calculator
+    // Calculate the ratio for accelerated interest
     const ratio = results.baselineInterest > 0 
       ? results.acceleratedInterest / results.baselineInterest 
-      : 0.8; // Default to 20% savings if baseline is zero
+      : 0.7; // Default to 30% savings if baseline is zero
     
     const acceleratedInterest = baselineInterest * ratio;
+    const interestSaved = baselineInterest - acceleratedInterest;
+    
+    // Calculate payoff date based on accelerated months
+    const payoffDate = new Date();
+    payoffDate.setMonth(payoffDate.getMonth() + results.acceleratedMonths);
     
     // Log final interest values for debugging
-    console.log('Final interest values:', {
-      originalCalculated: results.baselineInterest,
+    console.log('Final timeline calculation values:', {
+      originalCalculated: {
+        baselineInterest: results.baselineInterest,
+        acceleratedInterest: results.acceleratedInterest,
+        ratio: results.acceleratedInterest / results.baselineInterest
+      },
       sumOfIndividualCalculation: sumOfIndividualInterest,
       preIncludedInterest,
-      finalBaselineInterest: baselineInterest,
-      finalAcceleratedInterest: acceleratedInterest
+      finalValues: {
+        baselineInterest,
+        acceleratedInterest,
+        interestSaved,
+        baselineMonths: results.baselineMonths,
+        acceleratedMonths: results.acceleratedMonths,
+        monthsSaved: results.monthsSaved,
+        payoffDate: payoffDate.toISOString(),
+        ratio
+      }
     });
 
     return {
@@ -154,8 +171,8 @@ export class UnifiedDebtTimelineCalculator {
       baselineInterest: baselineInterest,
       acceleratedInterest: acceleratedInterest,
       monthsSaved: results.monthsSaved,
-      interestSaved: baselineInterest - acceleratedInterest,
-      payoffDate: results.payoffDate,
+      interestSaved: interestSaved,
+      payoffDate: payoffDate,
       monthlyPayments: results.monthlyPayments
     };
   }
