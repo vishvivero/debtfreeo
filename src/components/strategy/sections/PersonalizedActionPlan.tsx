@@ -19,6 +19,7 @@ import { formatCurrency } from "@/lib/strategies";
 import { Toggle } from "@/components/ui/toggle";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const getCompletionPercentage = (debts: Debt[]): number => {
   if (!debts?.length) return 0;
@@ -491,6 +492,14 @@ export const PersonalizedActionPlan = () => {
                                           className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
                                         >
                                           {step.description}
+                                          {step.description === "Create calendar reminders 5 days before each payment" && (
+                                            <Badge 
+                                              variant="secondary" 
+                                              className="ml-2 bg-violet-100 text-violet-800 hover:bg-violet-100"
+                                            >
+                                              Coming Soon
+                                            </Badge>
+                                          )}
                                           {step.action === "showDueDates" && (
                                             <Button 
                                               variant="ghost" 
