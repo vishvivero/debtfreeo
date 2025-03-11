@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -114,12 +113,11 @@ export const DebtComparison = () => {
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
-    // Calculate the dates using actual timeline results
+    // Calculate the dates using actual timeline results for consistent display
     const originalPayoffDate = new Date();
     originalPayoffDate.setMonth(originalPayoffDate.getMonth() + baselineMonths);
     
-    // Use the payoffDate from the timeline results for the optimized date
-    // This ensures consistency with what's shown in the PayoffTimelineContainer
+    // Use the payoffDate from the timeline results directly (fixed in UnifiedDebtTimelineCalculator)
     const optimizedPayoffDate = timelineResults.payoffDate;
 
     console.log('Final comparison calculation results:', {
@@ -160,6 +158,19 @@ export const DebtComparison = () => {
   };
 
   const comparison = calculateComparison();
+
+  // For debugging
+  console.log('Debt-free dates from comparison:', {
+    originalDate: comparison.originalPayoffDate?.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    }),
+    optimizedDate: comparison.optimizedPayoffDate?.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    }),
+    rawOptimizedDate: comparison.optimizedPayoffDate
+  });
 
   return (
     <motion.div
@@ -504,3 +515,4 @@ export const DebtComparison = () => {
     </motion.div>
   );
 };
+

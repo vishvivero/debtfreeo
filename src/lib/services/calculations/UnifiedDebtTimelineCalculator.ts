@@ -140,10 +140,13 @@ export class UnifiedDebtTimelineCalculator {
     const acceleratedInterest = baselineInterest * ratio;
     const interestSaved = baselineInterest - acceleratedInterest;
     
-    // Calculate payoff date based on accelerated months
-    // This is the correct calculation that matches what's shown on the Strategy page
-    const payoffDate = new Date();
-    payoffDate.setMonth(payoffDate.getMonth() + results.acceleratedMonths);
+    // Fix payoff date calculation to ensure it matches the Strategy page
+    // The date should be current date + acceleratedMonths
+    const today = new Date();
+    const payoffDate = new Date(today.getFullYear(), today.getMonth() + results.acceleratedMonths, today.getDate());
+    
+    // Calculate expected end date based on baseline months for logging
+    const baselineEndDate = new Date(today.getFullYear(), today.getMonth() + results.baselineMonths, today.getDate());
     
     // Log final interest values for debugging
     console.log('Final timeline calculation values:', {
@@ -161,6 +164,7 @@ export class UnifiedDebtTimelineCalculator {
         baselineMonths: results.baselineMonths,
         acceleratedMonths: results.acceleratedMonths,
         monthsSaved: results.monthsSaved,
+        baselineEndDate: baselineEndDate.toISOString(),
         payoffDate: payoffDate.toISOString(),
         ratio
       }
