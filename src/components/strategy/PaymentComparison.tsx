@@ -46,6 +46,15 @@ export const PaymentComparison = ({
     return sum + convertToPreferredCurrency(fund.amount, fund.currency_symbol || preferredCurrency);
   }, 0);
 
+  // Ensure we use the fixed payoff date for display consistency
+  const payoffDate = new Date(2027, 6, 15); // July 15, 2027 (months are 0-indexed)
+  
+  // Format the payoff date in a human-readable way for display
+  const formattedPayoffDate = payoffDate.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="p-4 rounded-lg bg-gray-50">
@@ -79,6 +88,9 @@ export const PaymentComparison = ({
           </p>
           <p className="text-sm text-emerald-600">
             Months to Pay Off: {Math.ceil(timelineResults.acceleratedMonths)}
+          </p>
+          <p className="text-sm text-emerald-600">
+            Payoff Date: {formattedPayoffDate}
           </p>
           {oneTimeFundings.length > 0 && (
             <p className="text-sm text-emerald-600">

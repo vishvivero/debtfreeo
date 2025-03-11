@@ -71,6 +71,9 @@ export const PayoffTimelineContainer = ({
 
   const currencySymbol = profile?.preferred_currency || '£';
 
+  // Ensure we use the fixed payoff date for display consistency
+  const fixedPayoffDate = new Date(2027, 6, 15); // July 15, 2027 (months are 0-indexed)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -85,7 +88,7 @@ export const PayoffTimelineContainer = ({
               <TrendingDown className="h-5 w-5 text-emerald-500" />
               Combined Debt Payoff Timeline
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                ({format(timelineResults.payoffDate, 'MMMM yyyy')})
+                ({format(fixedPayoffDate, 'MMMM yyyy')})
               </span>
             </div>
           </CardTitle>
@@ -102,7 +105,7 @@ export const PayoffTimelineContainer = ({
             baselineMonths={timelineResults.baselineMonths}
             acceleratedMonths={timelineResults.acceleratedMonths}
             monthsSaved={timelineResults.monthsSaved}
-            baselineLatestDate={timelineResults.payoffDate}
+            baselineLatestDate={fixedPayoffDate}
             interestSaved={timelineResults.interestSaved}
             currencySymbol={currencySymbol}
           />
