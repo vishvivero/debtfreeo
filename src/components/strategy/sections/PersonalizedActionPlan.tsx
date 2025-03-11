@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -680,3 +681,67 @@ export const PersonalizedActionPlan = () => {
                                           className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
                                         >
                                           {step.description}
+                                        </label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Due Date Dialog */}
+      <Dialog open={showDueDateDialog} onOpenChange={setShowDueDateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarCheck className="h-5 w-5 text-indigo-600" />
+              Debt Payment Due Dates
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="max-h-[60vh] overflow-y-auto mt-4">
+            {debts.length > 0 ? (
+              <div className="space-y-3">
+                {debts.map((debt) => (
+                  <div key={debt.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="font-medium text-slate-800">{debt.name}</h4>
+                      <span className="text-sm text-slate-600">
+                        {currencySymbol}{debt.minimum_payment.toLocaleString()} min payment
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">Due date:</span>
+                      <span className={`text-sm font-medium ${debt.due_date ? 'text-indigo-600' : 'text-gray-500'}`}>
+                        {formatDueDate(debt.due_date)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-6">No debt records found.</p>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-2 mt-4">
+            <DialogClose asChild>
+              <Button>Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
