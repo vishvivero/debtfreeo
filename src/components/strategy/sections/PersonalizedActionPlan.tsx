@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -84,6 +85,10 @@ export const PersonalizedActionPlan = () => {
     const generateActionItems = (): ActionItem[] => {
       const items: ActionItem[] = [];
       
+      // Check if there are debts with missing next_payment_date
+      const debtsWithMissingDueDate = debts.filter(debt => !debt.next_payment_date);
+      const hasMissingDueDates = debtsWithMissingDueDate.length > 0;
+      
       const minPaymentsSavings = Math.round(totalDebt * 0.05);
       items.push({
         title: "Make minimum payments on time",
@@ -93,12 +98,13 @@ export const PersonalizedActionPlan = () => {
         benefit: "Avoid late fees and credit score damage",
         savingsEstimate: `${currencySymbol}${minPaymentsSavings.toLocaleString()} in late fees annually`,
         steps: [
-          { 
+          // Only include the list due dates step if there are missing due dates
+          ...(hasMissingDueDates ? [{ 
             id: crypto.randomUUID(), 
             description: "List all debt payment due dates", 
             isCompleted: false,
             action: "showDueDates" 
-          },
+          }] : []),
           { id: crypto.randomUUID(), description: "Set up automatic payments with your bank", isCompleted: false },
           { id: crypto.randomUUID(), description: "Create calendar reminders 5 days before each payment", isCompleted: false }
         ]
