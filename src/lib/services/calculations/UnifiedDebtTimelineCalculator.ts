@@ -128,34 +128,17 @@ export class UnifiedDebtTimelineCalculator {
 
     console.log('Total pre-included interest to be added:', preIncludedInterest);
 
-    // Decide which interest value to use
-    // 1. If the sum of individual interest estimates is reasonable, use that
-    // 2. Otherwise, use the calculator result with sanity checks
-    let baselineInterest;
-    let acceleratedInterest;
+    // FIXED: Always prioritize using the sum of individual amortization-based calculations
+    // as it's more accurate and matches what users see in individual debt pages
+    const baselineInterest = sumOfIndividualInterest + preIncludedInterest;
     
-    // Use the sum of individual interest calculations if it's reasonable
-    if (sumOfIndividualInterest > 0 && sumOfIndividualInterest < results.baselineInterest * 1.5) {
-      console.log('Using sum of individual amortization interest as it appears more accurate');
-      baselineInterest = sumOfIndividualInterest + preIncludedInterest;
-      // Adjust accelerated interest proportionally
-      const ratio = results.acceleratedInterest / results.baselineInterest;
-      acceleratedInterest = baselineInterest * ratio;
-    } else {
-      // Use calculator results but with sanity checks
-      baselineInterest = results.baselineInterest + preIncludedInterest;
-      acceleratedInterest = results.acceleratedInterest + (preIncludedInterest * 0.9); // Assume some savings
-      
-      // Apply sanity checks if needed
-      const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
-      if (baselineInterest > totalBalance * this.MAX_INTEREST_MULTIPLIER || 
-          baselineInterest > this.ABSOLUTE_MAX_INTEREST) {
-        console.log('Adjusting unreasonably high interest calculation');
-        baselineInterest = Math.min(totalBalance * this.MAX_INTEREST_MULTIPLIER, this.ABSOLUTE_MAX_INTEREST);
-        acceleratedInterest = baselineInterest * 0.8; // Assume 20% savings
-      }
-    }
-
+    // Adjust accelerated interest based on the ratio from the standardized calculator
+    const ratio = results.baselineInterest > 0 
+      ? results.acceleratedInterest / results.baselineInterest 
+      : 0.8; // Default to 20% savings if baseline is zero
+    
+    const acceleratedInterest = baselineInterest * ratio;
+    
     // Log final interest values for debugging
     console.log('Final interest values:', {
       originalCalculated: results.baselineInterest,
