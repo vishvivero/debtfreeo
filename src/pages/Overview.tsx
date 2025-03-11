@@ -8,6 +8,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { OverviewMetrics } from "@/components/overview/OverviewMetrics";
+import { DebtComparison } from "@/components/overview/DebtComparison";
 import { motion } from "framer-motion";
 import { useProfile } from "@/hooks/use-profile";
 
@@ -67,6 +68,10 @@ const Overview = () => {
             />
             <OverviewMetrics />
           </motion.div>
+          
+          {/* Add DebtComparison before DebtScoreCard for better visualization */}
+          <DebtComparison />
+          
           <DebtScoreCard />
         </div>
       </div>

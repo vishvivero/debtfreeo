@@ -9,8 +9,7 @@ import {
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { strategies } from "@/lib/strategies";
-import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
-import {
+import { 
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -74,7 +73,6 @@ export const DebtComparison = () => {
     const totalDebtValue = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
     
     // Use the UnifiedDebtTimelineCalculator directly to ensure consistency with the timeline display
-    // CRITICAL FIX: Pass the total monthly payment correctly (including minimum payment + extra)
     const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       profile.monthly_payment,
@@ -82,7 +80,7 @@ export const DebtComparison = () => {
       oneTimeFundings
     );
     
-    console.log('Overview timeline calculation results:', {
+    console.log('Overview timeline calculation results (FIXED):', {
       baselineMonths: timelineResults.baselineMonths,
       acceleratedMonths: timelineResults.acceleratedMonths,
       baselineInterest: timelineResults.baselineInterest,
@@ -90,8 +88,9 @@ export const DebtComparison = () => {
       monthsSaved: timelineResults.monthsSaved,
       interestSaved: timelineResults.interestSaved,
       payoffDate: timelineResults.payoffDate.toISOString(),
-      payoffMonth: timelineResults.payoffDate.getMonth() + 1,
-      payoffYear: timelineResults.payoffDate.getFullYear()
+      payoffMonth: timelineResults.payoffDate.getMonth() + 1, // Add 1 for human month numbering
+      payoffYear: timelineResults.payoffDate.getFullYear(),
+      payoffDateType: Object.prototype.toString.call(timelineResults.payoffDate)
     });
     
     const baselineInterest = timelineResults.baselineInterest;
@@ -117,49 +116,50 @@ export const DebtComparison = () => {
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
-    // Calculate baseline date consistently
+    // Calculate baseline date consistently using the same method as in the calculator
     const today = new Date();
-    const originalPayoffDate = new Date(
-      today.getFullYear(),
-      today.getMonth() + baselineMonths,
-      today.getDate()
-    );
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const averageDaysPerMonth = 30.44; // Average days in a month (365.25/12)
     
-    // CRITICAL FIX: Create a NEW Date object from the payoffDate
-    // This ensures we're working with an actual Date object and not a serialized one
-    const optimizedPayoffDateStr = timelineResults.payoffDate.toISOString();
-    const optimizedPayoffDate = new Date(optimizedPayoffDateStr);
+    const baselineDaysToAdd = Math.round(baselineMonths * averageDaysPerMonth);
+    const baselineEndTimestamp = today.getTime() + (baselineDaysToAdd * msPerDay);
+    const originalPayoffDate = new Date(baselineEndTimestamp);
+    
+    // CRITICAL FIX: Make sure we're using the exact date object returned by the calculator
+    // Use the direct payoffDate object from timelineResults to ensure we're displaying exactly
+    // what the calculator computed
+    const optimizedPayoffDate = timelineResults.payoffDate;
 
-    // Detailed logging for debugging the date issue
-    console.log('Detailed date calculation debug:', {
-      today: today.toISOString(),
-      baselineMonths,
-      acceleratedMonths,
-      originalPayoffDate: originalPayoffDate.toISOString(),
-      optimizedPayoffDateFromTimeline: timelineResults.payoffDate.toISOString(),
-      recreatedOptimizedDate: optimizedPayoffDate.toISOString(),
-      optimizedPayoffFormatted: optimizedPayoffDate.toLocaleDateString('en-US', {
+    // Extra check to ensure optimizedPayoffDate is definitely a valid Date object
+    if (!(optimizedPayoffDate instanceof Date) || isNaN(optimizedPayoffDate.getTime())) {
+      console.error('Invalid optimized payoff date detected:', optimizedPayoffDate);
+      // Fallback to a calculated date if needed
+      const daysToAdd = Math.round(acceleratedMonths * averageDaysPerMonth);
+      const payoffTimestamp = today.getTime() + (daysToAdd * msPerDay);
+      // Create a fresh date object
+      const newPayoffDate = new Date(payoffTimestamp);
+      console.log('Created fallback date:', newPayoffDate.toISOString());
+      // Replace the invalid date
+      optimizedPayoffDate = newPayoffDate;
+    }
+
+    // Detailed debugging for the optimized date
+    console.log('FIXED DATE VERIFICATION:', {
+      optimizedPayoffDate: optimizedPayoffDate.toISOString(),
+      formattedOptimizedDate: optimizedPayoffDate.toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric'
       }),
-      payoffDateType: Object.prototype.toString.call(optimizedPayoffDate)
-    });
-
-    console.log('Final comparison calculation results:', {
-      preferredCurrency,
-      totalDebtValue,
-      baselineInterest,
-      acceleratedInterest,
-      interestSaved,
-      baselineMonths,
-      acceleratedMonths,
-      timeSavedMonths,
-      interestPercentage,
-      principalPercentage,
-      formattedBaseline: formatCurrency(baselineInterest),
-      formattedAccelerated: formatCurrency(acceleratedInterest),
       originalPayoffDate: originalPayoffDate.toISOString(),
-      optimizedPayoffDate: optimizedPayoffDate.toISOString()
+      formattedOriginalDate: originalPayoffDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      }),
+      optimizedDateProperties: {
+        month: optimizedPayoffDate.getMonth() + 1, // 1-based for human readability
+        year: optimizedPayoffDate.getFullYear(),
+        date: optimizedPayoffDate.getDate()
+      }
     });
 
     return {
@@ -185,7 +185,7 @@ export const DebtComparison = () => {
   const comparison = calculateComparison();
 
   // Enhanced debugging for the date issue
-  console.log('Debt-free dates from comparison:', {
+  console.log('FINAL FIXED Debt-free dates from comparison:', {
     originalDate: comparison.originalPayoffDate?.toLocaleDateString('en-US', {
       month: 'long',
       year: 'numeric'
