@@ -60,6 +60,7 @@ export const PersonalizedActionPlan = () => {
   const [newStep, setNewStep] = useState("");
   const [addingStepToItemIndex, setAddingStepToItemIndex] = useState<number | null>(null);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
+  const [showHighInterestDialog, setShowHighInterestDialog] = useState(false);
   
   const formatDueDate = (dateString: string | undefined): string => {
     if (!dateString) return "Not set";
@@ -89,6 +90,9 @@ export const PersonalizedActionPlan = () => {
       return dateA - dateB;
     })
     .slice(0, 3);
+  
+  // Find high-interest debts (interest rate > 15%)
+  const highInterestDebts = debts.filter(debt => debt.interest_rate > 15);
   
   useEffect(() => {
     const generateActionItems = (): ActionItem[] => {
@@ -133,7 +137,12 @@ export const PersonalizedActionPlan = () => {
           savingsEstimate: `${currencySymbol}${interestSavings.toLocaleString()} per year in interest charges`,
           timeEstimate: "Accelerate payoff by 6-12 months",
           steps: [
-            { id: crypto.randomUUID(), description: "Identify all debts with >15% interest rate", isCompleted: false },
+            { 
+              id: crypto.randomUUID(), 
+              description: "Identify all debts with >15% interest rate", 
+              isCompleted: false,
+              action: "showHighInterestDebts" 
+            },
             { id: crypto.randomUUID(), description: "Allocate extra payments to highest interest debt first", isCompleted: false },
             { id: crypto.randomUUID(), description: "Research balance transfer options for high-interest cards", isCompleted: false },
             { id: crypto.randomUUID(), description: "Call creditors to negotiate lower interest rates", isCompleted: false }
@@ -262,6 +271,8 @@ export const PersonalizedActionPlan = () => {
   const handleStepClick = (itemIndex: number, stepId: string, action?: string) => {
     if (action === "showDueDates") {
       setShowDueDateDialog(true);
+    } else if (action === "showHighInterestDebts") {
+      setShowHighInterestDialog(true);
     } else {
       toggleStepCompletion(itemIndex, stepId);
     }
@@ -514,6 +525,20 @@ export const PersonalizedActionPlan = () => {
                                               View Dates
                                             </Button>
                                           )}
+                                          {step.action === "showHighInterestDebts" && highInterestDebts.length > 0 && (
+                                            <Button 
+                                              variant="ghost" 
+                                              size="sm" 
+                                              className="ml-2 text-blue-600 p-0 h-auto text-xs underline hover:text-blue-800"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setShowHighInterestDialog(true);
+                                              }}
+                                            >
+                                              View {highInterestDebts.length} {highInterestDebts.length === 1 ? 'Debt' : 'Debts'}
+                                            </Button>
+                                          )}
                                           {step.description === "Set up automatic payments with your bank" && upcomingDueDates.length > 0 && (
                                             <span className="ml-2 text-blue-600 text-xs flex items-center gap-1">
                                               <CalendarDays className="h-3.5 w-3.5" />
@@ -667,110 +692,4 @@ export const PersonalizedActionPlan = () => {
                               {expandedItem === itemIndex && (
                                 <motion.div
                                   initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  className="mt-4"
-                                >
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                                      <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
-                                      <div className="text-sm font-semibold text-amber-800">{item.benefit}</div>
-                                    </div>
-                                    
-                                    {item.savingsEstimate && (
-                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                      </div>
-                                    )}
-                                    
-                                    {item.timeEstimate && (
-                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="space-y-2 mt-4">
-                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                    
-                                    {item.steps.map((step, stepIndex) => (
-                                      <div 
-                                        key={step.id} 
-                                        className={`flex items-start gap-2 p-2 rounded-lg border 
-                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                      >
-                                        <Checkbox 
-                                          id={step.id} 
-                                          checked={step.isCompleted}
-                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
-                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                        />
-                                        <label 
-                                          htmlFor={step.id} 
-                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                        >
-                                          {step.description}
-                                        </label>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={showDueDateDialog} onOpenChange={setShowDueDateDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-indigo-600" />
-              Debt Payment Due Dates
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="max-h-[60vh] overflow-y-auto mt-4">
-            {debts.length > 0 ? (
-              <div className="space-y-3">
-                {debts.map((debt) => (
-                  <div key={debt.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                    <div className="flex justify-between items-center mb-1">
-                      <h4 className="font-medium text-slate-800">{debt.name}</h4>
-                      <span className="text-sm text-slate-600">
-                        {currencySymbol}{debt.minimum_payment.toLocaleString()} min payment
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-slate-600">Due date:</span>
-                      <span className={`text-sm font-medium ${debt.next_payment_date ? 'text-indigo-600' : 'text-gray-500'}`}>
-                        {formatDueDate(debt.next_payment_date)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-6">No debt records found.</p>
-            )}
-          </div>
-          
-          <div className="flex justify-end gap-2 mt-4">
-            <DialogClose asChild>
-              <Button>Close</Button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-};
+                                  animate={{ opacity: 1
