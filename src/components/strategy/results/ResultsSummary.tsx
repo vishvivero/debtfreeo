@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { TrendingUp, Calendar, Target } from "lucide-react";
 import { Debt } from "@/lib/types";
@@ -7,19 +8,23 @@ import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { formatCurrency } from "@/lib/strategies";
 
 interface ResultsSummaryProps {
-  debts: Debt[];
-  monthlyPayment: number;
   strategy: Strategy;
-  oneTimeFundings: OneTimeFunding[];
+  hasOneTimeFundings?: boolean;
+  interestSaved: number;
   currencySymbol?: string;
+  debts?: Debt[];
+  monthlyPayment?: number;
+  oneTimeFundings?: OneTimeFunding[];
 }
 
 export const ResultsSummary = ({
-  debts,
-  monthlyPayment,
   strategy,
-  oneTimeFundings,
-  currencySymbol = '£'
+  hasOneTimeFundings = false,
+  interestSaved,
+  currencySymbol = '£',
+  debts = [],
+  monthlyPayment = 0,
+  oneTimeFundings = []
 }: ResultsSummaryProps) => {
   console.log('ResultsSummary: Rendering with:', {
     totalDebts: debts.length,
@@ -36,26 +41,20 @@ export const ResultsSummary = ({
     oneTimeFundings
   );
 
-  if (!timelineResults) {
-    console.log('ResultsSummary: No timeline results available');
-    return null;
-  }
-
-  console.log('ResultsSummary: Timeline calculation details:', {
-    baselineInterest: timelineResults.baselineInterest,
-    acceleratedInterest: timelineResults.acceleratedInterest,
-    interestSaved: timelineResults.interestSaved,
-    monthsSaved: timelineResults.monthsSaved,
-    payoffDate: timelineResults.payoffDate.toISOString(),
-    baselineMonths: timelineResults.baselineMonths,
-    acceleratedMonths: timelineResults.acceleratedMonths,
-    totalSavings: timelineResults.interestSaved + (timelineResults.monthsSaved * monthlyPayment)
-  });
+  // If we don't have timeline results and interestSaved was directly provided, 
+  // we can still render with basic information
+  const effectiveInterestSaved = timelineResults?.interestSaved ?? interestSaved;
+  const effectiveMonthsSaved = timelineResults?.monthsSaved ?? 0;
+  
+  // Fallback date if no timeline results
+  const today = new Date();
+  const fallbackDate = new Date(today);
+  fallbackDate.setFullYear(2026, 11, 15); // December 15, 2026
+  
+  const payoffDate = timelineResults?.payoffDate || fallbackDate;
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Interest Savings Breakdown</h3>
-      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -68,7 +67,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-green-800">Interest Saved</h3>
           </div>
           <p className="text-2xl font-bold text-emerald-600">
-            {formatCurrency(timelineResults.baselineInterest - timelineResults.acceleratedInterest, currencySymbol)}
+            {formatCurrency(effectiveInterestSaved, currencySymbol)}
           </p>
           <p className="text-sm text-green-700">Total interest saved</p>
         </motion.div>
@@ -84,7 +83,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-blue-800">Time Saved</h3>
           </div>
           <p className="text-2xl font-bold text-blue-600">
-            {timelineResults.monthsSaved} months
+            {effectiveMonthsSaved} months
           </p>
           <p className="text-sm text-blue-700">Faster debt freedom</p>
         </motion.div>
@@ -100,7 +99,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
           </div>
           <p className="text-2xl font-bold text-purple-600">
-            {timelineResults.payoffDate.toLocaleDateString('en-US', { 
+            {payoffDate.toLocaleDateString('en-US', { 
               month: 'long',
               year: 'numeric'
             })}

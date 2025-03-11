@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
@@ -20,7 +21,14 @@ export const PaymentComparison = ({
   oneTimeFundings,
   currencySymbol = '£'
 }: PaymentComparisonProps) => {
-  const { timelineResults } = useDebtTimeline(debts, monthlyPayment, strategy, oneTimeFundings);
+  // Convert oneTimeFundings to the format expected by useDebtTimeline
+  // This ensures the correct type is passed
+  const formattedFundings = oneTimeFundings.map(funding => ({
+    ...funding,
+    currency_symbol: funding.currency_symbol || currencySymbol
+  }));
+
+  const { timelineResults } = useDebtTimeline(debts, monthlyPayment, strategy, formattedFundings);
 
   if (!timelineResults) {
     console.log('No timeline results available');

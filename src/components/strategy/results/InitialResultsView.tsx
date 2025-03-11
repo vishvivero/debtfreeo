@@ -88,9 +88,12 @@ export const InitialResultsView = ({
             <h3 className="text-lg font-semibold mb-3">Strategy Summary</h3>
             <ResultsSummary
               strategy={selectedStrategy}
+              oneTimeFundings={oneTimeFundings}
               hasOneTimeFundings={hasOneTimeFundings}
               interestSaved={timelineResults.interestSaved}
               currencySymbol={currencySymbol}
+              debts={debts}
+              monthlyPayment={monthlyPayment}
             />
           </div>
         </div>

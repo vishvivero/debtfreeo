@@ -41,8 +41,14 @@ export const ResultsMetricsGrid = ({
   let actualPayoffDate = payoffDate;
   
   if (debts.length > 0 && monthlyPayment > 0 && strategy) {
+    // Ensure all one-time fundings have the currency_symbol property
+    const formattedFundings = oneTimeFundings.map(funding => ({
+      ...funding,
+      currency_symbol: funding.currency_symbol || currencySymbol
+    }));
+    
     // Generate timeline data to find the exact payoff month
-    const timelineData = calculateTimelineData(debts, monthlyPayment, strategy, oneTimeFundings);
+    const timelineData = calculateTimelineData(debts, monthlyPayment, strategy, formattedFundings);
     const today = new Date();
     
     if (timelineData && timelineData.length > 0) {

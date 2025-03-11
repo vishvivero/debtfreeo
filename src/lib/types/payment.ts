@@ -26,6 +26,6 @@ export interface OneTimeFunding {
   payment_date: string;
   notes: string | null;
   is_applied: boolean;
-  currency_symbol?: string;
+  currency_symbol: string; // Changed from optional to required
   created_at?: string;
 }

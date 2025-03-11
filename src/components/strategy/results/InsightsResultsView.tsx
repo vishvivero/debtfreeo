@@ -7,7 +7,7 @@ import { ResultsDialogFooter } from "./ResultsDialogFooter";
 interface InsightsResultsViewProps {
   onBack: () => void;
   onClose: () => void;
-  onViewFullResults: () => void;
+  onViewFullResults?: () => void;
 }
 
 export const InsightsResultsView = ({
