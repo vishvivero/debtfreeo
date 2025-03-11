@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,7 @@ import {
   ListChecks, ArrowRight, Calendar, Target, Award, 
   Download, CheckCircle2, ChevronDown, ChevronUp, 
   BookmarkCheck, BadgeCheck, ClipboardCheck,
-  Check, Plus
+  Check, Plus, CalendarCheck
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -18,6 +17,8 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { formatCurrency } from "@/lib/strategies";
 import { Toggle } from "@/components/ui/toggle";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { format } from "date-fns";
 
 const getCompletionPercentage = (debts: Debt[]): number => {
   if (!debts?.length) return 0;
@@ -36,6 +37,7 @@ export interface ActionStep {
   id: string;
   description: string;
   isCompleted: boolean;
+  action?: string; // Optional action identifier
 }
 
 export interface ActionItem {
@@ -57,6 +59,7 @@ export const PersonalizedActionPlan = () => {
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [newStep, setNewStep] = useState("");
   const [addingStepToItemIndex, setAddingStepToItemIndex] = useState<number | null>(null);
+  const [showDueDateDialog, setShowDueDateDialog] = useState(false);
   
   if (!debts || !profile) return null;
 
@@ -82,7 +85,12 @@ export const PersonalizedActionPlan = () => {
         benefit: "Avoid late fees and credit score damage",
         savingsEstimate: `${currencySymbol}${minPaymentsSavings.toLocaleString()} in late fees annually`,
         steps: [
-          { id: crypto.randomUUID(), description: "List all debt payment due dates", isCompleted: false },
+          { 
+            id: crypto.randomUUID(), 
+            description: "List all debt payment due dates", 
+            isCompleted: false,
+            action: "showDueDates" 
+          },
           { id: crypto.randomUUID(), description: "Set up automatic payments with your bank", isCompleted: false },
           { id: crypto.randomUUID(), description: "Create calendar reminders 5 days before each payment", isCompleted: false }
         ]
@@ -210,7 +218,7 @@ export const PersonalizedActionPlan = () => {
     if (actionItems.length === 0) {
       setActionItems(generateActionItems());
     }
-  }, [debts, profile, currencySymbol, completionPercentage, totalDebt, avgInterestRate]);
+  }, [debts, profile, currencySymbol, completionPercentage, totalDebt, avgInterestRate, actionItems.length]);
   
   const toggleStepCompletion = (itemIndex: number, stepId: string) => {
     setActionItems(prevItems => {
@@ -235,6 +243,14 @@ export const PersonalizedActionPlan = () => {
       
       return newItems;
     });
+  };
+
+  const handleStepClick = (itemIndex: number, stepId: string, action?: string) => {
+    if (action === "showDueDates") {
+      setShowDueDateDialog(true);
+    } else {
+      toggleStepCompletion(itemIndex, stepId);
+    }
   };
   
   const addNewStep = (itemIndex: number) => {
@@ -295,584 +311,373 @@ export const PersonalizedActionPlan = () => {
   const totalSteps = actionItems.reduce((sum, item) => sum + item.steps.length, 0);
   const completedSteps = actionItems.reduce((sum, item) => sum + item.steps.filter(step => step.isCompleted).length, 0);
   const planCompletionPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+  // Format the payment due date for display
+  const formatDueDate = (dateString: string | undefined): string => {
+    if (!dateString) return "Not set";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid date";
+      return format(date, 'MMM d, yyyy');
+    } catch (error) {
+      console.error("Error formatting due date:", error);
+      return "Invalid date";
+    }
+  };
   
   return (
-    <Card className="overflow-hidden border-none shadow-lg">
-      <CardHeader className="bg-gradient-to-br from-violet-500/90 to-purple-600 text-white">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold flex items-center gap-2">
-            <ListChecks className="h-6 w-6" />
-            Your Personalized Action Plan
-          </CardTitle>
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            className="gap-2 bg-white/20 hover:bg-white/30 text-white"
-            onClick={handleDownloadPlan}
-          >
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-        </div>
-        
-        <div className="mt-6 mb-2">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <span className="text-sm font-medium text-white/90">Debt Freedom Progress</span>
-              <div className="text-2xl font-bold">{Math.round(completionPercentage)}%</div>
-            </div>
-            <div className="text-right">
-              <span className="text-sm font-medium text-white/90">Action Plan Progress</span>
-              <div className="text-lg font-semibold">{planCompletionPercentage}% Complete</div>
-              <div className="text-xs text-white/70">
-                {completedSteps} of {totalSteps} steps
-              </div>
-            </div>
+    <>
+      <Card className="overflow-hidden border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-br from-violet-500/90 to-purple-600 text-white">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-bold flex items-center gap-2">
+              <ListChecks className="h-6 w-6" />
+              Your Personalized Action Plan
+            </CardTitle>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white"
+              onClick={handleDownloadPlan}
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
           </div>
           
-          <Progress 
-            value={completionPercentage} 
-            className="h-2.5 bg-white/20" 
-            indicatorClassName="bg-white"
-          />
-          
-          <Progress 
-            value={planCompletionPercentage} 
-            className="h-2.5 mt-2 bg-white/20" 
-            indicatorClassName="bg-green-400"
-          />
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-6 bg-gradient-to-br from-gray-50 to-white">
-        <div className="space-y-6">
-          {highPriorityItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`p-1 rounded-full ${priorityConfig.high.bg}`}>
-                  {priorityConfig.high.icon}
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">
-                  {priorityConfig.high.label} ACTIONS
-                </h3>
+          <div className="mt-6 mb-2">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="text-sm font-medium text-white/90">Debt Freedom Progress</span>
+                <div className="text-2xl font-bold">{Math.round(completionPercentage)}%</div>
               </div>
-              
-              <div className="space-y-4">
-                {highPriorityItems.map((item, index) => {
-                  const itemIndex = actionItems.findIndex(i => i.title === item.title);
-                  const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
-                  const totalStepsCount = item.steps.length;
-                  const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
-                  
-                  return (
-                    <motion.div
-                      key={`high-${index}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
-                        ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
-                    >
-                      <div className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
-                            'bg-green-500' : 
-                            `bg-gradient-to-r ${priorityConfig.high.color}`} text-white`}
-                          >
-                            {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                                {item.title}
-                                {item.isCompleted && (
-                                  <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                    Completed
-                                  </span>
-                                )}
-                              </h4>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
-                                className="p-1 h-8 w-8"
-                              >
-                                {expandedItem === itemIndex ? 
-                                  <ChevronUp className="h-5 w-5" /> : 
-                                  <ChevronDown className="h-5 w-5" />}
-                              </Button>
-                            </div>
-                            
-                            <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
-                            
-                            <div className="mt-3 flex items-center gap-2">
-                              <Progress 
-                                value={stepPercentage} 
-                                className="h-2 flex-1 bg-gray-100" 
-                                indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-red-500"}
-                              />
-                              <span className="text-xs font-medium text-gray-600">
-                                {completedStepsCount}/{totalStepsCount} steps
-                              </span>
-                            </div>
-                            
-                            {expandedItem === itemIndex && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                className="mt-4"
-                              >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                  <div className="bg-red-50 p-3 rounded-lg border border-red-100">
-                                    <div className="text-xs font-medium text-red-600 uppercase mb-1">Benefit</div>
-                                    <div className="text-sm font-semibold text-red-800">{item.benefit}</div>
-                                  </div>
-                                  
-                                  {item.savingsEstimate && (
-                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                      <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                      <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                    </div>
-                                  )}
-                                  
-                                  {item.timeEstimate && (
-                                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                      <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                      <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2 mt-4">
-                                  <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                  
-                                  {item.steps.map((step, stepIndex) => (
-                                    <div 
-                                      key={step.id} 
-                                      className={`flex items-start gap-2 p-2 rounded-lg border 
-                                        ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                    >
-                                      <Checkbox 
-                                        id={step.id} 
-                                        checked={step.isCompleted}
-                                        onCheckedChange={() => toggleStepCompletion(itemIndex, step.id)}
-                                        className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                      />
-                                      <label 
-                                        htmlFor={step.id} 
-                                        className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                      >
-                                        {step.description}
-                                      </label>
-                                    </div>
-                                  ))}
-                                  
-                                  {addingStepToItemIndex === itemIndex ? (
-                                    <div className="mt-3 space-y-2">
-                                      <Textarea 
-                                        placeholder="Enter a new action step..." 
-                                        value={newStep}
-                                        onChange={(e) => setNewStep(e.target.value)}
-                                        className="min-h-[80px] text-sm"
-                                      />
-                                      <div className="flex gap-2">
-                                        <Button 
-                                          size="sm" 
-                                          onClick={() => addNewStep(itemIndex)}
-                                          disabled={!newStep.trim()}
-                                        >
-                                          Add Step
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          onClick={() => {
-                                            setNewStep("");
-                                            setAddingStepToItemIndex(null);
-                                          }}
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="mt-2 gap-1"
-                                      onClick={() => setAddingStepToItemIndex(itemIndex)}
-                                    >
-                                      <Plus className="h-3.5 w-3.5" />
-                                      Add Custom Step
-                                    </Button>
-                                  )}
-                                </div>
-                              </motion.div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+              <div className="text-right">
+                <span className="text-sm font-medium text-white/90">Action Plan Progress</span>
+                <div className="text-lg font-semibold">{planCompletionPercentage}% Complete</div>
+                <div className="text-xs text-white/70">
+                  {completedSteps} of {totalSteps} steps
+                </div>
               </div>
             </div>
-          )}
-
-          {mediumPriorityItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`p-1 rounded-full ${priorityConfig.medium.bg}`}>
-                  {priorityConfig.medium.icon}
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">
-                  {priorityConfig.medium.label} ACTIONS
-                </h3>
-              </div>
-              
-              <div className="space-y-4">
-                {mediumPriorityItems.map((item, index) => {
-                  const itemIndex = actionItems.findIndex(i => i.title === item.title);
-                  const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
-                  const totalStepsCount = item.steps.length;
-                  const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
-                  
-                  return (
-                    <motion.div
-                      key={`medium-${index}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
-                        ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
-                    >
-                      <div className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
-                            'bg-green-500' : 
-                            `bg-gradient-to-r ${priorityConfig.medium.color}`} text-white`}
-                          >
-                            {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                                {item.title}
-                                {item.isCompleted && (
-                                  <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                    Completed
-                                  </span>
-                                )}
-                              </h4>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
-                                className="p-1 h-8 w-8"
-                              >
-                                {expandedItem === itemIndex ? 
-                                  <ChevronUp className="h-5 w-5" /> : 
-                                  <ChevronDown className="h-5 w-5" />}
-                              </Button>
-                            </div>
-                            
-                            <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
-                            
-                            <div className="mt-3 flex items-center gap-2">
-                              <Progress 
-                                value={stepPercentage} 
-                                className="h-2 flex-1 bg-gray-100" 
-                                indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-amber-500"}
-                              />
-                              <span className="text-xs font-medium text-gray-600">
-                                {completedStepsCount}/{totalStepsCount} steps
-                              </span>
-                            </div>
-                            
-                            {expandedItem === itemIndex && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                className="mt-4"
-                              >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                  <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                                    <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
-                                    <div className="text-sm font-semibold text-amber-800">{item.benefit}</div>
-                                  </div>
-                                  
-                                  {item.savingsEstimate && (
-                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                      <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                      <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                    </div>
-                                  )}
-                                  
-                                  {item.timeEstimate && (
-                                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                      <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                      <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2 mt-4">
-                                  <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                  
-                                  {item.steps.map((step, stepIndex) => (
-                                    <div 
-                                      key={step.id} 
-                                      className={`flex items-start gap-2 p-2 rounded-lg border 
-                                        ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                    >
-                                      <Checkbox 
-                                        id={step.id} 
-                                        checked={step.isCompleted}
-                                        onCheckedChange={() => toggleStepCompletion(itemIndex, step.id)}
-                                        className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                      />
-                                      <label 
-                                        htmlFor={step.id} 
-                                        className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                      >
-                                        {step.description}
-                                      </label>
-                                    </div>
-                                  ))}
-                                  
-                                  {addingStepToItemIndex === itemIndex ? (
-                                    <div className="mt-3 space-y-2">
-                                      <Textarea 
-                                        placeholder="Enter a new action step..." 
-                                        value={newStep}
-                                        onChange={(e) => setNewStep(e.target.value)}
-                                        className="min-h-[80px] text-sm"
-                                      />
-                                      <div className="flex gap-2">
-                                        <Button 
-                                          size="sm" 
-                                          onClick={() => addNewStep(itemIndex)}
-                                          disabled={!newStep.trim()}
-                                        >
-                                          Add Step
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          onClick={() => {
-                                            setNewStep("");
-                                            setAddingStepToItemIndex(null);
-                                          }}
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="mt-2 gap-1"
-                                      onClick={() => setAddingStepToItemIndex(itemIndex)}
-                                    >
-                                      <Plus className="h-3.5 w-3.5" />
-                                      Add Custom Step
-                                    </Button>
-                                  )}
-                                </div>
-                              </motion.div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {lowPriorityItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`p-1 rounded-full ${priorityConfig.low.bg}`}>
-                  {priorityConfig.low.icon}
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900">
-                  {priorityConfig.low.label} ACTIONS
-                </h3>
-              </div>
-              
-              <div className="space-y-4">
-                {lowPriorityItems.map((item, index) => {
-                  const itemIndex = actionItems.findIndex(i => i.title === item.title);
-                  const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
-                  const totalStepsCount = item.steps.length;
-                  const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
-                  
-                  return (
-                    <motion.div
-                      key={`low-${index}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 + index * 0.1 }}
-                      className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
-                        ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
-                    >
-                      <div className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
-                            'bg-green-500' : 
-                            `bg-gradient-to-r ${priorityConfig.low.color}`} text-white`}
-                          >
-                            {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                                {item.title}
-                                {item.isCompleted && (
-                                  <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                    Completed
-                                  </span>
-                                )}
-                              </h4>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
-                                className="p-1 h-8 w-8"
-                              >
-                                {expandedItem === itemIndex ? 
-                                  <ChevronUp className="h-5 w-5" /> : 
-                                  <ChevronDown className="h-5 w-5" />}
-                              </Button>
-                            </div>
-                            
-                            <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
-                            
-                            <div className="mt-3 flex items-center gap-2">
-                              <Progress 
-                                value={stepPercentage} 
-                                className="h-2 flex-1 bg-gray-100" 
-                                indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-emerald-500"}
-                              />
-                              <span className="text-xs font-medium text-gray-600">
-                                {completedStepsCount}/{totalStepsCount} steps
-                              </span>
-                            </div>
-                            
-                            {expandedItem === itemIndex && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                className="mt-4"
-                              >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                                    <div className="text-xs font-medium text-emerald-600 uppercase mb-1">Benefit</div>
-                                    <div className="text-sm font-semibold text-emerald-800">{item.benefit}</div>
-                                  </div>
-                                  
-                                  {item.savingsEstimate && (
-                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                      <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                      <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                    </div>
-                                  )}
-                                  
-                                  {item.timeEstimate && (
-                                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                      <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                      <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2 mt-4">
-                                  <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                  
-                                  {item.steps.map((step, stepIndex) => (
-                                    <div 
-                                      key={step.id} 
-                                      className={`flex items-start gap-2 p-2 rounded-lg border 
-                                        ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                    >
-                                      <Checkbox 
-                                        id={step.id} 
-                                        checked={step.isCompleted}
-                                        onCheckedChange={() => toggleStepCompletion(itemIndex, step.id)}
-                                        className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                      />
-                                      <label 
-                                        htmlFor={step.id} 
-                                        className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                      >
-                                        {step.description}
-                                      </label>
-                                    </div>
-                                  ))}
-                                  
-                                  {addingStepToItemIndex === itemIndex ? (
-                                    <div className="mt-3 space-y-2">
-                                      <Textarea 
-                                        placeholder="Enter a new action step..." 
-                                        value={newStep}
-                                        onChange={(e) => setNewStep(e.target.value)}
-                                        className="min-h-[80px] text-sm"
-                                      />
-                                      <div className="flex gap-2">
-                                        <Button 
-                                          size="sm" 
-                                          onClick={() => addNewStep(itemIndex)}
-                                          disabled={!newStep.trim()}
-                                        >
-                                          Add Step
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          onClick={() => {
-                                            setNewStep("");
-                                            setAddingStepToItemIndex(null);
-                                          }}
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="mt-2 gap-1"
-                                      onClick={() => setAddingStepToItemIndex(itemIndex)}
-                                    >
-                                      <Plus className="h-3.5 w-3.5" />
-                                      Add Custom Step
-                                    </Button>
-                                  )}
-                                </div>
-                              </motion.div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mt-6 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg border border-gray-100">
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
-            <p>This action plan is tailored to your debt profile and updated as your situation changes. Check off steps as you complete them to track your progress toward financial freedom.</p>
+            
+            <Progress 
+              value={completionPercentage} 
+              className="h-2.5 bg-white/20" 
+              indicatorClassName="bg-white"
+            />
+            
+            <Progress 
+              value={planCompletionPercentage} 
+              className="h-2.5 mt-2 bg-white/20" 
+              indicatorClassName="bg-green-400"
+            />
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+        </CardHeader>
+        
+        <CardContent className="p-6 bg-gradient-to-br from-gray-50 to-white">
+          <div className="space-y-6">
+            {highPriorityItems.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`p-1 rounded-full ${priorityConfig.high.bg}`}>
+                    {priorityConfig.high.icon}
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {priorityConfig.high.label} ACTIONS
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {highPriorityItems.map((item, index) => {
+                    const itemIndex = actionItems.findIndex(i => i.title === item.title);
+                    const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
+                    const totalStepsCount = item.steps.length;
+                    const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
+                    
+                    return (
+                      <motion.div
+                        key={`high-${index}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
+                          ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
+                      >
+                        <div className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
+                              'bg-green-500' : 
+                              `bg-gradient-to-r ${priorityConfig.high.color}`} text-white`}
+                            >
+                              {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                                  {item.title}
+                                  {item.isCompleted && (
+                                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                      Completed
+                                    </span>
+                                  )}
+                                </h4>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
+                                  className="p-1 h-8 w-8"
+                                >
+                                  {expandedItem === itemIndex ? 
+                                    <ChevronUp className="h-5 w-5" /> : 
+                                    <ChevronDown className="h-5 w-5" />}
+                                </Button>
+                              </div>
+                              
+                              <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
+                              
+                              <div className="mt-3 flex items-center gap-2">
+                                <Progress 
+                                  value={stepPercentage} 
+                                  className="h-2 flex-1 bg-gray-100" 
+                                  indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-red-500"}
+                                />
+                                <span className="text-xs font-medium text-gray-600">
+                                  {completedStepsCount}/{totalStepsCount} steps
+                                </span>
+                              </div>
+                              
+                              {expandedItem === itemIndex && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  className="mt-4"
+                                >
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                                      <div className="text-xs font-medium text-red-600 uppercase mb-1">Benefit</div>
+                                      <div className="text-sm font-semibold text-red-800">{item.benefit}</div>
+                                    </div>
+                                    
+                                    {item.savingsEstimate && (
+                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                                      </div>
+                                    )}
+                                    
+                                    {item.timeEstimate && (
+                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="space-y-2 mt-4">
+                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
+                                    
+                                    {item.steps.map((step, stepIndex) => (
+                                      <div 
+                                        key={step.id} 
+                                        className={`flex items-start gap-2 p-2 rounded-lg border 
+                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+                                      >
+                                        <Checkbox 
+                                          id={step.id} 
+                                          checked={step.isCompleted}
+                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
+                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
+                                        />
+                                        <label 
+                                          htmlFor={step.id} 
+                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
+                                        >
+                                          {step.description}
+                                          {step.action === "showDueDates" && (
+                                            <Button 
+                                              variant="ghost" 
+                                              size="sm" 
+                                              className="ml-2 text-blue-600 p-0 h-auto text-xs underline hover:text-blue-800"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setShowDueDateDialog(true);
+                                              }}
+                                            >
+                                              View Dates
+                                            </Button>
+                                          )}
+                                        </label>
+                                      </div>
+                                    ))}
+                                    
+                                    {addingStepToItemIndex === itemIndex ? (
+                                      <div className="mt-3 space-y-2">
+                                        <Textarea 
+                                          placeholder="Enter a new action step..." 
+                                          value={newStep}
+                                          onChange={(e) => setNewStep(e.target.value)}
+                                          className="min-h-[80px] text-sm"
+                                        />
+                                        <div className="flex gap-2">
+                                          <Button 
+                                            size="sm" 
+                                            onClick={() => addNewStep(itemIndex)}
+                                            disabled={!newStep.trim()}
+                                          >
+                                            Add Step
+                                          </Button>
+                                          <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={() => {
+                                              setNewStep("");
+                                              setAddingStepToItemIndex(null);
+                                            }}
+                                          >
+                                            Cancel
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="mt-2 gap-1"
+                                        onClick={() => setAddingStepToItemIndex(itemIndex)}
+                                      >
+                                        <Plus className="h-3.5 w-3.5" />
+                                        Add Custom Step
+                                      </Button>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {mediumPriorityItems.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`p-1 rounded-full ${priorityConfig.medium.bg}`}>
+                    {priorityConfig.medium.icon}
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {priorityConfig.medium.label} ACTIONS
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {mediumPriorityItems.map((item, index) => {
+                    const itemIndex = actionItems.findIndex(i => i.title === item.title);
+                    const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
+                    const totalStepsCount = item.steps.length;
+                    const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
+                    
+                    return (
+                      <motion.div
+                        key={`medium-${index}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                        className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
+                          ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
+                      >
+                        <div className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
+                              'bg-green-500' : 
+                              `bg-gradient-to-r ${priorityConfig.medium.color}`} text-white`}
+                            >
+                              {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                                  {item.title}
+                                  {item.isCompleted && (
+                                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                      Completed
+                                    </span>
+                                  )}
+                                </h4>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
+                                  className="p-1 h-8 w-8"
+                                >
+                                  {expandedItem === itemIndex ? 
+                                    <ChevronUp className="h-5 w-5" /> : 
+                                    <ChevronDown className="h-5 w-5" />}
+                                </Button>
+                              </div>
+                              
+                              <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
+                              
+                              <div className="mt-3 flex items-center gap-2">
+                                <Progress 
+                                  value={stepPercentage} 
+                                  className="h-2 flex-1 bg-gray-100" 
+                                  indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-amber-500"}
+                                />
+                                <span className="text-xs font-medium text-gray-600">
+                                  {completedStepsCount}/{totalStepsCount} steps
+                                </span>
+                              </div>
+                              
+                              {expandedItem === itemIndex && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  className="mt-4"
+                                >
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
+                                      <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
+                                      <div className="text-sm font-semibold text-amber-800">{item.benefit}</div>
+                                    </div>
+                                    
+                                    {item.savingsEstimate && (
+                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                                      </div>
+                                    )}
+                                    
+                                    {item.timeEstimate && (
+                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="space-y-2 mt-4">
+                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
+                                    
+                                    {item.steps.map((step, stepIndex) => (
+                                      <div 
+                                        key={step.id} 
+                                        className={`flex items-start gap-2 p-2 rounded-lg border 
+                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+                                      >
+                                        <Checkbox 
+                                          id={step.id} 
+                                          checked={step.isCompleted}
+                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
+                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
+                                        />
+                                        <label 
+                                          htmlFor={step.id} 
+                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
+                                        >
+                                          {step.description}
+                                          {step.
