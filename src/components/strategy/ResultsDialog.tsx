@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { InitialResultsView } from "./results/InitialResultsView";
-import { TimelineResultsView } from "./TimelineResultsView";
+import { TimelineResultsView } from "./results/TimelineResultsView";
 import { InsightsResultsView } from "./results/InsightsResultsView";
 import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 
