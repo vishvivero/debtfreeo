@@ -692,4 +692,4 @@ export const PersonalizedActionPlan = () => {
                               {expandedItem === itemIndex && (
                                 <motion.div
                                   initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1
+                                  animate={{ opacity: 1, height:
