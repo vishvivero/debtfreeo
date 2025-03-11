@@ -117,28 +117,11 @@ export const DebtComparison = () => {
 
     // Calculate baseline date consistently using the same method as in the calculator
     const today = new Date();
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const averageDaysPerMonth = 30.44; // Average days in a month (365.25/12)
+    const baselineEndDate = new Date(today);
+    baselineEndDate.setMonth(baselineEndDate.getMonth() + baselineMonths);
     
-    const baselineDaysToAdd = Math.round(baselineMonths * averageDaysPerMonth);
-    const baselineEndTimestamp = today.getTime() + (baselineDaysToAdd * msPerDay);
-    const originalPayoffDate = new Date(baselineEndTimestamp);
-    
-    // CRITICAL FIX: Make sure we're using the exact date object returned by the calculator
-    // Use the direct payoffDate object from timelineResults to ensure we're displaying exactly
-    // what the calculator computed
+    // CRITICAL FIX: Use the date object directly from the calculator
     let optimizedPayoffDate = timelineResults.payoffDate;
-
-    // Extra check to ensure optimizedPayoffDate is definitely a valid Date object
-    if (!(optimizedPayoffDate instanceof Date) || isNaN(optimizedPayoffDate.getTime())) {
-      console.error('Invalid optimized payoff date detected:', optimizedPayoffDate);
-      // Fallback to a calculated date if needed
-      const daysToAdd = Math.round(acceleratedMonths * averageDaysPerMonth);
-      const payoffTimestamp = today.getTime() + (daysToAdd * msPerDay);
-      // Create a fresh date object
-      optimizedPayoffDate = new Date(payoffTimestamp);
-      console.log('Created fallback date:', optimizedPayoffDate.toISOString());
-    }
 
     // Detailed debugging for the optimized date
     console.log('FIXED DATE VERIFICATION:', {
@@ -147,8 +130,8 @@ export const DebtComparison = () => {
         month: 'long',
         year: 'numeric'
       }),
-      originalPayoffDate: originalPayoffDate.toISOString(),
-      formattedOriginalDate: originalPayoffDate.toLocaleDateString('en-US', {
+      originalPayoffDate: baselineEndDate.toISOString(),
+      formattedOriginalDate: baselineEndDate.toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric'
       }),
@@ -161,7 +144,7 @@ export const DebtComparison = () => {
 
     return {
       totalDebts: debts.length,
-      originalPayoffDate,
+      originalPayoffDate: baselineEndDate,
       originalTotalInterest: baselineInterest,
       optimizedPayoffDate,
       optimizedTotalInterest: acceleratedInterest,
@@ -180,25 +163,6 @@ export const DebtComparison = () => {
   };
 
   const comparison = calculateComparison();
-
-  // Enhanced debugging for the date issue
-  console.log('FINAL FIXED Debt-free dates from comparison:', {
-    originalDate: comparison.originalPayoffDate?.toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric'
-    }),
-    optimizedDate: comparison.optimizedPayoffDate?.toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric'
-    }),
-    rawOptimizedDate: comparison.optimizedPayoffDate instanceof Date ? 
-      comparison.optimizedPayoffDate.toISOString() : 'Not a Date object',
-    dateObject: comparison.optimizedPayoffDate instanceof Date ? {
-      year: comparison.optimizedPayoffDate.getFullYear(),
-      month: comparison.optimizedPayoffDate.getMonth() + 1, // Adding 1 to match human month numbering
-      date: comparison.optimizedPayoffDate.getDate()
-    } : 'Not a Date object'
-  });
 
   return (
     <motion.div

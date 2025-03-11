@@ -69,9 +69,10 @@ const Overview = () => {
             <OverviewMetrics />
           </motion.div>
           
-          {/* Add DebtComparison before DebtScoreCard for better visualization */}
+          {/* DebtComparison shows both optimized and baseline scenarios */}
           <DebtComparison />
           
+          {/* DebtScoreCard shows credit score and other metrics */}
           <DebtScoreCard />
         </div>
       </div>
