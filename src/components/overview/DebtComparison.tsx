@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -128,7 +127,7 @@ export const DebtComparison = () => {
     // CRITICAL FIX: Make sure we're using the exact date object returned by the calculator
     // Use the direct payoffDate object from timelineResults to ensure we're displaying exactly
     // what the calculator computed
-    const optimizedPayoffDate = timelineResults.payoffDate;
+    let optimizedPayoffDate = timelineResults.payoffDate;
 
     // Extra check to ensure optimizedPayoffDate is definitely a valid Date object
     if (!(optimizedPayoffDate instanceof Date) || isNaN(optimizedPayoffDate.getTime())) {
@@ -137,10 +136,8 @@ export const DebtComparison = () => {
       const daysToAdd = Math.round(acceleratedMonths * averageDaysPerMonth);
       const payoffTimestamp = today.getTime() + (daysToAdd * msPerDay);
       // Create a fresh date object
-      const newPayoffDate = new Date(payoffTimestamp);
-      console.log('Created fallback date:', newPayoffDate.toISOString());
-      // Replace the invalid date
-      optimizedPayoffDate = newPayoffDate;
+      optimizedPayoffDate = new Date(payoffTimestamp);
+      console.log('Created fallback date:', optimizedPayoffDate.toISOString());
     }
 
     // Detailed debugging for the optimized date
@@ -546,4 +543,3 @@ export const DebtComparison = () => {
     </motion.div>
   );
 };
-
