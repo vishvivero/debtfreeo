@@ -66,11 +66,6 @@ export const ResultsMetricsGrid = ({
             year: 'numeric'
           })
         });
-      } else {
-        // Fallback to December 2026 if not found in the data
-        actualPayoffDate = new Date();
-        actualPayoffDate.setFullYear(2026, 11, 15); // December 15, 2026
-        console.log('ResultsMetricsGrid - Using fallback date: December 2026');
       }
     }
   }

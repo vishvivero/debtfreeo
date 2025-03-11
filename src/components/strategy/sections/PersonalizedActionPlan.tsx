@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,6 +60,19 @@ export const PersonalizedActionPlan = () => {
   const [newStep, setNewStep] = useState("");
   const [addingStepToItemIndex, setAddingStepToItemIndex] = useState<number | null>(null);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
+  
+  // Format the payment due date for display
+  const formatDueDate = (dateString: string | undefined): string => {
+    if (!dateString) return "Not set";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid date";
+      return format(date, 'MMM d, yyyy');
+    } catch (error) {
+      console.error("Error formatting due date:", error);
+      return "Invalid date";
+    }
+  };
   
   if (!debts || !profile) return null;
 
@@ -311,19 +324,6 @@ export const PersonalizedActionPlan = () => {
   const totalSteps = actionItems.reduce((sum, item) => sum + item.steps.length, 0);
   const completedSteps = actionItems.reduce((sum, item) => sum + item.steps.filter(step => step.isCompleted).length, 0);
   const planCompletionPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-
-  // Format the payment due date for display
-  const formatDueDate = (dateString: string | undefined): string => {
-    if (!dateString) return "Not set";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "Invalid date";
-      return format(date, 'MMM d, yyyy');
-    } catch (error) {
-      console.error("Error formatting due date:", error);
-      return "Invalid date";
-    }
-  };
   
   return (
     <>
@@ -680,4 +680,3 @@ export const PersonalizedActionPlan = () => {
                                           className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
                                         >
                                           {step.description}
-                                          {step.
