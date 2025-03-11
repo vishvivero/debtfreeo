@@ -34,6 +34,16 @@ export const InitialResultsView = ({
   currencySymbol,
   onNext
 }: InitialResultsViewProps) => {
+  console.log('InitialResultsView rendering with:', {
+    payoffDate: timelineResults.payoffDate,
+    formattedDate: timelineResults.payoffDate.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    }),
+    interestSaved: timelineResults.interestSaved,
+    monthsSaved: timelineResults.monthsSaved
+  });
+
   return (
     <motion.div
       key="initial"
