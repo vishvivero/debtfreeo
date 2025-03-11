@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -26,8 +25,7 @@ const getCompletionPercentage = (debts: Debt[]): number => {
   
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalOriginalDebt = debts.reduce((sum, debt) => {
-    // Estimate original debt based on payment history or just use current balance if no data
-    return sum + (debt.balance * 1.1); // Simple estimation
+    return sum + (debt.balance * 1.1);
   }, 0);
   
   if (totalOriginalDebt === 0) return 0;
@@ -62,7 +60,6 @@ export const PersonalizedActionPlan = () => {
   const [addingStepToItemIndex, setAddingStepToItemIndex] = useState<number | null>(null);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
   
-  // Format the payment due date for display
   const formatDueDate = (dateString: string | undefined): string => {
     if (!dateString) return "Not set";
     try {
@@ -80,17 +77,14 @@ export const PersonalizedActionPlan = () => {
   const currencySymbol = profile.preferred_currency || "£";
   const completionPercentage = getCompletionPercentage(debts);
   
-  // Calculate total debt and average interest rate
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt;
   
-  // Create personalized action items based on the user's debt situation
   useEffect(() => {
     const generateActionItems = (): ActionItem[] => {
       const items: ActionItem[] = [];
       
-      // Always suggest making at least minimum payments
-      const minPaymentsSavings = Math.round(totalDebt * 0.05); // Rough estimate of late fee avoidance
+      const minPaymentsSavings = Math.round(totalDebt * 0.05);
       items.push({
         title: "Make minimum payments on time",
         description: "Set up automatic payments for all your debts to ensure you never miss a payment date.",
@@ -110,12 +104,11 @@ export const PersonalizedActionPlan = () => {
         ]
       });
       
-      // Check if they have high-interest debts
       const highInterestDebts = debts.filter(debt => debt.interest_rate > 15);
       if (highInterestDebts.length > 0) {
         const highInterestTotal = highInterestDebts.reduce((sum, debt) => sum + debt.balance, 0);
         const avgHighRate = highInterestDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / highInterestTotal;
-        const avgNormalRate = 10; // Assuming this is an achievable rate
+        const avgNormalRate = 10;
         const interestSavings = Math.round(highInterestTotal * (avgHighRate - avgNormalRate) / 100);
         
         items.push({
@@ -135,12 +128,11 @@ export const PersonalizedActionPlan = () => {
         });
       }
       
-      // Check if they have multiple small debts
       const smallDebts = debts.filter(debt => debt.balance < 1000);
       if (smallDebts.length > 1) {
         const smallDebtTotal = smallDebts.reduce((sum, debt) => sum + debt.balance, 0);
         const avgSmallInterest = smallDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / smallDebtTotal;
-        const monthsToPayoff = Math.ceil(smallDebtTotal / (smallDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0) * 1.5)); // Assuming 1.5x minimum payment
+        const monthsToPayoff = Math.ceil(smallDebtTotal / (smallDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0) * 1.5));
         
         items.push({
           title: "Eliminate small debts quickly",
@@ -159,9 +151,8 @@ export const PersonalizedActionPlan = () => {
         });
       }
       
-      // Suggest consolidation if they have many debts
       if (debts.length > 3) {
-        const potentialConsolidationRate = avgInterestRate > 12 ? avgInterestRate - 3 : avgInterestRate - 1; // Estimated potential rate
+        const potentialConsolidationRate = avgInterestRate > 12 ? avgInterestRate - 3 : avgInterestRate - 1;
         const annualSavings = Math.round(totalDebt * (avgInterestRate - potentialConsolidationRate) / 100);
         
         items.push({
@@ -182,9 +173,8 @@ export const PersonalizedActionPlan = () => {
         });
       }
       
-      // Suggest increasing monthly payments
       const currentMinimums = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      const suggestedExtraPayment = Math.max(50, Math.round(currentMinimums * 0.1)); // Either 50 or 10% of minimum payments, whichever is greater
+      const suggestedExtraPayment = Math.max(50, Math.round(currentMinimums * 0.1));
       const payoffAcceleration = Math.round(12 * suggestedExtraPayment / (totalDebt * avgInterestRate / 1200));
       
       items.push({
@@ -203,7 +193,6 @@ export const PersonalizedActionPlan = () => {
         ]
       });
       
-      // Add a debt-free celebration planning action when they're close to paying off
       if (completionPercentage > 75) {
         const remainingDebt = totalDebt * (1 - completionPercentage / 100);
         const monthsRemaining = Math.ceil(remainingDebt / currentMinimums);
@@ -228,7 +217,6 @@ export const PersonalizedActionPlan = () => {
       return items;
     };
 
-    // Only regenerate items if we don't have any yet
     if (actionItems.length === 0) {
       setActionItems(generateActionItems());
     }
@@ -251,7 +239,6 @@ export const PersonalizedActionPlan = () => {
       item.steps = steps;
       newItems[itemIndex] = item;
       
-      // Check if all steps are completed and update the item's isCompleted status
       const allStepsCompleted = steps.every(step => step.isCompleted);
       item.isCompleted = allStepsCompleted;
       
@@ -293,7 +280,6 @@ export const PersonalizedActionPlan = () => {
   
   const handleDownloadPlan = () => {
     console.log("Download plan functionality would go here");
-    // Future enhancement: implement PDF download of the action plan
   };
   
   const highPriorityItems = actionItems.filter(item => item.priority === 'high');
@@ -321,7 +307,6 @@ export const PersonalizedActionPlan = () => {
     }
   };
   
-  // Calculate the total steps and completed steps
   const totalSteps = actionItems.reduce((sum, item) => sum + item.steps.length, 0);
   const completedSteps = actionItems.reduce((sum, item) => sum + item.steps.filter(step => step.isCompleted).length, 0);
   const planCompletionPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -700,7 +685,6 @@ export const PersonalizedActionPlan = () => {
         </CardContent>
       </Card>
 
-      {/* Due Date Dialog */}
       <Dialog open={showDueDateDialog} onOpenChange={setShowDueDateDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -723,8 +707,8 @@ export const PersonalizedActionPlan = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-slate-600">Due date:</span>
-                      <span className={`text-sm font-medium ${debt.due_date ? 'text-indigo-600' : 'text-gray-500'}`}>
-                        {formatDueDate(debt.due_date)}
+                      <span className={`text-sm font-medium ${debt.next_payment_date ? 'text-indigo-600' : 'text-gray-500'}`}>
+                        {formatDueDate(debt.next_payment_date)}
                       </span>
                     </div>
                   </div>
