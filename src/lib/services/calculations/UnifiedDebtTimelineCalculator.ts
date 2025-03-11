@@ -65,18 +65,43 @@ export class UnifiedDebtTimelineCalculator {
       );
     }
 
-    // Calculate alternative interest estimate as fallback using simple interest formula
-    const heuristicInterestEstimate = processedDebts.reduce((sum, debt) => {
-      // Skip debts with pre-included interest (they're now at 0% for calculation)
+    // Calculate more accurate interest estimates for individual debts
+    const individualInterestEstimates = processedDebts.map(debt => {
       if (debt.interest_rate === 0) {
-        return sum;
+        return { debtId: debt.id, interest: 0 };
       }
-      // Simple interest calculation: Principal * Rate * Time
-      return sum + (debt.balance * (debt.interest_rate / 100) * this.INTEREST_RATE_YEARS_HEURISTIC);
-    }, 0);
+      
+      // Basic amortization calculation for each debt
+      let balance = debt.balance;
+      let totalInterest = 0;
+      const monthlyRate = debt.interest_rate / 1200;
+      let payment = Math.max(debt.minimum_payment, balance * monthlyRate * 1.1); // Ensure payment is enough
+      
+      let monthCount = 0;
+      const MAX_MONTHS = 600; // Safety limit
+      
+      while (balance > 0.01 && monthCount < MAX_MONTHS) {
+        const interestPayment = balance * monthlyRate;
+        totalInterest += interestPayment;
+        
+        const principalPayment = Math.min(payment - interestPayment, balance);
+        balance -= principalPayment;
+        
+        monthCount++;
+      }
+      
+      console.log(`Amortization-based interest estimate for ${debt.name}: ${totalInterest.toFixed(2)}`);
+      return { debtId: debt.id, interest: totalInterest };
+    });
+    
+    // Calculate total individual interest (sum of individual amortization)
+    const sumOfIndividualInterest = individualInterestEstimates.reduce(
+      (sum, item) => sum + item.interest, 0
+    );
+    
+    console.log('Sum of individual debt interest calculations:', sumOfIndividualInterest.toFixed(2));
 
-    console.log('Heuristic interest estimate:', heuristicInterestEstimate);
-
+    // Use the StandardizedDebtCalculator for timeline values
     const results = StandardizedDebtCalculator.calculateTimeline(
       processedDebts,
       monthlyPayment,
@@ -84,10 +109,7 @@ export class UnifiedDebtTimelineCalculator {
       oneTimeFundings
     );
 
-    // Get the total principal balance
-    const totalBalance = processedDebts.reduce((sum, debt) => sum + debt.balance, 0);
-
-    // Calculate pre-included interest to add to the baseline interest
+    // Add pre-included interest to the baseline interest if needed
     const preIncludedInterest = debts.reduce((sum, debt) => {
       if (debt.metadata?.interest_included && debt.metadata?.remaining_months && debt.minimum_payment) {
         // Calculate total payments
@@ -106,48 +128,52 @@ export class UnifiedDebtTimelineCalculator {
 
     console.log('Total pre-included interest to be added:', preIncludedInterest);
 
-    // Add pre-included interest to the baseline interest
-    if (preIncludedInterest > 0) {
-      results.baselineInterest += preIncludedInterest;
-      results.acceleratedInterest += preIncludedInterest * 0.9; // Assume some savings in accelerated scenario
-      results.interestSaved = results.baselineInterest - results.acceleratedInterest;
+    // Decide which interest value to use
+    // 1. If the sum of individual interest estimates is reasonable, use that
+    // 2. Otherwise, use the calculator result with sanity checks
+    let baselineInterest;
+    let acceleratedInterest;
+    
+    // Use the sum of individual interest calculations if it's reasonable
+    if (sumOfIndividualInterest > 0 && sumOfIndividualInterest < results.baselineInterest * 1.5) {
+      console.log('Using sum of individual amortization interest as it appears more accurate');
+      baselineInterest = sumOfIndividualInterest + preIncludedInterest;
+      // Adjust accelerated interest proportionally
+      const ratio = results.acceleratedInterest / results.baselineInterest;
+      acceleratedInterest = baselineInterest * ratio;
+    } else {
+      // Use calculator results but with sanity checks
+      baselineInterest = results.baselineInterest + preIncludedInterest;
+      acceleratedInterest = results.acceleratedInterest + (preIncludedInterest * 0.9); // Assume some savings
+      
+      // Apply sanity checks if needed
+      const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
+      if (baselineInterest > totalBalance * this.MAX_INTEREST_MULTIPLIER || 
+          baselineInterest > this.ABSOLUTE_MAX_INTEREST) {
+        console.log('Adjusting unreasonably high interest calculation');
+        baselineInterest = Math.min(totalBalance * this.MAX_INTEREST_MULTIPLIER, this.ABSOLUTE_MAX_INTEREST);
+        acceleratedInterest = baselineInterest * 0.8; // Assume 20% savings
+      }
     }
 
-    // Comprehensive validation of the interest values
-    if (results.baselineInterest > this.ABSOLUTE_MAX_INTEREST || 
-        results.baselineInterest > totalBalance * this.MAX_INTEREST_MULTIPLIER ||
-        results.baselineInterest / totalBalance > this.MAX_INTEREST_MULTIPLIER) {
-      
-      console.log('Warning: Calculated interest exceeds reasonable limits, applying correction:', {
-        calculatedInterest: results.baselineInterest,
-        totalBalance,
-        interestToBalanceRatio: results.baselineInterest / totalBalance,
-        heuristicEstimate: heuristicInterestEstimate
-      });
-      
-      // Use the better of the two approaches - heuristic or capped value
-      const cappedInterest = Math.min(
-        totalBalance * this.MAX_INTEREST_MULTIPLIER, 
-        this.ABSOLUTE_MAX_INTEREST
-      );
-      
-      // Choose the more reasonable value between the heuristic and the cap
-      results.baselineInterest = Math.min(heuristicInterestEstimate, cappedInterest);
-      
-      // Also adjust accelerated interest proportionally
-      const originalRatio = results.acceleratedInterest / results.baselineInterest;
-      results.acceleratedInterest = results.baselineInterest * originalRatio;
-      
-      // Recalculate interest saved
-      results.interestSaved = results.baselineInterest - results.acceleratedInterest;
-      
-      console.log('Interest values after correction:', {
-        baselineInterest: results.baselineInterest,
-        acceleratedInterest: results.acceleratedInterest,
-        interestSaved: results.interestSaved
-      });
-    }
+    // Log final interest values for debugging
+    console.log('Final interest values:', {
+      originalCalculated: results.baselineInterest,
+      sumOfIndividualCalculation: sumOfIndividualInterest,
+      preIncludedInterest,
+      finalBaselineInterest: baselineInterest,
+      finalAcceleratedInterest: acceleratedInterest
+    });
 
-    return results;
+    return {
+      baselineMonths: results.baselineMonths,
+      acceleratedMonths: results.acceleratedMonths,
+      baselineInterest: baselineInterest,
+      acceleratedInterest: acceleratedInterest,
+      monthsSaved: results.monthsSaved,
+      interestSaved: baselineInterest - acceleratedInterest,
+      payoffDate: results.payoffDate,
+      monthlyPayments: results.monthlyPayments
+    };
   }
 }
