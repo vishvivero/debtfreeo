@@ -141,6 +141,7 @@ export class UnifiedDebtTimelineCalculator {
     const interestSaved = baselineInterest - acceleratedInterest;
     
     // Calculate payoff date based on accelerated months
+    // This is the correct calculation that matches what's shown on the Strategy page
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + results.acceleratedMonths);
     
