@@ -5,6 +5,7 @@ import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { useCurrency } from "@/hooks/use-currency";
+import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 
 interface PaymentComparisonProps {
   debts: Debt[];
@@ -46,8 +47,38 @@ export const PaymentComparison = ({
     return sum + convertToPreferredCurrency(fund.amount, fund.currency_symbol || preferredCurrency);
   }, 0);
 
-  // Ensure we use the fixed payoff date for display consistency
-  const payoffDate = new Date(2027, 6, 15); // July 15, 2027 (months are 0-indexed)
+  // Calculate the accurate payoff date based on the timeline data
+  const today = new Date();
+  let payoffDate = new Date(today);
+  
+  // Generate timeline data to find the exact payoff month
+  const timelineData = calculateTimelineData(debts, monthlyPayment, strategy, oneTimeFundings);
+  
+  if (timelineData && timelineData.length > 0) {
+    // Find the first month where the accelerated balance reaches zero
+    const payoffMonthIndex = timelineData.findIndex(
+      (data, index, array) => data.acceleratedBalance === 0 && 
+        (index === 0 || array[index - 1].acceleratedBalance > 0)
+    );
+    
+    if (payoffMonthIndex !== -1) {
+      // Add that many months to today's date to get the payoff date
+      payoffDate.setMonth(today.getMonth() + payoffMonthIndex);
+      console.log('PaymentComparison - Calculated payoff date:', {
+        payoffMonthIndex,
+        date: payoffDate.toISOString(),
+        month: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      });
+    } else {
+      // Fallback to December 2026 if not found in the data
+      payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
+      console.log('PaymentComparison - Using fallback date: December 2026');
+    }
+  } else {
+    // Fallback to December 2026 if no timeline data
+    payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
+    console.log('PaymentComparison - Using fallback date (no data): December 2026');
+  }
   
   // Format the payoff date in a human-readable way for display
   const formattedPayoffDate = payoffDate.toLocaleDateString('en-US', {

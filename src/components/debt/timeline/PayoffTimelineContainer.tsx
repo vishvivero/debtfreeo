@@ -71,8 +71,37 @@ export const PayoffTimelineContainer = ({
 
   const currencySymbol = profile?.preferred_currency || '£';
 
-  // Ensure we use the fixed payoff date for display consistency
-  const fixedPayoffDate = new Date(2027, 6, 15); // July 15, 2027 (months are 0-indexed)
+  // Calculate the accurate payoff date based on the timeline data
+  // Find the date when the accelerated timeline reaches zero
+  const today = new Date();
+  const actualPayoffDate = new Date(today);
+  
+  // If we have timeline data, find the exact month where debt is paid off
+  if (timelineData && timelineData.length > 0) {
+    // Find the first month where the accelerated balance reaches zero
+    const payoffMonthIndex = timelineData.findIndex(
+      (data, index, array) => data.acceleratedBalance === 0 && 
+        (index === 0 || array[index - 1].acceleratedBalance > 0)
+    );
+    
+    if (payoffMonthIndex !== -1) {
+      // Add that many months to today's date to get the payoff date
+      actualPayoffDate.setMonth(today.getMonth() + payoffMonthIndex);
+      console.log('Calculated actual payoff date:', {
+        payoffMonthIndex,
+        date: actualPayoffDate.toISOString(),
+        month: actualPayoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      });
+    } else {
+      // Fallback to December 2026 if not found in the data
+      actualPayoffDate.setFullYear(2026, 11, 15); // December 15, 2026
+      console.log('Using fallback payoff date: December 2026');
+    }
+  } else {
+    // Fallback to December 2026 if no timeline data
+    actualPayoffDate.setFullYear(2026, 11, 15); // December 15, 2026
+    console.log('Using fallback payoff date (no timeline data): December 2026');
+  }
 
   return (
     <motion.div
@@ -88,7 +117,7 @@ export const PayoffTimelineContainer = ({
               <TrendingDown className="h-5 w-5 text-emerald-500" />
               Combined Debt Payoff Timeline
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                ({format(fixedPayoffDate, 'MMMM yyyy')})
+                ({format(actualPayoffDate, 'MMMM yyyy')})
               </span>
             </div>
           </CardTitle>
@@ -105,7 +134,7 @@ export const PayoffTimelineContainer = ({
             baselineMonths={timelineResults.baselineMonths}
             acceleratedMonths={timelineResults.acceleratedMonths}
             monthsSaved={timelineResults.monthsSaved}
-            baselineLatestDate={fixedPayoffDate}
+            baselineLatestDate={actualPayoffDate}
             interestSaved={timelineResults.interestSaved}
             currencySymbol={currencySymbol}
           />

@@ -1,18 +1,23 @@
 
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sparkles } from "lucide-react";
+import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
-import { PaymentComparison } from "@/components/strategy/PaymentComparison";
 import { ResultsMetricsGrid } from "./ResultsMetricsGrid";
-import { ResultsDialogFooter } from "./ResultsDialogFooter";
+import { ResultsSummary } from "./ResultsSummary";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
+import { PaymentComparison } from "./PaymentComparison";
 
 interface InitialResultsViewProps {
   timelineResults: {
-    interestSaved: number;
+    baselineMonths: number;
+    acceleratedMonths: number;
+    baselineInterest: number;
+    acceleratedInterest: number;
     monthsSaved: number;
+    interestSaved: number;
     payoffDate: Date;
   };
   debts: Debt[];
@@ -22,6 +27,7 @@ interface InitialResultsViewProps {
   hasOneTimeFundings: boolean;
   currencySymbol: string;
   onNext: () => void;
+  payoffDate?: Date;
 }
 
 export const InitialResultsView = ({
@@ -32,98 +38,69 @@ export const InitialResultsView = ({
   oneTimeFundings,
   hasOneTimeFundings,
   currencySymbol,
-  onNext
+  onNext,
+  payoffDate
 }: InitialResultsViewProps) => {
-  console.log('InitialResultsView rendering with:', {
-    payoffDate: timelineResults.payoffDate,
-    formattedDate: timelineResults.payoffDate.toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric'
-    }),
-    interestSaved: timelineResults.interestSaved,
-    monthsSaved: timelineResults.monthsSaved
-  });
-
+  // Use provided payoff date or fall back to the one from timeline results
+  const actualPayoffDate = payoffDate || timelineResults.payoffDate;
+  
   return (
     <motion.div
       key="initial"
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <DialogHeader className="text-center space-y-4">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto bg-primary/10 p-3 rounded-full w-fit"
-        >
-          <Sparkles className="h-6 w-6 text-primary" />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
-            Your Path to Debt Freedom
-          </DialogTitle>
-          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-            Here's your personalized debt payoff strategy
-          </p>
-        </motion.div>
+      <DialogHeader>
+        <DialogTitle className="text-xl sm:text-2xl font-bold">
+          Your Path to Debt Freedom
+        </DialogTitle>
+        <DialogDescription>
+          Based on your current plan, here's how your debt payoff journey looks
+        </DialogDescription>
       </DialogHeader>
-      
-      <div className="space-y-6 py-4">
+
+      <div className="mt-6 space-y-6">
         <ResultsMetricsGrid
           interestSaved={timelineResults.interestSaved}
           monthsSaved={timelineResults.monthsSaved}
-          payoffDate={timelineResults.payoffDate}
+          payoffDate={actualPayoffDate}
           currencySymbol={currencySymbol}
+          debts={debts}
+          monthlyPayment={monthlyPayment}
+          strategy={selectedStrategy}
+          oneTimeFundings={oneTimeFundings}
         />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <PaymentComparison 
-            debts={debts} 
-            monthlyPayment={monthlyPayment} 
-            strategy={selectedStrategy} 
-            oneTimeFundings={oneTimeFundings} 
-          />
-        </motion.div>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Payment Breakdown</h3>
+            <PaymentComparison
+              debts={debts}
+              monthlyPayment={monthlyPayment}
+              strategy={selectedStrategy}
+              oneTimeFundings={oneTimeFundings}
+            />
+          </div>
 
-        {/* Only show one-time payment information if they are enabled */}
-        {hasOneTimeFundings && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="bg-purple-50 p-4 rounded-lg border border-purple-100"
-          >
-            <h3 className="font-semibold text-purple-800 mb-2">
-              Lump Sum Payments Impact
-            </h3>
-            <p className="text-sm text-purple-700">
-              You've included {oneTimeFundings.length > 1 ? `${oneTimeFundings.length} lump sum payments` : "a lump sum payment"} 
-              {oneTimeFundings.length > 1 ? " that total " : " of "}
-              <span className="font-semibold">
-                {currencySymbol}{oneTimeFundings.reduce((sum, f) => sum + Number(f.amount), 0).toLocaleString()}
-              </span>. 
-              These payments significantly accelerate your debt payoff timeline.
-            </p>
-          </motion.div>
-        )}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Strategy Summary</h3>
+            <ResultsSummary
+              strategy={selectedStrategy}
+              hasOneTimeFundings={hasOneTimeFundings}
+              interestSaved={timelineResults.interestSaved}
+              currencySymbol={currencySymbol}
+            />
+          </div>
+        </div>
 
-        <ResultsDialogFooter
-          currentView="initial"
-          onBack={() => {}}
-          onNext={onNext}
-          onClose={() => {}}
-        />
+        <div className="flex justify-end">
+          <Button onClick={onNext} className="space-x-2">
+            <span>Timeline Details</span>
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </motion.div>
   );
