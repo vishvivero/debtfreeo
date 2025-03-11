@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
@@ -165,6 +166,8 @@ export const DebtScoreCard = () => {
   }} transition={{
     duration: 0.5
   }} className="mb-6">
-      
+      <Card className="bg-white p-6 relative overflow-hidden">
+        {renderContent()}
+      </Card>
     </motion.div>;
 };
