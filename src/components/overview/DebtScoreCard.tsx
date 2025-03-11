@@ -9,11 +9,14 @@ import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalcula
 import { strategies } from "@/lib/strategies";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import { useCurrency } from "@/hooks/use-currency";
-
 export const DebtScoreCard = () => {
-  const { debts, profile } = useDebts();
-  const { convertToPreferredCurrency } = useCurrency();
-  
+  const {
+    debts,
+    profile
+  } = useDebts();
+  const {
+    convertToPreferredCurrency
+  } = useCurrency();
   console.log('Rendering DebtScoreCard with:', {
     debtCount: debts?.length,
     totalBalance: debts?.reduce((sum, debt) => sum + debt.balance, 0),
@@ -26,7 +29,6 @@ export const DebtScoreCard = () => {
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol), 0) || 0;
   const hasNoDebts = !debts || debts.length === 0;
   const isDebtFree = debts && debts.length > 0 && totalDebt === 0;
-  
   const calculateScore = () => {
     if (!debts || debts.length === 0) return null;
 
@@ -53,10 +55,8 @@ export const DebtScoreCard = () => {
     });
     return calculateDebtScore(normalizedDebts, originalPayoff, optimizedPayoff, selectedStrategy, effectiveMonthlyPayment);
   };
-  
   const scoreDetails = calculateScore();
   const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
-  
   const renderCircularProgress = () => {
     if (!scoreDetails) return null;
     return <div className="relative w-64 h-64">
@@ -90,7 +90,6 @@ export const DebtScoreCard = () => {
         </svg>
       </div>;
   };
-  
   const renderScoreBreakdown = () => {
     if (!scoreDetails) return null;
     return <div className="space-y-4 mt-6">
@@ -122,7 +121,6 @@ export const DebtScoreCard = () => {
         </div>
       </div>;
   };
-  
   const renderContent = () => {
     if (hasNoDebts) {
       return <NoDebtsMessage />;
@@ -158,7 +156,6 @@ export const DebtScoreCard = () => {
         </div>
       </>;
   };
-  
   return <motion.div initial={{
     opacity: 0,
     y: 20
@@ -168,8 +165,6 @@ export const DebtScoreCard = () => {
   }} transition={{
     duration: 0.5
   }} className="mb-6">
-      <Card className="bg-white p-6 relative overflow-hidden">
-        {renderContent()}
-      </Card>
+      
     </motion.div>;
 };
