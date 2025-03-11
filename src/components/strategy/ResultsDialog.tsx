@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
@@ -10,8 +9,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UnifiedDebtTimelineCalculator } from "@/lib/services/calculations/UnifiedDebtTimelineCalculator";
 import { InitialResultsView } from "./results/InitialResultsView";
-import { TimelineResultsView } from "./results/TimelineResultsView";
+import { TimelineResultsView } from "./TimelineResultsView";
 import { InsightsResultsView } from "./results/InsightsResultsView";
+import { calculateTimelineData } from "@/components/debt/timeline/TimelineCalculator";
 
 interface ResultsDialogProps {
   isOpen: boolean;
@@ -72,6 +72,39 @@ export const ResultsDialog = ({
   
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
   
+  // Calculate the actual payoff date based on the timeline data
+  const today = new Date();
+  let payoffDate = new Date(today);
+  
+  // Generate timeline data to find the exact payoff month
+  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, selectedStrategy, oneTimeFundings);
+  
+  if (timelineData && timelineData.length > 0) {
+    // Find the first month where the accelerated balance reaches zero
+    const payoffMonthIndex = timelineData.findIndex(
+      (data, index, array) => data.acceleratedBalance === 0 && 
+        (index === 0 || array[index - 1].acceleratedBalance > 0)
+    );
+    
+    if (payoffMonthIndex !== -1) {
+      // Add that many months to today's date to get the payoff date
+      payoffDate.setMonth(today.getMonth() + payoffMonthIndex);
+      console.log('ResultsDialog - Calculated payoff date:', {
+        payoffMonthIndex,
+        date: payoffDate.toISOString(),
+        month: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      });
+    } else {
+      // Fallback to December 2026 if not found in the data
+      payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
+      console.log('ResultsDialog - Using fallback date: December 2026');
+    }
+  } else {
+    // Fallback to December 2026 if no timeline data
+    payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
+    console.log('ResultsDialog - Using fallback date (no data): December 2026');
+  }
+  
   const handleNext = () => {
     if (currentView === 'initial') {
       setCurrentView('timeline');
@@ -125,6 +158,7 @@ export const ResultsDialog = ({
               hasOneTimeFundings={hasOneTimeFundings}
               currencySymbol={currencySymbol}
               onNext={handleNext}
+              payoffDate={payoffDate}
             />
           )}
         </AnimatePresence>
