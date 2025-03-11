@@ -140,22 +140,19 @@ export class UnifiedDebtTimelineCalculator {
     const acceleratedInterest = baselineInterest * ratio;
     const interestSaved = baselineInterest - acceleratedInterest;
     
-    // CRITICAL FIX: Ensure we create a date object properly for payoff date
-    // This needs to match what's shown on the Strategy page (July 2027)
+    // CRITICAL FIX: Create a fresh Date object for the payoff date
+    // Use a consistent method to compute the date
     const today = new Date();
-    
-    // Use date constructor instead of setMonth to avoid date overflows
-    // Create a proper new Date with acceleratedMonths added
     const payoffDate = new Date(
-      today.getFullYear(), 
-      today.getMonth() + results.acceleratedMonths, 
+      today.getFullYear(),
+      today.getMonth() + results.acceleratedMonths,
       today.getDate()
     );
     
-    // For debugging - also calculate baseline end date the same way
+    // For debugging - calculate baseline end date the same way
     const baselineEndDate = new Date(
-      today.getFullYear(), 
-      today.getMonth() + results.baselineMonths, 
+      today.getFullYear(),
+      today.getMonth() + results.baselineMonths,
       today.getDate()
     );
     

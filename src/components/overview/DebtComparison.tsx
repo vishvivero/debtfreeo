@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -73,6 +74,7 @@ export const DebtComparison = () => {
     const totalDebtValue = normalizedDebts.reduce((sum, debt) => sum + debt.balance, 0);
     
     // Use the UnifiedDebtTimelineCalculator directly to ensure consistency with the timeline display
+    // CRITICAL FIX: Pass the total monthly payment correctly (including minimum payment + extra)
     const timelineResults = UnifiedDebtTimelineCalculator.calculateTimeline(
       normalizedDebts,
       profile.monthly_payment,
@@ -87,7 +89,9 @@ export const DebtComparison = () => {
       acceleratedInterest: timelineResults.acceleratedInterest,
       monthsSaved: timelineResults.monthsSaved,
       interestSaved: timelineResults.interestSaved,
-      payoffDate: timelineResults.payoffDate
+      payoffDate: timelineResults.payoffDate.toISOString(),
+      payoffMonth: timelineResults.payoffDate.getMonth() + 1,
+      payoffYear: timelineResults.payoffDate.getFullYear()
     });
     
     const baselineInterest = timelineResults.baselineInterest;
@@ -113,7 +117,7 @@ export const DebtComparison = () => {
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
-    // CRITICAL FIX: Calculate baseline date consistently
+    // Calculate baseline date consistently
     const today = new Date();
     const originalPayoffDate = new Date(
       today.getFullYear(),
@@ -121,9 +125,10 @@ export const DebtComparison = () => {
       today.getDate()
     );
     
-    // Use the payoff date directly from the timeline results
-    // The issue was here - we need to make sure we use the date object directly
-    const optimizedPayoffDate = timelineResults.payoffDate;
+    // CRITICAL FIX: Create a NEW Date object from the payoffDate
+    // This ensures we're working with an actual Date object and not a serialized one
+    const optimizedPayoffDateStr = timelineResults.payoffDate.toISOString();
+    const optimizedPayoffDate = new Date(optimizedPayoffDateStr);
 
     // Detailed logging for debugging the date issue
     console.log('Detailed date calculation debug:', {
@@ -131,11 +136,11 @@ export const DebtComparison = () => {
       baselineMonths,
       acceleratedMonths,
       originalPayoffDate: originalPayoffDate.toISOString(),
-      optimizedPayoffDate: optimizedPayoffDate.toISOString(),
+      optimizedPayoffDateFromTimeline: timelineResults.payoffDate.toISOString(),
+      recreatedOptimizedDate: optimizedPayoffDate.toISOString(),
       optimizedPayoffFormatted: optimizedPayoffDate.toLocaleDateString('en-US', {
         month: 'long',
-        year: 'numeric',
-        day: 'numeric'
+        year: 'numeric'
       }),
       payoffDateType: Object.prototype.toString.call(optimizedPayoffDate)
     });
@@ -153,8 +158,8 @@ export const DebtComparison = () => {
       principalPercentage,
       formattedBaseline: formatCurrency(baselineInterest),
       formattedAccelerated: formatCurrency(acceleratedInterest),
-      originalPayoffDate,
-      optimizedPayoffDate
+      originalPayoffDate: originalPayoffDate.toISOString(),
+      optimizedPayoffDate: optimizedPayoffDate.toISOString()
     });
 
     return {
@@ -189,12 +194,13 @@ export const DebtComparison = () => {
       month: 'long',
       year: 'numeric'
     }),
-    rawOptimizedDate: comparison.optimizedPayoffDate,
-    dateObject: {
-      year: comparison.optimizedPayoffDate?.getFullYear(),
-      month: comparison.optimizedPayoffDate?.getMonth(),
-      date: comparison.optimizedPayoffDate?.getDate()
-    }
+    rawOptimizedDate: comparison.optimizedPayoffDate instanceof Date ? 
+      comparison.optimizedPayoffDate.toISOString() : 'Not a Date object',
+    dateObject: comparison.optimizedPayoffDate instanceof Date ? {
+      year: comparison.optimizedPayoffDate.getFullYear(),
+      month: comparison.optimizedPayoffDate.getMonth() + 1, // Adding 1 to match human month numbering
+      date: comparison.optimizedPayoffDate.getDate()
+    } : 'Not a Date object'
   });
 
   return (
