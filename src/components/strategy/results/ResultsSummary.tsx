@@ -1,6 +1,6 @@
 
 import { motion } from "framer-motion";
-import { TrendingUp, Calendar, Target } from "lucide-react";
+import { TrendingUp, Clock, Calendar } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding } from "@/lib/types/payment";
@@ -46,6 +46,10 @@ export const ResultsSummary = ({
   const effectiveInterestSaved = timelineResults?.interestSaved ?? interestSaved;
   const effectiveMonthsSaved = timelineResults?.monthsSaved ?? 0;
   
+  // Calculate years and months saved
+  const yearsSaved = Math.floor(effectiveMonthsSaved / 12);
+  const monthsSaved = effectiveMonthsSaved % 12;
+  
   // Fallback date if no timeline results
   const today = new Date();
   const fallbackDate = new Date(today);
@@ -74,7 +78,12 @@ export const ResultsSummary = ({
     monthsSaved: effectiveMonthsSaved,
     formattedTimeSaved: formatTimeSaved(effectiveMonthsSaved),
     yearsSaved: Math.floor(effectiveMonthsSaved / 12),
-    remainingMonths: effectiveMonthsSaved % 12
+    remainingMonths: effectiveMonthsSaved % 12,
+    payoffDate: payoffDate.toISOString(),
+    formattedPayoffDate: payoffDate.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    })
   });
 
   return (
@@ -103,7 +112,7 @@ export const ResultsSummary = ({
           className="bg-blue-50 p-4 rounded-lg"
         >
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
+            <Clock className="h-5 w-5 text-blue-600" />
             <h3 className="font-semibold text-blue-800">Time Saved</h3>
           </div>
           <p className="text-2xl font-bold text-blue-600">
@@ -119,7 +128,7 @@ export const ResultsSummary = ({
           className="bg-purple-50 p-4 rounded-lg"
         >
           <div className="flex items-center gap-2 mb-2">
-            <Target className="h-5 w-5 text-purple-600" />
+            <Calendar className="h-5 w-5 text-purple-600" />
             <h3 className="font-semibold text-purple-800">Debt-free Date</h3>
           </div>
           <p className="text-2xl font-bold text-purple-600">

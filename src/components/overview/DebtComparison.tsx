@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -80,7 +79,7 @@ export const DebtComparison = () => {
       oneTimeFundings
     );
     
-    console.log('Overview timeline calculation results (FIXED):', {
+    console.log('Overview timeline calculation results:', {
       baselineMonths: timelineResults.baselineMonths,
       acceleratedMonths: timelineResults.acceleratedMonths,
       baselineInterest: timelineResults.baselineInterest,
@@ -104,7 +103,7 @@ export const DebtComparison = () => {
     const acceleratedMonths = timelineResults.acceleratedMonths;
     const timeSavedMonths = timelineResults.monthsSaved;
     
-    // Fix: Properly calculate years and months saved
+    // Calculate years and months saved correctly
     const timeSavedYears = Math.floor(timeSavedMonths / 12);
     const timeSavedRemainingMonths = timeSavedMonths % 12;
 
@@ -118,17 +117,20 @@ export const DebtComparison = () => {
       ? (acceleratedInterest / baselineInterest) * 100 
       : 0;
 
-    // Calculate dates properly
+    // Calculate dates correctly
     const today = new Date();
     
-    // Fix: Calculate baseline date using baselineMonths from the start date
+    // Calculate baseline date properly using full baselineMonths
     const baselineEndDate = new Date(today);
     baselineEndDate.setMonth(baselineEndDate.getMonth() + baselineMonths);
     
     // Use the date object directly from the calculator for optimized date
     const optimizedPayoffDate = timelineResults.payoffDate;
 
-    console.log('FIXED DATE VERIFICATION:', {
+    console.log('Date verification:', {
+      today: today.toISOString(),
+      baselineMonths,
+      acceleratedMonths,
       optimizedPayoffDate: optimizedPayoffDate.toISOString(),
       formattedOptimizedDate: optimizedPayoffDate.toLocaleDateString('en-US', {
         month: 'long',
