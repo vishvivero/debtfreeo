@@ -74,10 +74,10 @@ export const PayoffTimelineContainer = ({
   // Calculate the accurate payoff date based on the timeline data
   // Find the date when the accelerated timeline reaches zero
   const today = new Date();
-  const actualPayoffDate = new Date(today);
-  
-  // If we have timeline data, find the exact month where debt is paid off
-  if (timelineData && timelineData.length > 0) {
+  let actualPayoffDate = timelineResults.payoffDate; // Use the calculated date from timeline results
+
+  // Fallback to the timeline data if needed
+  if (timelineData && timelineData.length > 0 && !actualPayoffDate) {
     // Find the first month where the accelerated balance reaches zero
     const payoffMonthIndex = timelineData.findIndex(
       (data, index, array) => data.acceleratedBalance === 0 && 
@@ -86,21 +86,20 @@ export const PayoffTimelineContainer = ({
     
     if (payoffMonthIndex !== -1) {
       // Add that many months to today's date to get the payoff date
+      actualPayoffDate = new Date(today);
       actualPayoffDate.setMonth(today.getMonth() + payoffMonthIndex);
-      console.log('Calculated actual payoff date:', {
+      console.log('Calculated actual payoff date from timeline data:', {
         payoffMonthIndex,
         date: actualPayoffDate.toISOString(),
         month: actualPayoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       });
-    } else {
-      // Fallback to December 2026 if not found in the data
-      actualPayoffDate.setFullYear(2026, 11, 15); // December 15, 2026
-      console.log('Using fallback payoff date: December 2026');
     }
-  } else {
-    // Fallback to December 2026 if no timeline data
-    actualPayoffDate.setFullYear(2026, 11, 15); // December 15, 2026
-    console.log('Using fallback payoff date (no timeline data): December 2026');
+  }
+  
+  if (!actualPayoffDate) {
+    actualPayoffDate = new Date(today);
+    actualPayoffDate.setMonth(today.getMonth() + timelineResults.acceleratedMonths);
+    console.log('Using acceleratedMonths to calculate payoff date:', actualPayoffDate.toISOString());
   }
 
   return (

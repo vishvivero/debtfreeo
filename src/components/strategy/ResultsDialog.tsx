@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
@@ -73,53 +72,51 @@ export const ResultsDialog = ({
   
   console.log('Timeline calculation results in ResultsDialog:', timelineResults);
   
-  // Calculate the actual payoff date based on the timeline data
-  const today = new Date();
-  let payoffDate = new Date(today);
+  // Use the calculated payoff date directly from timelineResults
+  let payoffDate = timelineResults.payoffDate;
   
-  // Generate timeline data to find the exact payoff month
-  const timelineData = calculateTimelineData(debts, totalMonthlyPayment, selectedStrategy, oneTimeFundings);
-  
-  if (timelineData && timelineData.length > 0) {
-    // Find the first month where the accelerated balance reaches zero
-    const payoffMonthIndex = timelineData.findIndex(
-      (data, index, array) => data.acceleratedBalance === 0 && 
-        (index === 0 || array[index - 1].acceleratedBalance > 0)
-    );
+  // Only use timeline data as fallback if the payoffDate is not available
+  if (!payoffDate) {
+    const today = new Date();
+    payoffDate = new Date(today);
     
-    if (payoffMonthIndex !== -1) {
-      // Add that many months to today's date to get the payoff date
-      payoffDate.setMonth(today.getMonth() + payoffMonthIndex);
-      console.log('ResultsDialog - Calculated payoff date:', {
-        payoffMonthIndex,
-        date: payoffDate.toISOString(),
-        month: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        baselineMonths: timelineResults.baselineMonths,
-        acceleratedMonths: timelineResults.acceleratedMonths,
-        monthsSaved: timelineResults.monthsSaved
-      });
+    // Generate timeline data to find the exact payoff month
+    const timelineData = calculateTimelineData(debts, totalMonthlyPayment, selectedStrategy, oneTimeFundings);
+    
+    if (timelineData && timelineData.length > 0) {
+      // Find the first month where the accelerated balance reaches zero
+      const payoffMonthIndex = timelineData.findIndex(
+        (data, index, array) => data.acceleratedBalance === 0 && 
+          (index === 0 || array[index - 1].acceleratedBalance > 0)
+      );
       
-      // Validate that monthsSaved is correct
-      if (timelineResults.baselineMonths && payoffMonthIndex) {
-        const calculatedMonthsSaved = timelineResults.baselineMonths - payoffMonthIndex;
-        if (calculatedMonthsSaved !== timelineResults.monthsSaved) {
-          console.log('Correcting monthsSaved calculation:', {
-            original: timelineResults.monthsSaved,
-            corrected: calculatedMonthsSaved
-          });
-          timelineResults.monthsSaved = calculatedMonthsSaved;
-        }
+      if (payoffMonthIndex !== -1) {
+        // Add that many months to today's date to get the payoff date
+        payoffDate.setMonth(today.getMonth() + payoffMonthIndex);
+        console.log('ResultsDialog - Calculated payoff date from timeline data:', {
+          payoffMonthIndex,
+          date: payoffDate.toISOString(),
+          month: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        });
+      } else {
+        // Fallback to using acceleratedMonths
+        payoffDate.setMonth(today.getMonth() + timelineResults.acceleratedMonths);
+        console.log('ResultsDialog - Using acceleratedMonths for payoff date:', payoffDate.toISOString());
       }
     } else {
-      // Fallback to December 2026 if not found in the data
-      payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
-      console.log('ResultsDialog - Using fallback date: December 2026');
+      // Final fallback using acceleratedMonths
+      payoffDate.setMonth(today.getMonth() + timelineResults.acceleratedMonths);
+      console.log('ResultsDialog - Final fallback for payoff date:', payoffDate.toISOString());
     }
-  } else {
-    // Fallback to December 2026 if no timeline data
-    payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
-    console.log('ResultsDialog - Using fallback date (no data): December 2026');
   }
+  
+  console.log('ResultsDialog - Final payoff date:', {
+    date: payoffDate.toISOString(),
+    formattedDate: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    baselineMonths: timelineResults.baselineMonths,
+    acceleratedMonths: timelineResults.acceleratedMonths,
+    monthsSaved: timelineResults.monthsSaved
+  });
   
   const handleNext = () => {
     if (currentView === 'initial') {

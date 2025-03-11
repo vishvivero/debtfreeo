@@ -146,12 +146,8 @@ export class UnifiedDebtTimelineCalculator {
     const payoffDate = new Date(today);
     payoffDate.setMonth(today.getMonth() + results.acceleratedMonths);
     
-    // For consistency with the Combined Debt Payoff Timeline, use December 2026 if the calculated date is after that
-    const december2026 = new Date(2026, 11, 15); // December 15, 2026
-    
-    // Use the calculated date ONLY if it's before December 2026, otherwise use December 2026
-    // This ensures consistency with the Combined Debt Payoff Timeline
-    const finalPayoffDate = payoffDate > december2026 ? december2026 : payoffDate;
+    // FIXED: Use the actual calculated payoff date instead of capping to December 2026
+    const finalPayoffDate = payoffDate;
     
     // For debugging - calculate baseline end date using months
     const baselineMonths = results.baselineMonths;
@@ -159,7 +155,7 @@ export class UnifiedDebtTimelineCalculator {
     baselineEndDate.setMonth(baselineEndDate.getMonth() + baselineMonths);
     
     // Log all calculated dates and values for debugging
-    console.log('Date calculation details (FIXED VERSION):', {
+    console.log('Date calculation details (ACTUAL DATES):', {
       startDate: today.toISOString(),
       acceleratedMonths: results.acceleratedMonths,
       baselineMonths: results.baselineMonths,
@@ -175,7 +171,7 @@ export class UnifiedDebtTimelineCalculator {
     });
     
     // Log final interest values for debugging
-    console.log('Final timeline calculation values (FIXED VERSION):', {
+    console.log('Final timeline calculation values (ACTUAL DATES):', {
       originalCalculated: {
         baselineInterest: results.baselineInterest,
         acceleratedInterest: results.acceleratedInterest,
@@ -205,7 +201,7 @@ export class UnifiedDebtTimelineCalculator {
       acceleratedInterest: acceleratedInterest,
       monthsSaved: results.monthsSaved,
       interestSaved: interestSaved,
-      payoffDate: finalPayoffDate, // Now using the properly calculated date
+      payoffDate: finalPayoffDate, // Now using the actual calculated date
       monthlyPayments: results.monthlyPayments
     };
   }
