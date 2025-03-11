@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -9,7 +8,7 @@ import {
   ListChecks, ArrowRight, Calendar, Target, Award, 
   Download, CheckCircle2, ChevronDown, ChevronUp, 
   BookmarkCheck, BadgeCheck, ClipboardCheck,
-  Check, Plus, CalendarCheck
+  Check, Plus, CalendarCheck, CalendarDays
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -81,11 +80,19 @@ export const PersonalizedActionPlan = () => {
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt;
   
+  const upcomingDueDates = debts
+    .filter(debt => debt.next_payment_date)
+    .sort((a, b) => {
+      const dateA = a.next_payment_date ? new Date(a.next_payment_date).getTime() : Infinity;
+      const dateB = b.next_payment_date ? new Date(b.next_payment_date).getTime() : Infinity;
+      return dateA - dateB;
+    })
+    .slice(0, 3);
+  
   useEffect(() => {
     const generateActionItems = (): ActionItem[] => {
       const items: ActionItem[] = [];
       
-      // Check if there are debts with missing next_payment_date
       const debtsWithMissingDueDate = debts.filter(debt => !debt.next_payment_date);
       const hasMissingDueDates = debtsWithMissingDueDate.length > 0;
       
@@ -98,7 +105,6 @@ export const PersonalizedActionPlan = () => {
         benefit: "Avoid late fees and credit score damage",
         savingsEstimate: `${currencySymbol}${minPaymentsSavings.toLocaleString()} in late fees annually`,
         steps: [
-          // Only include the list due dates step if there are missing due dates
           ...(hasMissingDueDates ? [{ 
             id: crypto.randomUUID(), 
             description: "List all debt payment due dates", 
@@ -498,6 +504,30 @@ export const PersonalizedActionPlan = () => {
                                             >
                                               View Dates
                                             </Button>
+                                          )}
+                                          {step.description === "Set up automatic payments with your bank" && upcomingDueDates.length > 0 && (
+                                            <span className="ml-2 text-blue-600 text-xs flex items-center gap-1">
+                                              <CalendarDays className="h-3.5 w-3.5" />
+                                              {upcomingDueDates.map((debt, i) => (
+                                                <span key={debt.id} className="bg-blue-50 px-2 py-0.5 rounded-full">
+                                                  {debt.name}: {formatDueDate(debt.next_payment_date)}
+                                                </span>
+                                              )).reduce((prev, curr, i) => [prev, <span key={i} className="mx-1">·</span>, curr] as any)}
+                                              {debts.length > upcomingDueDates.length && (
+                                                <Button 
+                                                  variant="ghost" 
+                                                  size="sm" 
+                                                  className="ml-1 p-0 h-auto text-xs underline hover:text-blue-800"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setShowDueDateDialog(true);
+                                                  }}
+                                                >
+                                                  +{debts.length - upcomingDueDates.length} more
+                                                </Button>
+                                              )}
+                                            </span>
                                           )}
                                         </label>
                                       </div>
