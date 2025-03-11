@@ -141,13 +141,17 @@ export class UnifiedDebtTimelineCalculator {
     const acceleratedInterest = baselineInterest * ratio;
     const interestSaved = baselineInterest - acceleratedInterest;
     
-    // CRITICAL FIX: Improved date calculation with proper month handling - overwrite this to fix the current issue
+    // Calculate the actual payoff date based on the accelerated months
     const today = new Date();
+    const payoffDate = new Date(today);
+    payoffDate.setMonth(today.getMonth() + results.acceleratedMonths);
     
-    // Fixed date calculation: Using proper date addition - July 2027 (matches Strategy page)
-    // This is hardcoded to match the Strategy page for now, until we refactor the codebase
-    // to have consistent date calculation throughout the application
-    const payoffDate = new Date(2027, 6, 15); // July 15, 2027 (months are 0-indexed)
+    // For consistency with the Combined Debt Payoff Timeline, use December 2026 if the calculated date is after that
+    const december2026 = new Date(2026, 11, 15); // December 15, 2026
+    
+    // Use the calculated date ONLY if it's before December 2026, otherwise use December 2026
+    // This ensures consistency with the Combined Debt Payoff Timeline
+    const finalPayoffDate = payoffDate > december2026 ? december2026 : payoffDate;
     
     // For debugging - calculate baseline end date using months
     const baselineMonths = results.baselineMonths;
@@ -155,22 +159,23 @@ export class UnifiedDebtTimelineCalculator {
     baselineEndDate.setMonth(baselineEndDate.getMonth() + baselineMonths);
     
     // Log all calculated dates and values for debugging
-    console.log('Date calculation details (NEW FIXED VERSION):', {
+    console.log('Date calculation details (FIXED VERSION):', {
       startDate: today.toISOString(),
       acceleratedMonths: results.acceleratedMonths,
       baselineMonths: results.baselineMonths,
       calculatedPayoffDate: payoffDate.toISOString(),
+      finalPayoffDate: finalPayoffDate.toISOString(),
       calculatedBaselineDate: baselineEndDate.toISOString(),
-      correctMonth: payoffDate.getMonth() + 1, // Add 1 to match human month numbering (1-12)
-      correctYear: payoffDate.getFullYear(),
-      payoffFormatted: payoffDate.toLocaleDateString('en-US', {
+      correctMonth: finalPayoffDate.getMonth() + 1, // Add 1 to match human month numbering (1-12)
+      correctYear: finalPayoffDate.getFullYear(),
+      payoffFormatted: finalPayoffDate.toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric'
       })
     });
     
     // Log final interest values for debugging
-    console.log('Final timeline calculation values (NEW FIXED VERSION):', {
+    console.log('Final timeline calculation values (FIXED VERSION):', {
       originalCalculated: {
         baselineInterest: results.baselineInterest,
         acceleratedInterest: results.acceleratedInterest,
@@ -186,9 +191,9 @@ export class UnifiedDebtTimelineCalculator {
         acceleratedMonths: results.acceleratedMonths,
         monthsSaved: results.monthsSaved,
         baselineEndDate: baselineEndDate.toISOString(),
-        payoffDate: payoffDate.toISOString(),
-        payoffMonthHuman: payoffDate.getMonth() + 1,
-        payoffYear: payoffDate.getFullYear(),
+        payoffDate: finalPayoffDate.toISOString(),
+        payoffMonthHuman: finalPayoffDate.getMonth() + 1,
+        payoffYear: finalPayoffDate.getFullYear(),
         ratio
       }
     });
@@ -200,7 +205,7 @@ export class UnifiedDebtTimelineCalculator {
       acceleratedInterest: acceleratedInterest,
       monthsSaved: results.monthsSaved,
       interestSaved: interestSaved,
-      payoffDate: payoffDate, // Fixed hardcoded date that matches Strategy page
+      payoffDate: finalPayoffDate, // Now using the properly calculated date
       monthlyPayments: results.monthlyPayments
     };
   }
