@@ -53,6 +53,22 @@ export const ResultsSummary = ({
   
   const payoffDate = timelineResults?.payoffDate || fallbackDate;
 
+  // Format the time saved in a more readable way (years and months)
+  const formatTimeSaved = (months: number): string => {
+    if (months <= 0) return "0 months";
+    
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    
+    if (years === 0) {
+      return `${months} month${months === 1 ? '' : 's'}`;
+    } else if (remainingMonths === 0) {
+      return `${years} year${years === 1 ? '' : 's'}`;
+    } else {
+      return `${years} year${years === 1 ? '' : 's'} and ${remainingMonths} month${remainingMonths === 1 ? '' : 's'}`;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -83,7 +99,7 @@ export const ResultsSummary = ({
             <h3 className="font-semibold text-blue-800">Time Saved</h3>
           </div>
           <p className="text-2xl font-bold text-blue-600">
-            {effectiveMonthsSaved} months
+            {formatTimeSaved(effectiveMonthsSaved)}
           </p>
           <p className="text-sm text-blue-700">Faster debt freedom</p>
         </motion.div>

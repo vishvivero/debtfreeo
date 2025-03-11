@@ -77,6 +77,22 @@ export const ResultsMetricsGrid = ({
     }
   }
 
+  // Format the time saved in a more readable way (years and months)
+  const formatTimeSaved = (months: number): string => {
+    if (months <= 0) return "0 months";
+    
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    
+    if (years === 0) {
+      return `${months} month${months === 1 ? '' : 's'}`;
+    } else if (remainingMonths === 0) {
+      return `${years} year${years === 1 ? '' : 's'}`;
+    } else {
+      return `${years} year${years === 1 ? '' : 's'} and ${remainingMonths} month${remainingMonths === 1 ? '' : 's'}`;
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -101,7 +117,7 @@ export const ResultsMetricsGrid = ({
           <h3 className="font-semibold text-blue-800">Time Saved</h3>
         </div>
         <p className="text-lg sm:text-2xl font-bold text-blue-600">
-          {monthsSaved} months
+          {formatTimeSaved(monthsSaved)}
         </p>
         <p className="text-xs sm:text-sm text-blue-700">Faster debt freedom</p>
       </div>

@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
@@ -92,8 +93,23 @@ export const ResultsDialog = ({
       console.log('ResultsDialog - Calculated payoff date:', {
         payoffMonthIndex,
         date: payoffDate.toISOString(),
-        month: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        month: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        baselineMonths: timelineResults.baselineMonths,
+        acceleratedMonths: timelineResults.acceleratedMonths,
+        monthsSaved: timelineResults.monthsSaved
       });
+      
+      // Validate that monthsSaved is correct
+      if (timelineResults.baselineMonths && payoffMonthIndex) {
+        const calculatedMonthsSaved = timelineResults.baselineMonths - payoffMonthIndex;
+        if (calculatedMonthsSaved !== timelineResults.monthsSaved) {
+          console.log('Correcting monthsSaved calculation:', {
+            original: timelineResults.monthsSaved,
+            corrected: calculatedMonthsSaved
+          });
+          timelineResults.monthsSaved = calculatedMonthsSaved;
+        }
+      }
     } else {
       // Fallback to December 2026 if not found in the data
       payoffDate.setFullYear(2026, 11, 15); // December 15, 2026
