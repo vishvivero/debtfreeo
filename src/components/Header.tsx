@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Navigation } from "./header/Navigation";
 import { AuthButtons } from "./header/AuthButtons";
 import { useProfile } from "@/hooks/use-profile";
+import { useDebts } from "@/hooks/use-debts";
 
 const Header = () => {
   const { user } = useAuth();
@@ -25,30 +25,33 @@ const Header = () => {
   const isSignupPage = location.pathname === '/signup';
   const [isInitialRender, setIsInitialRender] = useState(true);
 
+  const { profile, isLoading: profileLoading } = useProfile();
+  const { refreshDebts } = useDebts();
+
   useEffect(() => {
     if (isInitialRender) {
       setIsInitialRender(false);
     }
   }, [isInitialRender]);
 
-  // Use the profile from the useProfile hook instead of re-fetching
-  const { profile, isLoading: profileLoading } = useProfile();
-
   const handleAuthSuccess = async () => {
     console.log("Auth success handler triggered");
     
-    // Use setTimeout to avoid immediate state updates
     setTimeout(async () => {
-      await queryClient.invalidateQueries({ queryKey: ["profile"] });
-      
-      toast({
-        title: "Welcome! 👋",
-        description: "Successfully signed in. Let's start planning your debt-free journey!",
-      });
-      
-      // Use navigate with replace option to prevent navigation history issues
-      navigate("/overview", { replace: true });
-    }, 150); // Slightly increased timeout
+      try {
+        await queryClient.invalidateQueries();
+        await refreshDebts();
+        
+        toast({
+          title: "Welcome! 👋",
+          description: "Successfully signed in. Let's start planning your debt-free journey!",
+        });
+        
+        navigate("/overview", { replace: true });
+      } catch (error) {
+        console.error("Error refreshing data after login:", error);
+      }
+    }, 300);
   };
 
   const handleSignupClick = () => {

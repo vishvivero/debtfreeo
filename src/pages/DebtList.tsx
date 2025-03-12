@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
 import { useDebts } from "@/hooks/use-debts";
@@ -9,19 +10,66 @@ import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import type { Debt } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@/components/ui/alert"; 
 
 const DebtList = () => {
-  const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
+  const { user } = useAuth();
+  const { debts, isLoading, deleteDebt, addDebt, profile, error, refreshDebts } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Refresh debts data when component mounts
+    if (user?.id) {
+      refreshDebts();
+    }
+  }, [user?.id, refreshDebts]);
+
+  const handleRefresh = async () => {
+    if (!user?.id) return;
+    
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ["debts", user.id] });
+      await refreshDebts();
+    } catch (err) {
+      console.error("Error refreshing debts:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   if (isLoading) {
     return (
       <MainLayout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <Alert variant="destructive">
+            <AlertDescription>
+              There was an error loading your debts. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+          <div className="mt-4">
+            <Button onClick={handleRefresh} disabled={isRefreshing}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+            </Button>
+          </div>
         </div>
       </MainLayout>
     );
@@ -37,6 +85,16 @@ const DebtList = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Debt Management</h1>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">Track and manage all your debts in one place</p>
               </div>
+              <Button 
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                disabled={isRefreshing}
+                className="self-start"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+              </Button>
             </div>
             <div className="glassmorphism rounded-xl p-4 sm:p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
               <NoDebtsMessage />
@@ -80,6 +138,16 @@ const DebtList = () => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Debt Management</h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">Track and manage all your debts in one place</p>
             </div>
+            <Button 
+              onClick={handleRefresh}
+              variant="outline"
+              size="sm"
+              disabled={isRefreshing}
+              className="self-start"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+            </Button>
           </div>
 
           <motion.div 
@@ -125,31 +193,46 @@ const DebtList = () => {
               <Tabs defaultValue="active" className="w-full">
                 <TabsList className={`mb-4 ${isMobile ? "w-full" : ""}`}>
                   <TabsTrigger value="active" className={isMobile ? "flex-1" : ""}>
-                    Active Debts ({activeDebts.length})
+                    Active Debts ({debts.filter(debt => debt.balance > 0).length})
                   </TabsTrigger>
                   <TabsTrigger value="completed" className={isMobile ? "flex-1" : ""}>
-                    Completed ({completedDebts.length})
+                    Completed ({debts.filter(debt => debt.balance === 0).length})
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="active" className="space-y-3">
-                  {filteredActiveDebts.map((debt) => (
+                  {debts.filter(debt => 
+                    debt.balance > 0 && debt.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).map((debt) => (
                     <DebtCard
                       key={debt.id}
                       debt={debt}
                       onDelete={deleteDebt.mutate}
-                      calculatePayoffYears={calculatePayoffYears}
+                      calculatePayoffYears={(currentDebt) => {
+                        const monthlyInterest = currentDebt.interest_rate / 1200;
+                        const monthlyPayment = currentDebt.minimum_payment;
+                        const balance = currentDebt.balance;
+                        
+                        if (monthlyPayment <= balance * monthlyInterest) {
+                          return "Never";
+                        }
+
+                        const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
+                        return `${Math.ceil(months / 12)} years`;
+                      }}
                     />
                   ))}
                 </TabsContent>
 
                 <TabsContent value="completed" className="space-y-3">
-                  {filteredCompletedDebts.map((debt) => (
+                  {debts.filter(debt => 
+                    debt.balance === 0 && debt.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).map((debt) => (
                     <DebtCard
                       key={debt.id}
                       debt={debt}
                       onDelete={deleteDebt.mutate}
-                      calculatePayoffYears={calculatePayoffYears}
+                      calculatePayoffYears={() => "Completed"}
                     />
                   ))}
                 </TabsContent>
