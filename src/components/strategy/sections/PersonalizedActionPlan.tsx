@@ -60,9 +60,9 @@ export const PersonalizedActionPlan = () => {
   // Safety check for undefined debts
   if (!debts || debts.length === 0) {
     return (
-      <Card className="mt-4 border-green-100 dark:border-green-800/30 shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white">
-          <CardTitle className="text-white">Personalized Action Plan</CardTitle>
+      <Card className="mt-4 shadow-sm border border-slate-200 dark:border-slate-800">
+        <CardHeader className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+          <CardTitle className="text-slate-900 dark:text-slate-100">Personalized Action Plan</CardTitle>
         </CardHeader>
         <CardContent className="p-6 bg-white dark:bg-slate-900">
           <div className="flex flex-col items-center justify-center py-6">
@@ -70,7 +70,7 @@ export const PersonalizedActionPlan = () => {
               Add your debts to get personalized recommendations.
             </p>
             <Button 
-              className="mt-4 bg-green-600 hover:bg-green-700 text-white"
+              className="mt-4"
               onClick={() => window.location.href = "/overview"}
             >
               Go to Dashboard
@@ -163,16 +163,16 @@ export const PersonalizedActionPlan = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {icon}
-            <h3 className="text-base font-medium text-green-700 dark:text-green-400">
+            <h3 className="text-base font-medium text-slate-800 dark:text-slate-200">
               {title}
             </h3>
-            <Badge variant="outline" className="ml-1 text-xs bg-green-50 text-green-600 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800/50">
+            <Badge variant="outline" className="ml-1 text-xs bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:border-slate-700">
               {completedCount}/{itemCount}
             </Badge>
           </div>
           <CollapsibleTrigger 
             onClick={() => toggleSection(section)}
-            className="p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-colors"
+            className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
           >
             {openSections[section] ? (
               <ChevronUp className="h-4 w-4" />
@@ -185,11 +185,11 @@ export const PersonalizedActionPlan = () => {
           <div className="flex-1">
             <Progress 
               value={percentage} 
-              className="h-1.5 bg-green-100 dark:bg-green-950/30"
+              className="h-1.5 bg-slate-100 dark:bg-slate-800"
               indicatorClassName={`${percentage === 100 ? 'bg-green-500' : 'bg-green-400'}`}
             />
           </div>
-          <span className={`text-xs font-medium ${percentage === 100 ? 'text-green-600 dark:text-green-400' : 'text-green-500 dark:text-green-500'}`}>
+          <span className={`text-xs font-medium ${percentage === 100 ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
             {Math.round(percentage)}%
           </span>
         </div>
@@ -198,24 +198,23 @@ export const PersonalizedActionPlan = () => {
   };
 
   return (
-    <Card className="shadow-sm border border-green-100 dark:border-green-800/20 overflow-hidden rounded-lg bg-white dark:bg-slate-900">
-      <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 p-6 pb-10 relative">
-        <div className="relative">
-          <CardTitle className="text-2xl font-bold text-white mb-2">
+    <Card className="shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden rounded-lg bg-white dark:bg-slate-900">
+      <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             Your Action Plan
           </CardTitle>
-          <p className="text-green-50 dark:text-green-100 text-sm">
-            Follow these steps to become debt-free by {payoffDateString}
-          </p>
+          <span className="text-sm text-slate-500 dark:text-slate-400">
+            Debt-free by {payoffDateString}
+          </span>
         </div>
       </CardHeader>
-      <CardContent className="p-0 relative">
-        <div className="absolute -top-6 left-0 right-0 h-12 bg-white dark:bg-slate-900 rounded-t-2xl"></div>
-        <div className="relative px-6 pt-2 pb-6 space-y-4">
+      <CardContent className="p-0">
+        <div className="px-6 pt-2 pb-6 space-y-4">
           
           <Collapsible open={openSections.quickWins} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
+              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               {smallBalanceDebts.length > 0 && (
@@ -249,7 +248,7 @@ export const PersonalizedActionPlan = () => {
 
           <Collapsible open={openSections.priorityActions} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
+              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
@@ -283,7 +282,7 @@ export const PersonalizedActionPlan = () => {
 
           <Collapsible open={openSections.financialStability} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
+              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
@@ -315,7 +314,7 @@ export const PersonalizedActionPlan = () => {
 
           <Collapsible open={openSections.longTermHabits} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
+              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
@@ -351,13 +350,13 @@ export const PersonalizedActionPlan = () => {
         <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center text-sm">
             <CircleDollarSign className="h-4 w-4 mr-1.5 text-green-500" />
-            <span className="font-medium text-green-600 dark:text-green-400">
+            <span className="font-medium text-slate-700 dark:text-slate-300">
               {formatCurrency(interestSavings)}
             </span>
-            <span className="ml-1 text-slate-600 dark:text-slate-400 text-xs">potential interest savings</span>
+            <span className="ml-1 text-slate-500 dark:text-slate-400 text-xs">potential interest savings</span>
           </div>
           <Button
-            className="bg-green-600 hover:bg-green-700 text-white text-sm h-9 px-3 py-2"
+            className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-sm h-9 px-3 py-2"
             onClick={() => window.location.href = "/strategy"}
           >
             Update Strategy

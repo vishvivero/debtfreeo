@@ -34,7 +34,7 @@ export const ActionChecklistItem = ({
     <div className={cn(
       "p-4 rounded-lg transition-all duration-300 border",
       checked 
-        ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30" 
+        ? "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800" 
         : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
     )}>
       <div className="flex items-start gap-3">
@@ -45,7 +45,7 @@ export const ActionChecklistItem = ({
             className={cn(
               "h-5 w-5 rounded-md",
               checked 
-                ? "bg-green-500 border-green-500 dark:bg-green-600 dark:border-green-600" 
+                ? "border-green-500 text-green-500" 
                 : "border-slate-300 dark:border-slate-700"
             )}
           />
@@ -54,7 +54,7 @@ export const ActionChecklistItem = ({
           <h3 className={cn(
             "font-medium text-base transition-colors",
             checked 
-              ? "text-green-700 dark:text-green-400" 
+              ? "text-slate-500 dark:text-slate-400" 
               : "text-slate-800 dark:text-slate-100"
           )}>
             {title}
