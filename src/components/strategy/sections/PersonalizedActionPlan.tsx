@@ -73,8 +73,8 @@ export const PersonalizedActionPlan = () => {
   // Safety check for undefined debts
   if (!debts || debts.length === 0) {
     return (
-      <Card className="mt-4 border border-indigo-100 dark:border-indigo-800/30 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-indigo-500/90 to-purple-600/90 dark:from-indigo-700 dark:to-purple-800 text-white">
+      <Card className="mt-4 border border-green-100 dark:border-green-800/30 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-green-500/90 to-emerald-600/90 dark:from-green-700 dark:to-emerald-800 text-white">
           <CardTitle className="text-white flex items-center gap-2">
             <Award className="h-6 w-6 text-white/90" />
             Personalized Action Plan
@@ -82,12 +82,12 @@ export const PersonalizedActionPlan = () => {
         </CardHeader>
         <CardContent className="p-8 bg-white/90 dark:bg-slate-900/90">
           <div className="flex flex-col items-center justify-center py-6">
-            <Lightbulb className="h-12 w-12 text-indigo-400 mb-4" />
+            <Lightbulb className="h-12 w-12 text-green-400 mb-4" />
             <p className="text-lg font-medium text-slate-700 dark:text-slate-300 text-center">
               Add your debts to get personalized recommendations.
             </p>
             <Button 
-              className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              className="mt-4 bg-green-600 hover:bg-green-700 text-white font-medium"
               onClick={() => window.location.href = "/overview"}
             >
               Go to Dashboard
@@ -181,16 +181,16 @@ export const PersonalizedActionPlan = () => {
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             {icon}
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
               {title}
             </h3>
-            <Badge variant="outline" className="ml-2 bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800/50">
+            <Badge variant="outline" className="ml-2 bg-green-50 text-green-600 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800/50">
               {completedCount}/{itemCount} complete
             </Badge>
           </div>
           <CollapsibleTrigger 
             onClick={() => toggleSection(section)}
-            className="p-1.5 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/50 text-indigo-600 dark:text-indigo-400 transition-colors"
+            className="p-1.5 rounded-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-800/50 text-green-600 dark:text-green-400 transition-colors"
           >
             {openSections[section] ? (
               <ChevronUp className="h-5 w-5" />
@@ -203,11 +203,11 @@ export const PersonalizedActionPlan = () => {
           <div className="flex-1">
             <Progress 
               value={percentage} 
-              className="h-2 bg-indigo-100 dark:bg-indigo-950/50"
-              indicatorClassName={`${percentage === 100 ? 'bg-emerald-500' : 'bg-indigo-600'}`}
+              className="h-2 bg-green-100 dark:bg-green-950/50"
+              indicatorClassName={`${percentage === 100 ? 'bg-emerald-500' : 'bg-green-600'}`}
             />
           </div>
-          <span className={`text-sm font-medium ${percentage === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'}`}>
+          <span className={`text-sm font-medium ${percentage === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-green-600 dark:text-green-400'}`}>
             {Math.round(percentage)}%
           </span>
         </div>
@@ -217,7 +217,7 @@ export const PersonalizedActionPlan = () => {
 
   return (
     <Card className="shadow-xl border-0 overflow-hidden rounded-xl bg-white dark:bg-slate-900">
-      <CardHeader className="bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-700 dark:to-purple-900 p-8 pb-12 relative">
+      <CardHeader className="bg-gradient-to-br from-green-600 to-emerald-700 dark:from-green-700 dark:to-emerald-900 p-8 pb-12 relative">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]"></div>
         <div className="relative">
           <div className="flex justify-between items-start">
@@ -225,7 +225,7 @@ export const PersonalizedActionPlan = () => {
               <CardTitle className="text-3xl font-bold text-white mb-2">
                 Your Personalized Action Plan
               </CardTitle>
-              <p className="text-indigo-100 dark:text-indigo-200 text-lg">
+              <p className="text-green-100 dark:text-green-200 text-lg">
                 Follow these steps to become debt-free by {payoffDateString}
               </p>
             </div>
@@ -244,8 +244,8 @@ export const PersonalizedActionPlan = () => {
         <div className="relative px-8 pt-4 pb-8 space-y-6">
           
           <Collapsible open={openSections.quickWins} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20">
-              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />)}
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-5 w-5 text-green-500 dark:text-green-400" />)}
             </div>
             <CollapsibleContent className="p-6 space-y-4">
               {smallBalanceDebts.length > 0 && (
@@ -278,8 +278,8 @@ export const PersonalizedActionPlan = () => {
           </Collapsible>
 
           <Collapsible open={openSections.priorityActions} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-purple-50/50 to-blue-50/50 dark:from-purple-950/20 dark:to-blue-950/20">
-              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-5 w-5 text-purple-500 dark:text-purple-400" />)}
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-emerald-950/20 dark:to-green-950/20">
+              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />)}
             </div>
             <CollapsibleContent className="p-6 space-y-4">
               <ActionChecklistItem
@@ -312,8 +312,8 @@ export const PersonalizedActionPlan = () => {
           </Collapsible>
 
           <Collapsible open={openSections.financialStability} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-blue-50/50 to-emerald-50/50 dark:from-blue-950/20 dark:to-emerald-950/20">
-              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-5 w-5 text-blue-500 dark:text-blue-400" />)}
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-5 w-5 text-green-500 dark:text-green-400" />)}
             </div>
             <CollapsibleContent className="p-6 space-y-4">
               <ActionChecklistItem
@@ -344,7 +344,7 @@ export const PersonalizedActionPlan = () => {
           </Collapsible>
 
           <Collapsible open={openSections.longTermHabits} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/50 to-indigo-50/50 dark:from-emerald-950/20 dark:to-indigo-950/20">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-emerald-950/20 dark:to-green-950/20">
               {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />)}
             </div>
             <CollapsibleContent className="p-6 space-y-4">
@@ -377,7 +377,7 @@ export const PersonalizedActionPlan = () => {
           
         </div>
       </CardContent>
-      <CardFooter className="bg-gradient-to-br from-slate-50 to-indigo-50/30 dark:from-slate-900/90 dark:to-indigo-950/20 py-6 px-8 border-t border-indigo-100/50 dark:border-indigo-800/30">
+      <CardFooter className="bg-gradient-to-br from-slate-50 to-green-50/30 dark:from-slate-900/90 dark:to-green-950/20 py-6 px-8 border-t border-green-100/50 dark:border-green-800/30">
         <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center text-sm">
             <CircleDollarSign className="h-5 w-5 mr-2 text-emerald-500" />
@@ -387,7 +387,7 @@ export const PersonalizedActionPlan = () => {
             <span className="ml-1 text-slate-600 dark:text-slate-400">potential interest savings</span>
           </div>
           <Button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5"
+            className="bg-green-600 hover:bg-green-700 text-white gap-1.5"
             onClick={() => window.location.href = "/strategy"}
           >
             Update Your Strategy

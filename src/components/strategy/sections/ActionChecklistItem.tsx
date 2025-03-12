@@ -34,7 +34,7 @@ export const ActionChecklistItem = ({
     <div className={cn(
       "p-5 rounded-xl transition-all duration-300 border",
       checked 
-        ? "bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-950/30 dark:to-green-950/30 border-emerald-200 dark:border-emerald-800/30" 
+        ? "bg-gradient-to-r from-green-50/90 to-emerald-50/90 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800/30" 
         : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
     )}>
       <div className="flex items-start gap-3">
@@ -45,7 +45,7 @@ export const ActionChecklistItem = ({
             className={cn(
               "h-5 w-5 rounded-md",
               checked 
-                ? "bg-emerald-500 border-emerald-500 dark:bg-emerald-600 dark:border-emerald-600" 
+                ? "bg-green-500 border-green-500 dark:bg-green-600 dark:border-green-600" 
                 : "border-slate-300 dark:border-slate-700"
             )}
           />
@@ -54,7 +54,7 @@ export const ActionChecklistItem = ({
           <h3 className={cn(
             "font-medium text-lg transition-colors",
             checked 
-              ? "text-emerald-700 dark:text-emerald-400" 
+              ? "text-green-700 dark:text-green-400" 
               : "text-slate-900 dark:text-slate-100"
           )}>
             {title}
@@ -64,7 +64,7 @@ export const ActionChecklistItem = ({
           </p>
         </div>
         {checked && (
-          <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500 dark:text-emerald-400" />
+          <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500 dark:text-green-400" />
         )}
       </div>
     </div>
