@@ -13,18 +13,30 @@ export const PaymentTrendsChart = ({ payments }: PaymentTrendsChartProps) => {
 
   return (
     <div className="h-[300px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={paymentData} margin={{ right: 10, left: 0 }}>
+      <ResponsiveContainer width="99%" height="100%">
+        <LineChart 
+          data={paymentData} 
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-          <YAxis width={60} tick={{ fontSize: 12 }} />
+          <XAxis 
+            dataKey="date" 
+            tick={{ fontSize: 12 }} 
+            tickFormatter={(value) => value.split('/').slice(0, 2).join('/')}
+          />
+          <YAxis 
+            width={50} 
+            tick={{ fontSize: 12 }} 
+            tickFormatter={(value) => value.toLocaleString()} 
+          />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ fontSize: '12px' }} />
           <Line
             type="monotone"
             dataKey="amount"
             stroke="#34D399"
             name="Payment Amount"
+            strokeWidth={2}
           />
         </LineChart>
       </ResponsiveContainer>
