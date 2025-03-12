@@ -1,13 +1,37 @@
 
+// Export the context and provider
 export * from "./sidebar-context";
-export * from "./sidebar-menu";
-export * from "./types";
-export * from "./sidebar-components";
-export { SidebarRail } from "./sidebar-rail";
 
-// For compatibility with existing code, also export from the main sidebar.tsx file
-// This is a temporary solution until all components are properly moved to their respective files
-export { 
-  SidebarProvider,
-  useSidebar 
-} from "./sidebar-context";
+// Export type definitions
+export * from "./types";
+
+// Export components from sidebar-components without ambiguity
+export {
+  Sidebar,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarContent,
+  SidebarInput,
+  SidebarInset,
+  SidebarSeparator
+} from "./sidebar-components";
+
+// Export components from sidebar-menu without ambiguity
+export {
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton
+} from "./sidebar-menu";
+
+// Export SidebarRail
+export { SidebarRail } from "./sidebar-rail";
