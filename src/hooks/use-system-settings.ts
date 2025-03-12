@@ -13,14 +13,32 @@ export const useSystemSettings = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["systemSettings"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("system_settings")
-        .select("*")
-        .eq("key", "site_settings")
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("system_settings")
+          .select("*")
+          .eq("key", "site_settings")
+          .single();
 
-      if (error) {
-        console.error("Error fetching system settings:", error);
+        if (error) {
+          console.error("Error fetching system settings:", error);
+          return {
+            maintenanceMode: false,
+            siteTitle: "Debtfreeo",
+            defaultCurrency: "£",
+            showPricing: true,
+          };
+        }
+
+        const settingsValue = data?.value as Record<string, unknown>;
+        return {
+          maintenanceMode: Boolean(settingsValue?.maintenanceMode),
+          siteTitle: String(settingsValue?.siteTitle || "Debtfreeo"),
+          defaultCurrency: String(settingsValue?.defaultCurrency || "£"),
+          showPricing: settingsValue?.showPricing === undefined ? true : Boolean(settingsValue?.showPricing),
+        };
+      } catch (err) {
+        console.error("Unexpected error in useSystemSettings:", err);
         return {
           maintenanceMode: false,
           siteTitle: "Debtfreeo",
@@ -28,14 +46,6 @@ export const useSystemSettings = () => {
           showPricing: true,
         };
       }
-
-      const settingsValue = data?.value as Record<string, unknown>;
-      return {
-        maintenanceMode: Boolean(settingsValue?.maintenanceMode),
-        siteTitle: String(settingsValue?.siteTitle || "Debtfreeo"),
-        defaultCurrency: String(settingsValue?.defaultCurrency || "£"),
-        showPricing: settingsValue?.showPricing === undefined ? true : Boolean(settingsValue?.showPricing),
-      };
     },
   });
 
