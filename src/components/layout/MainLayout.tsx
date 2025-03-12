@@ -31,8 +31,8 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
         {/* Main content area */}
         <div className="flex-1 flex flex-col">
           <Header />
-          <main className="flex-1 pt-16">
-            <div className="py-6">
+          <main className="flex-1 pt-20"> {/* Increased padding-top from 16 to 20 */}
+            <div className="pb-8">
               {children}
             </div>
           </main>

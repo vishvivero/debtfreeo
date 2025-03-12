@@ -50,7 +50,7 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-12">
       <Card>
         <CardHeader>
           <CardTitle>Payment Trends</CardTitle>
