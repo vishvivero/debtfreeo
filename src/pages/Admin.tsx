@@ -1,7 +1,5 @@
-
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,8 +18,9 @@ import { AnalyticsReporting } from "@/components/admin/AnalyticsReporting";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const EditBlogPost = () => {
   const { id } = useParams();
@@ -190,6 +189,8 @@ const Admin = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkError, setCheckError] = useState<Error | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const checkAdminStatus = useCallback(async () => {
     if (!user) {
@@ -199,7 +200,7 @@ const Admin = () => {
     }
     
     try {
-      if (!profile && !profileError) {
+      if (!profile && !profileError && !profileLoading) {
         await refreshSession();
       }
       
@@ -226,24 +227,56 @@ const Admin = () => {
         variant: "destructive",
       });
     }
-  }, [user, profile, profileError, refreshSession, toast]);
+  }, [user, profile, profileError, profileLoading, refreshSession, toast]);
 
-  // Use a setTimeout to avoid potential UI freezing
   useEffect(() => {
-    let mounted = true;
-    if (!profileLoading && !isAdminChecked) {
-      const timer = setTimeout(() => {
-        if (mounted) {
-          checkAdminStatus();
+    if (!isAdminChecked && !profileLoading && user?.id) {
+      const timer = setTimeout(async () => {
+        try {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("is_admin")
+            .eq("id", user.id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error("Direct admin check error:", error);
+            setCheckError(new Error(error.message));
+          } else if (data) {
+            console.log("Direct admin check result:", data);
+            setIsAdmin(!!data.is_admin);
+            
+            queryClient.setQueryData(["profile", user.id], data);
+          }
+          
+          setIsAdminChecked(true);
+        } catch (err) {
+          console.error("Critical error in direct admin check:", err);
+          setIsAdminChecked(true);
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, isAdminChecked, profileLoading, queryClient]);
+
+  useEffect(() => {
+    if (isAdminChecked && !isAdmin && !loading) {
+      const redirectTimer = setTimeout(() => {
+        if (window.location.pathname.startsWith('/admin')) {
+          toast({
+            title: "Access Denied",
+            description: "You do not have permission to access the admin area.",
+            variant: "destructive",
+          });
+          navigate("/overview", { replace: true });
         }
       }, 100);
-      return () => {
-        mounted = false;
-        clearTimeout(timer);
-      };
+      
+      return () => clearTimeout(redirectTimer);
     }
-  }, [checkAdminStatus, profileLoading, isAdminChecked]);
-  
+  }, [isAdminChecked, isAdmin, navigate, toast]);
+
   if (!isAdminChecked || profileLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">

@@ -9,6 +9,8 @@ import { AuthForm } from "@/components/AuthForm";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 interface Profile {
   created_at: string;
@@ -30,21 +32,21 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { signOut: authSignOut } = useAuth();
 
   const handleSignOut = async () => {
-    console.log("Starting sign out process");
-    
-    queryClient.clear();
-    localStorage.clear();
+    if (isSigningOut) return;
     
     try {
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'
-      });
+      setIsSigningOut(true);
+      console.log("Starting sign out process");
       
-      if (error) {
-        console.log("Sign out error:", error);
-      }
+      // Clear React Query cache
+      queryClient.clear();
+      
+      // Use the auth context's signOut method
+      await authSignOut();
       
       console.log("Proceeding with navigation and UI updates");
       
@@ -54,11 +56,18 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         duration: 5000,
       });
       
-      navigate("/");
+      // Force navigation with replace to avoid history issues
+      navigate("/", { replace: true });
       
     } catch (error: any) {
       console.error("Critical error during sign out:", error);
-      navigate("/");
+      toast({
+        title: "Error",
+        description: "There was a problem signing out. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
@@ -93,9 +102,10 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
             size="sm"
             onClick={handleSignOut}
             className="bg-primary hover:bg-primary/90 text-white gap-2"
+            disabled={isSigningOut}
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <span className="hidden sm:inline">{isSigningOut ? "Signing out..." : "Sign Out"}</span>
           </Button>
         </>
       ) : (

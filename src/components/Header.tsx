@@ -1,10 +1,8 @@
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Navigation } from "./header/Navigation";
-import { AuthButtons } from "./header/AuthButtons";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
@@ -12,6 +10,9 @@ import { ThemeToggle } from "./theme/ThemeToggle";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
+import { Navigation } from "./header/Navigation";
+import { AuthButtons } from "./header/AuthButtons";
+import { useProfile } from "@/hooks/use-profile";
 
 const Header = () => {
   const { user } = useAuth();
@@ -30,48 +31,24 @@ const Header = () => {
     }
   }, [isInitialRender]);
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) {
-        console.log("No user ID available for profile fetch");
-        return null;
-      }
-      
-      console.log("Fetching profile for user:", user.id);
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      if (fetchError) {
-        console.error("Error fetching profile:", fetchError);
-        throw fetchError;
-      }
-
-      console.log("Profile data fetched:", existingProfile);
-      return existingProfile;
-    },
-    enabled: !!user?.id && !isInitialRender,
-    staleTime: 1000 * 60 * 5,
-    retry: 2,
-  });
+  // Use the profile from the useProfile hook instead of re-fetching
+  const { profile, isLoading: profileLoading } = useProfile();
 
   const handleAuthSuccess = async () => {
     console.log("Auth success handler triggered");
     
+    // Use setTimeout to avoid immediate state updates
     setTimeout(async () => {
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
-      await queryClient.invalidateQueries({ queryKey: ["debts"] });
       
       toast({
         title: "Welcome! 👋",
         description: "Successfully signed in. Let's start planning your debt-free journey!",
       });
       
-      navigate("/overview");
-    }, 100);
+      // Use navigate with replace option to prevent navigation history issues
+      navigate("/overview", { replace: true });
+    }, 150); // Slightly increased timeout
   };
 
   const handleSignupClick = () => {

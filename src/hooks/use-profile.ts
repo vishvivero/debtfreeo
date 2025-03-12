@@ -17,30 +17,24 @@ export function useProfile() {
         return null;
       }
       
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
+      // Use a more reliable approach for fetching the profile
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
 
-        if (error) {
-          console.error("Error fetching profile:", error);
-          throw error;
-        }
-
-        return data as Profile;
-      } catch (err) {
-        console.error("Critical error in profile fetch:", err);
-        // Return null instead of throwing to prevent UI freeze
-        return null;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
       }
+
+      return data as Profile;
     },
-    // Don't refetch too often to avoid loops
     staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: !!user?.id,
-    retry: 1, // Only retry once
-    retryDelay: 1000, // Wait a second before retrying
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const updateProfile = useMutation({
