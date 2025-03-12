@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       <Card>
         <CardHeader>
           <CardTitle>Payment Trends</CardTitle>

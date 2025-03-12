@@ -1,3 +1,4 @@
+
 #root {
   width: 100%;
 }
@@ -12,6 +13,7 @@
 .app-layout main {
   flex: 1;
   width: 100%;
+  padding-top: 64px; /* Ensure content starts below the header */
 }
 
 /* Content container styles */

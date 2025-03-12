@@ -32,7 +32,9 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
         <div className="flex-1 flex flex-col">
           <Header />
           <main className="flex-1 pt-16">
-            {children}
+            <div className="py-6">
+              {children}
+            </div>
           </main>
         </div>
       </div>

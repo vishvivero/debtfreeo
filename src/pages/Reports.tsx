@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Calculator, TrendingUp } from "lucide-react";
@@ -37,7 +38,7 @@ export default function Reports() {
   if (isLoading || isPaymentsLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
         </div>
       </MainLayout>
@@ -47,11 +48,11 @@ export default function Reports() {
   if (!debts || debts.length === 0) {
     return (
       <MainLayout>
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Financial Reports</h1>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow p-6">
             <NoDebtsMessage />
           </div>
         </div>
@@ -61,13 +62,13 @@ export default function Reports() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Financial Reports</h1>
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-          <TabsList>
+          <TabsList className="mb-2">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
               Overview
