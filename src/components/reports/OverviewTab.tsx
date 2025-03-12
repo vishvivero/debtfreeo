@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -215,13 +216,15 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="border border-slate-200 dark:border-slate-800">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-slate-500" />
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
                 Total Debt
-              </p>
-              <p className="text-2xl font-bold mt-1 text-slate-900 dark:text-slate-100">{formatCurrency(totalDebt)}</p>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{formatCurrency(totalDebt)}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -231,13 +234,15 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border border-slate-200 dark:border-slate-800">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-slate-500" />
+          <Card className="bg-gradient-to-br from-green-50 to-green-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-green-700 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
                 Average Interest Rate
-              </p>
-              <p className="text-2xl font-bold mt-1 text-slate-900 dark:text-slate-100">{averageInterestRate.toFixed(2)}%</p>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{averageInterestRate.toFixed(2)}%</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -247,13 +252,15 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="border border-slate-200 dark:border-slate-800">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-slate-500" />
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-purple-700 flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
                 Monthly Minimum
-              </p>
-              <p className="text-2xl font-bold mt-1 text-slate-900 dark:text-slate-100">{formatCurrency(totalMinimumPayment)}</p>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{formatCurrency(totalMinimumPayment)}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -263,13 +270,15 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border border-slate-200 dark:border-slate-800">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                <Tag className="h-4 w-4 text-slate-500" />
+          <Card className="bg-gradient-to-br from-amber-50 to-amber-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-amber-700 flex items-center gap-2">
+                <Tag className="h-4 w-4" />
                 Total Categories
-              </p>
-              <p className="text-2xl font-bold mt-1 text-slate-900 dark:text-slate-100">{Object.keys(categories).length}</p>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{Object.keys(categories).length}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -282,8 +291,8 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="border border-slate-200 dark:border-slate-800">
-            <CardHeader className="pb-2">
+          <Card>
+            <CardHeader>
               <CardTitle>Debt Distribution</CardTitle>
               <CardDescription>Overview of your debt portfolio</CardDescription>
             </CardHeader>
@@ -300,8 +309,8 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Card className="border border-slate-200 dark:border-slate-800">
-            <CardHeader className="pb-2">
+          <Card>
+            <CardHeader>
               <CardTitle>Debt Categories</CardTitle>
               <CardDescription>Breakdown by category</CardDescription>
             </CardHeader>
@@ -310,8 +319,8 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                 <div className="space-y-4">
                   {Object.entries(categories).map(([category, amount]) => (
                     <div key={category} className="flex justify-between items-center">
-                      <span className="font-medium text-slate-800 dark:text-slate-200">{category}</span>
-                      <span className="text-slate-600 dark:text-slate-400">
+                      <span className="font-medium">{category}</span>
+                      <span className="text-muted-foreground">
                         {formatCurrency(amount)}
                       </span>
                     </div>
@@ -329,20 +338,20 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         transition={{ delay: 0.7 }}
         className="mt-8"
       >
-        <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden">
-          <CardHeader className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
-            <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-              <FileText className="h-5 w-5 text-slate-500" />
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-300">
+              <FileText className="h-5 w-5" />
               Generate Detailed Report
             </CardTitle>
-            <CardDescription className="text-slate-500 dark:text-slate-400">
+            <CardDescription className="text-purple-600 dark:text-purple-400">
               Download a comprehensive overview of your debt management progress
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="font-medium text-slate-800 dark:text-slate-200">Report Contents:</h4>
+                <h4 className="font-medium text-purple-800 dark:text-purple-300">Report Contents:</h4>
                 <ul className="space-y-2">
                   {[
                     { icon: <TrendingUp className="h-4 w-4" />, text: "Debt Distribution Analysis" },
@@ -350,7 +359,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     { icon: <DollarSign className="h-4 w-4" />, text: "Interest Savings" },
                     { icon: <Tag className="h-4 w-4" />, text: "Category Breakdown" }
                   ].map((item, index) => (
-                    <li key={index} className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                    <li key={index} className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
                       {item.icon}
                       <span>{item.text}</span>
                     </li>
@@ -363,7 +372,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     <TooltipTrigger asChild>
                       <Button 
                         onClick={handleDownloadReport}
-                        className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white flex items-center gap-2"
+                        className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 p-6"
                       >
                         <Download className="h-5 w-5" />
                         Download PDF Report
@@ -375,7 +384,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+                <p className="text-sm text-purple-600 dark:text-purple-400 text-center">
                   PDF format • Includes all metrics • {new Date().toLocaleDateString()}
                 </p>
               </div>
@@ -386,4 +395,3 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     </div>
   );
 };
-
