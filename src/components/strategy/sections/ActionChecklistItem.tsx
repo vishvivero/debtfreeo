@@ -1,6 +1,6 @@
 
-import { Check, CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
@@ -8,37 +8,54 @@ interface ActionChecklistItemProps {
   title: string;
   description: string;
   defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
 }
 
 export const ActionChecklistItem = ({
   title,
   description,
   defaultChecked = false,
+  onCheckedChange,
 }: ActionChecklistItemProps) => {
   const [checked, setChecked] = useState(defaultChecked);
 
+  useEffect(() => {
+    setChecked(defaultChecked);
+  }, [defaultChecked]);
+
+  const handleCheckedChange = (value: boolean) => {
+    setChecked(value);
+    if (onCheckedChange) {
+      onCheckedChange(value);
+    }
+  };
+
   return (
     <div className={cn(
-      "p-4 rounded-lg border transition-all duration-200",
+      "p-5 rounded-xl transition-all duration-300 border",
       checked 
-        ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/30" 
-        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+        ? "bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-950/30 dark:to-green-950/30 border-emerald-200 dark:border-emerald-800/30" 
+        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
     )}>
       <div className="flex items-start gap-3">
         <div className="mt-1">
           <Checkbox 
             checked={checked} 
-            onCheckedChange={(value) => setChecked(!!value)}
+            onCheckedChange={handleCheckedChange}
             className={cn(
-              "h-5 w-5 rounded-sm",
-              checked && "bg-green-600 border-green-600 dark:bg-green-600 dark:border-green-600"
+              "h-5 w-5 rounded-md",
+              checked 
+                ? "bg-emerald-500 border-emerald-500 dark:bg-emerald-600 dark:border-emerald-600" 
+                : "border-slate-300 dark:border-slate-700"
             )}
           />
         </div>
         <div className="space-y-1 flex-1">
           <h3 className={cn(
-            "font-medium text-slate-900 dark:text-slate-100 transition-colors",
-            checked && "text-green-600 dark:text-green-400"
+            "font-medium text-lg transition-colors",
+            checked 
+              ? "text-emerald-700 dark:text-emerald-400" 
+              : "text-slate-900 dark:text-slate-100"
           )}>
             {title}
           </h3>
@@ -47,7 +64,7 @@ export const ActionChecklistItem = ({
           </p>
         </div>
         {checked && (
-          <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500 dark:text-green-400" />
+          <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500 dark:text-emerald-400" />
         )}
       </div>
     </div>
