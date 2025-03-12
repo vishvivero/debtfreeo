@@ -52,7 +52,6 @@ export const PersonalizedActionPlan = () => {
   // Pre-calculate some debt stats
   const maxInterestRate = Math.max(...debts.map(debt => debt.interest_rate));
   const avgInterestRate = debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt;
-  const hasHighInterest = maxInterestRate > 15;
   
   // Time to debt free in months
   const monthsToDebtFree = timelineResults?.acceleratedMonths || 0;
@@ -73,11 +72,6 @@ export const PersonalizedActionPlan = () => {
   const totalMinimumPayments = debts.reduce((sum, debt) => 
     sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol), 0);
   const monthlySavingsTarget = Math.max(0, currentPayment - totalMinimumPayments);
-
-  // Sort debts by interest rate (high to low)
-  const highInterestDebts = [...debts]
-    .sort((a, b) => b.interest_rate - a.interest_rate)
-    .filter(debt => debt.interest_rate > 10);
 
   // Sort debts by balance (low to high) for small wins
   const smallBalanceDebts = [...debts]
@@ -116,16 +110,16 @@ export const PersonalizedActionPlan = () => {
                 />
               )}
               <ActionChecklistItem
-                title="Set up automatic payments for all minimum payments"
-                description="Ensure you never miss a payment and avoid late fees that can add to your debt."
+                title="Set up automatic payments for all debts within the app"
+                description="Track all your payments in one place and ensure you never miss a payment date."
               />
               <ActionChecklistItem
-                title="Create a budget spreadsheet or use a budgeting app"
-                description="Track all income and expenses to understand your cash flow better and find areas to save."
+                title="Use the budget tracker in your dashboard"
+                description="Our built-in budget tracking feature helps identify areas where you can save more for debt payments."
               />
               <ActionChecklistItem
-                title="Identify and cancel unused subscriptions"
-                description="Redirect these savings toward your debt payoff strategy for faster results."
+                title="Set up payment reminders in the app"
+                description="Configure alerts to remind you before each payment is due to avoid late fees."
               />
             </div>
           </div>
@@ -135,7 +129,7 @@ export const PersonalizedActionPlan = () => {
             <div className="space-y-3">
               <ActionChecklistItem
                 title={`Follow your ${selectedStrategy.name} strategy consistently`}
-                description={`Stick to the payment order this strategy recommends for maximum impact on your debts.`}
+                description={`Stick to the payment order recommended by this strategy for maximum impact on your debts.`}
               />
               {extraPayment > 0 && (
                 <ActionChecklistItem
@@ -143,15 +137,13 @@ export const PersonalizedActionPlan = () => {
                   description={`This additional payment will save you approximately ${formatCurrency(interestSavings)} in interest over time.`}
                 />
               )}
-              {hasHighInterest && highInterestDebts.length > 0 && (
-                <ActionChecklistItem
-                  title={`Contact ${highInterestDebts[0].name} to negotiate a lower rate`}
-                  description={`This ${highInterestDebts[0].interest_rate}% interest debt is costing you significantly. Even a small rate reduction can save money.`}
-                />
-              )}
               <ActionChecklistItem
-                title="Research balance transfer options for high-interest debt"
-                description="Look for 0% promotional offers to reduce interest costs while you pay down the balance."
+                title="Schedule a monthly payment increase of 5%"
+                description="Use our payment scheduler to gradually increase your payments for faster debt elimination."
+              />
+              <ActionChecklistItem
+                title="Set up your debt snowball in the app"
+                description="Configure your account to automatically redirect freed-up payments toward your next target debt."
               />
             </div>
           </div>
@@ -160,20 +152,20 @@ export const PersonalizedActionPlan = () => {
             <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Financial Stability</h3>
             <div className="space-y-3">
               <ActionChecklistItem
-                title="Build a small emergency fund (£1,000)"
-                description="This prevents new debt when unexpected expenses arise and protects your debt payoff plan."
+                title="Create an emergency fund goal in your profile"
+                description="Use our goal-setting feature to build a small emergency fund while paying down debt."
               />
               <ActionChecklistItem
-                title="Review your insurance coverage"
-                description="Ensure you have adequate protection while looking for ways to reduce premiums."
+                title="Add upcoming windfalls as one-time payments"
+                description="Plan ahead by scheduling any tax refunds, bonuses, or other expected windfalls as one-time debt payments."
               />
               <ActionChecklistItem
-                title="Identify one expense category to reduce"
-                description="Find at least one spending area where you can trim costs and redirect to debt payments."
+                title="Track monthly expenses in our expense tracker"
+                description="Identify one spending category to reduce each month using our expense analysis tools."
               />
               <ActionChecklistItem
-                title="Create a plan for windfalls and bonuses"
-                description="Decide in advance what percentage of any unexpected income will go toward debt repayment."
+                title="Set up savings goals alongside debt payments"
+                description="Balance debt repayment with small savings goals using our dual-purpose financial planner."
               />
             </div>
           </div>
@@ -182,20 +174,20 @@ export const PersonalizedActionPlan = () => {
             <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Long-Term Habits</h3>
             <div className="space-y-3">
               <ActionChecklistItem
-                title="Schedule monthly finance review sessions"
-                description="Set aside 30 minutes each month to track progress and adjust your plan as needed."
+                title="Schedule monthly finance review sessions in the calendar"
+                description="Use our integrated calendar to set aside 30 minutes each month to review your progress and adjust your plan."
               />
               <ActionChecklistItem
-                title="Set quarterly debt strategy check-ins"
-                description="Every three months, review your approach and make adjustments based on your progress."
+                title="Enable quarterly strategy check-in reminders"
+                description="Let the app remind you to review your debt strategy every three months to optimize your approach."
               />
               <ActionChecklistItem
-                title="Create a system to avoid new debt"
-                description="Implement a 48-hour waiting period before any non-essential purchases."
+                title="Use the expense approval workflow for non-essential purchases"
+                description="Enable our purchase consideration feature to help avoid impulse buys that could add new debt."
               />
               <ActionChecklistItem
-                title="Set up automatic saving for future expenses"
-                description="Start saving small amounts for predictable expenses to avoid using credit cards."
+                title="Activate automated saving allocations for future expenses"
+                description="Set up automatic saving rules for predictable expenses to avoid using credit for these costs."
               />
             </div>
           </div>
