@@ -68,7 +68,7 @@ export const PersonalizedActionPlan = () => {
   // Sort debts by balance (low to high) for small wins
   const smallBalanceDebts = [...debts]
     .sort((a, b) => a.balance - b.balance)
-    .filter(debt => a.balance < totalDebt * 0.1);
+    .filter(debt => debt.balance < totalDebt * 0.1);
 
   // Pre-calculate some debt stats
   const maxInterestRate = Math.max(...debts.map(debt => debt.interest_rate));
@@ -325,7 +325,7 @@ export const PersonalizedActionPlan = () => {
       <Dialog open={openDialog === "highInterest"} onOpenChange={(open) => !open && setOpenDialog(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>High Interest Debts {{'>'}} 10%</DialogTitle>
+            <DialogTitle>High Interest Debts &gt; 10%</DialogTitle>
             <DialogDescription>
               These high-interest debts require priority attention
             </DialogDescription>
