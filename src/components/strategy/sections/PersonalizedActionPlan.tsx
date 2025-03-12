@@ -20,6 +20,89 @@ export const PersonalizedActionPlan = () => {
   const { currentPayment, extraPayment } = useMonthlyPayment();
   const { oneTimeFundings } = useOneTimeFunding();
 
+  // Define the checklist items for each section
+  const quickWinsItems = [
+    {
+      title: "Pay off your smallest debt first",
+      description: "Eliminating a small debt will give you momentum.",
+      defaultChecked: false
+    },
+    {
+      title: "Set up automatic payments for all debts",
+      description: "Track all your payments in one place and never miss a payment date.",
+      defaultChecked: false
+    },
+    {
+      title: "Use the budget tracker in your dashboard",
+      description: "Identify areas where you can save more for debt payments.",
+      defaultChecked: false
+    },
+    {
+      title: "Set up payment reminders in the app",
+      description: "Configure alerts to remind you before each payment is due.",
+      defaultChecked: false
+    }
+  ];
+
+  const priorityActionsItems = [
+    {
+      title: "Focus on high-interest debts first",
+      description: "Stick to the payment order recommended by your strategy.",
+      defaultChecked: false
+    },
+    {
+      title: "Maintain your extra monthly payment",
+      description: "This additional payment will save you significant interest.",
+      defaultChecked: false
+    },
+    {
+      title: "Schedule a monthly payment increase of 5%",
+      description: "Gradually increase your payments for faster debt elimination.",
+      defaultChecked: false
+    }
+  ];
+
+  const financialStabilityItems = [
+    {
+      title: "Create an emergency fund goal",
+      description: "Build a small emergency fund while paying down debt.",
+      defaultChecked: false
+    },
+    {
+      title: "Add upcoming windfalls as one-time payments",
+      description: "Schedule tax refunds, bonuses, or other windfalls as one-time debt payments.",
+      defaultChecked: false
+    },
+    {
+      title: "Track monthly expenses in our expense tracker",
+      description: "Identify one spending category to reduce each month.",
+      defaultChecked: false
+    },
+    {
+      title: "Set up savings goals alongside debt payments",
+      description: "Balance debt repayment with small savings goals.",
+      defaultChecked: false
+    }
+  ];
+
+  const longTermHabitsItems = [
+    {
+      title: "Schedule monthly finance review sessions",
+      description: "Set aside 30 minutes each month to review your progress.",
+      defaultChecked: false
+    },
+    {
+      title: "Enable quarterly strategy check-in reminders",
+      description: "Review your debt strategy every three months to optimize your approach.",
+      defaultChecked: false
+    },
+    {
+      title: "Use the expense approval workflow",
+      description: "Help avoid impulse buys that could add new debt.",
+      defaultChecked: false
+    }
+  ];
+
   // State for collapsible sections - all closed by default
   const [openSections, setOpenSections] = useState({
     quickWins: false,
@@ -30,10 +113,10 @@ export const PersonalizedActionPlan = () => {
 
   // State for tracking completed items
   const [completionStatus, setCompletionStatus] = useState({
-    quickWins: [false, false, false, false],
-    priorityActions: [false, false, false, false],
-    financialStability: [false, false, false, false],
-    longTermHabits: [false, false, false, false]
+    quickWins: Array(quickWinsItems.length).fill(false),
+    priorityActions: Array(priorityActionsItems.length).fill(false),
+    financialStability: Array(financialStabilityItems.length).fill(false),
+    longTermHabits: Array(longTermHabitsItems.length).fill(false)
   });
 
   // Calculate completion percentages
@@ -214,46 +297,44 @@ export const PersonalizedActionPlan = () => {
           
           <Collapsible open={openSections.quickWins} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
+              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-4 w-4 text-slate-500 dark:text-slate-400" />, quickWinsItems.length)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
-              {smallBalanceDebts.length > 0 && (
+              {smallBalanceDebts.length > 0 ? (
                 <ActionChecklistItem
                   title={`Pay off your smallest debt: ${smallBalanceDebts[0].name}`}
                   description={`Eliminating this ${formatCurrency(smallBalanceDebts[0].balance)} debt will give you momentum.`}
                   onCheckedChange={(checked) => handleCheckChange("quickWins", 0, checked)}
                   defaultChecked={completionStatus.quickWins[0]}
                 />
+              ) : (
+                <ActionChecklistItem
+                  title={quickWinsItems[0].title}
+                  description={quickWinsItems[0].description}
+                  onCheckedChange={(checked) => handleCheckChange("quickWins", 0, checked)}
+                  defaultChecked={completionStatus.quickWins[0]}
+                />
               )}
-              <ActionChecklistItem
-                title="Set up automatic payments for all debts"
-                description="Track all your payments in one place and never miss a payment date."
-                onCheckedChange={(checked) => handleCheckChange("quickWins", 1, checked)}
-                defaultChecked={completionStatus.quickWins[1]}
-              />
-              <ActionChecklistItem
-                title="Use the budget tracker in your dashboard"
-                description="Identify areas where you can save more for debt payments."
-                onCheckedChange={(checked) => handleCheckChange("quickWins", 2, checked)}
-                defaultChecked={completionStatus.quickWins[2]}
-              />
-              <ActionChecklistItem
-                title="Set up payment reminders in the app"
-                description="Configure alerts to remind you before each payment is due."
-                onCheckedChange={(checked) => handleCheckChange("quickWins", 3, checked)}
-                defaultChecked={completionStatus.quickWins[3]}
-              />
+              {quickWinsItems.slice(1).map((item, index) => (
+                <ActionChecklistItem
+                  key={`quick-wins-${index + 1}`}
+                  title={item.title}
+                  description={item.description}
+                  onCheckedChange={(checked) => handleCheckChange("quickWins", index + 1, checked)}
+                  defaultChecked={completionStatus.quickWins[index + 1]}
+                />
+              ))}
             </CollapsibleContent>
           </Collapsible>
 
           <Collapsible open={openSections.priorityActions} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
+              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-4 w-4 text-slate-500 dark:text-slate-400" />, priorityActionsItems.length)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
                 title={getStrategyActionText()}
-                description={`Stick to the payment order recommended by this strategy.`}
+                description="Stick to the payment order recommended by this strategy."
                 onCheckedChange={(checked) => handleCheckChange("priorityActions", 0, checked)}
                 defaultChecked={completionStatus.priorityActions[0]}
               />
@@ -271,76 +352,40 @@ export const PersonalizedActionPlan = () => {
                 onCheckedChange={(checked) => handleCheckChange("priorityActions", 2, checked)}
                 defaultChecked={completionStatus.priorityActions[2]}
               />
-              <ActionChecklistItem
-                title={getStrategySetupText()}
-                description="Automatically redirect freed-up payments toward your next target debt."
-                onCheckedChange={(checked) => handleCheckChange("priorityActions", 3, checked)}
-                defaultChecked={completionStatus.priorityActions[3]}
-              />
             </CollapsibleContent>
           </Collapsible>
 
           <Collapsible open={openSections.financialStability} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
+              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-4 w-4 text-slate-500 dark:text-slate-400" />, financialStabilityItems.length)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
-              <ActionChecklistItem
-                title="Create an emergency fund goal"
-                description="Build a small emergency fund while paying down debt."
-                onCheckedChange={(checked) => handleCheckChange("financialStability", 0, checked)}
-                defaultChecked={completionStatus.financialStability[0]}
-              />
-              <ActionChecklistItem
-                title="Add upcoming windfalls as one-time payments"
-                description="Schedule tax refunds, bonuses, or other windfalls as one-time debt payments."
-                onCheckedChange={(checked) => handleCheckChange("financialStability", 1, checked)}
-                defaultChecked={completionStatus.financialStability[1]}
-              />
-              <ActionChecklistItem
-                title="Track monthly expenses in our expense tracker"
-                description="Identify one spending category to reduce each month."
-                onCheckedChange={(checked) => handleCheckChange("financialStability", 2, checked)}
-                defaultChecked={completionStatus.financialStability[2]}
-              />
-              <ActionChecklistItem
-                title="Set up savings goals alongside debt payments"
-                description="Balance debt repayment with small savings goals."
-                onCheckedChange={(checked) => handleCheckChange("financialStability", 3, checked)}
-                defaultChecked={completionStatus.financialStability[3]}
-              />
+              {financialStabilityItems.map((item, index) => (
+                <ActionChecklistItem
+                  key={`financial-stability-${index}`}
+                  title={item.title}
+                  description={item.description}
+                  onCheckedChange={(checked) => handleCheckChange("financialStability", index, checked)}
+                  defaultChecked={completionStatus.financialStability[index]}
+                />
+              ))}
             </CollapsibleContent>
           </Collapsible>
 
           <Collapsible open={openSections.longTermHabits} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-4 w-4 text-slate-500 dark:text-slate-400" />, 4)}
+              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-4 w-4 text-slate-500 dark:text-slate-400" />, longTermHabitsItems.length)}
             </div>
             <CollapsibleContent className="p-4 space-y-3">
-              <ActionChecklistItem
-                title="Schedule monthly finance review sessions"
-                description="Set aside 30 minutes each month to review your progress."
-                onCheckedChange={(checked) => handleCheckChange("longTermHabits", 0, checked)}
-                defaultChecked={completionStatus.longTermHabits[0]}
-              />
-              <ActionChecklistItem
-                title="Enable quarterly strategy check-in reminders"
-                description="Review your debt strategy every three months to optimize your approach."
-                onCheckedChange={(checked) => handleCheckChange("longTermHabits", 1, checked)}
-                defaultChecked={completionStatus.longTermHabits[1]}
-              />
-              <ActionChecklistItem
-                title="Use the expense approval workflow"
-                description="Help avoid impulse buys that could add new debt."
-                onCheckedChange={(checked) => handleCheckChange("longTermHabits", 2, checked)}
-                defaultChecked={completionStatus.longTermHabits[2]}
-              />
-              <ActionChecklistItem
-                title="Activate automated saving allocations"
-                description="Set up automatic saving rules for predictable expenses."
-                onCheckedChange={(checked) => handleCheckChange("longTermHabits", 3, checked)}
-                defaultChecked={completionStatus.longTermHabits[3]}
-              />
+              {longTermHabitsItems.map((item, index) => (
+                <ActionChecklistItem
+                  key={`long-term-habits-${index}`}
+                  title={item.title}
+                  description={item.description}
+                  onCheckedChange={(checked) => handleCheckChange("longTermHabits", index, checked)}
+                  defaultChecked={completionStatus.longTermHabits[index]}
+                />
+              ))}
             </CollapsibleContent>
           </Collapsible>
           
