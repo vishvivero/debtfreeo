@@ -8,7 +8,7 @@ export * from "./sidebar-rail";
 // Export type definitions
 export * from "./types";
 
-// Import all components from sidebar.tsx
+// Import all components from the sidebar component file
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +32,7 @@ import {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger
-} from "./sidebar";
+} from "../sidebar"; // Updated path to point to the correct location
 
 // Export all these components
 export {
