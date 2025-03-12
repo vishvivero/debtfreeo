@@ -10,17 +10,13 @@ export function useProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  console.log("useProfile hook - user:", user?.id);
-
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log("No user ID available for profile fetch");
         return null;
       }
       
-      console.log("Fetching profile for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -29,22 +25,16 @@ export function useProfile() {
 
       if (error) {
         console.error("Error fetching profile:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch profile",
-          variant: "destructive",
-        });
-        return null;
+        throw error;
       }
 
-      console.log("Profile data fetched:", data);
       return data as Profile;
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep in garbage collection for 30 minutes
+    // Don't refetch too often to avoid loops
+    staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: !!user?.id,
-    retry: 1, // Only retry once to avoid excessive fetching
-    retryDelay: 1000, // Retry after 1 second
+    retry: 1, // Only retry once
+    retryDelay: 1000, // Wait a second before retrying
   });
 
   const updateProfile = useMutation({
@@ -52,8 +42,6 @@ export function useProfile() {
       if (!user?.id) {
         throw new Error("No user ID available for profile update");
       }
-
-      console.log("Updating profile for user:", user.id, updates);
       
       const { data, error } = await supabase
         .from("profiles")
@@ -67,7 +55,6 @@ export function useProfile() {
         throw error;
       }
 
-      console.log("Profile updated successfully:", data);
       return data as Profile;
     },
     onSuccess: (data) => {
@@ -78,7 +65,6 @@ export function useProfile() {
       });
     },
     onError: (error) => {
-      console.error("Error in profile update mutation:", error);
       toast({
         title: "Error",
         description: "Failed to update profile",

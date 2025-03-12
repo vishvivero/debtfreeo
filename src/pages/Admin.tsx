@@ -1,6 +1,5 @@
-
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -23,7 +22,6 @@ import { BannerManagement } from "@/components/admin/BannerManagement";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 
-// Create EditBlogPost component
 const EditBlogPost = () => {
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -37,7 +35,6 @@ const EditBlogPost = () => {
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
 
-  // Use React Query to fetch blog data
   const { data: blog, isLoading: blogLoading } = useQuery({
     queryKey: ["blog", id],
     queryFn: async () => {
@@ -57,7 +54,6 @@ const EditBlogPost = () => {
     enabled: !!id
   });
 
-  // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["blog-categories"],
     queryFn: async () => {
@@ -74,7 +70,6 @@ const EditBlogPost = () => {
     }
   });
 
-  // Update form when blog data is loaded
   useEffect(() => {
     if (blog) {
       setTitle(blog.title);
@@ -125,7 +120,6 @@ const EditBlogPost = () => {
   );
 };
 
-// Create NewBlogPost component
 const NewBlogPost = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -196,51 +190,49 @@ const Admin = () => {
   const [checkError, setCheckError] = useState<Error | null>(null);
   const { toast } = useToast();
   
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        console.log("Admin page - No user found during admin check");
+  const checkAdminStatus = useCallback(async () => {
+    if (!user) {
+      console.log("Admin page - No user found during admin check");
+      setIsAdminChecked(true);
+      return;
+    }
+    
+    try {
+      if (!profile && !profileError) {
+        await refreshSession();
+      }
+      
+      if (profileError) {
+        console.error("Admin check - Error loading profile:", profileError);
+        setCheckError(profileError as Error);
         setIsAdminChecked(true);
         return;
       }
       
-      try {
-        // First ensure we have the latest session
-        await refreshSession();
-        
-        if (profileError) {
-          console.error("Admin check - Error loading profile:", profileError);
-          setCheckError(profileError as Error);
-          setIsAdminChecked(true);
-          return;
-        }
-        
-        // We've moved profile fetching to the useProfile hook
-        if (profile) {
-          console.log("Admin check - Profile loaded:", profile);
-          setIsAdmin(!!profile.is_admin);
-          setIsAdminChecked(true);
-        }
-      } catch (error) {
-        console.error("Error checking admin status:", error);
-        setCheckError(error as Error);
+      if (profile) {
+        console.log("Admin check - Profile loaded:", profile);
+        setIsAdmin(!!profile.is_admin);
         setIsAdminChecked(true);
-        
-        toast({
-          title: "Error",
-          description: "There was a problem checking admin status. Please try again.",
-          variant: "destructive",
-        });
       }
-    };
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      setCheckError(error as Error);
+      setIsAdminChecked(true);
+      
+      toast({
+        title: "Error",
+        description: "There was a problem checking admin status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [user, profile, profileError, refreshSession, toast]);
 
-    if (!profileLoading) {
+  useEffect(() => {
+    if (!profileLoading && !isAdminChecked) {
       checkAdminStatus();
     }
-  }, [user, profile, profileLoading, profileError, refreshSession, toast]);
+  }, [checkAdminStatus, profileLoading, isAdminChecked]);
   
-  // Show loading state while checking admin status
   if (!isAdminChecked || profileLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -250,7 +242,6 @@ const Admin = () => {
     );
   }
 
-  // Show error if there was a problem checking admin status
   if (checkError) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -263,13 +254,11 @@ const Admin = () => {
     );
   }
 
-  // Redirect if not logged in
   if (!user) {
     console.log("Admin page - No user, redirecting to /");
     return <Navigate to="/" replace />;
   }
 
-  // Show error if not admin
   if (!isAdmin) {
     console.log("Admin page - User is not an admin");
     return (
