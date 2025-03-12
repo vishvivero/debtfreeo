@@ -15,6 +15,7 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { ActionChecklistItem } from "./ActionChecklistItem";
 
 export const PersonalizedActionPlan = () => {
   const { debts, profile } = useDebts();
@@ -181,6 +182,44 @@ export const PersonalizedActionPlan = () => {
           </div>
         );
 
+      case "checklist":
+        return (
+          <div className="space-y-4">
+            <ActionChecklistItem
+              title="Create a budget spreadsheet or use a budgeting app"
+              description="Track all income and expenses to understand your cash flow better."
+            />
+            <ActionChecklistItem
+              title="Set up automatic payments for all debt minimum payments"
+              description="Never miss a payment and avoid late fees and credit score impacts."
+            />
+            <ActionChecklistItem
+              title="Contact high-interest lenders to negotiate lower rates"
+              description="Even a 1-2% reduction can save you significant money over time."
+            />
+            <ActionChecklistItem
+              title="Review and cancel unnecessary subscriptions"
+              description="Redirect these savings toward your debt payoff strategy."
+            />
+            <ActionChecklistItem
+              title="Set up a small emergency fund (£1,000)"
+              description="This prevents new debt when unexpected expenses arise."
+            />
+            <ActionChecklistItem
+              title="Schedule monthly finance review sessions"
+              description="Set aside 30 minutes each month to track progress and adjust your plan."
+            />
+            <ActionChecklistItem
+              title="Research balance transfer options for high-interest debt"
+              description="Look for 0% promotional offers to reduce interest costs."
+            />
+            <ActionChecklistItem
+              title="Identify one expense to reduce and redirect to debt"
+              description="Find at least one category where you can trim spending."
+            />
+          </div>
+        );
+
       default:
         return null;
     }
@@ -210,10 +249,11 @@ export const PersonalizedActionPlan = () => {
         <CardContent className="p-0">
           <div className="px-6 pt-4 pb-0">
             <Tabs defaultValue="priority" onValueChange={setSelectedTab} className="w-full">
-              <TabsList className="grid grid-cols-3">
+              <TabsList className="grid grid-cols-4">
                 <TabsTrigger value="priority">Priority Actions</TabsTrigger>
                 <TabsTrigger value="quick-wins">Quick Wins</TabsTrigger>
                 <TabsTrigger value="long-term">Long-Term Goals</TabsTrigger>
+                <TabsTrigger value="checklist">Action Checklist</TabsTrigger>
               </TabsList>
               <TabsContent value={selectedTab} className="pt-4 pb-2 min-h-[200px]">
                 {renderActionSteps()}
