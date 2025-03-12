@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -92,7 +91,6 @@ export const PersonalizedActionPlan = () => {
     })
     .slice(0, 3);
   
-  // Find high-interest debts (interest rate > 15%)
   const highInterestDebts = debts.filter(debt => debt.interest_rate > 15);
   
   useEffect(() => {
@@ -122,7 +120,6 @@ export const PersonalizedActionPlan = () => {
         ]
       });
       
-      const highInterestDebts = debts.filter(debt => debt.interest_rate > 15);
       if (highInterestDebts.length > 0) {
         const highInterestTotal = highInterestDebts.reduce((sum, debt) => sum + debt.balance, 0);
         const avgHighRate = highInterestDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / highInterestTotal;
@@ -696,7 +693,6 @@ export const PersonalizedActionPlan = () => {
                                   animate={{ opacity: 1, height: 'auto' }}
                                   className="mt-4"
                                 >
-                                  {/* Content for expanded medium priority items - Identical structure to high priority items */}
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                     <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
                                       <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
@@ -806,7 +802,6 @@ export const PersonalizedActionPlan = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  {/* Similar structure as high and medium priority items */}
                   {lowPriorityItems.map((item, index) => {
                     const itemIndex = actionItems.findIndex(i => i.title === item.title);
                     const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
@@ -822,7 +817,6 @@ export const PersonalizedActionPlan = () => {
                         className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
                           ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
                       >
-                        {/* Similar content as other priority sections */}
                         <div className="p-4">
                           <div className="flex items-start gap-3">
                             <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
@@ -872,7 +866,6 @@ export const PersonalizedActionPlan = () => {
                                   animate={{ opacity: 1, height: 'auto' }}
                                   className="mt-4"
                                 >
-                                  {/* Similar expanded content structure */}
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                     <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
                                       <div className="text-xs font-medium text-emerald-600 uppercase mb-1">Benefit</div>
@@ -973,7 +966,6 @@ export const PersonalizedActionPlan = () => {
         </CardContent>
       </Card>
 
-      {/* Due Dates Dialog */}
       <Dialog open={showDueDateDialog} onOpenChange={setShowDueDateDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -1019,7 +1011,6 @@ export const PersonalizedActionPlan = () => {
         </DialogContent>
       </Dialog>
 
-      {/* High Interest Debts Dialog */}
       <Dialog open={showHighInterestDialog} onOpenChange={setShowHighInterestDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -1083,3 +1074,4 @@ export const PersonalizedActionPlan = () => {
     </>
   );
 };
+
