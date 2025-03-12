@@ -1,3 +1,4 @@
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useState, useEffect } from "react";
 import { useDebts } from "@/hooks/use-debts";
@@ -15,6 +16,7 @@ import { Loader2, CalendarIcon, History, ChevronLeft, ChevronRight, ArrowLeft, A
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ResultsHistory() {
   const {
@@ -36,6 +38,7 @@ export default function ResultsHistory() {
   const [selectedTab, setSelectedTab] = useState("latest");
   const [currentPage, setCurrentPage] = useState(0);
   const isLoading = isDebtsLoading || isProfileLoading;
+  const isMobile = useIsMobile();
 
   const pages = [{
     id: "overview",
@@ -101,39 +104,39 @@ export default function ResultsHistory() {
 
   return <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
-        <div className="container py-8">
-          <div className="flex items-center gap-4 mb-6">
-            <Button variant="outline" size="icon" onClick={() => navigate("/strategy")} className="h-9 w-9">
+        <div className="container py-4 sm:py-8 max-w-full sm:max-w-[1200px] mx-auto px-3 sm:px-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <Button variant="outline" size="icon" onClick={() => navigate("/strategy")} className="h-9 w-9 self-start">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Debt Strategy Results</h1>
-              <p className="text-muted-foreground">Review your personalized debt repayment plan and track progress</p>
+              <h1 className="text-xl sm:text-2xl font-bold">Debt Strategy Results</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Review your personalized debt repayment plan and track progress</p>
             </div>
           </div>
           
           <Tabs defaultValue="latest" className="space-y-4" onValueChange={setSelectedTab}>
             <div className="flex items-center justify-between">
-              <Button variant="outline" onClick={() => navigate("/strategy")} className="gap-2">
+              <Button variant="outline" onClick={() => navigate("/strategy")} className="gap-2 text-sm sm:text-base">
                 Update Plan
               </Button>
             </div>
             
             <TabsContent value="latest" className="mt-0">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-1">
-                  {pages.map((page, index) => <Button key={page.id} variant={currentPage === index ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(index)} className={`${currentPage === index ? 'bg-primary text-white' : ''}`}>
+              <div className={`flex ${isMobile ? 'flex-col' : 'items-center justify-between'} mb-4 sm:mb-6 gap-2`}>
+                <div className="flex items-center gap-1 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto">
+                  {pages.map((page, index) => <Button key={page.id} variant={currentPage === index ? "default" : "outline"} size={isMobile ? "sm" : "default"} onClick={() => setCurrentPage(index)} className={`${currentPage === index ? 'bg-primary text-white' : ''} text-xs sm:text-sm whitespace-nowrap`}>
                       {page.label}
                     </Button>)}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={handlePrevious} disabled={currentPage === 0} className="gap-1">
-                    <ArrowLeft className="h-4 w-4" />
-                    Previous
+                  <Button variant="outline" size="sm" onClick={handlePrevious} disabled={currentPage === 0} className="gap-1 text-xs sm:text-sm">
+                    <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Previous</span>
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleNext} disabled={currentPage === pages.length - 1} className="gap-1">
-                    Next
-                    <ArrowRight className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={handleNext} disabled={currentPage === pages.length - 1} className="gap-1 text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Next</span>
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
@@ -151,60 +154,60 @@ export default function ResultsHistory() {
               }} transition={{
                 duration: 0.3
               }}>
-                    <Card className="border-none shadow-lg mb-8 overflow-hidden">
-                      <CardHeader className="bg-gradient-to-r from-indigo-500/90 to-purple-600/90 dark:from-indigo-700 dark:to-purple-800 text-white">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="flex items-center gap-2 text-white">
-                            <span className="p-1.5 rounded-full bg-white text-indigo-600">
-                              <History className="h-4 w-4" />
-                            </span>
+                    <Card className="border border-slate-200 dark:border-slate-800 shadow-sm mb-4 sm:mb-8">
+                      <CardHeader className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200 text-lg">
+                            <History className="h-4 w-4 text-slate-500" />
                             Strategy Overview
                           </CardTitle>
-                          <div className="text-sm text-white/80">
+                          <div className="text-xs sm:text-sm text-slate-500">
                             Updated {new Date().toLocaleDateString()}
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
-                        <div className="p-6 bg-white dark:bg-slate-900">
-                          <div className="grid gap-6 md:grid-cols-3 mb-6">
-                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
-                              <div className="flex items-start mb-2">
-                                <div className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mr-3">
-                                  <Target className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        <div className="p-4 sm:p-6 bg-white dark:bg-slate-900">
+                          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-4 sm:mb-6">
+                            <div className="p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                              <div className="flex items-start">
+                                <div className="mr-3">
+                                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
                                 </div>
                                 <div>
-                                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Strategy</div>
-                                  <div className="font-semibold text-slate-800 dark:text-slate-200">{selectedStrategy.name}</div>
+                                  <div className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Strategy</div>
+                                  <div className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">{selectedStrategy.name}</div>
                                 </div>
                               </div>
                             </div>
                             
-                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
-                              <div className="flex items-start mb-2">
-                                <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mr-3">
-                                  <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                            <div className="p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                              <div className="flex items-start">
+                                <div className="mr-3">
+                                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
                                 </div>
                                 <div>
-                                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Monthly Payment</div>
-                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                  <div className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Monthly Payment</div>
+                                  <div className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">
                                     {currencySymbol}{currentPayment.toLocaleString()}
                                   </div>
+                                  {extraPayment > 0 && (
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                      Including {currencySymbol}{extraPayment.toLocaleString()} extra
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 pl-11">
-                                {extraPayment > 0 && <span>Including {currencySymbol}{extraPayment.toLocaleString()} extra</span>}
                               </div>
                             </div>
                             
-                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
-                              <div className="flex items-start mb-2">
-                                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30 mr-3">
-                                  <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                            <div className="p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                              <div className="flex items-start">
+                                <div className="mr-3">
+                                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
                                 </div>
                                 <div>
-                                  <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Estimated Timeline</div>
-                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                  <div className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Estimated Timeline</div>
+                                  <div className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">
                                     {estimatedYears > 0 ? `${estimatedYears} ${estimatedYears === 1 ? 'year' : 'years'}` : ''} 
                                     {remainingMonths > 0 ? `${estimatedYears > 0 ? ' and ' : ''}${remainingMonths} ${remainingMonths === 1 ? 'month' : 'months'}` : ''}
                                   </div>
@@ -214,77 +217,65 @@ export default function ResultsHistory() {
                           </div>
                         </div>
                         
-                        <div className="p-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/70 border-t border-slate-100 dark:border-slate-800">
-                          <h3 className="text-lg font-semibold mb-5 text-slate-800 dark:text-slate-200">Results Summary</h3>
+                        <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800">
+                          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-5 text-slate-800 dark:text-slate-200">Results Summary</h3>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-5 rounded-xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="bg-emerald-100 dark:bg-emerald-800/30 p-2 rounded-full">
-                                  <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                </div>
-                                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Total Debt</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                            <div className="p-3 sm:p-5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
+                                <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Total Debt</span>
                               </div>
-                              <div className="mt-3">
-                                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                                  {currencySymbol}{totalDebt.toLocaleString()}
-                                </div>
-                                <div className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-1">
-                                  {debts.length} active {debts.length === 1 ? 'debt' : 'debts'}
-                                </div>
+                              <div className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                {currencySymbol}{totalDebt.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                {debts.length} active {debts.length === 1 ? 'debt' : 'debts'}
                               </div>
                             </div>
                             
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-5 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="bg-blue-100 dark:bg-blue-800/30 p-2 rounded-full">
-                                  <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Strategy Impact</span>
+                            <div className="p-3 sm:p-5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
+                                <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Strategy Impact</span>
                               </div>
-                              <div className="mt-3">
-                                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                                  {selectedStrategy.name}
-                                </div>
-                                <div className="text-xs text-blue-600/80 dark:text-blue-400/80 mt-1">
-                                  Using {selectedStrategy.description.split(' ').slice(0, 5).join(' ')}...
-                                </div>
+                              <div className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                {selectedStrategy.name}
+                              </div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Using {selectedStrategy.description.split(' ').slice(0, 5).join(' ')}...
                               </div>
                             </div>
                             
-                            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-5 rounded-xl border border-purple-100 dark:border-purple-800/30 shadow-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="bg-purple-100 dark:bg-purple-800/30 p-2 rounded-full">
-                                  <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                </div>
-                                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">Interest Rate</span>
+                            <div className="p-3 sm:p-5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
+                                <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Interest Rate</span>
                               </div>
-                              <div className="mt-3">
-                                <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                                  {avgInterestRate.toFixed(1)}%
-                                </div>
-                                <div className="text-xs text-purple-600/80 dark:text-purple-400/80 mt-1">
-                                  Weighted average
-                                </div>
+                              <div className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                {avgInterestRate.toFixed(1)}%
+                              </div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Weighted average
                               </div>
                             </div>
                           </div>
                           
-                          <p className="text-slate-600 dark:text-slate-400 mt-6 text-sm">
+                          <p className="text-slate-600 dark:text-slate-400 mt-4 sm:mt-6 text-xs sm:text-sm">
                             This overview shows your current debt strategy and key metrics. Navigate through the tabs to see your detailed action plan and projected timeline.
                           </p>
                           
                           {oneTimeFundings.length > 0 && (
-                            <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800/30">
+                            <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
                               <div className="flex items-start">
-                                <div className="p-2 bg-indigo-100 dark:bg-indigo-800/30 rounded-full mr-3">
-                                  <DollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                <div className="mr-3">
+                                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
                                 </div>
                                 <div>
-                                  <h4 className="font-medium text-indigo-700 dark:text-indigo-300">
+                                  <h4 className="text-sm sm:text-base font-medium text-slate-700 dark:text-slate-300">
                                     {oneTimeFundings.length > 1 ? 'Lump Sum Payments' : 'Lump Sum Payment'}
                                   </h4>
-                                  <p className="text-sm text-indigo-700/80 dark:text-indigo-400/80 mt-1">
+                                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                                     You've added {oneTimeFundings.length} {oneTimeFundings.length > 1 ? 'payments' : 'payment'} totaling {currencySymbol}
                                     {oneTimeFundings.reduce((sum, f) => sum + Number(f.amount), 0).toLocaleString()}
                                   </p>
@@ -297,7 +288,7 @@ export default function ResultsHistory() {
                     </Card>
                     
                     <div className="text-center">
-                      <Button onClick={handleNext} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
+                      <Button onClick={handleNext} className="gap-2">
                         View Action Plan
                         <ChevronRight className="h-4 w-4" />
                       </Button>
@@ -320,13 +311,13 @@ export default function ResultsHistory() {
                       <PersonalizedActionPlan />
                     </DebtCalculationProvider>
                     
-                    <div className="text-center mt-6">
-                      <div className="flex justify-center gap-4">
-                        <Button variant="outline" onClick={handlePrevious} className="gap-2">
+                    <div className="text-center mt-4 sm:mt-6">
+                      <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                        <Button variant="outline" onClick={handlePrevious} className="gap-2 w-full sm:w-auto">
                           <ChevronLeft className="h-4 w-4" />
                           Back to Overview
                         </Button>
-                        <Button onClick={handleNext} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
+                        <Button onClick={handleNext} className="gap-2 w-full sm:w-auto">
                           View Timeline
                           <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -350,8 +341,8 @@ export default function ResultsHistory() {
                         <PayoffTimeline debts={debts} extraPayment={extraPayment} enableOneTimeFundings={oneTimeFundings.length > 0} />
                       </div>}
                     
-                    <div className="text-center mt-6">
-                      <Button variant="outline" onClick={handlePrevious} className="gap-2">
+                    <div className="text-center mt-4 sm:mt-6">
+                      <Button variant="outline" onClick={handlePrevious} className="gap-2 w-full sm:w-auto">
                         <ChevronLeft className="h-4 w-4" />
                         Back to Action Plan
                       </Button>
@@ -359,8 +350,8 @@ export default function ResultsHistory() {
                   </motion.div>}
               </AnimatePresence>
               
-              <div className="flex justify-center items-center mt-8 gap-2">
-                {pages.map((_, index) => <div key={index} className={`h-2 rounded-full transition-all ${currentPage === index ? 'w-8 bg-indigo-600 dark:bg-indigo-500' : 'w-2 bg-gray-300 dark:bg-gray-700 cursor-pointer'}`} onClick={() => setCurrentPage(index)} />)}
+              <div className="flex justify-center items-center mt-6 sm:mt-8 gap-2">
+                {pages.map((_, index) => <div key={index} className={`h-1.5 sm:h-2 rounded-full transition-all ${currentPage === index ? 'w-6 sm:w-8 bg-indigo-600 dark:bg-indigo-500' : 'w-1.5 sm:w-2 bg-gray-300 dark:bg-gray-700 cursor-pointer'}`} onClick={() => setCurrentPage(index)} />)}
               </div>
             </TabsContent>
             

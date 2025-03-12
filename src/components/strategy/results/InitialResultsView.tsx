@@ -1,7 +1,6 @@
 
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
-import { ResultsMetricsGrid } from "./ResultsMetricsGrid";
 import { ResultsSummary } from "./ResultsSummary";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -62,17 +61,6 @@ export const InitialResultsView = ({
       </DialogHeader>
 
       <div className="mt-6 space-y-6">
-        <ResultsMetricsGrid
-          interestSaved={timelineResults.interestSaved}
-          monthsSaved={timelineResults.monthsSaved}
-          payoffDate={actualPayoffDate}
-          currencySymbol={currencySymbol}
-          debts={debts}
-          monthlyPayment={monthlyPayment}
-          strategy={selectedStrategy}
-          oneTimeFundings={oneTimeFundings}
-        />
-
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-3">Payment Breakdown</h3>

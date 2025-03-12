@@ -1,40 +1,168 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { motion } from "framer-motion";
 import { useDebts } from "@/hooks/use-debts";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Check, CheckCircle, ChevronDown, ChevronRight, CircleDollarSign, ExternalLink, HandCoins, HelpCircle, LucideIcon, PiggyBank, Plus, RefreshCw, ShieldCheck, Target, TrendingUp } from "lucide-react";
-import { strategies } from "@/lib/strategies";
 import { useCurrency } from "@/hooks/use-currency";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { strategies } from "@/lib/strategies";
+import { Badge } from "@/components/ui/badge";
+import { CircleDollarSign, ChevronRight, ChevronDown, ChevronUp, Rocket, BadgeCheck, Shield, Timer, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ActionChecklistItem } from "./ActionChecklistItem";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Progress } from "@/components/ui/progress";
 
 export const PersonalizedActionPlan = () => {
   const { debts, profile } = useDebts();
   const { convertToPreferredCurrency, formatCurrency } = useCurrency();
   const { currentPayment, extraPayment } = useMonthlyPayment();
   const { oneTimeFundings } = useOneTimeFunding();
-  const [selectedTab, setSelectedTab] = useState("priority");
-  const [openDialog, setOpenDialog] = useState<string | null>(null);
+
+  // Define the checklist items for each section
+  const quickWinsItems = [
+    {
+      title: "Pay off your smallest debt first",
+      description: "Eliminating a small debt will give you momentum.",
+      defaultChecked: false
+    },
+    {
+      title: "Set up automatic payments for all debts",
+      description: "Track all your payments in one place and never miss a payment date.",
+      defaultChecked: false
+    },
+    {
+      title: "Use the budget tracker in your dashboard",
+      description: "Identify areas where you can save more for debt payments.",
+      defaultChecked: false,
+      comingSoon: true
+    },
+    {
+      title: "Set up payment reminders in the app",
+      description: "Configure alerts to remind you before each payment is due.",
+      defaultChecked: false,
+      comingSoon: true
+    }
+  ];
+
+  const priorityActionsItems = [
+    {
+      title: "Focus on high-interest debts first",
+      description: "Stick to the payment order recommended by your strategy.",
+      defaultChecked: false
+    },
+    {
+      title: "Maintain your extra monthly payment",
+      description: "This additional payment will save you significant interest.",
+      defaultChecked: false
+    },
+    {
+      title: "Schedule a monthly payment increase of 5%",
+      description: "Gradually increase your payments for faster debt elimination.",
+      defaultChecked: false
+    }
+  ];
+
+  const financialStabilityItems = [
+    {
+      title: "Create an emergency fund goal",
+      description: "Build a small emergency fund while paying down debt.",
+      defaultChecked: false
+    },
+    {
+      title: "Add upcoming windfalls as one-time payments",
+      description: "Schedule tax refunds, bonuses, or other windfalls as one-time debt payments.",
+      defaultChecked: false
+    },
+    {
+      title: "Track monthly expenses in our expense tracker",
+      description: "Identify one spending category to reduce each month.",
+      defaultChecked: false,
+      comingSoon: true
+    },
+    {
+      title: "Set up savings goals alongside debt payments",
+      description: "Balance debt repayment with small savings goals.",
+      defaultChecked: false
+    }
+  ];
+
+  const longTermHabitsItems = [
+    {
+      title: "Schedule monthly finance review sessions",
+      description: "Set aside 30 minutes each month to review your progress.",
+      defaultChecked: false
+    },
+    {
+      title: "Enable quarterly strategy check-in reminders",
+      description: "Review your debt strategy every three months to optimize your approach.",
+      defaultChecked: false
+    },
+    {
+      title: "Use the expense approval workflow",
+      description: "Help avoid impulse buys that could add new debt.",
+      defaultChecked: false,
+      comingSoon: true
+    }
+  ];
+
+  // State for collapsible sections - all closed by default
+  const [openSections, setOpenSections] = useState({
+    quickWins: false,
+    priorityActions: false,
+    financialStability: false,
+    longTermHabits: false
+  });
+
+  // State for tracking completed items
+  const [completionStatus, setCompletionStatus] = useState({
+    quickWins: Array(quickWinsItems.length).fill(false),
+    priorityActions: Array(priorityActionsItems.length).fill(false),
+    financialStability: Array(financialStabilityItems.length).fill(false),
+    longTermHabits: Array(longTermHabitsItems.length).fill(false)
+  });
+
+  // Calculate completion percentages
+  const getCompletionPercentage = (section) => {
+    const completedCount = completionStatus[section].filter(Boolean).length;
+    const totalCount = completionStatus[section].length;
+    return (completedCount / totalCount) * 100;
+  };
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections({
+      ...openSections,
+      [section]: !openSections[section]
+    });
+  };
+
+  // Handle checkbox changes
+  const handleCheckChange = (section, index, checked) => {
+    const newStatus = { ...completionStatus };
+    newStatus[section][index] = checked;
+    setCompletionStatus(newStatus);
+  };
 
   // Safety check for undefined debts
   if (!debts || debts.length === 0) {
     return (
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle>Personalized Action Plan</CardTitle>
+      <Card className="mt-4 shadow-sm border border-slate-200 dark:border-slate-800">
+        <CardHeader className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+          <CardTitle className="text-slate-900 dark:text-slate-100">Personalized Action Plan</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Add your debts to get personalized recommendations.
-          </p>
+        <CardContent className="p-6 bg-white dark:bg-slate-900">
+          <div className="flex flex-col items-center justify-center py-6">
+            <p className="text-lg font-medium text-slate-700 dark:text-slate-300 text-center">
+              Add your debts to get personalized recommendations.
+            </p>
+            <Button 
+              className="mt-4"
+              onClick={() => window.location.href = "/overview"}
+            >
+              Go to Dashboard
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -55,26 +183,10 @@ export const PersonalizedActionPlan = () => {
     oneTimeFundings
   );
 
-  // Calculate monthly savings metrics
-  const totalMinimumPayments = debts.reduce((sum, debt) => sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol), 0);
-  const monthlySavingsTarget = Math.max(0, currentPayment - totalMinimumPayments);
-  const hasExtraPayment = extraPayment > 0;
-
-  // Sort debts by interest rate (high to low)
-  const highInterestDebts = [...debts]
-    .sort((a, b) => b.interest_rate - a.interest_rate)
-    .filter(debt => debt.interest_rate > 10);
-
-  // Sort debts by balance (low to high) for small wins
-  const smallBalanceDebts = [...debts]
-    .sort((a, b) => a.balance - b.balance)
-    .filter(debt => debt.balance < totalDebt * 0.1);
-
   // Pre-calculate some debt stats
   const maxInterestRate = Math.max(...debts.map(debt => debt.interest_rate));
   const avgInterestRate = debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt;
-  const hasHighInterest = maxInterestRate > 15;
-
+  
   // Time to debt free in months
   const monthsToDebtFree = timelineResults?.acceleratedMonths || 0;
   const yearsToDebtFree = Math.floor(monthsToDebtFree / 12);
@@ -90,532 +202,211 @@ export const PersonalizedActionPlan = () => {
   // Potential interest savings
   const interestSavings = timelineResults?.interestSaved || 0;
 
-  // Render action steps based on the selected tab
-  const renderActionSteps = () => {
-    switch (selectedTab) {
-      case "priority":
-        return (
-          <div className="space-y-4">
-            <ActionStep
-              icon={Target}
-              title="Follow Your Strategy"
-              description={`Stick to the ${selectedStrategy.name} strategy to maximize your progress.`}
-              actionText="How It Works"
-              onAction={() => setOpenDialog("strategy")}
-            />
-            {hasExtraPayment && (
-              <ActionStep
-                icon={TrendingUp}
-                title="Maintain Extra Payments"
-                description={`Continue your extra payment of ${formatCurrency(extraPayment)}/month to stay ahead.`}
-                actionText="Impact Details"
-                onAction={() => setOpenDialog("extraPayment")}
-              />
-            )}
-            {oneTimeFundings.length > 0 && (
-              <ActionStep
-                icon={PiggyBank}
-                title="Apply Your Planned Lump Sums"
-                description={`You have ${oneTimeFundings.length} future payment${oneTimeFundings.length > 1 ? 's' : ''} scheduled.`}
-                actionText="View Timeline"
-                onAction={() => window.location.href = "/strategy"}
-              />
-            )}
-            {hasHighInterest && (
-              <ActionStep
-                icon={CircleDollarSign}
-                title="Address High Interest Debts"
-                description="You have debts with very high interest rates that need attention."
-                actionText="View Details"
-                onAction={() => setOpenDialog("highInterest")}
-              />
-            )}
-          </div>
-        );
+  // Calculate monthly savings metrics
+  const totalMinimumPayments = debts.reduce((sum, debt) => 
+    sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol), 0);
+  const monthlySavingsTarget = Math.max(0, currentPayment - totalMinimumPayments);
 
-      case "quick-wins":
-        return (
-          <div className="space-y-4">
-            {smallBalanceDebts.length > 0 ? (
-              <ActionStep
-                icon={CheckCircle}
-                title="Eliminate Small Balances"
-                description={`Pay off your ${smallBalanceDebts.length} smallest debt${smallBalanceDebts.length > 1 ? 's' : ''} first for quick wins.`}
-                actionText="View Details"
-                onAction={() => setOpenDialog("smallBalances")}
-              />
-            ) : (
-              <div className="text-center p-4">
-                <p className="text-muted-foreground">
-                  You don't have any small balance debts to target right now.
-                </p>
-              </div>
-            )}
-          </div>
-        );
+  // Sort debts by balance (low to high) for small wins
+  const smallBalanceDebts = [...debts]
+    .sort((a, b) => a.balance - b.balance)
+    .filter(debt => debt.balance < totalDebt * 0.1);
 
-      case "long-term":
-        return (
-          <div className="space-y-4">
-            <ActionStep
-              icon={PiggyBank}
-              title="Build Emergency Fund"
-              description="Aim to save 3-6 months of expenses while paying down debt."
-              actionText="Learn More"
-              onAction={() => setOpenDialog("emergencyFund")}
-            />
-            <ActionStep
-              icon={ShieldCheck}
-              title="Review Insurance Coverage"
-              description="Ensure adequate insurance while reducing monthly premiums."
-              actionText="Tips"
-              onAction={() => setOpenDialog("insurance")}
-            />
-            <ActionStep
-              icon={RefreshCw}
-              title="Create Regular Review Schedule"
-              description="Set calendar reminders to review your debt plan quarterly."
-              actionText="Why It Matters"
-              onAction={() => setOpenDialog("reviewSchedule")}
-            />
-          </div>
-        );
-
+  // Get strategy-specific action text
+  const getStrategyActionText = () => {
+    switch (selectedStrategy.id) {
+      case 'avalanche':
+        return `Follow your ${selectedStrategy.name} strategy by focusing on high-interest debts first`;
+      case 'snowball':
+        return `Follow your ${selectedStrategy.name} strategy by paying off small debts first`;
+      case 'balance-ratio':
+        return `Follow your ${selectedStrategy.name} strategy for optimal debt elimination`;
       default:
-        return null;
+        return `Follow your ${selectedStrategy.name} strategy consistently`;
     }
   };
 
-  return (
-    <>
-      <Card className="bg-white dark:bg-slate-950 rounded-lg shadow-md overflow-hidden border">
-        <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 pb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                Your Personalized Action Plan
-              </CardTitle>
-              <p className="text-muted-foreground mt-2 text-sm">
-                Follow these steps to become debt-free by {payoffDateString}
-              </p>
-            </div>
-            <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/80 text-indigo-600 dark:text-indigo-400 font-medium px-3 py-1 rounded-full">
-              {yearsToDebtFree > 0 ? `${yearsToDebtFree} year${yearsToDebtFree > 1 ? 's' : ''}` : ''}
-              {yearsToDebtFree > 0 && remainingMonths > 0 ? ' and ' : ''}
-              {remainingMonths > 0 ? `${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}
-              {yearsToDebtFree === 0 && remainingMonths === 0 ? 'Less than a month' : ''}
+  // Get strategy-specific setup text
+  const getStrategySetupText = () => {
+    switch (selectedStrategy.id) {
+      case 'avalanche':
+        return "Configure automatic payment redistribution to highest-interest debts";
+      case 'snowball':
+        return "Set up your debt snowball in the app";
+      case 'balance-ratio':
+        return "Configure your balanced payment approach in the app";
+      default:
+        return "Configure your payment strategy in the app";
+    }
+  };
+
+  // Renders a section header with a toggle button and progress bar
+  const renderSectionHeader = (title: string, section: keyof typeof openSections, icon, itemCount: number) => {
+    const percentage = getCompletionPercentage(section);
+    const completedCount = completionStatus[section].filter(Boolean).length;
+    
+    return (
+      <div className="w-full">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            {icon}
+            <h3 className="text-base font-medium text-slate-800 dark:text-slate-200">
+              {title}
+            </h3>
+            <Badge variant="outline" className="ml-1 text-xs bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:border-slate-700">
+              {completedCount}/{itemCount}
             </Badge>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="px-6 pt-4 pb-0">
-            <Tabs defaultValue="priority" onValueChange={setSelectedTab} className="w-full">
-              <TabsList className="grid grid-cols-3">
-                <TabsTrigger value="priority">Priority Actions</TabsTrigger>
-                <TabsTrigger value="quick-wins">Quick Wins</TabsTrigger>
-                <TabsTrigger value="long-term">Long-Term Goals</TabsTrigger>
-              </TabsList>
-              <TabsContent value={selectedTab} className="pt-4 pb-2 min-h-[200px]">
-                {renderActionSteps()}
-              </TabsContent>
-            </Tabs>
+          <CollapsibleTrigger 
+            onClick={() => toggleSection(section)}
+            className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+          >
+            {openSections[section] ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </CollapsibleTrigger>
+        </div>
+        <div className="flex items-center gap-3 mt-2 mb-1">
+          <div className="flex-1">
+            <Progress 
+              value={percentage} 
+              className="h-1.5 bg-slate-100 dark:bg-slate-800"
+              indicatorClassName={`${percentage === 100 ? 'bg-green-500' : 'bg-green-400'}`}
+            />
           </div>
-        </CardContent>
-        <CardFooter className="bg-gradient-to-r from-indigo-50/50 to-blue-50/50 dark:from-indigo-950/10 dark:to-blue-950/10 py-4 px-6">
-          <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
-              <CircleDollarSign className="h-4 w-4 mr-2 text-emerald-500" />
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                {formatCurrency(interestSavings)}
-              </span>
-              <span className="ml-1">potential interest savings</span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1 text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-400 dark:border-indigo-900/50 dark:hover:bg-indigo-950/30"
-              onClick={() => window.location.href = "/strategy"}
-            >
-              Update Your Strategy
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+          <span className={`text-xs font-medium ${percentage === 100 ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
+            {Math.round(percentage)}%
+          </span>
+        </div>
+      </div>
+    );
+  };
 
-      {/* Strategy Dialog */}
-      <Dialog open={openDialog === "strategy"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{selectedStrategy.name} Strategy</DialogTitle>
-            <DialogDescription>
-              How this strategy works to accelerate your debt payoff
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>{selectedStrategy.description}</p>
-            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
-              <h4 className="font-semibold mb-2">Key Benefits:</h4>
-              <ul className="space-y-2">
-                {selectedStrategy.benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start">
-                    <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Extra Payment Dialog */}
-      <Dialog open={openDialog === "extraPayment"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Extra Payment Impact</DialogTitle>
-            <DialogDescription>
-              How your additional payments accelerate debt freedom
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>
-              Your extra payment of {formatCurrency(extraPayment)}/month beyond the minimum payments creates a powerful compounding effect:
-            </p>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">
-                <div className="flex items-center">
-                  <span className="h-8 w-8 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50 rounded-full mr-3">
-                    <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                  </span>
-                  <span>Reduces total interest paid</span>
-                </div>
-                <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-emerald-600">
-                  {formatCurrency(interestSavings)}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                <div className="flex items-center">
-                  <span className="h-8 w-8 flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 rounded-full mr-3">
-                    <Check className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </span>
-                  <span>Shortens payoff timeline</span>
-                </div>
-                <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-blue-600">
-                  {timelineResults?.monthsSaved || 0} months
-                </Badge>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* High Interest Dialog */}
-      <Dialog open={openDialog === "highInterest"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>High Interest Debts &gt; 10%</DialogTitle>
-            <DialogDescription>
-              These high-interest debts require priority attention
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="max-h-[300px] pr-4">
-            <div className="space-y-3">
-              {highInterestDebts.map((debt) => (
-                <div key={debt.id} className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">{debt.name}</span>
-                    <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-amber-600">
-                      {debt.interest_rate}%
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Balance: {formatCurrency(debt.balance)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-          <div className="border-t pt-4 mt-2">
-            <h4 className="font-semibold mb-3">Action Steps:</h4>
-            <ul className="space-y-2">
-              <li className="flex items-start">
-                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Check if you qualify for any balance transfer offers with lower rates</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Contact lenders directly to negotiate lower interest rates</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Focus extra payments on highest interest debts first</span>
-              </li>
-            </ul>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Small Balances Dialog */}
-      <Dialog open={openDialog === "smallBalances"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Small Balance Quick Wins</DialogTitle>
-            <DialogDescription>
-              Paying off these small debts first creates momentum
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="max-h-[300px] pr-4">
-            <div className="space-y-3">
-              {smallBalanceDebts.map((debt) => (
-                <div key={debt.id} className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">{debt.name}</span>
-                    <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-emerald-600">
-                      {formatCurrency(debt.balance)}
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground flex justify-between">
-                    <span>Min payment: {formatCurrency(debt.minimum_payment)}</span>
-                    <span>Rate: {debt.interest_rate}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-          <div className="border-t pt-4 mt-2">
-            <h4 className="font-semibold mb-3">Benefits of the Small Wins Approach:</h4>
-            <ul className="space-y-2">
-              <li className="flex items-start">
-                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Creates psychological momentum and motivation</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Reduces the number of monthly payments to manage</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Frees up cash flow faster for bigger debts</span>
-              </li>
-            </ul>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Emergency Fund Dialog */}
-      <Dialog open={openDialog === "emergencyFund"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Building Your Emergency Fund</DialogTitle>
-            <DialogDescription>
-              Financial security while paying down debt
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>
-              An emergency fund prevents you from taking on new debt when unexpected expenses arise.
-            </p>
-            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
-              <h4 className="font-semibold mb-2">Recommended Steps:</h4>
-              <ol className="space-y-2 list-decimal list-inside">
-                <li>Start with a mini fund of £1,000 while paying down high-interest debt</li>
-                <li>Once high-interest debt is gone, build to 3-6 months of expenses</li>
-                <li>Keep your emergency fund in a high-yield savings account</li>
-                <li>Only use it for true emergencies, not planned expenses</li>
-              </ol>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
-              <div className="flex items-start">
-                <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Your emergency fund helps prevent the debt cycle from starting again when unexpected expenses occur.
-                </p>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Insurance Dialog */}
-      <Dialog open={openDialog === "insurance"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Insurance Coverage Review</DialogTitle>
-            <DialogDescription>
-              Protect yourself while optimizing premiums
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>
-              Adequate insurance coverage is essential for financial security, but there are ways to reduce costs.
-            </p>
-            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
-              <h4 className="font-semibold mb-2">Insurance Review Checklist:</h4>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Compare quotes from multiple providers annually</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Bundle policies for discounts (home, auto, etc.)</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Consider higher deductibles if you have emergency savings</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Review coverage levels to ensure they're appropriate</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Ask about all available discounts</span>
-                </li>
-              </ul>
-            </div>
-            <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg">
-              <div className="flex items-start">
-                <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                  The right insurance prevents catastrophic financial setbacks that could derail your debt payment plan.
-                </p>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Review Schedule Dialog */}
-      <Dialog open={openDialog === "reviewSchedule"} onOpenChange={(open) => !open && setOpenDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Regular Debt Plan Reviews</DialogTitle>
-            <DialogDescription>
-              Stay on track with scheduled check-ins
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>
-              Regular reviews of your debt strategy help you adapt to changes and stay motivated.
-            </p>
-            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
-              <h4 className="font-semibold mb-2">Recommended Review Schedule:</h4>
-              <div className="space-y-3">
-                <div className="flex items-start">
-                  <div className="h-6 w-6 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 rounded-full mr-2 mt-0.5 text-sm font-medium text-indigo-700 dark:text-indigo-300">M</div>
-                  <div>
-                    <span className="font-medium">Monthly: Quick Check</span>
-                    <p className="text-sm text-muted-foreground">Review expenses and ensure payments are on track</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="h-6 w-6 flex items-center justify-center bg-purple-100 dark:bg-purple-900/50 rounded-full mr-2 mt-0.5 text-sm font-medium text-purple-700 dark:text-purple-300">Q</div>
-                  <div>
-                    <span className="font-medium">Quarterly: Deep Dive</span>
-                    <p className="text-sm text-muted-foreground">Assess progress, adjust allocations if needed</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="h-6 w-6 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50 rounded-full mr-2 mt-0.5 text-sm font-medium text-emerald-700 dark:text-emerald-300">Y</div>
-                  <div>
-                    <span className="font-medium">Yearly: Full Strategy Review</span>
-                    <p className="text-sm text-muted-foreground">Re-evaluate strategy, set new goals, celebrate progress</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
-              <div className="flex items-start">
-                <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Set calendar reminders now for your quarterly reviews to maintain momentum and adjust your strategy as needed.
-                </p>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+  // Function to render an item with optional "Coming Soon" badge
+  const renderActionItem = (item, section, index) => (
+    <ActionChecklistItem
+      key={`${section}-${index}`}
+      title={item.title}
+      description={item.description}
+      onCheckedChange={(checked) => handleCheckChange(section, index, checked)}
+      defaultChecked={completionStatus[section][index]}
+      comingSoon={item.comingSoon}
+    />
   );
-};
 
-// Helper component for action steps
-interface ActionStepProps {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  actionText: string;
-  onAction: () => void;
-}
-
-const ActionStep = ({ icon: Icon, title, description, actionText, onAction }: ActionStepProps) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-start">
-        <div className="bg-indigo-50 dark:bg-indigo-950/30 p-2 rounded-full mr-4">
-          <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+    <Card className="shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden rounded-lg bg-white dark:bg-slate-900">
+      <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            Your Action Plan
+          </CardTitle>
+          <span className="text-sm text-slate-500 dark:text-slate-400">
+            Debt-free by {payoffDateString}
+          </span>
         </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{description}</p>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="px-6 pt-2 pb-6 space-y-4">
+          
+          <Collapsible open={openSections.quickWins} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-4 w-4 text-slate-500 dark:text-slate-400" />, quickWinsItems.length)}
+            </div>
+            <CollapsibleContent className="p-4 space-y-3">
+              {smallBalanceDebts.length > 0 ? (
+                <ActionChecklistItem
+                  title={`Pay off your smallest debt: ${smallBalanceDebts[0].name}`}
+                  description={`Eliminating this ${formatCurrency(smallBalanceDebts[0].balance)} debt will give you momentum.`}
+                  onCheckedChange={(checked) => handleCheckChange("quickWins", 0, checked)}
+                  defaultChecked={completionStatus.quickWins[0]}
+                />
+              ) : (
+                <ActionChecklistItem
+                  title={quickWinsItems[0].title}
+                  description={quickWinsItems[0].description}
+                  onCheckedChange={(checked) => handleCheckChange("quickWins", 0, checked)}
+                  defaultChecked={completionStatus.quickWins[0]}
+                />
+              )}
+              {quickWinsItems.slice(1).map((item, index) => (
+                renderActionItem(item, "quickWins", index + 1)
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Collapsible open={openSections.priorityActions} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-4 w-4 text-slate-500 dark:text-slate-400" />, priorityActionsItems.length)}
+            </div>
+            <CollapsibleContent className="p-4 space-y-3">
+              <ActionChecklistItem
+                title={getStrategyActionText()}
+                description="Stick to the payment order recommended by this strategy."
+                onCheckedChange={(checked) => handleCheckChange("priorityActions", 0, checked)}
+                defaultChecked={completionStatus.priorityActions[0]}
+              />
+              {extraPayment > 0 && (
+                <ActionChecklistItem
+                  title={`Maintain your extra payment of ${formatCurrency(extraPayment)}/month`}
+                  description={`This additional payment will save you approximately ${formatCurrency(interestSavings)} in interest.`}
+                  onCheckedChange={(checked) => handleCheckChange("priorityActions", 1, checked)}
+                  defaultChecked={completionStatus.priorityActions[1]}
+                />
+              )}
+              <ActionChecklistItem
+                title="Schedule a monthly payment increase of 5%"
+                description="Gradually increase your payments for faster debt elimination."
+                onCheckedChange={(checked) => handleCheckChange("priorityActions", 2, checked)}
+                defaultChecked={completionStatus.priorityActions[2]}
+              />
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Collapsible open={openSections.financialStability} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-4 w-4 text-slate-500 dark:text-slate-400" />, financialStabilityItems.length)}
+            </div>
+            <CollapsibleContent className="p-4 space-y-3">
+              {financialStabilityItems.map((item, index) => (
+                renderActionItem(item, "financialStability", index)
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Collapsible open={openSections.longTermHabits} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-4 w-4 text-slate-500 dark:text-slate-400" />, longTermHabitsItems.length)}
+            </div>
+            <CollapsibleContent className="p-4 space-y-3">
+              {longTermHabitsItems.map((item, index) => (
+                renderActionItem(item, "longTermHabits", index)
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+          
         </div>
-      </div>
-      <div className="mt-3 pl-11">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-700 dark:hover:text-indigo-300 -ml-2 h-8"
-          onClick={onAction}
-        >
-          {actionText}
-          <ChevronRight className="h-4 w-4 ml-1" />
-        </Button>
-      </div>
-    </motion.div>
+      </CardContent>
+      <CardFooter className="bg-slate-50 dark:bg-slate-800/20 py-4 px-6 border-t border-slate-100 dark:border-slate-800">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center text-sm">
+            <CircleDollarSign className="h-4 w-4 mr-1.5 text-green-500" />
+            <span className="font-medium text-slate-700 dark:text-slate-300">
+              {formatCurrency(interestSavings)}
+            </span>
+            <span className="ml-1 text-slate-500 dark:text-slate-400 text-xs">potential interest savings</span>
+          </div>
+          <Button
+            className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-sm h-9 px-3 py-2"
+            onClick={() => window.location.href = "/strategy"}
+          >
+            Update Strategy
+            <ChevronRight className="h-3.5 w-3.5 ml-1" />
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
 };
