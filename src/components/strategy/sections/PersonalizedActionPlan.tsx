@@ -8,15 +8,31 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { strategies } from "@/lib/strategies";
 import { Badge } from "@/components/ui/badge";
-import { CircleDollarSign, ChevronRight } from "lucide-react";
+import { CircleDollarSign, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionChecklistItem } from "./ActionChecklistItem";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export const PersonalizedActionPlan = () => {
   const { debts, profile } = useDebts();
   const { convertToPreferredCurrency, formatCurrency } = useCurrency();
   const { currentPayment, extraPayment } = useMonthlyPayment();
   const { oneTimeFundings } = useOneTimeFunding();
+
+  // State for collapsible sections
+  const [openSections, setOpenSections] = useState({
+    quickWins: true,
+    priorityActions: true,
+    financialStability: true,
+    longTermHabits: true
+  });
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections({
+      ...openSections,
+      [section]: !openSections[section]
+    });
+  };
 
   // Safety check for undefined debts
   if (!debts || debts.length === 0) {
@@ -106,6 +122,23 @@ export const PersonalizedActionPlan = () => {
     }
   };
 
+  // Renders a section header with a toggle button
+  const renderSectionHeader = (title: string, section: keyof typeof openSections) => (
+    <div className="flex justify-between items-center mb-3">
+      <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">{title}</h3>
+      <CollapsibleTrigger 
+        onClick={() => toggleSection(section)}
+        className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+      >
+        {openSections[section] ? (
+          <ChevronUp className="h-5 w-5 text-slate-500" />
+        ) : (
+          <ChevronDown className="h-5 w-5 text-slate-500" />
+        )}
+      </CollapsibleTrigger>
+    </div>
+  );
+
   return (
     <Card className="bg-white dark:bg-slate-950 rounded-lg shadow-md overflow-hidden border">
       <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 pb-6">
@@ -128,9 +161,9 @@ export const PersonalizedActionPlan = () => {
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Quick Wins</h3>
-            <div className="space-y-3">
+          <Collapsible open={openSections.quickWins} className="border-b border-slate-100 dark:border-slate-800 pb-6">
+            {renderSectionHeader("Quick Wins", "quickWins")}
+            <CollapsibleContent className="space-y-3">
               {smallBalanceDebts.length > 0 && (
                 <ActionChecklistItem
                   title={`Pay off your smallest debt: ${smallBalanceDebts[0].name}`}
@@ -149,12 +182,12 @@ export const PersonalizedActionPlan = () => {
                 title="Set up payment reminders in the app"
                 description="Configure alerts to remind you before each payment is due to avoid late fees."
               />
-            </div>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Priority Actions</h3>
-            <div className="space-y-3">
+          <Collapsible open={openSections.priorityActions} className="border-b border-slate-100 dark:border-slate-800 pb-6">
+            {renderSectionHeader("Priority Actions", "priorityActions")}
+            <CollapsibleContent className="space-y-3">
               <ActionChecklistItem
                 title={getStrategyActionText()}
                 description={`Stick to the payment order recommended by this strategy for maximum impact on your debts.`}
@@ -173,12 +206,12 @@ export const PersonalizedActionPlan = () => {
                 title={getStrategySetupText()}
                 description="Use our app to automatically redirect freed-up payments toward your next target debt."
               />
-            </div>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Financial Stability</h3>
-            <div className="space-y-3">
+          <Collapsible open={openSections.financialStability} className="border-b border-slate-100 dark:border-slate-800 pb-6">
+            {renderSectionHeader("Financial Stability", "financialStability")}
+            <CollapsibleContent className="space-y-3">
               <ActionChecklistItem
                 title="Create an emergency fund goal in your profile"
                 description="Use our goal-setting feature to build a small emergency fund while paying down debt."
@@ -195,12 +228,12 @@ export const PersonalizedActionPlan = () => {
                 title="Set up savings goals alongside debt payments"
                 description="Balance debt repayment with small savings goals using our dual-purpose financial planner."
               />
-            </div>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Long-Term Habits</h3>
-            <div className="space-y-3">
+          <Collapsible open={openSections.longTermHabits} className="pb-2">
+            {renderSectionHeader("Long-Term Habits", "longTermHabits")}
+            <CollapsibleContent className="space-y-3">
               <ActionChecklistItem
                 title="Schedule monthly finance review sessions in the calendar"
                 description="Use our integrated calendar to set aside 30 minutes each month to review your progress and adjust your plan."
@@ -217,8 +250,8 @@ export const PersonalizedActionPlan = () => {
                 title="Activate automated saving allocations for future expenses"
                 description="Set up automatic saving rules for predictable expenses to avoid using credit for these costs."
               />
-            </div>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </CardContent>
       <CardFooter className="bg-gradient-to-r from-indigo-50/50 to-blue-50/50 dark:from-indigo-950/10 dark:to-blue-950/10 py-4 px-6">
