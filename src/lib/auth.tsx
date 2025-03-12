@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -41,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const refreshSession = async () => {
+  const refreshSession = async (): Promise<void> => {
     try {
       console.log("Refreshing session...");
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
@@ -55,12 +54,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Session refreshed successfully");
         setSession(currentSession);
         setUser(currentSession.user);
-        return currentSession;
       } else {
         console.log("No active session found during refresh");
         setSession(null);
         setUser(null);
-        return null;
       }
     } catch (error) {
       console.error("Error in refreshSession:", error);
