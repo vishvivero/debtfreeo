@@ -5,33 +5,30 @@ export * from "./sidebar-context";
 // Export type definitions
 export * from "./types";
 
-// Export components from sidebar-components without ambiguity
+// Instead of individual exports, let's revert to the approach of exporting all components from the main sidebar.tsx
+// This ensures we have access to all the components without needing to maintain separate export lists
 export {
   Sidebar,
-  SidebarHeader,
-  SidebarFooter,
   SidebarContent,
-  SidebarInput,
-  SidebarInset,
-  SidebarSeparator
-} from "./sidebar-components";
-
-// Export components from sidebar-menu without ambiguity
-export {
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarInset,
   SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarMenuAction,
   SidebarMenuBadge,
+  SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarMenuSub,
+  SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarMenuSubButton
-} from "./sidebar-menu";
-
-// Export SidebarRail
-export { SidebarRail } from "./sidebar-rail";
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
