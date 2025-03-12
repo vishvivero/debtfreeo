@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { useSystemSettings } from "@/hooks/use-system-settings";

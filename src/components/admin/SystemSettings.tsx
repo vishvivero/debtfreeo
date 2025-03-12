@@ -86,12 +86,11 @@ export const SystemSettings = () => {
         showPricing: newSettings.showPricing,
       };
 
+      // Use update instead of upsert to avoid duplicate key errors
       const { error } = await supabase
         .from("system_settings")
-        .upsert({
-          key: "site_settings",
-          value: settingsJson,
-        });
+        .update({ value: settingsJson })
+        .eq("key", "site_settings");
 
       if (error) throw error;
     },
