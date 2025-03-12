@@ -1,18 +1,17 @@
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Navigation } from "./header/Navigation";
+import { AuthButtons } from "./header/AuthButtons";
 import { Loader2, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ThemeToggle } from "./theme/ThemeToggle";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect, useState } from "react";
-import { Navigation } from "./header/Navigation";
-import { AuthButtons } from "./header/AuthButtons";
-import { useProfile } from "@/hooks/use-profile";
-import { useDebts } from "@/hooks/use-debts";
 
 const Header = () => {
   const { user } = useAuth();
@@ -23,35 +22,46 @@ const Header = () => {
   const isMobile = useIsMobile();
   const isPlannerPage = location.pathname === '/overview';
   const isSignupPage = location.pathname === '/signup';
-  const [isInitialRender, setIsInitialRender] = useState(true);
 
-  const { profile, isLoading: profileLoading } = useProfile();
-  const { refreshDebts } = useDebts();
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) {
+        console.log("No user ID available for profile fetch");
+        return null;
+      }
+      
+      console.log("Fetching profile for user:", user.id);
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      if (fetchError) {
+        console.error("Error fetching profile:", fetchError);
+        throw fetchError;
+      }
 
-  useEffect(() => {
-    if (isInitialRender) {
-      setIsInitialRender(false);
-    }
-  }, [isInitialRender]);
+      console.log("Profile data fetched:", existingProfile);
+      return existingProfile;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
+  });
 
   const handleAuthSuccess = async () => {
     console.log("Auth success handler triggered");
+    await queryClient.invalidateQueries({ queryKey: ["profile"] });
+    await queryClient.invalidateQueries({ queryKey: ["debts"] });
     
-    setTimeout(async () => {
-      try {
-        await queryClient.invalidateQueries();
-        await refreshDebts();
-        
-        toast({
-          title: "Welcome! 👋",
-          description: "Successfully signed in. Let's start planning your debt-free journey!",
-        });
-        
-        navigate("/overview", { replace: true });
-      } catch (error) {
-        console.error("Error refreshing data after login:", error);
-      }
-    }, 300);
+    toast({
+      title: "Welcome! 👋",
+      description: "Successfully signed in. Let's start planning your debt-free journey!",
+    });
+    
+    navigate("/overview");
   };
 
   const handleSignupClick = () => {

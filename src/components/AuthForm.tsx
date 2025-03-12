@@ -119,12 +119,9 @@ export function AuthForm({ onSuccess, defaultView = "signin" }: AuthFormProps) {
         }
         
         console.log("Sign in successful:", data);
-        
-        // Change the redirect to use a timeout to avoid UI freezing
-        setTimeout(() => {
-          navigate("/overview");
-          onSuccess?.();
-        }, 100);
+        // Redirect to overview page after successful signin
+        navigate("/overview");
+        onSuccess?.();
       }
     } catch (error: any) {
       console.error('Authentication Error:', error);

@@ -1,5 +1,4 @@
-
-import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -23,45 +22,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const refreshingRef = useRef(false);
-  const initializeRef = useRef(false);
-  const authSubscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
 
-  const signOut = useCallback(async () => {
+  const signOut = async () => {
     try {
       console.log("Auth provider: Starting sign out");
-      // Clear state first to prevent UI from accessing invalid data
       setUser(null);
       setSession(null);
-      
-      // Clear any stored data
       localStorage.clear();
       
-      // Actually sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Auth provider: Sign out error:", error);
       }
     } catch (error) {
       console.error("Auth provider: Critical error during sign out:", error);
+      throw error;
     }
-  }, []);
+  };
 
-  const refreshSession = useCallback(async (): Promise<void> => {
-    if (refreshingRef.current) {
-      console.log("Session refresh already in progress, skipping");
-      return;
-    }
-
+  const refreshSession = async () => {
     try {
-      refreshingRef.current = true;
       console.log("Refreshing session...");
-      
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
       
       if (error) {
         console.error("Error refreshing session:", error);
-        return;
+        throw error;
       }
       
       if (currentSession) {
@@ -75,16 +61,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Error in refreshSession:", error);
-    } finally {
-      refreshingRef.current = false;
+      throw error;
     }
-  }, []);
+  };
 
-  const handleAuthCode = useCallback(async () => {
+  const handleAuthCode = async () => {
     try {
+      // Check URL hash for code
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const searchParams = new URLSearchParams(window.location.search);
       
+      // Check both hash and search parameters for the code
       const code = hashParams.get('code') || searchParams.get('code');
       
       if (!code) {
@@ -98,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error("Error exchanging code for session:", error);
-        return false;
+        throw error;
       }
       
       if (data.session) {
@@ -106,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(data.session);
         setUser(data.session.user);
         
-        // Clean up URL after successful exchange
+        // Clean up the URL
         window.history.replaceState({}, '', '/overview');
         return true;
       }
@@ -116,23 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Error in handleAuthCode:", error);
       return false;
     }
-  }, []);
+  };
 
   useEffect(() => {
     let mounted = true;
-    
-    // Don't initialize auth multiple times
-    if (initializeRef.current) {
-      return;
-    }
-    
-    initializeRef.current = true;
 
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state...");
         
-        // Handle authentication code in URL if present
+        // First try to handle any auth code in the URL
         const handled = await handleAuthCode();
         if (handled) {
           console.log("Successfully handled auth code");
@@ -140,60 +120,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         
-        // Use a timeout to ensure UI is responsive during auth initialization
-        setTimeout(async () => {
-          if (!mounted) return;
-          
-          try {
-            // Get the initial session
-            const { data: { session: initialSession } } = await supabase.auth.getSession();
-            
+        // If no auth code, proceed with normal session check
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (mounted) {
+          if (initialSession) {
+            console.log("Initial session found:", initialSession.user.id);
+            setSession(initialSession);
+            setUser(initialSession.user);
+          } else {
+            console.log("No initial session found");
+          }
+          setLoading(false);
+        }
+
+        // Set up auth state change listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, currentSession) => {
+            console.log("Auth state changed:", {
+              event,
+              userId: currentSession?.user?.id,
+              sessionExists: !!currentSession
+            });
+
             if (mounted) {
-              if (initialSession) {
-                console.log("Initial session found:", initialSession.user.id);
-                setSession(initialSession);
-                setUser(initialSession.user);
+              if (currentSession) {
+                console.log("New session established:", currentSession.user.id);
+                setSession(currentSession);
+                setUser(currentSession.user);
               } else {
-                console.log("No initial session found");
+                setSession(null);
+                setUser(null);
               }
               setLoading(false);
             }
-
-            // Set up auth state change listener
-            if (mounted && !authSubscriptionRef.current) {
-              const { data: { subscription } } = supabase.auth.onAuthStateChange(
-                (event, currentSession) => {
-                  console.log("Auth state changed:", {
-                    event,
-                    userId: currentSession?.user?.id,
-                    sessionExists: !!currentSession
-                  });
-
-                  if (mounted) {
-                    // Update state based on auth state change
-                    if (currentSession) {
-                      setSession(currentSession);
-                      setUser(currentSession.user);
-                    } else if (event === 'SIGNED_OUT') {
-                      // Clear state on sign out
-                      setSession(null);
-                      setUser(null);
-                    }
-                    setLoading(false);
-                  }
-                }
-              );
-
-              authSubscriptionRef.current = subscription;
-            }
-          } catch (error) {
-            console.error("Error in delayed auth initialization:", error);
-            if (mounted) {
-              setLoading(false);
-            }
           }
-        }, 100);
-        
+        );
+
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error("Error in auth initialization:", error);
         if (mounted) {
@@ -203,27 +170,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-
-    return () => {
-      mounted = false;
-      // Clean up subscription on unmount
-      if (authSubscriptionRef.current) {
-        authSubscriptionRef.current.unsubscribe();
-        authSubscriptionRef.current = null;
-      }
-    };
-  }, [handleAuthCode]);
-
-  const authValue = {
-    user,
-    session,
-    loading,
-    signOut,
-    refreshSession
-  };
+  }, []);
 
   return (
-    <AuthContext.Provider value={authValue}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

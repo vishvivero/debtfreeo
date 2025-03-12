@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { useDebts } from "@/hooks/use-debts";
@@ -8,17 +8,12 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import type { Debt } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/lib/auth";
 
 export const NoDebtsMessage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const { addDebt, profile, refreshDebts } = useDebts();
+  const { addDebt, profile } = useDebts();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     try {
@@ -35,29 +30,6 @@ export const NoDebtsMessage = () => {
         description: "Failed to add debt. Please try again.",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleRefreshData = async () => {
-    if (!user?.id) return;
-    
-    setIsRefreshing(true);
-    try {
-      await queryClient.invalidateQueries({ queryKey: ["debts", user.id] });
-      await refreshDebts();
-      toast({
-        title: "Data Refreshed",
-        description: "Your debt data has been refreshed",
-      });
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to refresh data. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRefreshing(false);
     }
   };
 
@@ -86,24 +58,12 @@ export const NoDebtsMessage = () => {
         Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
       </p>
       
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-        <Button 
-          onClick={() => setIsDialogOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
-        >
-          Add Your First Debt
-        </Button>
-        
-        <Button 
-          onClick={handleRefreshData}
-          variant="outline"
-          className="w-full sm:w-auto"
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
-        </Button>
-      </div>
+      <Button 
+        onClick={() => setIsDialogOpen(true)}
+        className="bg-emerald-600 hover:bg-emerald-700"
+      >
+        Add Your First Debt
+      </Button>
 
       <AddDebtDialog
         isOpen={isDialogOpen}
