@@ -78,6 +78,34 @@ export const PersonalizedActionPlan = () => {
     .sort((a, b) => a.balance - b.balance)
     .filter(debt => debt.balance < totalDebt * 0.1);
 
+  // Get strategy-specific action text
+  const getStrategyActionText = () => {
+    switch (selectedStrategy.id) {
+      case 'avalanche':
+        return `Follow your ${selectedStrategy.name} strategy by focusing on high-interest debts first`;
+      case 'snowball':
+        return `Follow your ${selectedStrategy.name} strategy by paying off small debts first`;
+      case 'balance-ratio':
+        return `Follow your ${selectedStrategy.name} strategy for optimal debt elimination`;
+      default:
+        return `Follow your ${selectedStrategy.name} strategy consistently`;
+    }
+  };
+
+  // Get strategy-specific setup text
+  const getStrategySetupText = () => {
+    switch (selectedStrategy.id) {
+      case 'avalanche':
+        return "Configure automatic payment redistribution to highest-interest debts";
+      case 'snowball':
+        return "Set up your debt snowball in the app";
+      case 'balance-ratio':
+        return "Configure your balanced payment approach in the app";
+      default:
+        return "Configure your payment strategy in the app";
+    }
+  };
+
   return (
     <Card className="bg-white dark:bg-slate-950 rounded-lg shadow-md overflow-hidden border">
       <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 pb-6">
@@ -128,7 +156,7 @@ export const PersonalizedActionPlan = () => {
             <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">Priority Actions</h3>
             <div className="space-y-3">
               <ActionChecklistItem
-                title={`Follow your ${selectedStrategy.name} strategy consistently`}
+                title={getStrategyActionText()}
                 description={`Stick to the payment order recommended by this strategy for maximum impact on your debts.`}
               />
               {extraPayment > 0 && (
@@ -142,8 +170,8 @@ export const PersonalizedActionPlan = () => {
                 description="Use our payment scheduler to gradually increase your payments for faster debt elimination."
               />
               <ActionChecklistItem
-                title="Set up your debt snowball in the app"
-                description="Configure your account to automatically redirect freed-up payments toward your next target debt."
+                title={getStrategySetupText()}
+                description="Use our app to automatically redirect freed-up payments toward your next target debt."
               />
             </div>
           </div>
