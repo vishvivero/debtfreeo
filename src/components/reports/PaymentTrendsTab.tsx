@@ -10,6 +10,7 @@ import { DebtRepaymentPlan } from "@/components/strategy/DebtRepaymentPlan";
 import { useDebts } from "@/hooks/use-debts";
 import { strategies } from "@/lib/strategies";
 import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PaymentTrendsTabProps {
   payments: any[];
@@ -18,6 +19,7 @@ interface PaymentTrendsTabProps {
 export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
   const { toast } = useToast();
   const { debts, profile } = useDebts();
+  const isMobile = useIsMobile();
 
   const handleDownloadReport = () => {
     try {
@@ -50,29 +52,29 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
   };
 
   return (
-    <div className="w-full pb-12">
+    <div className="w-full pb-6 sm:pb-12">
       <Card className="w-full overflow-hidden">
-        <CardHeader>
-          <CardTitle>Payment Trends</CardTitle>
-          <CardDescription>Analysis of your payment history and trends</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Payment Trends</CardTitle>
+          <CardDescription className="text-sm">Analysis of your payment history and trends</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CardContent className="p-3 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div className="w-full">
               <PaymentTrendsChart payments={payments} />
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <Button 
-                className="w-full flex items-center gap-2"
+                className="w-full flex items-center gap-2 text-sm"
                 onClick={handleDownloadReport}
               >
                 <FileDown className="h-4 w-4" />
                 Download Trends Report
               </Button>
-              <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                <div className="space-y-4">
+              <ScrollArea className="h-[150px] sm:h-[200px] w-full rounded-md border p-3 sm:p-4">
+                <div className="space-y-2 sm:space-y-4">
                   {payments.map((payment, index) => (
-                    <div key={index} className="flex justify-between items-center">
+                    <div key={index} className="flex justify-between items-center text-xs sm:text-sm">
                       <span>{new Date(payment.payment_date).toLocaleDateString()}</span>
                       <span>£{payment.total_payment.toLocaleString()}</span>
                     </div>
@@ -84,11 +86,11 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
         </CardContent>
       </Card>
 
-      <Separator className="my-8" />
+      <Separator className="my-4 sm:my-8" />
 
       {debts && profile && (
         <Card className="w-full overflow-hidden">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <DebtRepaymentPlan
               debts={debts}
               totalMonthlyPayment={profile.monthly_payment || 0}
