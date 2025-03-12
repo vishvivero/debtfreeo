@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -693,4 +694,408 @@ export const PersonalizedActionPlan = () => {
                                 >
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                     <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                                      <div className="text-xs font-medium text-amber-600
+                                      <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
+                                      <div className="text-sm font-semibold text-amber-800">{item.benefit}</div>
+                                    </div>
+                                    
+                                    {item.savingsEstimate && (
+                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                                      </div>
+                                    )}
+                                    
+                                    {item.timeEstimate && (
+                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="space-y-2 mt-4">
+                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
+                                    
+                                    {item.steps.map((step, stepIndex) => (
+                                      <div 
+                                        key={step.id} 
+                                        className={`flex items-start gap-2 p-2 rounded-lg border 
+                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+                                      >
+                                        <Checkbox 
+                                          id={step.id} 
+                                          checked={step.isCompleted}
+                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
+                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
+                                        />
+                                        <label 
+                                          htmlFor={step.id} 
+                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
+                                        >
+                                          {step.description}
+                                        </label>
+                                      </div>
+                                    ))}
+                                    
+                                    {addingStepToItemIndex === itemIndex ? (
+                                      <div className="mt-3 space-y-2">
+                                        <Textarea 
+                                          placeholder="Enter a new action step..." 
+                                          value={newStep}
+                                          onChange={(e) => setNewStep(e.target.value)}
+                                          className="min-h-[80px] text-sm"
+                                        />
+                                        <div className="flex gap-2">
+                                          <Button 
+                                            size="sm" 
+                                            onClick={() => addNewStep(itemIndex)}
+                                            disabled={!newStep.trim()}
+                                          >
+                                            Add Step
+                                          </Button>
+                                          <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={() => {
+                                              setNewStep("");
+                                              setAddingStepToItemIndex(null);
+                                            }}
+                                          >
+                                            Cancel
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="mt-2 gap-1"
+                                        onClick={() => setAddingStepToItemIndex(itemIndex)}
+                                      >
+                                        <Plus className="h-3.5 w-3.5" />
+                                        Add Custom Step
+                                      </Button>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {lowPriorityItems.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`p-1 rounded-full ${priorityConfig.low.bg}`}>
+                    {priorityConfig.low.icon}
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {priorityConfig.low.label} ACTIONS
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {lowPriorityItems.map((item, index) => {
+                    const itemIndex = actionItems.findIndex(i => i.title === item.title);
+                    const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
+                    const totalStepsCount = item.steps.length;
+                    const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
+                    
+                    return (
+                      <motion.div
+                        key={`low-${index}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 + index * 0.1 }}
+                        className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
+                          ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
+                      >
+                        <div className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
+                              'bg-green-500' : 
+                              `bg-gradient-to-r ${priorityConfig.low.color}`} text-white`}
+                            >
+                              {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                                  {item.title}
+                                  {item.isCompleted && (
+                                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                      Completed
+                                    </span>
+                                  )}
+                                </h4>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
+                                  className="p-1 h-8 w-8"
+                                >
+                                  {expandedItem === itemIndex ? 
+                                    <ChevronUp className="h-5 w-5" /> : 
+                                    <ChevronDown className="h-5 w-5" />}
+                                </Button>
+                              </div>
+                              
+                              <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
+                              
+                              <div className="mt-3 flex items-center gap-2">
+                                <Progress 
+                                  value={stepPercentage} 
+                                  className="h-2 flex-1 bg-gray-100" 
+                                  indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-emerald-500"}
+                                />
+                                <span className="text-xs font-medium text-gray-600">
+                                  {completedStepsCount}/{totalStepsCount} steps
+                                </span>
+                              </div>
+                              
+                              {expandedItem === itemIndex && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  className="mt-4"
+                                >
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                                      <div className="text-xs font-medium text-emerald-600 uppercase mb-1">Benefit</div>
+                                      <div className="text-sm font-semibold text-emerald-800">{item.benefit}</div>
+                                    </div>
+                                    
+                                    {item.savingsEstimate && (
+                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
+                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
+                                      </div>
+                                    )}
+                                    
+                                    {item.timeEstimate && (
+                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
+                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="space-y-2 mt-4">
+                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
+                                    
+                                    {item.steps.map((step, stepIndex) => (
+                                      <div 
+                                        key={step.id} 
+                                        className={`flex items-start gap-2 p-2 rounded-lg border 
+                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+                                      >
+                                        <Checkbox 
+                                          id={step.id} 
+                                          checked={step.isCompleted}
+                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
+                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
+                                        />
+                                        <label 
+                                          htmlFor={step.id} 
+                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
+                                        >
+                                          {step.description}
+                                        </label>
+                                      </div>
+                                    ))}
+                                    
+                                    {addingStepToItemIndex === itemIndex ? (
+                                      <div className="mt-3 space-y-2">
+                                        <Textarea 
+                                          placeholder="Enter a new action step..." 
+                                          value={newStep}
+                                          onChange={(e) => setNewStep(e.target.value)}
+                                          className="min-h-[80px] text-sm"
+                                        />
+                                        <div className="flex gap-2">
+                                          <Button 
+                                            size="sm" 
+                                            onClick={() => addNewStep(itemIndex)}
+                                            disabled={!newStep.trim()}
+                                          >
+                                            Add Step
+                                          </Button>
+                                          <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={() => {
+                                              setNewStep("");
+                                              setAddingStepToItemIndex(null);
+                                            }}
+                                          >
+                                            Cancel
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="mt-2 gap-1"
+                                        onClick={() => setAddingStepToItemIndex(itemIndex)}
+                                      >
+                                        <Plus className="h-3.5 w-3.5" />
+                                        Add Custom Step
+                                      </Button>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+        
+        <CardFooter className="p-5 bg-gray-50 border-t">
+          <div className="flex items-center justify-between w-full">
+            <div className="text-sm text-gray-600">
+              Keep track of your progress and check off steps as you complete them.
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-800">
+                {planCompletionPercentage}% Complete
+              </span>
+              <Progress 
+                value={planCompletionPercentage} 
+                className="h-2 w-24 bg-gray-200" 
+                indicatorClassName="bg-primary"
+              />
+            </div>
+          </div>
+        </CardFooter>
+      </Card>
+
+      <Dialog open={showDueDateDialog} onOpenChange={setShowDueDateDialog}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Upcoming Payment Due Dates</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 my-4">
+            {debts.length > 0 ? (
+              <div className="overflow-auto max-h-[400px]">
+                <table className="w-full border-collapse">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="p-2 text-left text-xs font-semibold text-gray-600 border-b">Debt Name</th>
+                      <th className="p-2 text-left text-xs font-semibold text-gray-600 border-b">Due Date</th>
+                      <th className="p-2 text-right text-xs font-semibold text-gray-600 border-b">Minimum Payment</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {debts.sort((a, b) => {
+                      if (!a.next_payment_date) return 1;
+                      if (!b.next_payment_date) return -1;
+                      return new Date(a.next_payment_date).getTime() - new Date(b.next_payment_date).getTime();
+                    }).map(debt => (
+                      <tr key={debt.id} className="border-b hover:bg-gray-50">
+                        <td className="p-2 text-sm">{debt.name}</td>
+                        <td className="p-2 text-sm">
+                          {debt.next_payment_date ? (
+                            formatDueDate(debt.next_payment_date)
+                          ) : (
+                            <span className="text-amber-600 text-xs font-medium px-2 py-0.5 bg-amber-50 rounded">
+                              Not Set
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-2 text-sm text-right">
+                          {debt.currency_symbol}{debt.minimum_payment.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center p-4 text-gray-500">No debts found</p>
+            )}
+          </div>
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button>Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showHighInterestDialog} onOpenChange={setShowHighInterestDialog}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>High Interest Debts {`>`}15%</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 my-4">
+            {highInterestDebts.length > 0 ? (
+              <div className="overflow-auto max-h-[400px]">
+                <table className="w-full border-collapse">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="p-2 text-left text-xs font-semibold text-gray-600 border-b">Debt Name</th>
+                      <th className="p-2 text-right text-xs font-semibold text-gray-600 border-b">Interest Rate</th>
+                      <th className="p-2 text-right text-xs font-semibold text-gray-600 border-b">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {highInterestDebts.sort((a, b) => b.interest_rate - a.interest_rate).map(debt => (
+                      <tr key={debt.id} className="border-b hover:bg-gray-50">
+                        <td className="p-2 text-sm">{debt.name}</td>
+                        <td className="p-2 text-sm text-right font-medium text-red-600">
+                          {debt.interest_rate.toFixed(1)}%
+                        </td>
+                        <td className="p-2 text-sm text-right">
+                          {debt.currency_symbol}{debt.balance.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <h4 className="font-medium text-amber-900 mb-2">Debt Payoff Tips for High Interest Rates</h4>
+                  <ul className="space-y-2 text-sm text-amber-800">
+                    <li className="flex items-start gap-2">
+                      <div className="mt-0.5 w-1 h-1 rounded-full bg-amber-500"></div>
+                      <span>Focus on paying off your highest-interest debt first while making minimum payments on others</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="mt-0.5 w-1 h-1 rounded-full bg-amber-500"></div>
+                      <span>Consider balance transfer options if you have good credit</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="mt-0.5 w-1 h-1 rounded-full bg-amber-500"></div>
+                      <span>Look into personal loans with lower interest rates for debt consolidation</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <p className="text-center p-4 text-gray-500">No high interest debts found</p>
+            )}
+          </div>
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button>Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
