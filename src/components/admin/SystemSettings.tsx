@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -14,6 +15,7 @@ interface SystemSettings {
   maintenanceMode: boolean;
   siteTitle: string;
   defaultCurrency: string;
+  showPricing: boolean;  // New setting
 }
 
 interface SettingsResponse {
@@ -30,6 +32,7 @@ export const SystemSettings = () => {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [siteTitle, setSiteTitle] = useState("");
   const [defaultCurrency, setDefaultCurrency] = useState("£");
+  const [showPricing, setShowPricing] = useState(true);  // New state
 
   const { data: settings, isLoading } = useQuery<SettingsResponse>({
     queryKey: ["systemSettings"],
@@ -46,12 +49,12 @@ export const SystemSettings = () => {
         throw error;
       }
 
-      // Parse and validate the value as SystemSettings
       const settingsValue = data.value as Record<string, unknown>;
       const typedValue: SystemSettings = {
         maintenanceMode: Boolean(settingsValue.maintenanceMode),
         siteTitle: String(settingsValue.siteTitle || ""),
         defaultCurrency: String(settingsValue.defaultCurrency || "£"),
+        showPricing: settingsValue.showPricing === undefined ? true : Boolean(settingsValue.showPricing),
       };
 
       const typedData: SettingsResponse = {
@@ -69,6 +72,7 @@ export const SystemSettings = () => {
       setMaintenanceMode(settings.value.maintenanceMode);
       setSiteTitle(settings.value.siteTitle);
       setDefaultCurrency(settings.value.defaultCurrency);
+      setShowPricing(settings.value.showPricing);
     }
   }, [settings]);
 
@@ -79,6 +83,7 @@ export const SystemSettings = () => {
         maintenanceMode: newSettings.maintenanceMode,
         siteTitle: newSettings.siteTitle,
         defaultCurrency: newSettings.defaultCurrency,
+        showPricing: newSettings.showPricing,
       };
 
       const { error } = await supabase
@@ -131,6 +136,15 @@ export const SystemSettings = () => {
             />
           </div>
 
+          <div className="flex items-center justify-between">
+            <Label htmlFor="showPricing">Show Pricing Page</Label>
+            <Switch
+              id="showPricing"
+              checked={showPricing}
+              onCheckedChange={setShowPricing}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="siteTitle">Site Title</Label>
             <Input
@@ -157,6 +171,7 @@ export const SystemSettings = () => {
             maintenanceMode,
             siteTitle,
             defaultCurrency,
+            showPricing,
           })}
           disabled={updateSettings.isPending}
           className="w-full"

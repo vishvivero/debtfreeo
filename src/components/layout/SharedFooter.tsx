@@ -1,9 +1,10 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { LegalFooter } from "@/components/legal/LegalFooter";
+import { useSystemSettings } from "@/hooks/use-system-settings";
 
 export const SharedFooter = () => {
   const navigate = useNavigate();
+  const { settings } = useSystemSettings();
 
   const handleLinkClick = (path: string) => async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,11 +60,13 @@ export const SharedFooter = () => {
                   FAQ
                 </Link>
               </li>
-              <li>
-                <Link to="/pricing" onClick={handleLinkClick("/pricing")} className="hover:text-primary transition-colors">
-                  Pricing
-                </Link>
-              </li>
+              {settings.showPricing && (
+                <li>
+                  <Link to="/pricing" onClick={handleLinkClick("/pricing")} className="hover:text-primary transition-colors">
+                    Pricing
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
           <div>
