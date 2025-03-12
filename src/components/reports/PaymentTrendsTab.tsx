@@ -50,7 +50,7 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
   };
 
   return (
-    <div className="space-y-6 pb-12 max-w-full">
+    <div className="w-full space-y-6 pb-12 overflow-x-hidden">
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Payment Trends</CardTitle>
@@ -58,7 +58,9 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
-            <PaymentTrendsChart payments={payments} />
+            <div className="w-full overflow-hidden">
+              <PaymentTrendsChart payments={payments} />
+            </div>
             <div className="space-y-4">
               <Button 
                 className="w-full flex items-center gap-2"
@@ -85,11 +87,13 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
       <Separator className="my-8" />
 
       {debts && profile && (
-        <DebtRepaymentPlan
-          debts={debts}
-          totalMonthlyPayment={profile.monthly_payment || 0}
-          selectedStrategy={strategies.find(s => s.id === profile.selected_strategy) || strategies[0]}
-        />
+        <div className="w-full overflow-x-hidden">
+          <DebtRepaymentPlan
+            debts={debts}
+            totalMonthlyPayment={profile.monthly_payment || 0}
+            selectedStrategy={strategies.find(s => s.id === profile.selected_strategy) || strategies[0]}
+          />
+        </div>
       )}
     </div>
   );

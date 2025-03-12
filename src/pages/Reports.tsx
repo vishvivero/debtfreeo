@@ -48,7 +48,7 @@ export default function Reports() {
   if (!debts || debts.length === 0) {
     return (
       <MainLayout>
-        <div className="container mx-auto pt-4">
+        <div className="container mx-auto pt-4 w-full max-w-[1200px]">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Financial Reports</h1>
           </div>
@@ -62,12 +62,12 @@ export default function Reports() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto pt-4">
+      <div className="container mx-auto pt-4 w-full max-w-[1200px]">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Financial Reports</h1>
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4 w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
@@ -83,15 +83,15 @@ export default function Reports() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="w-full">
             <OverviewTab debts={debts || []} />
           </TabsContent>
 
-          <TabsContent value="amortization">
+          <TabsContent value="amortization" className="w-full">
             <AmortizationTab debts={debts || []} />
           </TabsContent>
 
-          <TabsContent value="trends">
+          <TabsContent value="trends" className="w-full">
             <PaymentTrendsTab payments={payments} />
           </TabsContent>
         </Tabs>

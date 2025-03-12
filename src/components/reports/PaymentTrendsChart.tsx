@@ -1,3 +1,4 @@
+
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
 interface PaymentTrendsChartProps {
@@ -11,12 +12,12 @@ export const PaymentTrendsChart = ({ payments }: PaymentTrendsChartProps) => {
   })) || [];
 
   return (
-    <div className="h-[300px]">
+    <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={paymentData}>
+        <LineChart data={paymentData} margin={{ right: 10, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <YAxis width={60} tick={{ fontSize: 12 }} />
           <Tooltip />
           <Legend />
           <Line
