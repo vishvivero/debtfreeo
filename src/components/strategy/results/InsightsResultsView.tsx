@@ -3,6 +3,7 @@ import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { PersonalizedActionPlan } from "@/components/strategy/sections/PersonalizedActionPlan";
 import { ResultsDialogFooter } from "./ResultsDialogFooter";
+import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
 
 interface InsightsResultsViewProps {
   onBack: () => void;
@@ -29,7 +30,9 @@ export const InsightsResultsView = ({
         </DialogTitle>
       </DialogHeader>
       <div className="mt-4">
-        <PersonalizedActionPlan />
+        <DebtCalculationProvider>
+          <PersonalizedActionPlan />
+        </DebtCalculationProvider>
         <ResultsDialogFooter
           currentView="insights"
           onBack={onBack}

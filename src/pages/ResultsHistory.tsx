@@ -1,4 +1,3 @@
-
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useState, useEffect } from "react";
 import { useDebts } from "@/hooks/use-debts";
@@ -15,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, CalendarIcon, History, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Target, DollarSign, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
 
 export default function ResultsHistory() {
   const {
@@ -37,7 +37,6 @@ export default function ResultsHistory() {
   const [currentPage, setCurrentPage] = useState(0);
   const isLoading = isDebtsLoading || isProfileLoading;
 
-  // Define page content sections
   const pages = [{
     id: "overview",
     label: "Overview"
@@ -48,18 +47,19 @@ export default function ResultsHistory() {
     id: "timeline",
     label: "Payoff Timeline"
   }];
+
   const handleNext = () => {
     if (currentPage < pages.length - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
+
   const handlePrevious = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  // Show loading state while data is being fetched
   if (isLoading) {
     return <MainLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -68,7 +68,6 @@ export default function ResultsHistory() {
       </MainLayout>;
   }
 
-  // Safety check for undefined debts
   if (!debts) {
     console.error("Debts data is undefined");
     return <MainLayout>
@@ -84,35 +83,22 @@ export default function ResultsHistory() {
       </MainLayout>;
   }
 
-  // Calculate total debt - with safety check
   const totalDebt = debts ? debts.reduce((sum, debt) => sum + debt.balance, 0) : 0;
-
-  // Calculate weighted average interest rate - with safety check
   const avgInterestRate = debts && totalDebt > 0 ? debts.reduce((sum, debt) => sum + debt.interest_rate * debt.balance, 0) / totalDebt : 0;
-
-  // Determine the selected strategy
   const selectedStrategyId = profile?.selected_strategy || strategies[0].id;
   const selectedStrategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
-
-  // For future enhancement: This would fetch actual historical results from a database
-  // For now, we're just showing the current result
   const results = [{
     id: "latest",
     date: new Date(),
     label: "Current Plan"
-  }
-  // Historical results would be added here
-  ];
+  }];
   const currencySymbol = profile?.preferred_currency || "£";
 
-  // Safety check for the current payment to avoid division by zero
   const safeCurrentPayment = currentPayment > 0 ? currentPayment : 1;
-
-  // Estimate months until debt-free (rough approximation)
   const estimatedMonths = Math.ceil(totalDebt / safeCurrentPayment);
   const estimatedYears = Math.floor(estimatedMonths / 12);
   const remainingMonths = estimatedMonths % 12;
-  
+
   return <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
         <div className="container py-8">
@@ -134,7 +120,6 @@ export default function ResultsHistory() {
             </div>
             
             <TabsContent value="latest" className="mt-0">
-              {/* Pagination Navigation - Top */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-1">
                   {pages.map((page, index) => <Button key={page.id} variant={currentPage === index ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(index)} className={`${currentPage === index ? 'bg-primary text-white' : ''}`}>
@@ -153,7 +138,6 @@ export default function ResultsHistory() {
                 </div>
               </div>
               
-              {/* Page Content with Animation */}
               <AnimatePresence mode="wait">
                 {currentPage === 0 && <motion.div key="overview" initial={{
                 opacity: 0,
@@ -167,7 +151,6 @@ export default function ResultsHistory() {
               }} transition={{
                 duration: 0.3
               }}>
-                    {/* Updated Strategy Overview Card with enhanced styling */}
                     <Card className="border-none shadow-lg mb-8 overflow-hidden">
                       <CardHeader className="bg-gradient-to-r from-indigo-500/90 to-purple-600/90 dark:from-indigo-700 dark:to-purple-800 text-white">
                         <div className="flex items-center justify-between">
@@ -183,7 +166,6 @@ export default function ResultsHistory() {
                         </div>
                       </CardHeader>
                       <CardContent className="p-0">
-                        {/* Strategy info section */}
                         <div className="p-6 bg-white dark:bg-slate-900">
                           <div className="grid gap-6 md:grid-cols-3 mb-6">
                             <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 border border-slate-100 dark:border-slate-700/30 shadow-sm">
@@ -232,7 +214,6 @@ export default function ResultsHistory() {
                           </div>
                         </div>
                         
-                        {/* Results Summary with enhanced styling */}
                         <div className="p-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/70 border-t border-slate-100 dark:border-slate-800">
                           <h3 className="text-lg font-semibold mb-5 text-slate-800 dark:text-slate-200">Results Summary</h3>
                           
@@ -293,7 +274,6 @@ export default function ResultsHistory() {
                             This overview shows your current debt strategy and key metrics. Navigate through the tabs to see your detailed action plan and projected timeline.
                           </p>
                           
-                          {/* One-time payments summary if any */}
                           {oneTimeFundings.length > 0 && (
                             <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800/30">
                               <div className="flex items-start">
@@ -336,7 +316,9 @@ export default function ResultsHistory() {
               }} transition={{
                 duration: 0.3
               }}>
-                    <PersonalizedActionPlan />
+                    <DebtCalculationProvider>
+                      <PersonalizedActionPlan />
+                    </DebtCalculationProvider>
                     
                     <div className="text-center mt-6">
                       <div className="flex justify-center gap-4">
@@ -377,13 +359,11 @@ export default function ResultsHistory() {
                   </motion.div>}
               </AnimatePresence>
               
-              {/* Pagination Indicator */}
               <div className="flex justify-center items-center mt-8 gap-2">
                 {pages.map((_, index) => <div key={index} className={`h-2 rounded-full transition-all ${currentPage === index ? 'w-8 bg-indigo-600 dark:bg-indigo-500' : 'w-2 bg-gray-300 dark:bg-gray-700 cursor-pointer'}`} onClick={() => setCurrentPage(index)} />)}
               </div>
             </TabsContent>
             
-            {/* For future versions with historical data */}
             {results.filter(r => r.id !== "latest").map(result => <TabsContent key={result.id} value={result.id} className="mt-0 space-y-6">
                 <Card>
                   <CardHeader>

@@ -4,6 +4,7 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useProfile } from "@/hooks/use-profile";
 import { strategies } from "@/lib/strategies";
 import { PayoffTimelineContainer } from "./timeline/PayoffTimelineContainer";
+import { DebtCalculationProvider } from "@/contexts/DebtCalculationContext";
 
 interface PayoffTimelineProps {
   debts: Debt[];
@@ -31,11 +32,13 @@ export const PayoffTimeline = ({
   const activeOneTimeFundings = enableOneTimeFundings ? oneTimeFundings : [];
 
   return (
-    <PayoffTimelineContainer
-      debts={debts}
-      extraPayment={extraPayment}
-      strategy={selectedStrategy}
-      oneTimeFundings={activeOneTimeFundings}
-    />
+    <DebtCalculationProvider>
+      <PayoffTimelineContainer
+        debts={debts}
+        extraPayment={extraPayment}
+        strategy={selectedStrategy}
+        oneTimeFundings={activeOneTimeFundings}
+      />
+    </DebtCalculationProvider>
   );
 };
