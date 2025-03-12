@@ -1,15 +1,13 @@
 
-export * from "./sidebar-components";
 export * from "./sidebar-context";
-export { 
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem
-} from "./sidebar-menu";
+export * from "./sidebar-menu";
 export * from "./types";
+export * from "./sidebar-components";
+export { SidebarRail } from "./sidebar-rail";
 
-// Make sure these are exported properly
+// For compatibility with existing code, also export from the main sidebar.tsx file
+// This is a temporary solution until all components are properly moved to their respective files
 export { 
-  SidebarGroup, 
-  SidebarGroupContent 
-} from "./sidebar-components";
+  SidebarProvider,
+  useSidebar 
+} from "./sidebar-context";
