@@ -1,28 +1,43 @@
 import * as React from "react";
-import type { SidebarContext as SidebarContextType } from "./types";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+type SidebarContext = {
+  state: "expanded" | "collapsed";
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  openMobile: boolean;
+  setOpenMobile: (open: boolean) => void;
+  isMobile: boolean;
+  toggleSidebar: () => void;
+};
+
+const SidebarContext = React.createContext<SidebarContext | null>(null);
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
-const SidebarContextValue = React.createContext<SidebarContextType | null>(null);
-
 export function useSidebar() {
-  const context = React.useContext(SidebarContextValue);
+  const context = React.useContext(SidebarContext);
   if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider");
+    throw new Error("useSidebar must be used within a SidebarProvider.");
   }
+
   return context;
+}
+
+interface SidebarProviderProps {
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 export const SidebarProvider = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> & {
-    defaultOpen?: boolean;
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-  }
+  React.HTMLAttributes<HTMLDivElement> & SidebarProviderProps
 >(
   (
     {
@@ -38,8 +53,8 @@ export const SidebarProvider = React.forwardRef<
   ) => {
     const isMobile = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
+
     const [_open, _setOpen] = React.useState(defaultOpen);
-    
     const open = openProp ?? _open;
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
@@ -49,6 +64,7 @@ export const SidebarProvider = React.forwardRef<
         } else {
           _setOpen(openState);
         }
+
         document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
       },
       [setOpenProp, open]
@@ -76,7 +92,8 @@ export const SidebarProvider = React.forwardRef<
     }, [toggleSidebar]);
 
     const state = open ? "expanded" : "collapsed";
-    const contextValue = React.useMemo<SidebarContextType>(
+
+    const contextValue = React.useMemo<SidebarContext>(
       () => ({
         state,
         open,
@@ -90,20 +107,22 @@ export const SidebarProvider = React.forwardRef<
     );
 
     return (
-      <SidebarContextValue.Provider value={contextValue}>
+      <SidebarContext.Provider value={contextValue}>
         <div
-          className="group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar"
-          style={{
-            "--sidebar-width": "16rem",
-            "--sidebar-width-icon": "3rem",
-            ...style,
-          } as React.CSSProperties}
+          style={
+            {
+              "--sidebar-width": "16rem",
+              "--sidebar-width-icon": "3rem",
+              ...style,
+            } as React.CSSProperties
+          }
+          className={className}
           ref={ref}
           {...props}
         >
           {children}
         </div>
-      </SidebarContextValue.Provider>
+      </SidebarContext.Provider>
     );
   }
 );
