@@ -17,18 +17,24 @@ export function useProfile() {
         return null;
       }
       
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
+        if (error) {
+          console.error("Error fetching profile:", error);
+          throw error;
+        }
+
+        return data as Profile;
+      } catch (err) {
+        console.error("Critical error in profile fetch:", err);
+        // Return null instead of throwing to prevent UI freeze
+        return null;
       }
-
-      return data as Profile;
     },
     // Don't refetch too often to avoid loops
     staleTime: 1000 * 60 * 5, // 5 minutes

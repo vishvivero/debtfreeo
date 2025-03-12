@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ThemeToggle } from "./theme/ThemeToggle";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect, useState } from "react";
 
 const Header = () => {
   const { user } = useAuth();
@@ -22,6 +22,13 @@ const Header = () => {
   const isMobile = useIsMobile();
   const isPlannerPage = location.pathname === '/overview';
   const isSignupPage = location.pathname === '/signup';
+  const [isInitialRender, setIsInitialRender] = useState(true);
+
+  useEffect(() => {
+    if (isInitialRender) {
+      setIsInitialRender(false);
+    }
+  }, [isInitialRender]);
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -46,22 +53,25 @@ const Header = () => {
       console.log("Profile data fetched:", existingProfile);
       return existingProfile;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !isInitialRender,
     staleTime: 1000 * 60 * 5,
     retry: 2,
   });
 
   const handleAuthSuccess = async () => {
     console.log("Auth success handler triggered");
-    await queryClient.invalidateQueries({ queryKey: ["profile"] });
-    await queryClient.invalidateQueries({ queryKey: ["debts"] });
     
-    toast({
-      title: "Welcome! 👋",
-      description: "Successfully signed in. Let's start planning your debt-free journey!",
-    });
-    
-    navigate("/overview");
+    setTimeout(async () => {
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      await queryClient.invalidateQueries({ queryKey: ["debts"] });
+      
+      toast({
+        title: "Welcome! 👋",
+        description: "Successfully signed in. Let's start planning your debt-free journey!",
+      });
+      
+      navigate("/overview");
+    }, 100);
   };
 
   const handleSignupClick = () => {

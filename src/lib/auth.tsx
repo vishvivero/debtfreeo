@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const refreshingRef = useRef(false);
+  const initializeRef = useRef(false);
 
   const signOut = useCallback(async () => {
     try {
@@ -116,6 +117,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
     let authSubscription: { unsubscribe: () => void } | null = null;
 
+    if (initializeRef.current) {
+      return;
+    }
+    
+    initializeRef.current = true;
+
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state...");
@@ -127,41 +134,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        if (mounted) {
-          if (initialSession) {
-            console.log("Initial session found:", initialSession.user.id);
-            setSession(initialSession);
-            setUser(initialSession.user);
-          } else {
-            console.log("No initial session found");
-          }
-          setLoading(false);
-        }
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (event, currentSession) => {
-            console.log("Auth state changed:", {
-              event,
-              userId: currentSession?.user?.id,
-              sessionExists: !!currentSession
-            });
-
+        setTimeout(async () => {
+          if (!mounted) return;
+          
+          try {
+            const { data: { session: initialSession } } = await supabase.auth.getSession();
+            
             if (mounted) {
-              if (currentSession) {
-                setSession(currentSession);
-                setUser(currentSession.user);
+              if (initialSession) {
+                console.log("Initial session found:", initialSession.user.id);
+                setSession(initialSession);
+                setUser(initialSession.user);
               } else {
-                setSession(null);
-                setUser(null);
+                console.log("No initial session found");
               }
               setLoading(false);
             }
-          }
-        );
 
-        authSubscription = subscription;
+            if (mounted) {
+              const { data: { subscription } } = supabase.auth.onAuthStateChange(
+                (event, currentSession) => {
+                  console.log("Auth state changed:", {
+                    event,
+                    userId: currentSession?.user?.id,
+                    sessionExists: !!currentSession
+                  });
+
+                  if (mounted) {
+                    if (currentSession) {
+                      setSession(currentSession);
+                      setUser(currentSession.user);
+                    } else {
+                      setSession(null);
+                      setUser(null);
+                    }
+                    setLoading(false);
+                  }
+                }
+              );
+
+              authSubscription = subscription;
+            }
+          } catch (error) {
+            console.error("Error in delayed auth initialization:", error);
+            if (mounted) {
+              setLoading(false);
+            }
+          }
+        }, 100);
+        
       } catch (error) {
         console.error("Error in auth initialization:", error);
         if (mounted) {

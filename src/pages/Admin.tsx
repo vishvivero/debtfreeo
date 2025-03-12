@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -227,9 +228,19 @@ const Admin = () => {
     }
   }, [user, profile, profileError, refreshSession, toast]);
 
+  // Use a setTimeout to avoid potential UI freezing
   useEffect(() => {
+    let mounted = true;
     if (!profileLoading && !isAdminChecked) {
-      checkAdminStatus();
+      const timer = setTimeout(() => {
+        if (mounted) {
+          checkAdminStatus();
+        }
+      }, 100);
+      return () => {
+        mounted = false;
+        clearTimeout(timer);
+      };
     }
   }, [checkAdminStatus, profileLoading, isAdminChecked]);
   
