@@ -50,8 +50,8 @@ export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      <Card>
+    <div className="space-y-6 pb-12 max-w-full">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Payment Trends</CardTitle>
           <CardDescription>Analysis of your payment history and trends</CardDescription>

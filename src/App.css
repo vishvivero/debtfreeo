@@ -13,7 +13,7 @@
 .app-layout main {
   flex: 1;
   width: 100%;
-  padding-top: 80px; /* Increased padding to ensure content appears below header */
+  padding-top: 88px; /* Further increased padding to ensure content appears below header */
 }
 
 /* Content container styles */

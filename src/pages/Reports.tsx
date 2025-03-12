@@ -48,7 +48,7 @@ export default function Reports() {
   if (!debts || debts.length === 0) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 pt-4">
+        <div className="container mx-auto pt-4">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Financial Reports</h1>
           </div>
@@ -62,7 +62,7 @@ export default function Reports() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 pt-4">
+      <div className="container mx-auto pt-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Financial Reports</h1>
         </div>
