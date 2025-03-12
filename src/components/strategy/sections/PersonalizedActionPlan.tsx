@@ -8,20 +8,7 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { strategies } from "@/lib/strategies";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CircleDollarSign, 
-  ChevronRight, 
-  ChevronDown, 
-  ChevronUp, 
-  CheckCircle,
-  Clock,
-  Award,
-  Rocket,
-  BadgeCheck,
-  Lightbulb,
-  Shield,
-  Timer
-} from "lucide-react";
+import { CircleDollarSign, ChevronRight, ChevronDown, ChevronUp, Rocket, BadgeCheck, Shield, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionChecklistItem } from "./ActionChecklistItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -33,12 +20,12 @@ export const PersonalizedActionPlan = () => {
   const { currentPayment, extraPayment } = useMonthlyPayment();
   const { oneTimeFundings } = useOneTimeFunding();
 
-  // State for collapsible sections
+  // State for collapsible sections - all closed by default
   const [openSections, setOpenSections] = useState({
-    quickWins: true,
-    priorityActions: true,
-    financialStability: true,
-    longTermHabits: true
+    quickWins: false,
+    priorityActions: false,
+    financialStability: false,
+    longTermHabits: false
   });
 
   // State for tracking completed items
@@ -73,21 +60,17 @@ export const PersonalizedActionPlan = () => {
   // Safety check for undefined debts
   if (!debts || debts.length === 0) {
     return (
-      <Card className="mt-4 border border-green-100 dark:border-green-800/30 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-green-500/90 to-emerald-600/90 dark:from-green-700 dark:to-emerald-800 text-white">
-          <CardTitle className="text-white flex items-center gap-2">
-            <Award className="h-6 w-6 text-white/90" />
-            Personalized Action Plan
-          </CardTitle>
+      <Card className="mt-4 border-green-100 dark:border-green-800/30 shadow-sm">
+        <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white">
+          <CardTitle className="text-white">Personalized Action Plan</CardTitle>
         </CardHeader>
-        <CardContent className="p-8 bg-white/90 dark:bg-slate-900/90">
+        <CardContent className="p-6 bg-white dark:bg-slate-900">
           <div className="flex flex-col items-center justify-center py-6">
-            <Lightbulb className="h-12 w-12 text-green-400 mb-4" />
             <p className="text-lg font-medium text-slate-700 dark:text-slate-300 text-center">
               Add your debts to get personalized recommendations.
             </p>
             <Button 
-              className="mt-4 bg-green-600 hover:bg-green-700 text-white font-medium"
+              className="mt-4 bg-green-600 hover:bg-green-700 text-white"
               onClick={() => window.location.href = "/overview"}
             >
               Go to Dashboard
@@ -171,43 +154,42 @@ export const PersonalizedActionPlan = () => {
   };
 
   // Renders a section header with a toggle button and progress bar
-  const renderSectionHeader = (title: string, section: keyof typeof openSections, icon) => {
+  const renderSectionHeader = (title: string, section: keyof typeof openSections, icon, itemCount: number) => {
     const percentage = getCompletionPercentage(section);
-    const itemCount = completionStatus[section].length;
     const completedCount = completionStatus[section].filter(Boolean).length;
     
     return (
-      <div className="mb-2">
-        <div className="flex justify-between items-center mb-2">
+      <div className="w-full">
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {icon}
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            <h3 className="text-base font-medium text-green-700 dark:text-green-400">
               {title}
             </h3>
-            <Badge variant="outline" className="ml-2 bg-green-50 text-green-600 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800/50">
-              {completedCount}/{itemCount} complete
+            <Badge variant="outline" className="ml-1 text-xs bg-green-50 text-green-600 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800/50">
+              {completedCount}/{itemCount}
             </Badge>
           </div>
           <CollapsibleTrigger 
             onClick={() => toggleSection(section)}
-            className="p-1.5 rounded-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-800/50 text-green-600 dark:text-green-400 transition-colors"
+            className="p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-colors"
           >
             {openSections[section] ? (
-              <ChevronUp className="h-5 w-5" />
+              <ChevronUp className="h-4 w-4" />
             ) : (
-              <ChevronDown className="h-5 w-5" />
+              <ChevronDown className="h-4 w-4" />
             )}
           </CollapsibleTrigger>
         </div>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mt-2 mb-1">
           <div className="flex-1">
             <Progress 
               value={percentage} 
-              className="h-2 bg-green-100 dark:bg-green-950/50"
-              indicatorClassName={`${percentage === 100 ? 'bg-emerald-500' : 'bg-green-600'}`}
+              className="h-1.5 bg-green-100 dark:bg-green-950/30"
+              indicatorClassName={`${percentage === 100 ? 'bg-green-500' : 'bg-green-400'}`}
             />
           </div>
-          <span className={`text-sm font-medium ${percentage === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-green-600 dark:text-green-400'}`}>
+          <span className={`text-xs font-medium ${percentage === 100 ? 'text-green-600 dark:text-green-400' : 'text-green-500 dark:text-green-500'}`}>
             {Math.round(percentage)}%
           </span>
         </div>
@@ -216,159 +198,147 @@ export const PersonalizedActionPlan = () => {
   };
 
   return (
-    <Card className="shadow-xl border-0 overflow-hidden rounded-xl bg-white dark:bg-slate-900">
-      <CardHeader className="bg-gradient-to-br from-green-600 to-emerald-700 dark:from-green-700 dark:to-emerald-900 p-8 pb-12 relative">
-        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]"></div>
+    <Card className="shadow-sm border border-green-100 dark:border-green-800/20 overflow-hidden rounded-lg bg-white dark:bg-slate-900">
+      <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 p-6 pb-10 relative">
         <div className="relative">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-3xl font-bold text-white mb-2">
-                Your Personalized Action Plan
-              </CardTitle>
-              <p className="text-green-100 dark:text-green-200 text-lg">
-                Follow these steps to become debt-free by {payoffDateString}
-              </p>
-            </div>
-            <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 py-2 px-4 rounded-full text-sm font-medium">
-              <Clock className="h-4 w-4 mr-1.5" />
-              {yearsToDebtFree > 0 ? `${yearsToDebtFree} year${yearsToDebtFree > 1 ? 's' : ''}` : ''}
-              {yearsToDebtFree > 0 && remainingMonths > 0 ? ' and ' : ''}
-              {remainingMonths > 0 ? `${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}
-              {yearsToDebtFree === 0 && remainingMonths === 0 ? 'Less than a month' : ''}
-            </Badge>
-          </div>
+          <CardTitle className="text-2xl font-bold text-white mb-2">
+            Your Action Plan
+          </CardTitle>
+          <p className="text-green-50 dark:text-green-100 text-sm">
+            Follow these steps to become debt-free by {payoffDateString}
+          </p>
         </div>
       </CardHeader>
       <CardContent className="p-0 relative">
-        <div className="absolute -top-6 left-0 right-0 h-12 bg-white dark:bg-slate-900 rounded-t-3xl"></div>
-        <div className="relative px-8 pt-4 pb-8 space-y-6">
+        <div className="absolute -top-6 left-0 right-0 h-12 bg-white dark:bg-slate-900 rounded-t-2xl"></div>
+        <div className="relative px-6 pt-2 pb-6 space-y-4">
           
-          <Collapsible open={openSections.quickWins} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
-              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-5 w-5 text-green-500 dark:text-green-400" />)}
+          <Collapsible open={openSections.quickWins} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Quick Wins", "quickWins", <Rocket className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
             </div>
-            <CollapsibleContent className="p-6 space-y-4">
+            <CollapsibleContent className="p-4 space-y-3">
               {smallBalanceDebts.length > 0 && (
                 <ActionChecklistItem
                   title={`Pay off your smallest debt: ${smallBalanceDebts[0].name}`}
-                  description={`Eliminating this ${formatCurrency(smallBalanceDebts[0].balance)} debt will give you momentum and reduce your monthly obligations.`}
+                  description={`Eliminating this ${formatCurrency(smallBalanceDebts[0].balance)} debt will give you momentum.`}
                   onCheckedChange={(checked) => handleCheckChange("quickWins", 0, checked)}
                   defaultChecked={completionStatus.quickWins[0]}
                 />
               )}
               <ActionChecklistItem
-                title="Set up automatic payments for all debts within the app"
-                description="Track all your payments in one place and ensure you never miss a payment date."
+                title="Set up automatic payments for all debts"
+                description="Track all your payments in one place and never miss a payment date."
                 onCheckedChange={(checked) => handleCheckChange("quickWins", 1, checked)}
                 defaultChecked={completionStatus.quickWins[1]}
               />
               <ActionChecklistItem
                 title="Use the budget tracker in your dashboard"
-                description="Our built-in budget tracking feature helps identify areas where you can save more for debt payments."
+                description="Identify areas where you can save more for debt payments."
                 onCheckedChange={(checked) => handleCheckChange("quickWins", 2, checked)}
                 defaultChecked={completionStatus.quickWins[2]}
               />
               <ActionChecklistItem
                 title="Set up payment reminders in the app"
-                description="Configure alerts to remind you before each payment is due to avoid late fees."
+                description="Configure alerts to remind you before each payment is due."
                 onCheckedChange={(checked) => handleCheckChange("quickWins", 3, checked)}
                 defaultChecked={completionStatus.quickWins[3]}
               />
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible open={openSections.priorityActions} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-emerald-950/20 dark:to-green-950/20">
-              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />)}
+          <Collapsible open={openSections.priorityActions} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Priority Actions", "priorityActions", <BadgeCheck className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
             </div>
-            <CollapsibleContent className="p-6 space-y-4">
+            <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
                 title={getStrategyActionText()}
-                description={`Stick to the payment order recommended by this strategy for maximum impact on your debts.`}
+                description={`Stick to the payment order recommended by this strategy.`}
                 onCheckedChange={(checked) => handleCheckChange("priorityActions", 0, checked)}
                 defaultChecked={completionStatus.priorityActions[0]}
               />
               {extraPayment > 0 && (
                 <ActionChecklistItem
                   title={`Maintain your extra payment of ${formatCurrency(extraPayment)}/month`}
-                  description={`This additional payment will save you approximately ${formatCurrency(interestSavings)} in interest over time.`}
+                  description={`This additional payment will save you approximately ${formatCurrency(interestSavings)} in interest.`}
                   onCheckedChange={(checked) => handleCheckChange("priorityActions", 1, checked)}
                   defaultChecked={completionStatus.priorityActions[1]}
                 />
               )}
               <ActionChecklistItem
                 title="Schedule a monthly payment increase of 5%"
-                description="Use our payment scheduler to gradually increase your payments for faster debt elimination."
+                description="Gradually increase your payments for faster debt elimination."
                 onCheckedChange={(checked) => handleCheckChange("priorityActions", 2, checked)}
                 defaultChecked={completionStatus.priorityActions[2]}
               />
               <ActionChecklistItem
                 title={getStrategySetupText()}
-                description="Use our app to automatically redirect freed-up payments toward your next target debt."
+                description="Automatically redirect freed-up payments toward your next target debt."
                 onCheckedChange={(checked) => handleCheckChange("priorityActions", 3, checked)}
                 defaultChecked={completionStatus.priorityActions[3]}
               />
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible open={openSections.financialStability} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
-              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-5 w-5 text-green-500 dark:text-green-400" />)}
+          <Collapsible open={openSections.financialStability} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Financial Stability", "financialStability", <Shield className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
             </div>
-            <CollapsibleContent className="p-6 space-y-4">
+            <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
-                title="Create an emergency fund goal in your profile"
-                description="Use our goal-setting feature to build a small emergency fund while paying down debt."
+                title="Create an emergency fund goal"
+                description="Build a small emergency fund while paying down debt."
                 onCheckedChange={(checked) => handleCheckChange("financialStability", 0, checked)}
                 defaultChecked={completionStatus.financialStability[0]}
               />
               <ActionChecklistItem
                 title="Add upcoming windfalls as one-time payments"
-                description="Plan ahead by scheduling any tax refunds, bonuses, or other expected windfalls as one-time debt payments."
+                description="Schedule tax refunds, bonuses, or other windfalls as one-time debt payments."
                 onCheckedChange={(checked) => handleCheckChange("financialStability", 1, checked)}
                 defaultChecked={completionStatus.financialStability[1]}
               />
               <ActionChecklistItem
                 title="Track monthly expenses in our expense tracker"
-                description="Identify one spending category to reduce each month using our expense analysis tools."
+                description="Identify one spending category to reduce each month."
                 onCheckedChange={(checked) => handleCheckChange("financialStability", 2, checked)}
                 defaultChecked={completionStatus.financialStability[2]}
               />
               <ActionChecklistItem
                 title="Set up savings goals alongside debt payments"
-                description="Balance debt repayment with small savings goals using our dual-purpose financial planner."
+                description="Balance debt repayment with small savings goals."
                 onCheckedChange={(checked) => handleCheckChange("financialStability", 3, checked)}
                 defaultChecked={completionStatus.financialStability[3]}
               />
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible open={openSections.longTermHabits} className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-emerald-950/20 dark:to-green-950/20">
-              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />)}
+          <Collapsible open={openSections.longTermHabits} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              {renderSectionHeader("Long-Term Habits", "longTermHabits", <Timer className="h-4 w-4 text-green-500 dark:text-green-400" />, 4)}
             </div>
-            <CollapsibleContent className="p-6 space-y-4">
+            <CollapsibleContent className="p-4 space-y-3">
               <ActionChecklistItem
-                title="Schedule monthly finance review sessions in the calendar"
-                description="Use our integrated calendar to set aside 30 minutes each month to review your progress and adjust your plan."
+                title="Schedule monthly finance review sessions"
+                description="Set aside 30 minutes each month to review your progress."
                 onCheckedChange={(checked) => handleCheckChange("longTermHabits", 0, checked)}
                 defaultChecked={completionStatus.longTermHabits[0]}
               />
               <ActionChecklistItem
                 title="Enable quarterly strategy check-in reminders"
-                description="Let the app remind you to review your debt strategy every three months to optimize your approach."
+                description="Review your debt strategy every three months to optimize your approach."
                 onCheckedChange={(checked) => handleCheckChange("longTermHabits", 1, checked)}
                 defaultChecked={completionStatus.longTermHabits[1]}
               />
               <ActionChecklistItem
-                title="Use the expense approval workflow for non-essential purchases"
-                description="Enable our purchase consideration feature to help avoid impulse buys that could add new debt."
+                title="Use the expense approval workflow"
+                description="Help avoid impulse buys that could add new debt."
                 onCheckedChange={(checked) => handleCheckChange("longTermHabits", 2, checked)}
                 defaultChecked={completionStatus.longTermHabits[2]}
               />
               <ActionChecklistItem
-                title="Activate automated saving allocations for future expenses"
-                description="Set up automatic saving rules for predictable expenses to avoid using credit for these costs."
+                title="Activate automated saving allocations"
+                description="Set up automatic saving rules for predictable expenses."
                 onCheckedChange={(checked) => handleCheckChange("longTermHabits", 3, checked)}
                 defaultChecked={completionStatus.longTermHabits[3]}
               />
@@ -377,21 +347,21 @@ export const PersonalizedActionPlan = () => {
           
         </div>
       </CardContent>
-      <CardFooter className="bg-gradient-to-br from-slate-50 to-green-50/30 dark:from-slate-900/90 dark:to-green-950/20 py-6 px-8 border-t border-green-100/50 dark:border-green-800/30">
-        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <CardFooter className="bg-slate-50 dark:bg-slate-800/20 py-4 px-6 border-t border-slate-100 dark:border-slate-800">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center text-sm">
-            <CircleDollarSign className="h-5 w-5 mr-2 text-emerald-500" />
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+            <CircleDollarSign className="h-4 w-4 mr-1.5 text-green-500" />
+            <span className="font-medium text-green-600 dark:text-green-400">
               {formatCurrency(interestSavings)}
             </span>
-            <span className="ml-1 text-slate-600 dark:text-slate-400">potential interest savings</span>
+            <span className="ml-1 text-slate-600 dark:text-slate-400 text-xs">potential interest savings</span>
           </div>
           <Button
-            className="bg-green-600 hover:bg-green-700 text-white gap-1.5"
+            className="bg-green-600 hover:bg-green-700 text-white text-sm h-9 px-3 py-2"
             onClick={() => window.location.href = "/strategy"}
           >
-            Update Your Strategy
-            <ChevronRight className="h-4 w-4" />
+            Update Strategy
+            <ChevronRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
       </CardFooter>

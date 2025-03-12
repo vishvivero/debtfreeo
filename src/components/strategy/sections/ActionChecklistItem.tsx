@@ -1,5 +1,5 @@
 
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -32,13 +32,13 @@ export const ActionChecklistItem = ({
 
   return (
     <div className={cn(
-      "p-5 rounded-xl transition-all duration-300 border",
+      "p-4 rounded-lg transition-all duration-300 border",
       checked 
-        ? "bg-gradient-to-r from-green-50/90 to-emerald-50/90 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800/30" 
-        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+        ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30" 
+        : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
     )}>
       <div className="flex items-start gap-3">
-        <div className="mt-1">
+        <div className="mt-0.5">
           <Checkbox 
             checked={checked} 
             onCheckedChange={handleCheckedChange}
@@ -52,10 +52,10 @@ export const ActionChecklistItem = ({
         </div>
         <div className="space-y-1 flex-1">
           <h3 className={cn(
-            "font-medium text-lg transition-colors",
+            "font-medium text-base transition-colors",
             checked 
               ? "text-green-700 dark:text-green-400" 
-              : "text-slate-900 dark:text-slate-100"
+              : "text-slate-800 dark:text-slate-100"
           )}>
             {title}
           </h3>
@@ -64,7 +64,7 @@ export const ActionChecklistItem = ({
           </p>
         </div>
         {checked && (
-          <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500 dark:text-green-400" />
+          <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-500 dark:text-green-400" />
         )}
       </div>
     </div>
