@@ -1,1101 +1,621 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  ListChecks, ArrowRight, Calendar, Target, Award, 
-  Download, CheckCircle2, ChevronDown, ChevronUp, 
-  BookmarkCheck, BadgeCheck, ClipboardCheck,
-  Check, Plus, CalendarCheck, CalendarDays
-} from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
-import { useProfile } from "@/hooks/use-profile";
-import { Progress } from "@/components/ui/progress";
-import { Debt } from "@/lib/types";
-import { Strategy } from "@/lib/strategies";
-import { formatCurrency } from "@/lib/strategies";
-import { Toggle } from "@/components/ui/toggle";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-
-const getCompletionPercentage = (debts: Debt[]): number => {
-  if (!debts?.length) return 0;
-  
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-  const totalOriginalDebt = debts.reduce((sum, debt) => {
-    return sum + (debt.balance * 1.1);
-  }, 0);
-  
-  if (totalOriginalDebt === 0) return 0;
-  return Math.min(100, Math.max(0, 100 - (totalDebt / totalOriginalDebt * 100)));
-};
-
-export interface ActionStep {
-  id: string;
-  description: string;
-  isCompleted: boolean;
-  action?: string; // Optional action identifier
-}
-
-export interface ActionItem {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  priority: 'high' | 'medium' | 'low';
-  benefit: string;
-  savingsEstimate?: string;
-  timeEstimate?: string;
-  isCompleted?: boolean;
-  steps: ActionStep[];
-}
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Check, CheckCircle, ChevronDown, ChevronRight, CircleDollarSign, ExternalLink, HandCoins, HelpCircle, LucideIcon, PiggyBank, Plus, RefreshCw, ShieldCheck, Target, TrendingUp } from "lucide-react";
+import { strategies } from "@/lib/strategies";
+import { useCurrency } from "@/hooks/use-currency";
+import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
+import { useDebtTimeline } from "@/hooks/use-debt-timeline";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 export const PersonalizedActionPlan = () => {
-  const { debts } = useDebts();
-  const { profile } = useProfile();
-  const [expandedItem, setExpandedItem] = useState<number | null>(null);
-  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
-  const [newStep, setNewStep] = useState("");
-  const [addingStepToItemIndex, setAddingStepToItemIndex] = useState<number | null>(null);
-  const [showDueDateDialog, setShowDueDateDialog] = useState(false);
-  const [showHighInterestDialog, setShowHighInterestDialog] = useState(false);
-  
-  const formatDueDate = (dateString: string | undefined): string => {
-    if (!dateString) return "Not set";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "Invalid date";
-      return format(date, 'MMM d, yyyy');
-    } catch (error) {
-      console.error("Error formatting due date:", error);
-      return "Invalid date";
-    }
-  };
-  
-  if (!debts || !profile) return null;
+  const { debts, profile } = useDebts();
+  const { convertToPreferredCurrency, formatCurrency } = useCurrency();
+  const { currentPayment, extraPayment } = useMonthlyPayment();
+  const { oneTimeFundings } = useOneTimeFunding();
+  const [selectedTab, setSelectedTab] = useState("priority");
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
 
-  const currencySymbol = profile.preferred_currency || "£";
-  const completionPercentage = getCompletionPercentage(debts);
-  
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  // Safety check for undefined debts
+  if (!debts || debts.length === 0) {
+    return (
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Personalized Action Plan</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Add your debts to get personalized recommendations.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Get the selected strategy
+  const selectedStrategyId = profile?.selected_strategy || strategies[0].id;
+  const selectedStrategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
+
+  // Calculate total debt
+  const totalDebt = debts.reduce((sum, debt) => sum + convertToPreferredCurrency(debt.balance, debt.currency_symbol), 0);
+
+  // Calculate timeline
+  const { timelineResults } = useDebtTimeline(
+    debts,
+    currentPayment,
+    selectedStrategy,
+    oneTimeFundings
+  );
+
+  // Calculate monthly savings metrics
+  const totalMinimumPayments = debts.reduce((sum, debt) => sum + convertToPreferredCurrency(debt.minimum_payment, debt.currency_symbol), 0);
+  const monthlySavingsTarget = Math.max(0, currentPayment - totalMinimumPayments);
+  const hasExtraPayment = extraPayment > 0;
+
+  // Sort debts by interest rate (high to low)
+  const highInterestDebts = [...debts]
+    .sort((a, b) => b.interest_rate - a.interest_rate)
+    .filter(debt => debt.interest_rate > 10);
+
+  // Sort debts by balance (low to high) for small wins
+  const smallBalanceDebts = [...debts]
+    .sort((a, b) => a.balance - b.balance)
+    .filter(debt => a.balance < totalDebt * 0.1);
+
+  // Pre-calculate some debt stats
+  const maxInterestRate = Math.max(...debts.map(debt => debt.interest_rate));
   const avgInterestRate = debts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / totalDebt;
-  
-  const upcomingDueDates = debts
-    .filter(debt => debt.next_payment_date)
-    .sort((a, b) => {
-      const dateA = a.next_payment_date ? new Date(a.next_payment_date).getTime() : Infinity;
-      const dateB = b.next_payment_date ? new Date(b.next_payment_date).getTime() : Infinity;
-      return dateA - dateB;
-    })
-    .slice(0, 3);
-  
-  const highInterestDebts = debts.filter(debt => debt.interest_rate > 15);
-  
-  useEffect(() => {
-    const generateActionItems = (): ActionItem[] => {
-      const items: ActionItem[] = [];
-      
-      const debtsWithMissingDueDate = debts.filter(debt => !debt.next_payment_date);
-      const hasMissingDueDates = debtsWithMissingDueDate.length > 0;
-      
-      const minPaymentsSavings = Math.round(totalDebt * 0.05);
-      items.push({
-        title: "Make minimum payments on time",
-        description: "Set up automatic payments for all your debts to ensure you never miss a payment date.",
-        icon: <Calendar className="h-5 w-5" />,
-        priority: 'high',
-        benefit: "Avoid late fees and credit score damage",
-        savingsEstimate: `${currencySymbol}${minPaymentsSavings.toLocaleString()} in late fees annually`,
-        steps: [
-          ...(hasMissingDueDates ? [{ 
-            id: crypto.randomUUID(), 
-            description: "List all debt payment due dates", 
-            isCompleted: false,
-            action: "showDueDates" 
-          }] : []),
-          { id: crypto.randomUUID(), description: "Set up automatic payments with your bank", isCompleted: false },
-          { id: crypto.randomUUID(), description: "Create calendar reminders 5 days before each payment", isCompleted: false }
-        ]
-      });
-      
-      if (highInterestDebts.length > 0) {
-        const highInterestTotal = highInterestDebts.reduce((sum, debt) => sum + debt.balance, 0);
-        const avgHighRate = highInterestDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / highInterestTotal;
-        const avgNormalRate = 10;
-        const interestSavings = Math.round(highInterestTotal * (avgHighRate - avgNormalRate) / 100);
-        
-        items.push({
-          title: "Focus on high-interest debt first",
-          description: "Prioritize paying off debts with interest rates above 15% to save money on interest charges.",
-          icon: <Target className="h-5 w-5" />,
-          priority: 'high',
-          benefit: "Reduce your high-cost interest payments",
-          savingsEstimate: `${currencySymbol}${interestSavings.toLocaleString()} per year in interest charges`,
-          timeEstimate: "Accelerate payoff by 6-12 months",
-          steps: [
-            { 
-              id: crypto.randomUUID(), 
-              description: "Identify all debts with >15% interest rate", 
-              isCompleted: false,
-              action: "showHighInterestDebts" 
-            },
-            { id: crypto.randomUUID(), description: "Allocate extra payments to highest interest debt first", isCompleted: false }
-          ]
-        });
-      }
-      
-      const smallDebts = debts.filter(debt => debt.balance < 1000);
-      if (smallDebts.length > 1) {
-        const smallDebtTotal = smallDebts.reduce((sum, debt) => sum + debt.balance, 0);
-        const avgSmallInterest = smallDebts.reduce((sum, debt) => sum + (debt.interest_rate * debt.balance), 0) / smallDebtTotal;
-        const monthsToPayoff = Math.ceil(smallDebtTotal / (smallDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0) * 1.5));
-        
-        items.push({
-          title: "Eliminate small debts quickly",
-          description: "Pay off your smallest debts first to reduce the number of monthly payments and build momentum.",
-          icon: <Award className="h-5 w-5" />,
-          priority: 'medium',
-          benefit: "Build psychological momentum and simplify your finances",
-          timeEstimate: `Clear ${smallDebts.length} smaller debts in ~${monthsToPayoff} months`,
-          savingsEstimate: `Reduce ${smallDebts.length} monthly payments to just one`,
-          steps: [
-            { id: crypto.randomUUID(), description: "List all debts from smallest to largest balance", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Calculate how much extra you can put toward the smallest debt", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Pay minimum on all other debts while focusing on smallest", isCompleted: false },
-            { id: crypto.randomUUID(), description: "After paying off smallest, move to next smallest debt", isCompleted: false }
-          ]
-        });
-      }
-      
-      if (debts.length > 3) {
-        const potentialConsolidationRate = avgInterestRate > 12 ? avgInterestRate - 3 : avgInterestRate - 1;
-        const annualSavings = Math.round(totalDebt * (avgInterestRate - potentialConsolidationRate) / 100);
-        
-        items.push({
-          title: "Consider debt consolidation",
-          description: "Look into consolidating multiple debts into a single loan with a lower interest rate.",
-          icon: <ListChecks className="h-5 w-5" />,
-          priority: 'medium',
-          benefit: "Simplify payments and potentially reduce interest",
-          savingsEstimate: `${currencySymbol}${annualSavings.toLocaleString()} per year in interest`,
-          timeEstimate: "Simplify to 1 payment instead of " + debts.length,
-          steps: [
-            { id: crypto.randomUUID(), description: "Check your credit score to see what rates you qualify for", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Research consolidation loans from banks and credit unions", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Compare total cost of current debts vs. consolidation options", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Apply for consolidation if it saves money overall", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Set up automatic payments for the new consolidated loan", isCompleted: false }
-          ]
-        });
-      }
-      
-      const currentMinimums = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      const suggestedExtraPayment = Math.max(50, Math.round(currentMinimums * 0.1));
-      const payoffAcceleration = Math.round(12 * suggestedExtraPayment / (totalDebt * avgInterestRate / 1200));
-      
-      items.push({
-        title: "Increase your monthly payment",
-        description: `Adding just ${currencySymbol}${suggestedExtraPayment} more to your monthly payment could significantly reduce your payoff time.`,
-        icon: <ArrowRight className="h-5 w-5" />,
-        priority: 'medium',
-        benefit: "Accelerate your debt payoff timeline",
-        timeEstimate: `Become debt-free ~${payoffAcceleration} months sooner`,
-        savingsEstimate: `Save ${currencySymbol}${Math.round(totalDebt * avgInterestRate / 100 * payoffAcceleration / 12).toLocaleString()} in interest`,
-        steps: [
-          { id: crypto.randomUUID(), description: "Review your monthly budget to find areas to cut back", isCompleted: false },
-          { id: crypto.randomUUID(), description: `Find ways to free up at least ${currencySymbol}${suggestedExtraPayment} per month`, isCompleted: false },
-          { id: crypto.randomUUID(), description: "Set up automatic transfer of extra payment amount", isCompleted: false },
-          { id: crypto.randomUUID(), description: "Apply extra payment to highest priority debt", isCompleted: false }
-        ]
-      });
-      
-      if (completionPercentage > 75) {
-        const remainingDebt = totalDebt * (1 - completionPercentage / 100);
-        const monthsRemaining = Math.ceil(remainingDebt / currentMinimums);
-        
-        items.push({
-          title: "Plan your debt-free celebration",
-          description: "You're getting close! Start planning how you'll celebrate becoming debt-free and what financial goals you'll tackle next.",
-          icon: <Award className="h-5 w-5" />,
-          priority: 'low',
-          benefit: "Keep motivated during the final stretch",
-          timeEstimate: `Only ~${monthsRemaining} months remaining at current pace`,
-          savingsEstimate: `Soon redirecting ${currencySymbol}${currentMinimums.toLocaleString()} monthly to savings`,
-          steps: [
-            { id: crypto.randomUUID(), description: "Create a vision board for debt-free life", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Plan a modest celebration for when you make your final payment", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Set your next financial goal (emergency fund, investing, etc.)", isCompleted: false },
-            { id: crypto.randomUUID(), description: "Create a plan to redirect debt payments to your new goal", isCompleted: false }
-          ]
-        });
-      }
-      
-      return items;
-    };
+  const hasHighInterest = maxInterestRate > 15;
 
-    if (actionItems.length === 0) {
-      setActionItems(generateActionItems());
-    }
-  }, [debts, profile, currencySymbol, completionPercentage, totalDebt, avgInterestRate, actionItems.length]);
+  // Time to debt free in months
+  const monthsToDebtFree = timelineResults?.acceleratedMonths || 0;
+  const yearsToDebtFree = Math.floor(monthsToDebtFree / 12);
+  const remainingMonths = monthsToDebtFree % 12;
   
-  const toggleStepCompletion = (itemIndex: number, stepId: string) => {
-    setActionItems(prevItems => {
-      const newItems = [...prevItems];
-      const item = {...newItems[itemIndex]};
-      const steps = [...item.steps];
-      
-      const stepIndex = steps.findIndex(step => step.id === stepId);
-      if (stepIndex !== -1) {
-        steps[stepIndex] = {
-          ...steps[stepIndex],
-          isCompleted: !steps[stepIndex].isCompleted
-        };
-      }
-      
-      item.steps = steps;
-      newItems[itemIndex] = item;
-      
-      const allStepsCompleted = steps.every(step => step.isCompleted);
-      item.isCompleted = allStepsCompleted;
-      
-      return newItems;
-    });
+  // Determine payoff date
+  const payoffDate = timelineResults?.payoffDate || new Date();
+  const payoffDateString = payoffDate.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  
+  // Potential interest savings
+  const interestSavings = timelineResults?.interestSaved || 0;
+
+  // Render action steps based on the selected tab
+  const renderActionSteps = () => {
+    switch (selectedTab) {
+      case "priority":
+        return (
+          <div className="space-y-4">
+            <ActionStep
+              icon={Target}
+              title="Follow Your Strategy"
+              description={`Stick to the ${selectedStrategy.name} strategy to maximize your progress.`}
+              actionText="How It Works"
+              onAction={() => setOpenDialog("strategy")}
+            />
+            {hasExtraPayment && (
+              <ActionStep
+                icon={TrendingUp}
+                title="Maintain Extra Payments"
+                description={`Continue your extra payment of ${formatCurrency(extraPayment)}/month to stay ahead.`}
+                actionText="Impact Details"
+                onAction={() => setOpenDialog("extraPayment")}
+              />
+            )}
+            {oneTimeFundings.length > 0 && (
+              <ActionStep
+                icon={PiggyBank}
+                title="Apply Your Planned Lump Sums"
+                description={`You have ${oneTimeFundings.length} future payment${oneTimeFundings.length > 1 ? 's' : ''} scheduled.`}
+                actionText="View Timeline"
+                onAction={() => window.location.href = "/strategy"}
+              />
+            )}
+            {hasHighInterest && (
+              <ActionStep
+                icon={CircleDollarSign}
+                title="Address High Interest Debts"
+                description="You have debts with very high interest rates that need attention."
+                actionText="View Details"
+                onAction={() => setOpenDialog("highInterest")}
+              />
+            )}
+          </div>
+        );
+
+      case "quick-wins":
+        return (
+          <div className="space-y-4">
+            {smallBalanceDebts.length > 0 ? (
+              <ActionStep
+                icon={CheckCircle}
+                title="Eliminate Small Balances"
+                description={`Pay off your ${smallBalanceDebts.length} smallest debt${smallBalanceDebts.length > 1 ? 's' : ''} first for quick wins.`}
+                actionText="View Details"
+                onAction={() => setOpenDialog("smallBalances")}
+              />
+            ) : (
+              <div className="text-center p-4">
+                <p className="text-muted-foreground">
+                  You don't have any small balance debts to target right now.
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
+      case "long-term":
+        return (
+          <div className="space-y-4">
+            <ActionStep
+              icon={PiggyBank}
+              title="Build Emergency Fund"
+              description="Aim to save 3-6 months of expenses while paying down debt."
+              actionText="Learn More"
+              onAction={() => setOpenDialog("emergencyFund")}
+            />
+            <ActionStep
+              icon={ShieldCheck}
+              title="Review Insurance Coverage"
+              description="Ensure adequate insurance while reducing monthly premiums."
+              actionText="Tips"
+              onAction={() => setOpenDialog("insurance")}
+            />
+            <ActionStep
+              icon={RefreshCw}
+              title="Create Regular Review Schedule"
+              description="Set calendar reminders to review your debt plan quarterly."
+              actionText="Why It Matters"
+              onAction={() => setOpenDialog("reviewSchedule")}
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
-  const handleStepClick = (itemIndex: number, stepId: string, action?: string) => {
-    if (action === "showDueDates") {
-      setShowDueDateDialog(true);
-    } else if (action === "showHighInterestDebts") {
-      setShowHighInterestDialog(true);
-    } else {
-      toggleStepCompletion(itemIndex, stepId);
-    }
-  };
-  
-  const addNewStep = (itemIndex: number) => {
-    if (!newStep.trim()) return;
-    
-    setActionItems(prevItems => {
-      const newItems = [...prevItems];
-      const item = {...newItems[itemIndex]};
-      const steps = [...item.steps];
-      
-      steps.push({
-        id: crypto.randomUUID(),
-        description: newStep.trim(),
-        isCompleted: false
-      });
-      
-      item.steps = steps;
-      newItems[itemIndex] = item;
-      
-      return newItems;
-    });
-    
-    setNewStep("");
-    setAddingStepToItemIndex(null);
-  };
-  
-  const handleDownloadPlan = () => {
-    console.log("Download plan functionality would go here");
-  };
-  
-  const highPriorityItems = actionItems.filter(item => item.priority === 'high');
-  const mediumPriorityItems = actionItems.filter(item => item.priority === 'medium');
-  const lowPriorityItems = actionItems.filter(item => item.priority === 'low');
-  
-  const priorityConfig = {
-    high: {
-      icon: <BadgeCheck className="h-5 w-5 text-white" />,
-      color: 'from-red-500 to-rose-600',
-      bg: 'bg-gradient-to-r from-red-500 to-rose-600',
-      label: 'Critical'
-    },
-    medium: {
-      icon: <BookmarkCheck className="h-5 w-5 text-white" />,
-      color: 'from-amber-500 to-orange-600',
-      bg: 'bg-gradient-to-r from-amber-500 to-orange-600',
-      label: 'Important'
-    },
-    low: {
-      icon: <ClipboardCheck className="h-5 w-5 text-white" />,
-      color: 'from-emerald-500 to-teal-600',
-      bg: 'bg-gradient-to-r from-emerald-500 to-teal-600',
-      label: 'Suggested'
-    }
-  };
-  
-  const totalSteps = actionItems.reduce((sum, item) => sum + item.steps.length, 0);
-  const completedSteps = actionItems.reduce((sum, item) => sum + item.steps.filter(step => step.isCompleted).length, 0);
-  const planCompletionPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-  
   return (
     <>
-      <Card className="overflow-hidden border-none shadow-lg">
-        <CardHeader className="bg-gradient-to-br from-violet-500/90 to-purple-600 text-white">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-bold flex items-center gap-2">
-              <ListChecks className="h-6 w-6" />
-              Your Personalized Action Plan
-            </CardTitle>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="gap-2 bg-white/20 hover:bg-white/30 text-white"
-              onClick={handleDownloadPlan}
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </Button>
-          </div>
-          
-          <div className="mt-6 mb-2">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <span className="text-sm font-medium text-white/90">Debt Freedom Progress</span>
-                <div className="text-2xl font-bold">{Math.round(completionPercentage)}%</div>
-              </div>
-              <div className="text-right">
-                <span className="text-sm font-medium text-white/90">Action Plan Progress</span>
-                <div className="text-lg font-semibold">{planCompletionPercentage}% Complete</div>
-                <div className="text-xs text-white/70">
-                  {completedSteps} of {totalSteps} steps
-                </div>
-              </div>
+      <Card className="bg-white dark:bg-slate-950 rounded-lg shadow-md overflow-hidden border">
+        <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 pb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                Your Personalized Action Plan
+              </CardTitle>
+              <p className="text-muted-foreground mt-2 text-sm">
+                Follow these steps to become debt-free by {payoffDateString}
+              </p>
             </div>
-            
-            <Progress 
-              value={completionPercentage} 
-              className="h-2.5 bg-white/20" 
-              indicatorClassName="bg-white"
-            />
-            
-            <Progress 
-              value={planCompletionPercentage} 
-              className="h-2.5 mt-2 bg-white/20" 
-              indicatorClassName="bg-green-400"
-            />
+            <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/80 text-indigo-600 dark:text-indigo-400 font-medium px-3 py-1 rounded-full">
+              {yearsToDebtFree > 0 ? `${yearsToDebtFree} year${yearsToDebtFree > 1 ? 's' : ''}` : ''}
+              {yearsToDebtFree > 0 && remainingMonths > 0 ? ' and ' : ''}
+              {remainingMonths > 0 ? `${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}
+              {yearsToDebtFree === 0 && remainingMonths === 0 ? 'Less than a month' : ''}
+            </Badge>
           </div>
         </CardHeader>
-        
-        <CardContent className="p-6 bg-gradient-to-br from-gray-50 to-white">
-          <div className="space-y-6">
-            {highPriorityItems.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`p-1 rounded-full ${priorityConfig.high.bg}`}>
-                    {priorityConfig.high.icon}
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    {priorityConfig.high.label} ACTIONS
-                  </h3>
-                </div>
-                
-                <div className="space-y-4">
-                  {highPriorityItems.map((item, index) => {
-                    const itemIndex = actionItems.findIndex(i => i.title === item.title);
-                    const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
-                    const totalStepsCount = item.steps.length;
-                    const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
-                    
-                    return (
-                      <motion.div
-                        key={`high-${index}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
-                          ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
-                      >
-                        <div className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
-                              'bg-green-500' : 
-                              `bg-gradient-to-r ${priorityConfig.high.color}`} text-white`}
-                            >
-                              {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                                  {item.title}
-                                  {item.isCompleted && (
-                                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                      Completed
-                                    </span>
-                                  )}
-                                </h4>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
-                                  className="p-1 h-8 w-8"
-                                >
-                                  {expandedItem === itemIndex ? 
-                                    <ChevronUp className="h-5 w-5" /> : 
-                                    <ChevronDown className="h-5 w-5" />}
-                                </Button>
-                              </div>
-                              
-                              <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
-                              
-                              <div className="mt-3 flex items-center gap-2">
-                                <Progress 
-                                  value={stepPercentage} 
-                                  className="h-2 flex-1 bg-gray-100" 
-                                  indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-red-500"}
-                                />
-                                <span className="text-xs font-medium text-gray-600">
-                                  {completedStepsCount}/{totalStepsCount} steps
-                                </span>
-                              </div>
-                              
-                              {expandedItem === itemIndex && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  className="mt-4"
-                                >
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                    <div className="bg-red-50 p-3 rounded-lg border border-red-100">
-                                      <div className="text-xs font-medium text-red-600 uppercase mb-1">Benefit</div>
-                                      <div className="text-sm font-semibold text-red-800">{item.benefit}</div>
-                                    </div>
-                                    
-                                    {item.savingsEstimate && (
-                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                      </div>
-                                    )}
-                                    
-                                    {item.timeEstimate && (
-                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="space-y-2 mt-4">
-                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                    
-                                    {item.steps.map((step, stepIndex) => (
-                                      <div 
-                                        key={step.id} 
-                                        className={`flex items-start gap-2 p-2 rounded-lg border 
-                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                      >
-                                        <Checkbox 
-                                          id={step.id} 
-                                          checked={step.isCompleted}
-                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
-                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                        />
-                                        <label 
-                                          htmlFor={step.id} 
-                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                        >
-                                          {step.description}
-                                          {step.description === "Create calendar reminders 5 days before each payment" && (
-                                            <Badge 
-                                              variant="secondary" 
-                                              className="ml-2 bg-violet-100 text-violet-800 hover:bg-violet-100"
-                                            >
-                                              Coming Soon
-                                            </Badge>
-                                          )}
-                                          {step.action === "showDueDates" && (
-                                            <Button 
-                                              variant="ghost" 
-                                              size="sm" 
-                                              className="ml-2 text-blue-600 p-0 h-auto text-xs underline hover:text-blue-800"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setShowDueDateDialog(true);
-                                              }}
-                                            >
-                                              View Dates
-                                            </Button>
-                                          )}
-                                          {step.action === "showHighInterestDebts" && highInterestDebts.length > 0 && (
-                                            <Button 
-                                              variant="ghost" 
-                                              size="sm" 
-                                              className="ml-2 text-blue-600 p-0 h-auto text-xs underline hover:text-blue-800"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setShowHighInterestDialog(true);
-                                              }}
-                                            >
-                                              View {highInterestDebts.length} {highInterestDebts.length === 1 ? 'Debt' : 'Debts'}
-                                            </Button>
-                                          )}
-                                          {step.description === "Set up automatic payments with your bank" && upcomingDueDates.length > 0 && (
-                                            <span className="ml-2 text-blue-600 text-xs flex items-center gap-1">
-                                              <CalendarDays className="h-3.5 w-3.5" />
-                                              {upcomingDueDates.map((debt, i) => (
-                                                <span key={debt.id} className="bg-blue-50 px-2 py-0.5 rounded-full">
-                                                  {debt.name}: {formatDueDate(debt.next_payment_date)}
-                                                </span>
-                                              )).reduce((prev, curr, i) => [prev, <span key={i} className="mx-1">·</span>, curr] as any)}
-                                              {debts.length > upcomingDueDates.length && (
-                                                <Button 
-                                                  variant="ghost" 
-                                                  size="sm" 
-                                                  className="ml-1 p-0 h-auto text-xs underline hover:text-blue-800"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setShowDueDateDialog(true);
-                                                  }}
-                                                >
-                                                  +{debts.length - upcomingDueDates.length} more
-                                                </Button>
-                                              )}
-                                            </span>
-                                          )}
-                                        </label>
-                                      </div>
-                                    ))}
-                                    
-                                    {addingStepToItemIndex === itemIndex ? (
-                                      <div className="mt-3 space-y-2">
-                                        <Textarea 
-                                          placeholder="Enter a new action step..." 
-                                          value={newStep}
-                                          onChange={(e) => setNewStep(e.target.value)}
-                                          className="min-h-[80px] text-sm"
-                                        />
-                                        <div className="flex gap-2">
-                                          <Button 
-                                            size="sm" 
-                                            onClick={() => addNewStep(itemIndex)}
-                                            disabled={!newStep.trim()}
-                                          >
-                                            Add Step
-                                          </Button>
-                                          <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={() => {
-                                              setNewStep("");
-                                              setAddingStepToItemIndex(null);
-                                            }}
-                                          >
-                                            Cancel
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="mt-2 gap-1"
-                                        onClick={() => setAddingStepToItemIndex(itemIndex)}
-                                      >
-                                        <Plus className="h-3.5 w-3.5" />
-                                        Add Custom Step
-                                      </Button>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {mediumPriorityItems.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`p-1 rounded-full ${priorityConfig.medium.bg}`}>
-                    {priorityConfig.medium.icon}
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    {priorityConfig.medium.label} ACTIONS
-                  </h3>
-                </div>
-                
-                <div className="space-y-4">
-                  {mediumPriorityItems.map((item, index) => {
-                    const itemIndex = actionItems.findIndex(i => i.title === item.title);
-                    const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
-                    const totalStepsCount = item.steps.length;
-                    const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
-                    
-                    return (
-                      <motion.div
-                        key={`medium-${index}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                        className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
-                          ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
-                      >
-                        <div className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
-                              'bg-green-500' : 
-                              `bg-gradient-to-r ${priorityConfig.medium.color}`} text-white`}
-                            >
-                              {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                                  {item.title}
-                                  {item.isCompleted && (
-                                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                      Completed
-                                    </span>
-                                  )}
-                                </h4>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
-                                  className="p-1 h-8 w-8"
-                                >
-                                  {expandedItem === itemIndex ? 
-                                    <ChevronUp className="h-5 w-5" /> : 
-                                    <ChevronDown className="h-5 w-5" />}
-                                </Button>
-                              </div>
-                              
-                              <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
-                              
-                              <div className="mt-3 flex items-center gap-2">
-                                <Progress 
-                                  value={stepPercentage} 
-                                  className="h-2 flex-1 bg-gray-100" 
-                                  indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-amber-500"}
-                                />
-                                <span className="text-xs font-medium text-gray-600">
-                                  {completedStepsCount}/{totalStepsCount} steps
-                                </span>
-                              </div>
-                              
-                              {expandedItem === itemIndex && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  className="mt-4"
-                                >
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                                      <div className="text-xs font-medium text-amber-600 uppercase mb-1">Benefit</div>
-                                      <div className="text-sm font-semibold text-amber-800">{item.benefit}</div>
-                                    </div>
-                                    
-                                    {item.savingsEstimate && (
-                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                      </div>
-                                    )}
-                                    
-                                    {item.timeEstimate && (
-                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="space-y-2 mt-4">
-                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                    
-                                    {item.steps.map((step, stepIndex) => (
-                                      <div 
-                                        key={step.id} 
-                                        className={`flex items-start gap-2 p-2 rounded-lg border 
-                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                      >
-                                        <Checkbox 
-                                          id={step.id} 
-                                          checked={step.isCompleted}
-                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
-                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                        />
-                                        <label 
-                                          htmlFor={step.id} 
-                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                        >
-                                          {step.description}
-                                        </label>
-                                      </div>
-                                    ))}
-                                    
-                                    {addingStepToItemIndex === itemIndex ? (
-                                      <div className="mt-3 space-y-2">
-                                        <Textarea 
-                                          placeholder="Enter a new action step..." 
-                                          value={newStep}
-                                          onChange={(e) => setNewStep(e.target.value)}
-                                          className="min-h-[80px] text-sm"
-                                        />
-                                        <div className="flex gap-2">
-                                          <Button 
-                                            size="sm" 
-                                            onClick={() => addNewStep(itemIndex)}
-                                            disabled={!newStep.trim()}
-                                          >
-                                            Add Step
-                                          </Button>
-                                          <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={() => {
-                                              setNewStep("");
-                                              setAddingStepToItemIndex(null);
-                                            }}
-                                          >
-                                            Cancel
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="mt-2 gap-1"
-                                        onClick={() => setAddingStepToItemIndex(itemIndex)}
-                                      >
-                                        <Plus className="h-3.5 w-3.5" />
-                                        Add Custom Step
-                                      </Button>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {lowPriorityItems.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`p-1 rounded-full ${priorityConfig.low.bg}`}>
-                    {priorityConfig.low.icon}
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    {priorityConfig.low.label} ACTIONS
-                  </h3>
-                </div>
-                
-                <div className="space-y-4">
-                  {lowPriorityItems.map((item, index) => {
-                    const itemIndex = actionItems.findIndex(i => i.title === item.title);
-                    const completedStepsCount = item.steps.filter(step => step.isCompleted).length;
-                    const totalStepsCount = item.steps.length;
-                    const stepPercentage = Math.round((completedStepsCount / totalStepsCount) * 100);
-                    
-                    return (
-                      <motion.div
-                        key={`low-${index}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 + index * 0.1 }}
-                        className={`border rounded-xl shadow-sm hover:shadow-md transition-all bg-white 
-                          ${item.isCompleted ? 'border-green-300 bg-green-50' : ''}`}
-                      >
-                        <div className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className={`mt-0.5 p-2 rounded-full ${item.isCompleted ? 
-                              'bg-green-500' : 
-                              `bg-gradient-to-r ${priorityConfig.low.color}`} text-white`}
-                            >
-                              {item.isCompleted ? <Check className="h-5 w-5" /> : item.icon}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                                  {item.title}
-                                  {item.isCompleted && (
-                                    <span className="text-xs font-normal px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                      Completed
-                                    </span>
-                                  )}
-                                </h4>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => setExpandedItem(expandedItem === itemIndex ? null : itemIndex)}
-                                  className="p-1 h-8 w-8"
-                                >
-                                  {expandedItem === itemIndex ? 
-                                    <ChevronUp className="h-5 w-5" /> : 
-                                    <ChevronDown className="h-5 w-5" />}
-                                </Button>
-                              </div>
-                              
-                              <p className="text-gray-600 mt-1 text-sm">{item.description}</p>
-                              
-                              <div className="mt-3 flex items-center gap-2">
-                                <Progress 
-                                  value={stepPercentage} 
-                                  className="h-2 flex-1 bg-gray-100" 
-                                  indicatorClassName={item.isCompleted ? "bg-green-500" : "bg-emerald-500"}
-                                />
-                                <span className="text-xs font-medium text-gray-600">
-                                  {completedStepsCount}/{totalStepsCount} steps
-                                </span>
-                              </div>
-                              
-                              {expandedItem === itemIndex && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  className="mt-4"
-                                >
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                    <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                                      <div className="text-xs font-medium text-emerald-600 uppercase mb-1">Benefit</div>
-                                      <div className="text-sm font-semibold text-emerald-800">{item.benefit}</div>
-                                    </div>
-                                    
-                                    {item.savingsEstimate && (
-                                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                        <div className="text-xs font-medium text-blue-600 uppercase mb-1">Estimated Savings</div>
-                                        <div className="text-sm font-semibold text-blue-800">{item.savingsEstimate}</div>
-                                      </div>
-                                    )}
-                                    
-                                    {item.timeEstimate && (
-                                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                        <div className="text-xs font-medium text-purple-600 uppercase mb-1">Time Impact</div>
-                                        <div className="text-sm font-semibold text-purple-800">{item.timeEstimate}</div>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="space-y-2 mt-4">
-                                    <h5 className="text-sm font-semibold text-gray-700">Action Steps:</h5>
-                                    
-                                    {item.steps.map((step, stepIndex) => (
-                                      <div 
-                                        key={step.id} 
-                                        className={`flex items-start gap-2 p-2 rounded-lg border 
-                                          ${step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
-                                      >
-                                        <Checkbox 
-                                          id={step.id} 
-                                          checked={step.isCompleted}
-                                          onCheckedChange={() => handleStepClick(itemIndex, step.id, step.action)}
-                                          className="mt-0.5 data-[state=checked]:bg-green-500 data-[state=checked]:text-white"
-                                        />
-                                        <label 
-                                          htmlFor={step.id} 
-                                          className={`text-sm flex-1 cursor-pointer ${step.isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'}`}
-                                        >
-                                          {step.description}
-                                        </label>
-                                      </div>
-                                    ))}
-                                    
-                                    {addingStepToItemIndex === itemIndex ? (
-                                      <div className="mt-3 space-y-2">
-                                        <Textarea 
-                                          placeholder="Enter a new action step..." 
-                                          value={newStep}
-                                          onChange={(e) => setNewStep(e.target.value)}
-                                          className="min-h-[80px] text-sm"
-                                        />
-                                        <div className="flex gap-2">
-                                          <Button 
-                                            size="sm" 
-                                            onClick={() => addNewStep(itemIndex)}
-                                            disabled={!newStep.trim()}
-                                          >
-                                            Add Step
-                                          </Button>
-                                          <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={() => {
-                                              setNewStep("");
-                                              setAddingStepToItemIndex(null);
-                                            }}
-                                          >
-                                            Cancel
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="mt-2 gap-1"
-                                        onClick={() => setAddingStepToItemIndex(itemIndex)}
-                                      >
-                                        <Plus className="h-3.5 w-3.5" />
-                                        Add Custom Step
-                                      </Button>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+        <CardContent className="p-0">
+          <div className="px-6 pt-4 pb-0">
+            <Tabs defaultValue="priority" onValueChange={setSelectedTab} className="w-full">
+              <TabsList className="grid grid-cols-3">
+                <TabsTrigger value="priority">Priority Actions</TabsTrigger>
+                <TabsTrigger value="quick-wins">Quick Wins</TabsTrigger>
+                <TabsTrigger value="long-term">Long-Term Goals</TabsTrigger>
+              </TabsList>
+              <TabsContent value={selectedTab} className="pt-4 pb-2 min-h-[200px]">
+                {renderActionSteps()}
+              </TabsContent>
+            </Tabs>
           </div>
         </CardContent>
-        
-        <CardFooter className="p-5 bg-gray-50 border-t">
-          <div className="flex items-center justify-between w-full">
-            <div className="text-sm text-gray-600">
-              Keep track of your progress and check off steps as you complete them.
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-800">
-                {planCompletionPercentage}% Complete
+        <CardFooter className="bg-gradient-to-r from-indigo-50/50 to-blue-50/50 dark:from-indigo-950/10 dark:to-blue-950/10 py-4 px-6">
+          <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
+              <CircleDollarSign className="h-4 w-4 mr-2 text-emerald-500" />
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {formatCurrency(interestSavings)}
               </span>
-              <Progress 
-                value={planCompletionPercentage} 
-                className="h-2 w-24 bg-gray-200" 
-                indicatorClassName="bg-primary"
-              />
+              <span className="ml-1">potential interest savings</span>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-400 dark:border-indigo-900/50 dark:hover:bg-indigo-950/30"
+              onClick={() => window.location.href = "/strategy"}
+            >
+              Update Your Strategy
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </CardFooter>
       </Card>
 
-      <Dialog open={showDueDateDialog} onOpenChange={setShowDueDateDialog}>
-        <DialogContent className="max-w-xl">
+      {/* Strategy Dialog */}
+      <Dialog open={openDialog === "strategy"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Upcoming Payment Due Dates</DialogTitle>
+            <DialogTitle>{selectedStrategy.name} Strategy</DialogTitle>
+            <DialogDescription>
+              How this strategy works to accelerate your debt payoff
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 my-4">
-            {debts.length > 0 ? (
-              <div className="overflow-auto max-h-[400px]">
-                <table className="w-full border-collapse">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="p-2 text-left text-xs font-semibold text-gray-600 border-b">Debt Name</th>
-                      <th className="p-2 text-left text-xs font-semibold text-gray-600 border-b">Due Date</th>
-                      <th className="p-2 text-right text-xs font-semibold text-gray-600 border-b">Minimum Payment</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {debts.sort((a, b) => {
-                      if (!a.next_payment_date) return 1;
-                      if (!b.next_payment_date) return -1;
-                      return new Date(a.next_payment_date).getTime() - new Date(b.next_payment_date).getTime();
-                    }).map(debt => (
-                      <tr key={debt.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2 text-sm">{debt.name}</td>
-                        <td className="p-2 text-sm">
-                          {debt.next_payment_date ? (
-                            formatDueDate(debt.next_payment_date)
-                          ) : (
-                            <span className="text-amber-600 text-xs font-medium px-2 py-0.5 bg-amber-50 rounded">
-                              Not Set
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-2 text-sm text-right">
-                          {debt.currency_symbol}{debt.minimum_payment.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-center p-4 text-gray-500">No debts found</p>
-            )}
+          <div className="space-y-4">
+            <p>{selectedStrategy.description}</p>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
+              <h4 className="font-semibold mb-2">Key Benefits:</h4>
+              <ul className="space-y-2">
+                {selectedStrategy.benefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start">
+                    <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="flex justify-end">
-            <DialogClose asChild>
-              <Button>Close</Button>
-            </DialogClose>
-          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showHighInterestDialog} onOpenChange={setShowHighInterestDialog}>
-        <DialogContent className="max-w-xl">
+      {/* Extra Payment Dialog */}
+      <Dialog open={openDialog === "extraPayment"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>High Interest Debts {`>`}15%</DialogTitle>
+            <DialogTitle>Extra Payment Impact</DialogTitle>
+            <DialogDescription>
+              How your additional payments accelerate debt freedom
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 my-4">
-            {highInterestDebts.length > 0 ? (
-              <div className="overflow-auto max-h-[400px]">
-                <table className="w-full border-collapse">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="p-2 text-left text-xs font-semibold text-gray-600 border-b">Debt Name</th>
-                      <th className="p-2 text-right text-xs font-semibold text-gray-600 border-b">Interest Rate</th>
-                      <th className="p-2 text-right text-xs font-semibold text-gray-600 border-b">Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {highInterestDebts.sort((a, b) => b.interest_rate - a.interest_rate).map(debt => (
-                      <tr key={debt.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2 text-sm">{debt.name}</td>
-                        <td className="p-2 text-sm text-right font-medium text-red-600">
-                          {debt.interest_rate.toFixed(1)}%
-                        </td>
-                        <td className="p-2 text-sm text-right">
-                          {debt.currency_symbol}{debt.balance.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div className="space-y-4">
+            <p>
+              Your extra payment of {formatCurrency(extraPayment)}/month beyond the minimum payments creates a powerful compounding effect:
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">
+                <div className="flex items-center">
+                  <span className="h-8 w-8 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50 rounded-full mr-3">
+                    <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </span>
+                  <span>Reduces total interest paid</span>
+                </div>
+                <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-emerald-600">
+                  {formatCurrency(interestSavings)}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                <div className="flex items-center">
+                  <span className="h-8 w-8 flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 rounded-full mr-3">
+                    <Check className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </span>
+                  <span>Shortens payoff timeline</span>
+                </div>
+                <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-blue-600">
+                  {timelineResults?.monthsSaved || 0} months
+                </Badge>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <h4 className="font-medium text-amber-900 mb-2">Debt Payoff Tips for High Interest Rates</h4>
-                  <ul className="space-y-2 text-sm text-amber-800">
-                    <li className="flex items-start gap-2">
-                      <div className="mt-0.5 w-1 h-1 rounded-full bg-amber-500"></div>
-                      <span>Focus on paying off your highest-interest debt first while making minimum payments on others</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="mt-0.5 w-1 h-1 rounded-full bg-amber-500"></div>
-                      <span>Consider balance transfer options if you have good credit</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="mt-0.5 w-1 h-1 rounded-full bg-amber-500"></div>
-                      <span>Look into personal loans with lower interest rates for debt consolidation</span>
-                    </li>
-                  </ul>
+      {/* High Interest Dialog */}
+      <Dialog open={openDialog === "highInterest"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>High Interest Debts {{'>'}} 10%</DialogTitle>
+            <DialogDescription>
+              These high-interest debts require priority attention
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[300px] pr-4">
+            <div className="space-y-3">
+              {highInterestDebts.map((debt) => (
+                <div key={debt.id} className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">{debt.name}</span>
+                    <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-amber-600">
+                      {debt.interest_rate}%
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Balance: {formatCurrency(debt.balance)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="border-t pt-4 mt-2">
+            <h4 className="font-semibold mb-3">Action Steps:</h4>
+            <ul className="space-y-2">
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Check if you qualify for any balance transfer offers with lower rates</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Contact lenders directly to negotiate lower interest rates</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Focus extra payments on highest interest debts first</span>
+              </li>
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Small Balances Dialog */}
+      <Dialog open={openDialog === "smallBalances"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Small Balance Quick Wins</DialogTitle>
+            <DialogDescription>
+              Paying off these small debts first creates momentum
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[300px] pr-4">
+            <div className="space-y-3">
+              {smallBalanceDebts.map((debt) => (
+                <div key={debt.id} className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">{debt.name}</span>
+                    <Badge variant="outline" className="bg-white/80 dark:bg-slate-900/50 text-emerald-600">
+                      {formatCurrency(debt.balance)}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground flex justify-between">
+                    <span>Min payment: {formatCurrency(debt.minimum_payment)}</span>
+                    <span>Rate: {debt.interest_rate}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="border-t pt-4 mt-2">
+            <h4 className="font-semibold mb-3">Benefits of the Small Wins Approach:</h4>
+            <ul className="space-y-2">
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Creates psychological momentum and motivation</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Reduces the number of monthly payments to manage</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Frees up cash flow faster for bigger debts</span>
+              </li>
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Emergency Fund Dialog */}
+      <Dialog open={openDialog === "emergencyFund"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Building Your Emergency Fund</DialogTitle>
+            <DialogDescription>
+              Financial security while paying down debt
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>
+              An emergency fund prevents you from taking on new debt when unexpected expenses arise.
+            </p>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
+              <h4 className="font-semibold mb-2">Recommended Steps:</h4>
+              <ol className="space-y-2 list-decimal list-inside">
+                <li>Start with a mini fund of £1,000 while paying down high-interest debt</li>
+                <li>Once high-interest debt is gone, build to 3-6 months of expenses</li>
+                <li>Keep your emergency fund in a high-yield savings account</li>
+                <li>Only use it for true emergencies, not planned expenses</li>
+              </ol>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+              <div className="flex items-start">
+                <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Your emergency fund helps prevent the debt cycle from starting again when unexpected expenses occur.
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Insurance Dialog */}
+      <Dialog open={openDialog === "insurance"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Insurance Coverage Review</DialogTitle>
+            <DialogDescription>
+              Protect yourself while optimizing premiums
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>
+              Adequate insurance coverage is essential for financial security, but there are ways to reduce costs.
+            </p>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
+              <h4 className="font-semibold mb-2">Insurance Review Checklist:</h4>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Compare quotes from multiple providers annually</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Bundle policies for discounts (home, auto, etc.)</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Consider higher deductibles if you have emergency savings</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Review coverage levels to ensure they're appropriate</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Ask about all available discounts</span>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg">
+              <div className="flex items-start">
+                <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  The right insurance prevents catastrophic financial setbacks that could derail your debt payment plan.
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Schedule Dialog */}
+      <Dialog open={openDialog === "reviewSchedule"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Regular Debt Plan Reviews</DialogTitle>
+            <DialogDescription>
+              Stay on track with scheduled check-ins
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>
+              Regular reviews of your debt strategy help you adapt to changes and stay motivated.
+            </p>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
+              <h4 className="font-semibold mb-2">Recommended Review Schedule:</h4>
+              <div className="space-y-3">
+                <div className="flex items-start">
+                  <div className="h-6 w-6 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 rounded-full mr-2 mt-0.5 text-sm font-medium text-indigo-700 dark:text-indigo-300">M</div>
+                  <div>
+                    <span className="font-medium">Monthly: Quick Check</span>
+                    <p className="text-sm text-muted-foreground">Review expenses and ensure payments are on track</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="h-6 w-6 flex items-center justify-center bg-purple-100 dark:bg-purple-900/50 rounded-full mr-2 mt-0.5 text-sm font-medium text-purple-700 dark:text-purple-300">Q</div>
+                  <div>
+                    <span className="font-medium">Quarterly: Deep Dive</span>
+                    <p className="text-sm text-muted-foreground">Assess progress, adjust allocations if needed</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="h-6 w-6 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50 rounded-full mr-2 mt-0.5 text-sm font-medium text-emerald-700 dark:text-emerald-300">Y</div>
+                  <div>
+                    <span className="font-medium">Yearly: Full Strategy Review</span>
+                    <p className="text-sm text-muted-foreground">Re-evaluate strategy, set new goals, celebrate progress</p>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <p className="text-center p-4 text-gray-500">No high interest debts found</p>
-            )}
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+              <div className="flex items-start">
+                <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Set calendar reminders now for your quarterly reviews to maintain momentum and adjust your strategy as needed.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-end">
-            <DialogClose asChild>
-              <Button>Close</Button>
-            </DialogClose>
-          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(null)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
+  );
+};
+
+// Helper component for action steps
+interface ActionStepProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  actionText: string;
+  onAction: () => void;
+}
+
+const ActionStep = ({ icon: Icon, title, description, actionText, onAction }: ActionStepProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow"
+    >
+      <div className="flex items-start">
+        <div className="bg-indigo-50 dark:bg-indigo-950/30 p-2 rounded-full mr-4">
+          <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{description}</p>
+        </div>
+      </div>
+      <div className="mt-3 pl-11">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-700 dark:hover:text-indigo-300 -ml-2 h-8"
+          onClick={onAction}
+        >
+          {actionText}
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+    </motion.div>
   );
 };
