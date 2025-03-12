@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+
+import { Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -261,7 +262,7 @@ const Admin = () => {
   }, [user, isAdminChecked, profileLoading, queryClient]);
 
   useEffect(() => {
-    if (isAdminChecked && !isAdmin && !loading) {
+    if (isAdminChecked && !isAdmin && !profileLoading) {
       const redirectTimer = setTimeout(() => {
         if (window.location.pathname.startsWith('/admin')) {
           toast({
@@ -275,7 +276,7 @@ const Admin = () => {
       
       return () => clearTimeout(redirectTimer);
     }
-  }, [isAdminChecked, isAdmin, navigate, toast]);
+  }, [isAdminChecked, isAdmin, navigate, toast, profileLoading]);
 
   if (!isAdminChecked || profileLoading) {
     return (

@@ -5,20 +5,29 @@ export { SidebarProvider, useSidebar } from "./sidebar-context";
 // Export type definitions
 export * from "./types";
 
-// Export all components from the main sidebar.tsx file
-// This ensures all components are properly available without import conflicts
+// Export all components directly from the main sidebar.tsx file
+// This avoids the component export conflicts
 export {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarInput,
+  SidebarInset,
   SidebarMenu,
-  SidebarMenuItem,
+  SidebarMenuAction,
+  SidebarMenuBadge,
   SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarRail,
   SidebarSeparator,
-  SidebarTrigger,
-} from "@/components/ui/sidebar/sidebar-components";
+  SidebarTrigger
+} from "@/components/ui/sidebar";
