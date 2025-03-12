@@ -8,7 +8,7 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useDebtTimeline } from "@/hooks/use-debt-timeline";
 import { strategies } from "@/lib/strategies";
 import { Badge } from "@/components/ui/badge";
-import { CircleDollarSign, ChevronRight, ChevronDown, ChevronUp, Rocket, BadgeCheck, Shield, Timer } from "lucide-react";
+import { CircleDollarSign, ChevronRight, ChevronDown, ChevronUp, Rocket, BadgeCheck, Shield, Timer, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionChecklistItem } from "./ActionChecklistItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -35,12 +35,14 @@ export const PersonalizedActionPlan = () => {
     {
       title: "Use the budget tracker in your dashboard",
       description: "Identify areas where you can save more for debt payments.",
-      defaultChecked: false
+      defaultChecked: false,
+      comingSoon: true
     },
     {
       title: "Set up payment reminders in the app",
       description: "Configure alerts to remind you before each payment is due.",
-      defaultChecked: false
+      defaultChecked: false,
+      comingSoon: true
     }
   ];
 
@@ -76,7 +78,8 @@ export const PersonalizedActionPlan = () => {
     {
       title: "Track monthly expenses in our expense tracker",
       description: "Identify one spending category to reduce each month.",
-      defaultChecked: false
+      defaultChecked: false,
+      comingSoon: true
     },
     {
       title: "Set up savings goals alongside debt payments",
@@ -99,7 +102,8 @@ export const PersonalizedActionPlan = () => {
     {
       title: "Use the expense approval workflow",
       description: "Help avoid impulse buys that could add new debt.",
-      defaultChecked: false
+      defaultChecked: false,
+      comingSoon: true
     }
   ];
 
@@ -280,6 +284,18 @@ export const PersonalizedActionPlan = () => {
     );
   };
 
+  // Function to render an item with optional "Coming Soon" badge
+  const renderActionItem = (item, section, index) => (
+    <ActionChecklistItem
+      key={`${section}-${index}`}
+      title={item.title}
+      description={item.description}
+      onCheckedChange={(checked) => handleCheckChange(section, index, checked)}
+      defaultChecked={completionStatus[section][index]}
+      comingSoon={item.comingSoon}
+    />
+  );
+
   return (
     <Card className="shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden rounded-lg bg-white dark:bg-slate-900">
       <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
@@ -316,13 +332,7 @@ export const PersonalizedActionPlan = () => {
                 />
               )}
               {quickWinsItems.slice(1).map((item, index) => (
-                <ActionChecklistItem
-                  key={`quick-wins-${index + 1}`}
-                  title={item.title}
-                  description={item.description}
-                  onCheckedChange={(checked) => handleCheckChange("quickWins", index + 1, checked)}
-                  defaultChecked={completionStatus.quickWins[index + 1]}
-                />
+                renderActionItem(item, "quickWins", index + 1)
               ))}
             </CollapsibleContent>
           </Collapsible>
@@ -361,13 +371,7 @@ export const PersonalizedActionPlan = () => {
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               {financialStabilityItems.map((item, index) => (
-                <ActionChecklistItem
-                  key={`financial-stability-${index}`}
-                  title={item.title}
-                  description={item.description}
-                  onCheckedChange={(checked) => handleCheckChange("financialStability", index, checked)}
-                  defaultChecked={completionStatus.financialStability[index]}
-                />
+                renderActionItem(item, "financialStability", index)
               ))}
             </CollapsibleContent>
           </Collapsible>
@@ -378,13 +382,7 @@ export const PersonalizedActionPlan = () => {
             </div>
             <CollapsibleContent className="p-4 space-y-3">
               {longTermHabitsItems.map((item, index) => (
-                <ActionChecklistItem
-                  key={`long-term-habits-${index}`}
-                  title={item.title}
-                  description={item.description}
-                  onCheckedChange={(checked) => handleCheckChange("longTermHabits", index, checked)}
-                  defaultChecked={completionStatus.longTermHabits[index]}
-                />
+                renderActionItem(item, "longTermHabits", index)
               ))}
             </CollapsibleContent>
           </Collapsible>
