@@ -1,3 +1,4 @@
+
 import { Debt } from "./types/debt";
 
 export type { Debt };
@@ -6,6 +7,7 @@ export interface Strategy {
   id: string;
   name: string;
   description: string;
+  benefits: string[];
   calculate: (debts: Debt[]) => Debt[];
 }
 
@@ -48,6 +50,11 @@ const avalancheStrategy: Strategy = {
   id: 'avalanche',
   name: "Avalanche Method",
   description: "Pay off debts with highest interest rate first",
+  benefits: [
+    "Minimizes total interest paid over time",
+    "Mathematically optimal for saving money",
+    "Accelerates overall debt payoff timeline"
+  ],
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
   },
@@ -57,6 +64,11 @@ const snowballStrategy: Strategy = {
   id: 'snowball',
   name: "Snowball Method",
   description: "Pay off smallest debts first",
+  benefits: [
+    "Creates psychological wins by clearing debts faster",
+    "Reduces number of monthly payments quicker",
+    "Builds momentum and motivation"
+  ],
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => a.balance - b.balance);
   },
@@ -66,6 +78,11 @@ const balanceRatioStrategy: Strategy = {
   id: 'balance-ratio',
   name: "Balance Ratio",
   description: "Balance between interest rate and debt size",
+  benefits: [
+    "Optimizes between mathematical savings and psychological wins",
+    "Prioritizes high-interest small debts for quick impact",
+    "Balanced approach for most people's situations"
+  ],
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => {
       const ratioA = a.interest_rate / a.balance;
