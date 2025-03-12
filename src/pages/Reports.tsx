@@ -62,12 +62,12 @@ export default function Reports() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto pt-4 w-full max-w-[1200px]">
+      <div className="container mx-auto pt-4 w-full max-w-[1200px] px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Financial Reports</h1>
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4 w-full">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
