@@ -1,15 +1,7 @@
 
 import { Home, PiggyBank, BarChart2, LineChart, ChartBar, History } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
-import { 
-  SidebarContent, 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarMenu, 
-  SidebarMenuItem, 
-  SidebarMenuButton, 
-  SidebarMenuBadge 
-} from "@/components/ui/sidebar";
+import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuBadge } from "@/components/ui/sidebar";
 
 const menuItems = [{
   title: "Overview",

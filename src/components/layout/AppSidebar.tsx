@@ -1,8 +1,10 @@
+
 import { ArrowLeft } from "lucide-react";
-import { Sidebar, SidebarRail } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/ui/sidebar";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarNavigation } from "@/components/sidebar/SidebarNavigation";
 import { SidebarFooter } from "@/components/sidebar/SidebarFooter";
+import { SidebarRail } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   return (

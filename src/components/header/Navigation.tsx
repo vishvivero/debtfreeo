@@ -20,6 +20,13 @@ export const Navigation = () => {
         size="sm" 
         asChild
       >
+        <Link to="/pricing">Pricing</Link>
+      </Button>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        asChild
+      >
         <Link to="/blog">Blog</Link>
       </Button>
       <Button 

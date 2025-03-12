@@ -9,7 +9,6 @@ import { publicRoutes } from "@/routes/publicRoutes";
 import { protectedRoutes } from "@/routes/protectedRoutes";
 import { adminRoutes } from "@/routes/adminRoutes";
 import { useScrollTop } from "./hooks/use-scroll-top";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,19 +23,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <SidebarProvider>
-            <BrowserRouter basename="/">
-              <ScrollToTop />
-              <Routes>
-                {publicRoutes}
-                {protectedRoutes}
-                {adminRoutes}
-              </Routes>
-              <Toaster />
-            </BrowserRouter>
-          </SidebarProvider>
-        </TooltipProvider>
+        <SidebarProvider>
+          <BrowserRouter basename="/">
+            <ScrollToTop />
+            <Routes>
+              {publicRoutes}
+              {protectedRoutes}
+              {adminRoutes}
+            </Routes>
+            <Toaster />
+          </BrowserRouter>
+        </SidebarProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

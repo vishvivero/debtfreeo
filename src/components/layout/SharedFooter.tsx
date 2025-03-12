@@ -59,6 +59,11 @@ export const SharedFooter = () => {
                   FAQ
                 </Link>
               </li>
+              <li>
+                <Link to="/pricing" onClick={handleLinkClick("/pricing")} className="hover:text-primary transition-colors">
+                  Pricing
+                </Link>
+              </li>
             </ul>
           </div>
           <div>

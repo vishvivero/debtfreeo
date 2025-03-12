@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -22,9 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const refreshingRef = useRef(false);
 
-  const signOut = useCallback(async () => {
+  const signOut = async () => {
     try {
       console.log("Auth provider: Starting sign out");
       setUser(null);
@@ -39,18 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Auth provider: Critical error during sign out:", error);
       throw error;
     }
-  }, []);
+  };
 
-  const refreshSession = useCallback(async (): Promise<void> => {
-    if (refreshingRef.current) {
-      console.log("Session refresh already in progress, skipping");
-      return;
-    }
-
+  const refreshSession = async () => {
     try {
-      refreshingRef.current = true;
       console.log("Refreshing session...");
-      
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -70,16 +62,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error in refreshSession:", error);
       throw error;
-    } finally {
-      refreshingRef.current = false;
     }
-  }, []);
+  };
 
   const handleAuthCode = async () => {
     try {
+      // Check URL hash for code
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const searchParams = new URLSearchParams(window.location.search);
       
+      // Check both hash and search parameters for the code
       const code = hashParams.get('code') || searchParams.get('code');
       
       if (!code) {
@@ -101,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(data.session);
         setUser(data.session.user);
         
+        // Clean up the URL
         window.history.replaceState({}, '', '/overview');
         return true;
       }
@@ -114,12 +107,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    let authSubscription: { unsubscribe: () => void } | null = null;
 
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state...");
         
+        // First try to handle any auth code in the URL
         const handled = await handleAuthCode();
         if (handled) {
           console.log("Successfully handled auth code");
@@ -127,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         
+        // If no auth code, proceed with normal session check
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (mounted) {
@@ -140,8 +134,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setLoading(false);
         }
 
+        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (event, currentSession) => {
+          async (event, currentSession) => {
             console.log("Auth state changed:", {
               event,
               userId: currentSession?.user?.id,
@@ -150,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (mounted) {
               if (currentSession) {
+                console.log("New session established:", currentSession.user.id);
                 setSession(currentSession);
                 setUser(currentSession.user);
               } else {
@@ -161,7 +157,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         );
 
-        authSubscription = subscription;
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error("Error in auth initialization:", error);
         if (mounted) {
@@ -171,25 +170,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-
-    return () => {
-      mounted = false;
-      if (authSubscription) {
-        authSubscription.unsubscribe();
-      }
-    };
   }, []);
 
-  const authValue = {
-    user,
-    session,
-    loading,
-    signOut,
-    refreshSession
-  };
-
   return (
-    <AuthContext.Provider value={authValue}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

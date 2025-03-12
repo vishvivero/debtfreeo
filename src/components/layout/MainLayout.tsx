@@ -21,7 +21,7 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
       <div className="flex min-h-screen w-full">
         {/* Sidebar - Only show on desktop */}
         {hasSidebar && !isMobile && (
-          <div className="relative flex w-64 flex-shrink-0 transition-transform">
+          <div className="relative flex w-64 transition-transform">
             <div className="fixed inset-y-0 z-50 flex w-64 flex-col">
               {SidebarComponent}
             </div>
@@ -31,10 +31,8 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
         {/* Main content area */}
         <div className="flex-1 flex flex-col">
           <Header />
-          <main className="flex-1 pt-24"> {/* Further increased padding-top to 24 for more space */}
-            <div className="pb-8 px-4">
-              {children}
-            </div>
+          <main className="flex-1 pt-16">
+            {children}
           </main>
         </div>
       </div>
