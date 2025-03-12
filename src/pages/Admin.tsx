@@ -1,8 +1,9 @@
+
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useProfile } from "@/hooks/use-profile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { AdminMetrics } from "@/components/admin/AdminMetrics";
@@ -19,8 +20,9 @@ import { AnalyticsReporting } from "@/components/admin/AnalyticsReporting";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
+import { useQuery } from "@tanstack/react-query";
 
-// Create a new component for the edit form
+// Create EditBlogPost component
 const EditBlogPost = () => {
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -34,6 +36,7 @@ const EditBlogPost = () => {
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
 
+  // Use React Query to fetch blog data
   const { data: blog, isLoading: blogLoading } = useQuery({
     queryKey: ["blog", id],
     queryFn: async () => {
@@ -53,6 +56,7 @@ const EditBlogPost = () => {
     enabled: !!id
   });
 
+  // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["blog-categories"],
     queryFn: async () => {
@@ -120,7 +124,7 @@ const EditBlogPost = () => {
   );
 };
 
-// Create a new component for the new post form
+// Create NewBlogPost component
 const NewBlogPost = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -184,33 +188,40 @@ const NewBlogPost = () => {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, refreshSession } = useAuth();
+  const { profile, isLoading: profileLoading } = useProfile();
+  const [isAdminChecked, setIsAdminChecked] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdminChecked(true);
+        return;
       }
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5
-  });
+      
+      try {
+        // First ensure we have the latest session
+        await refreshSession();
+        
+        // We've moved profile fetching to the useProfile hook
+        if (profile) {
+          console.log("Admin check - Profile loaded:", profile);
+          setIsAdmin(!!profile.is_admin);
+          setIsAdminChecked(true);
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        setIsAdminChecked(true);
+      }
+    };
 
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (profileLoading) {
+    checkAdminStatus();
+  }, [user, profile, refreshSession]);
+  
+  // Show loading state while checking admin status
+  if (!isAdminChecked || profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -218,7 +229,15 @@ const Admin = () => {
     );
   }
 
-  if (profileError || !profile?.is_admin) {
+  // Redirect if not logged in
+  if (!user) {
+    console.log("Admin page - No user, redirecting to /");
+    return <Navigate to="/" replace />;
+  }
+
+  // Show error if not admin
+  if (!isAdmin) {
+    console.log("Admin page - User is not an admin");
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
@@ -230,6 +249,8 @@ const Admin = () => {
     );
   }
 
+  console.log("Admin page - Rendering for admin user");
+  
   return (
     <MainLayout sidebar={<AdminSidebar />}>
       <div className="container mx-auto px-4 py-8">
