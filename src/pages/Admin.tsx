@@ -21,6 +21,7 @@ import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 
 // Create EditBlogPost component
 const EditBlogPost = () => {
@@ -189,14 +190,17 @@ const NewBlogPost = () => {
 
 const Admin = () => {
   const { user, refreshSession } = useAuth();
-  const { profile, isLoading: profileLoading } = useProfile();
+  const { profile, isLoading: profileLoading, error: profileError } = useProfile();
   const [isAdminChecked, setIsAdminChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [checkError, setCheckError] = useState<Error | null>(null);
+  const { toast } = useToast();
   
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
+        console.log("Admin page - No user found during admin check");
         setIsAdminChecked(true);
         return;
       }
@@ -204,6 +208,13 @@ const Admin = () => {
       try {
         // First ensure we have the latest session
         await refreshSession();
+        
+        if (profileError) {
+          console.error("Admin check - Error loading profile:", profileError);
+          setCheckError(profileError as Error);
+          setIsAdminChecked(true);
+          return;
+        }
         
         // We've moved profile fetching to the useProfile hook
         if (profile) {
@@ -213,18 +224,41 @@ const Admin = () => {
         }
       } catch (error) {
         console.error("Error checking admin status:", error);
+        setCheckError(error as Error);
         setIsAdminChecked(true);
+        
+        toast({
+          title: "Error",
+          description: "There was a problem checking admin status. Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
-    checkAdminStatus();
-  }, [user, profile, refreshSession]);
+    if (!profileLoading) {
+      checkAdminStatus();
+    }
+  }, [user, profile, profileLoading, profileError, refreshSession, toast]);
   
   // Show loading state while checking admin status
   if (!isAdminChecked || profileLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading admin dashboard...</p>
+      </div>
+    );
+  }
+
+  // Show error if there was a problem checking admin status
+  if (checkError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            There was an error loading the admin dashboard: {checkError.message}
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }

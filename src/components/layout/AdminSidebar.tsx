@@ -17,7 +17,7 @@ import {
   Activity,
   Flag
 } from "lucide-react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import {
   Sidebar,
@@ -32,6 +32,7 @@ import {
   SidebarHeader
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
 
 const menuItems = [
   {
@@ -98,7 +99,27 @@ const menuItems = [
 
 export function AdminSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Sidebar className="border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -161,7 +182,7 @@ export function AdminSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              onClick={signOut} 
+              onClick={handleSignOut} 
               tooltip="Sign out"
               className="px-4 py-2 hover:bg-destructive/10 text-destructive"
             >
