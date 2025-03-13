@@ -35,8 +35,8 @@ const HeroSection = () => {
 
   return (
     <div className="relative bg-gradient-to-b from-gray-50 to-white">
-      {/* Animated background pattern */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Animated background pattern - extended upward to cover the whitespace */}
+      <div className="absolute inset-0 overflow-hidden" style={{ top: "-80px" }}>
         <div className="absolute inset-0">
           {[...Array(5)].map((_, i) => (
             <motion.div
