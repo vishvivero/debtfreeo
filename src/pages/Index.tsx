@@ -60,7 +60,7 @@ const Index = () => {
       )}
       
       <Header />
-      <main className="flex-grow w-full pt-0"> {/* Removed padding-top */}
+      <main className="flex-grow w-full">
         <HeroSection />
         <FeaturesSection />
 

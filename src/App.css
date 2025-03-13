@@ -13,7 +13,7 @@
 .app-layout main {
   flex: 1;
   width: 100%;
-  padding-top: 64px; /* Reduced padding to match header height */
+  padding-top: 0; /* Remove padding completely */
 }
 
 /* Content container styles */
