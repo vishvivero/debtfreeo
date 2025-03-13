@@ -47,12 +47,12 @@ const Index = () => {
           >
             <PartyPopper className="w-5 h-5 animate-bounce" />
             <a 
-              href={bannerSettings?.link_url} 
+              href={bannerSettings.link_url} 
               target="_blank" 
               rel="noopener noreferrer"
               className="font-medium hover:underline"
             >
-              {bannerSettings?.message}
+              {bannerSettings.message}
             </a>
             <PartyPopper className="w-5 h-5 animate-bounce" />
           </motion.div>

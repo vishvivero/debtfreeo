@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -34,6 +35,7 @@ const HeroSection = () => {
 
   return (
     <div className="relative bg-gradient-to-b from-gray-50 to-white">
+      {/* Animated background pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0">
           {[...Array(5)].map((_, i) => (
@@ -63,8 +65,8 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="flex flex-col py-8 md:py-12">
+      <div className="container mx-auto px-4 pt-12 md:pt-20 max-w-7xl">
+        <div className="flex flex-col py-8 md:py-16">
           <div className="max-w-3xl z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -94,6 +96,7 @@ const HeroSection = () => {
                 </Button>
               </div>
 
+              {/* Feature highlights */}
               <div className="space-y-3 mt-4 md:mt-6">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
