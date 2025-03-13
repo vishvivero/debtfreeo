@@ -47,12 +47,12 @@ const Index = () => {
           >
             <PartyPopper className="w-5 h-5 animate-bounce" />
             <a 
-              href={bannerSettings.link_url} 
+              href={bannerSettings?.link_url} 
               target="_blank" 
               rel="noopener noreferrer"
               className="font-medium hover:underline"
             >
-              {bannerSettings.message}
+              {bannerSettings?.message}
             </a>
             <PartyPopper className="w-5 h-5 animate-bounce" />
           </motion.div>
@@ -60,7 +60,7 @@ const Index = () => {
       )}
       
       <Header />
-      <main className="flex-grow w-full">
+      <main className="flex-grow w-full pt-0"> {/* Removed padding-top */}
         <HeroSection />
         <FeaturesSection />
 

@@ -34,7 +34,7 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-gray-50 to-white">
+    <div className="relative bg-gradient-to-b from-gray-50 to-white mt-16"> {/* Added mt-16 to account for header height */}
       {/* Animated background pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0">
@@ -65,7 +65,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-12 md:pt-20 max-w-7xl">
+      <div className="container mx-auto px-4 pt-0 md:pt-0 max-w-7xl"> {/* Removed top padding */}
         <div className="flex flex-col py-8 md:py-16">
           <div className="max-w-3xl z-10">
             <motion.div

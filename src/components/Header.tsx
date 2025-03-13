@@ -79,7 +79,7 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 right-0 z-50 w-full bg-background/80 backdrop-blur-md border-b">
+    <header className="fixed top-0 right-0 z-50 w-full bg-background/80 backdrop-blur-md border-b h-16"> {/* Added h-16 to set a fixed height */}
       <div className="container">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
