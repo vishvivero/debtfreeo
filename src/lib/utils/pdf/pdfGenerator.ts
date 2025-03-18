@@ -15,6 +15,22 @@ const BRAND_COLOR = [0, 211, 130] as const; // Green
 const ACCENT_COLOR = [147, 51, 234] as const; // Purple
 const TEXT_COLOR = [31, 41, 55] as const; // Gray-800
 
+/**
+ * Validates if a URL is safe to use with jsPDF
+ * This helps mitigate the CVE related to malicious data URLs
+ */
+const isSafeImageUrl = (url: string): boolean => {
+  // Block data URLs that could be malicious
+  if (url.startsWith('data:') && 
+      (url.includes('charset=s') || 
+       url.includes('\x00') || 
+       url.length > 10000)) {
+    console.warn('Potentially malicious data URL detected and blocked');
+    return false;
+  }
+  return true;
+};
+
 export const generateDebtOverviewPDF = (
   debts: Debt[],
   monthlyPayment: number,
@@ -189,3 +205,4 @@ export const generateDebtOverviewPDF = (
 
   return doc;
 };
+

@@ -8,6 +8,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+/**
+ * Validates if a prompt is safe to use for image generation
+ */
+const isValidPrompt = (prompt: string): boolean => {
+  if (!prompt || typeof prompt !== 'string') {
+    return false;
+  }
+  
+  // Check for reasonable length
+  if (prompt.length > 4000 || prompt.length < 3) {
+    return false;
+  }
+  
+  // Check for potential injection attempts
+  const suspiciousPatterns = [
+    '\x00', // null byte
+    'charset=s', // Related to the jsPDF vulnerability
+    'data:image', // Trying to pass a data URL as a prompt
+    '<script', // Script tags
+    'function(', // JS code
+    'function (', // JS code variant
+  ];
+  
+  return !suspiciousPatterns.some(pattern => prompt.includes(pattern));
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -23,6 +49,10 @@ serve(async (req) => {
 
     if (!prompt) {
       throw new Error('Image prompt is required');
+    }
+    
+    if (!isValidPrompt(prompt)) {
+      throw new Error('Invalid or potentially harmful prompt');
     }
 
     console.log(`Generating image with prompt: ${prompt}`);
