@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -7,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Loader2, Sparkles, Image as ImageIcon, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { BlogImageUpload } from "./form/BlogImageUpload";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const AIBlogGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -19,6 +19,9 @@ export const AIBlogGenerator = () => {
   const [generatedContent, setGeneratedContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [activeTab, setActiveTab] = useState("upload");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -72,11 +75,57 @@ export const AIBlogGenerator = () => {
     }
   };
 
+  const handleGenerateImage = async () => {
+    if (!imagePrompt.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter an image prompt",
+      });
+      return;
+    }
+
+    setIsGeneratingImage(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-blog-image", {
+        body: { prompt: imagePrompt },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const response = await fetch(data.imageUrl);
+      const blob = await response.blob();
+      
+      const file = new File([blob], `generated-image-${Date.now()}.png`, { type: 'image/png' });
+      
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      
+      toast({
+        title: "Success",
+        description: "Image generated successfully",
+      });
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast({
+        variant: "destructive",
+        title: "Image Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate image",
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
   const handleSaveToDrafts = async () => {
     if (!generatedContent || !user) return;
 
     try {
-      // Parse the markdown content to extract metadata
       const metadataMatch = generatedContent.match(/---\n([\s\S]*?)\n---\n([\s\S]*)/);
       
       if (!metadataMatch) {
@@ -86,7 +135,6 @@ export const AIBlogGenerator = () => {
       const metadataStr = metadataMatch[1];
       const content = metadataMatch[2].trim();
       
-      // Parse metadata
       const metadata: Record<string, string> = {};
       metadataStr.split('\n').forEach(line => {
         const [key, ...valueParts] = line.split(':');
@@ -100,7 +148,6 @@ export const AIBlogGenerator = () => {
 
       let imageUrl = null;
 
-      // Handle image upload if an image is selected
       if (image) {
         console.log("Processing image upload...");
         const fileExt = image.name.split('.').pop();
@@ -128,7 +175,7 @@ export const AIBlogGenerator = () => {
           excerpt: metadata.excerpt || metadata.title,
           category: metadata.category || category || 'uncategorized',
           author_id: user.id,
-          is_published: false, // Save as draft
+          is_published: false,
           slug,
           meta_title: metadata.meta_title || metadata.title,
           meta_description: metadata.meta_description || metadata.excerpt,
@@ -144,7 +191,6 @@ export const AIBlogGenerator = () => {
         description: "Blog post saved to drafts",
       });
       
-      // Clear the form
       setPrompt("");
       setGeneratedContent("");
       setImage(null);
@@ -199,11 +245,47 @@ export const AIBlogGenerator = () => {
         </div>
 
         <div className="space-y-2">
-          <Label>Featured Image (Optional)</Label>
-          <BlogImageUpload 
-            setImage={setImage} 
-            imagePreview={setImagePreview}
-          />
+          <Label>Featured Image</Label>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload">Upload Image</TabsTrigger>
+              <TabsTrigger value="generate">Generate with AI</TabsTrigger>
+            </TabsList>
+            <TabsContent value="upload" className="pt-4">
+              <BlogImageUpload 
+                setImage={setImage} 
+                imagePreview={setImagePreview}
+              />
+            </TabsContent>
+            <TabsContent value="generate" className="pt-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="imagePrompt">Image Description</Label>
+                <div className="flex space-x-2">
+                  <Textarea
+                    id="imagePrompt"
+                    value={imagePrompt}
+                    onChange={(e) => setImagePrompt(e.target.value)}
+                    placeholder="Describe the image you want to generate..."
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleGenerateImage}
+                    disabled={isGeneratingImage || !imagePrompt.trim()}
+                    className="self-end"
+                  >
+                    {isGeneratingImage ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Example: "A person happily reviewing their finances with a calculator"
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
           {imagePreview && (
             <div className="mt-2">
               <img 
@@ -211,6 +293,9 @@ export const AIBlogGenerator = () => {
                 alt="Featured image preview" 
                 className="w-full max-h-48 object-cover rounded-md" 
               />
+              {activeTab === "generate" && (
+                <p className="text-xs text-muted-foreground mt-1">Generated image will be saved with your blog post</p>
+              )}
             </div>
           )}
         </div>
