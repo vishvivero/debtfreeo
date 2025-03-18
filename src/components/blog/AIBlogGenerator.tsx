@@ -7,15 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { BlogImageUpload } from "./form/BlogImageUpload";
 
 export const AIBlogGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [category, setCategory] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -94,6 +97,28 @@ export const AIBlogGenerator = () => {
       
       const timestamp = new Date().getTime();
       const slug = `${(metadata.title || 'blog-post').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
+
+      let imageUrl = null;
+
+      // Handle image upload if an image is selected
+      if (image) {
+        console.log("Processing image upload...");
+        const fileExt = image.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        
+        console.log("Uploading image to storage:", fileName);
+        const { error: uploadError, data } = await supabase.storage
+          .from('blog-images')
+          .upload(fileName, image);
+
+        if (uploadError) {
+          console.error("Image upload error:", uploadError);
+          throw uploadError;
+        }
+
+        console.log("Image upload successful:", data);
+        imageUrl = fileName;
+      }
       
       const { error } = await supabase
         .from('blogs')
@@ -109,6 +134,7 @@ export const AIBlogGenerator = () => {
           meta_description: metadata.meta_description || metadata.excerpt,
           keywords: metadata.keywords ? metadata.keywords.split(',').map(k => k.trim()) : [],
           key_takeaways: metadata.key_takeaways || '',
+          image_url: imageUrl,
         });
 
       if (error) throw error;
@@ -121,6 +147,8 @@ export const AIBlogGenerator = () => {
       // Clear the form
       setPrompt("");
       setGeneratedContent("");
+      setImage(null);
+      setImagePreview(null);
     } catch (error) {
       console.error('Error saving blog:', error);
       toast({
@@ -168,6 +196,23 @@ export const AIBlogGenerator = () => {
           <p className="text-sm text-muted-foreground">
             Example: "Write a blog post about strategies for paying off student loans quickly"
           </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Featured Image (Optional)</Label>
+          <BlogImageUpload 
+            setImage={setImage} 
+            imagePreview={setImagePreview}
+          />
+          {imagePreview && (
+            <div className="mt-2">
+              <img 
+                src={imagePreview} 
+                alt="Featured image preview" 
+                className="w-full max-h-48 object-cover rounded-md" 
+              />
+            </div>
+          )}
         </div>
 
         <Button 
