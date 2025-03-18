@@ -12,7 +12,8 @@ import {
   LineChart, 
   ClipboardList,
   Bell,
-  Upload
+  Upload,
+  Sparkles
 } from "lucide-react";
 
 export const AdminSidebar = () => {
@@ -47,6 +48,11 @@ export const AdminSidebar = () => {
         <NavLink to="/admin/bulk-upload" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-muted">
           <Upload className="w-5 h-5 mr-3 text-muted-foreground" />
           Bulk Upload
+        </NavLink>
+        
+        <NavLink to="/admin/ai-blog-generator" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-muted">
+          <Sparkles className="w-5 h-5 mr-3 text-muted-foreground" />
+          AI Blog Generator
         </NavLink>
         
         <NavLink to="/admin/categories" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-muted">

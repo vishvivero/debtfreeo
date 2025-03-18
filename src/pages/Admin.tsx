@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,8 +20,8 @@ import { AuditLogs } from "@/components/admin/AuditLogs";
 import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 import { BannerManagement } from "@/components/admin/BannerManagement";
 import { BulkBlogUploader } from "@/components/blog/BulkBlogUploader";
+import { AIBlogGenerator } from "@/components/blog/AIBlogGenerator";
 
-// Create a new component for the edit form
 const EditBlogPost = () => {
   const { id } = useParams();
   const [title, setTitle] = useState("");
@@ -71,7 +70,6 @@ const EditBlogPost = () => {
     }
   });
 
-  // Update form when blog data is loaded
   useEffect(() => {
     if (blog) {
       setTitle(blog.title);
@@ -122,7 +120,6 @@ const EditBlogPost = () => {
   );
 };
 
-// Create a new component for the new post form
 const NewBlogPost = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -242,6 +239,7 @@ const Admin = () => {
             <Route path="categories" element={<CategoryManager />} />
             <Route path="new-post" element={<NewBlogPost />} />
             <Route path="bulk-upload" element={<BulkBlogUploader />} />
+            <Route path="ai-blog-generator" element={<AIBlogGenerator />} />
             <Route path="edit/:id" element={<EditBlogPost />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="settings" element={<SystemSettings />} />
