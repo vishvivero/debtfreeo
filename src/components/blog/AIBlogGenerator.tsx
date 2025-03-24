@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Sparkles, Image as ImageIcon, Wand2, Lightbulb } from "lucide-react";
+import { Loader2, Sparkles, Image as ImageIcon, Wand2, Lightbulb, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { BlogImageUpload } from "./form/BlogImageUpload";
@@ -26,6 +26,7 @@ export const AIBlogGenerator = () => {
   const [activeTab, setActiveTab] = useState("upload");
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
   const [blogIdeas, setBlogIdeas] = useState<Array<{title: string, description: string}>>([]);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -200,8 +201,10 @@ export const AIBlogGenerator = () => {
     }
   };
 
-  const handleSaveToDrafts = async () => {
+  const handleSaveBlog = async (isPublished: boolean = false) => {
     if (!generatedContent || !user) return;
+    
+    setIsSaving(true);
 
     try {
       const metadataMatch = generatedContent.match(/---\n([\s\S]*?)\n---\n([\s\S]*)/);
@@ -253,20 +256,21 @@ export const AIBlogGenerator = () => {
           excerpt: metadata.excerpt || metadata.title,
           category: metadata.category || category || 'uncategorized',
           author_id: user.id,
-          is_published: false,
+          is_published: isPublished,
           slug,
           meta_title: metadata.meta_title || metadata.title,
           meta_description: metadata.meta_description || metadata.excerpt,
           keywords: metadata.keywords ? metadata.keywords.split(',').map(k => k.trim()) : [],
           key_takeaways: metadata.key_takeaways || '',
           image_url: imageUrl,
+          published_at: isPublished ? new Date().toISOString() : null,
         });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Blog post saved to drafts",
+        description: isPublished ? "Blog post published successfully" : "Blog post saved to drafts",
       });
       
       setPrompt("");
@@ -281,6 +285,8 @@ export const AIBlogGenerator = () => {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to save blog post",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -450,13 +456,26 @@ export const AIBlogGenerator = () => {
               </div>
             </div>
             
-            <Button 
-              onClick={handleSaveToDrafts} 
-              variant="secondary" 
-              className="w-full"
-            >
-              Save to Drafts
-            </Button>
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => handleSaveBlog(false)} 
+                variant="secondary" 
+                className="flex-1"
+                disabled={isSaving}
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Save to Drafts
+              </Button>
+              
+              <Button 
+                onClick={() => handleSaveBlog(true)}
+                className="flex-1"
+                disabled={isSaving}
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Publish
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>
