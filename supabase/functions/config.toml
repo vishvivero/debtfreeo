@@ -1,3 +1,4 @@
+
 project_id = "cfbleqfvxyosenezksbc"
 
 [create-checkout-session]
@@ -5,3 +6,6 @@ verify_jwt = true
 
 [check-subscription]
 verify_jwt = true
+
+[generate-blog-ideas]
+verify_jwt = false
