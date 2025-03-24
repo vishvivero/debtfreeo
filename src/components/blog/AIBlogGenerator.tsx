@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Sparkles, Image as ImageIcon, Wand2 } from "lucide-react";
+import { Loader2, Sparkles, Image as ImageIcon, Wand2, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 
 export const AIBlogGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -22,8 +24,84 @@ export const AIBlogGenerator = () => {
   const [imagePrompt, setImagePrompt] = useState("");
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [activeTab, setActiveTab] = useState("upload");
+  const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
+  const [blogIdeas, setBlogIdeas] = useState<Array<{title: string, description: string}>>([]);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Fetch existing blogs to avoid duplicates
+  const { data: existingBlogs } = useQuery({
+    queryKey: ["existing-blogs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blogs")
+        .select("title")
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching existing blogs:", error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+  });
+
+  const handleGenerateIdeas = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to generate blog ideas",
+      });
+      return;
+    }
+
+    setIsGeneratingIdeas(true);
+    setBlogIdeas([]);
+
+    try {
+      const existingBlogTitles = existingBlogs?.map(blog => blog.title) || [];
+      
+      const { data, error } = await supabase.functions.invoke("generate-blog-ideas", {
+        body: { 
+          existingBlogTitles,
+          category
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setBlogIdeas(data.ideas);
+      toast({
+        title: "Success",
+        description: "Blog ideas generated successfully",
+      });
+    } catch (error) {
+      console.error("Error generating blog ideas:", error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate blog ideas",
+      });
+    } finally {
+      setIsGeneratingIdeas(false);
+    }
+  };
+
+  const handleSelectIdea = (idea: { title: string, description: string }) => {
+    const idealPrompt = `Write a blog post about "${idea.title}". The blog should cover: ${idea.description}`;
+    setPrompt(idealPrompt);
+    
+    toast({
+      title: "Idea Selected",
+      description: "Blog idea added to prompt. You can now generate the content.",
+    });
+  };
 
   const handleGenerateBlog = async () => {
     if (!user) {
@@ -195,6 +273,7 @@ export const AIBlogGenerator = () => {
       setGeneratedContent("");
       setImage(null);
       setImagePreview(null);
+      setBlogIdeas([]);
     } catch (error) {
       console.error('Error saving blog:', error);
       toast({
@@ -231,7 +310,29 @@ export const AIBlogGenerator = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="prompt">Your Blog Idea</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="prompt">Your Blog Idea</Label>
+            <Button 
+              onClick={handleGenerateIdeas} 
+              disabled={isGeneratingIdeas}
+              variant="outline" 
+              size="sm"
+              className="text-xs"
+            >
+              {isGeneratingIdeas ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  Thinking...
+                </>
+              ) : (
+                <>
+                  <Lightbulb className="w-3 h-3 mr-1" />
+                  Get Blog Ideas
+                </>
+              )}
+            </Button>
+          </div>
+
           <Textarea
             id="prompt"
             value={prompt}
@@ -243,6 +344,28 @@ export const AIBlogGenerator = () => {
             Example: "Write a blog post about strategies for paying off student loans quickly"
           </p>
         </div>
+
+        {blogIdeas.length > 0 && (
+          <div className="space-y-2 border rounded-md p-4 bg-muted/20">
+            <h3 className="text-sm font-medium">Suggested Blog Ideas</h3>
+            <div className="space-y-2 max-h-[250px] overflow-y-auto">
+              {blogIdeas.map((idea, index) => (
+                <div key={index} className="bg-card p-3 rounded-md border shadow-sm">
+                  <h4 className="font-medium text-sm">{idea.title}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{idea.description}</p>
+                  <Button 
+                    onClick={() => handleSelectIdea(idea)} 
+                    variant="ghost" 
+                    size="sm" 
+                    className="mt-2 text-xs"
+                  >
+                    Use This Idea
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label>Featured Image</Label>
