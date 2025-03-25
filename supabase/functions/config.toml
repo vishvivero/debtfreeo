@@ -9,3 +9,15 @@ verify_jwt = true
 
 [generate-blog-ideas]
 verify_jwt = false
+
+[generate-blog]
+verify_jwt = false
+
+[auto-generate-blog]
+verify_jwt = true
+
+[create-blog-automation-schedule]
+verify_jwt = true
+
+[run-scheduled-blogs]
+verify_jwt = false

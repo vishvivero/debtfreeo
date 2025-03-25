@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
+import { BlogAutomationScheduler } from "./BlogAutomationScheduler";
 
 export const AIBlogGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -295,7 +295,7 @@ export const AIBlogGenerator = () => {
       <CardHeader>
         <CardTitle>Generate Blog Post with AI</CardTitle>
         <CardDescription>
-          Use AI to generate blog content based on your ideas
+          Use AI to generate blog content based on your ideas or set up automated publishing
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -315,169 +315,191 @@ export const AIBlogGenerator = () => {
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="prompt">Your Blog Idea</Label>
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="manual">Manual Generation</TabsTrigger>
+            <TabsTrigger value="automated">Automated Publishing</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="manual" className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="prompt">Your Blog Idea</Label>
+                <Button 
+                  onClick={handleGenerateIdeas} 
+                  disabled={isGeneratingIdeas}
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs"
+                >
+                  {isGeneratingIdeas ? (
+                    <>
+                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                      Thinking...
+                    </>
+                  ) : (
+                    <>
+                      <Lightbulb className="w-3 h-3 mr-1" />
+                      Get Blog Ideas
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <Textarea
+                id="prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe the blog post you want to create..."
+                className="h-24"
+              />
+              <p className="text-sm text-muted-foreground">
+                Example: "Write a blog post about strategies for paying off student loans quickly"
+              </p>
+            </div>
+
+            {blogIdeas.length > 0 && (
+              <div className="space-y-2 border rounded-md p-4 bg-muted/20">
+                <h3 className="text-sm font-medium">Suggested Blog Ideas</h3>
+                <div className="space-y-2 max-h-[250px] overflow-y-auto">
+                  {blogIdeas.map((idea, index) => (
+                    <div key={index} className="bg-card p-3 rounded-md border shadow-sm">
+                      <h4 className="font-medium text-sm">{idea.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{idea.description}</p>
+                      <Button 
+                        onClick={() => handleSelectIdea(idea)} 
+                        variant="ghost" 
+                        size="sm" 
+                        className="mt-2 text-xs"
+                      >
+                        Use This Idea
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Featured Image</Label>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload">Upload Image</TabsTrigger>
+                  <TabsTrigger value="generate">Generate with AI</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload" className="pt-4">
+                  <BlogImageUpload 
+                    setImage={setImage} 
+                    imagePreview={setImagePreview}
+                  />
+                </TabsContent>
+                <TabsContent value="generate" className="pt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="imagePrompt">Image Description</Label>
+                    <div className="flex space-x-2">
+                      <Textarea
+                        id="imagePrompt"
+                        value={imagePrompt}
+                        onChange={(e) => setImagePrompt(e.target.value)}
+                        placeholder="Describe the image you want to generate..."
+                        className="flex-1"
+                      />
+                      <Button 
+                        onClick={handleGenerateImage}
+                        disabled={isGeneratingImage || !imagePrompt.trim()}
+                        className="self-end"
+                      >
+                        {isGeneratingImage ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Wand2 className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Example: "A person happily reviewing their finances with a calculator"
+                    </p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+              {imagePreview && (
+                <div className="mt-2">
+                  <img 
+                    src={imagePreview} 
+                    alt="Featured image preview" 
+                    className="w-full max-h-48 object-cover rounded-md" 
+                  />
+                  {activeTab === "generate" && (
+                    <p className="text-xs text-muted-foreground mt-1">Generated image will be saved with your blog post</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Button 
-              onClick={handleGenerateIdeas} 
-              disabled={isGeneratingIdeas}
-              variant="outline" 
-              size="sm"
-              className="text-xs"
+              onClick={handleGenerateBlog} 
+              disabled={isGenerating || !prompt.trim()} 
+              className="w-full"
             >
-              {isGeneratingIdeas ? (
+              {isGenerating ? (
                 <>
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  Thinking...
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
                 </>
               ) : (
                 <>
-                  <Lightbulb className="w-3 h-3 mr-1" />
-                  Get Blog Ideas
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Blog Content
                 </>
               )}
             </Button>
-          </div>
 
-          <Textarea
-            id="prompt"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the blog post you want to create..."
-            className="h-24"
-          />
-          <p className="text-sm text-muted-foreground">
-            Example: "Write a blog post about strategies for paying off student loans quickly"
-          </p>
-        </div>
-
-        {blogIdeas.length > 0 && (
-          <div className="space-y-2 border rounded-md p-4 bg-muted/20">
-            <h3 className="text-sm font-medium">Suggested Blog Ideas</h3>
-            <div className="space-y-2 max-h-[250px] overflow-y-auto">
-              {blogIdeas.map((idea, index) => (
-                <div key={index} className="bg-card p-3 rounded-md border shadow-sm">
-                  <h4 className="font-medium text-sm">{idea.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{idea.description}</p>
-                  <Button 
-                    onClick={() => handleSelectIdea(idea)} 
-                    variant="ghost" 
-                    size="sm" 
-                    className="mt-2 text-xs"
-                  >
-                    Use This Idea
-                  </Button>
+            {generatedContent && (
+              <div className="space-y-4 mt-6">
+                <div className="border rounded-md p-4 bg-muted/20">
+                  <h3 className="text-lg font-medium mb-2">Generated Content</h3>
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label>Featured Image</Label>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload">Upload Image</TabsTrigger>
-              <TabsTrigger value="generate">Generate with AI</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upload" className="pt-4">
-              <BlogImageUpload 
-                setImage={setImage} 
-                imagePreview={setImagePreview}
-              />
-            </TabsContent>
-            <TabsContent value="generate" className="pt-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="imagePrompt">Image Description</Label>
-                <div className="flex space-x-2">
-                  <Textarea
-                    id="imagePrompt"
-                    value={imagePrompt}
-                    onChange={(e) => setImagePrompt(e.target.value)}
-                    placeholder="Describe the image you want to generate..."
+                
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={() => handleSaveBlog(false)} 
+                    variant="secondary" 
                     className="flex-1"
-                  />
-                  <Button 
-                    onClick={handleGenerateImage}
-                    disabled={isGeneratingImage || !imagePrompt.trim()}
-                    className="self-end"
+                    disabled={isSaving}
                   >
-                    {isGeneratingImage ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Wand2 className="w-4 h-4" />
-                    )}
+                    {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    Save to Drafts
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleSaveBlog(true)}
+                    className="flex-1"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                    Publish
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Example: "A person happily reviewing their finances with a calculator"
-                </p>
               </div>
-            </TabsContent>
-          </Tabs>
-          {imagePreview && (
-            <div className="mt-2">
-              <img 
-                src={imagePreview} 
-                alt="Featured image preview" 
-                className="w-full max-h-48 object-cover rounded-md" 
-              />
-              {activeTab === "generate" && (
-                <p className="text-xs text-muted-foreground mt-1">Generated image will be saved with your blog post</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        <Button 
-          onClick={handleGenerateBlog} 
-          disabled={isGenerating || !prompt.trim()} 
-          className="w-full"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Generate Blog Content
-            </>
-          )}
-        </Button>
-
-        {generatedContent && (
-          <div className="space-y-4 mt-6">
-            <div className="border rounded-md p-4 bg-muted/20">
-              <h3 className="text-lg font-medium mb-2">Generated Content</h3>
-              <div className="max-h-[500px] overflow-y-auto">
-                <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => handleSaveBlog(false)} 
-                variant="secondary" 
-                className="flex-1"
-                disabled={isSaving}
-              >
-                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Save to Drafts
-              </Button>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="automated" className="space-y-4">
+            <div className="bg-muted/20 p-4 rounded-md border mb-4">
+              <h3 className="font-medium mb-2">Automated Blog Publishing</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Set up schedules to automatically generate and publish blog posts at specific times.
+                The system will create unique content based on your selected category and ensure it doesn't
+                duplicate existing blog posts.
+              </p>
               
-              <Button 
-                onClick={() => handleSaveBlog(true)}
-                className="flex-1"
-                disabled={isSaving}
-              >
-                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                Publish
-              </Button>
+              <BlogAutomationScheduler category={category} />
             </div>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
