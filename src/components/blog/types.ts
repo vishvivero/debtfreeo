@@ -1,4 +1,3 @@
-
 export interface BlogFormProps {
   title: string;
   setTitle: (value: string) => void;
@@ -20,4 +19,17 @@ export interface BlogFormProps {
   setMetaDescription?: (value: string) => void;
   keywords?: string[];
   setKeywords?: (value: string[]) => void;
+}
+
+export interface BlogAutomationSchedule {
+  id?: string;
+  user_id: string;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  hour: number;
+  day_of_week?: number | null;
+  day_of_month?: number | null;
+  category: string;
+  is_active: boolean;
+  created_at?: string;
+  last_run_at?: string | null;
 }

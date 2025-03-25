@@ -30,7 +30,6 @@ export const AIBlogGenerator = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Fetch existing blogs to avoid duplicates
   const { data: existingBlogs } = useQuery({
     queryKey: ["existing-blogs"],
     queryFn: async () => {

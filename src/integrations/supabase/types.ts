@@ -77,6 +77,45 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_automation_schedules: {
+        Row: {
+          category: string
+          created_at: string
+          day_of_month: number | null
+          day_of_week: number | null
+          frequency: string
+          hour: number
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency: string
+          hour: number
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency?: string
+          hour?: number
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_categories: {
         Row: {
           created_at: string | null
