@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -166,6 +167,7 @@ export const AIBlogGenerator = () => {
     setIsGeneratingImage(true);
 
     try {
+      // Make the request to the edge function
       const { data, error } = await supabase.functions.invoke("generate-blog-image", {
         body: { prompt: imagePrompt },
       });
@@ -176,24 +178,40 @@ export const AIBlogGenerator = () => {
         throw new Error(data.error);
       }
 
-      const response = await fetch(data.imageUrl);
-      const blob = await response.blob();
-      
-      const file = new File([blob], `generated-image-${Date.now()}.png`, { type: 'image/png' });
-      
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-      
-      toast({
-        title: "Success",
-        description: "Image generated successfully",
-      });
+      if (!data.imageUrl) {
+        throw new Error("No image URL returned from the service");
+      }
+
+      // Fetch the image from the provided URL
+      try {
+        const response = await fetch(data.imageUrl);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
+        }
+        
+        const blob = await response.blob();
+        const file = new File([blob], `generated-image-${Date.now()}.png`, { type: 'image/png' });
+        
+        setImage(file);
+        setImagePreview(URL.createObjectURL(file));
+        
+        toast({
+          title: "Success",
+          description: "Image generated successfully",
+        });
+      } catch (downloadError) {
+        console.error("Error downloading the generated image:", downloadError);
+        throw new Error(`Failed to download the generated image: ${downloadError.message}`);
+      }
     } catch (error) {
       console.error("Error generating image:", error);
       toast({
         variant: "destructive",
         title: "Image Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate image",
+        description: error instanceof Error ? 
+          error.message : 
+          "Failed to generate image. Please try again later.",
       });
     } finally {
       setIsGeneratingImage(false);

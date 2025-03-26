@@ -57,32 +57,42 @@ serve(async (req) => {
 
     console.log(`Generating image with prompt: ${prompt}`);
 
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAIApiKey}`,
-      },
-      body: JSON.stringify({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-      }),
-    });
+    try {
+      const response = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openAIApiKey}`,
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: prompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        }),
+      });
 
-    const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(`OpenAI API error: ${data.error.message}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`OpenAI API responded with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(`OpenAI API error: ${data.error.message}`);
+      }
+      
+      const imageUrl = data.data[0].url;
+
+      return new Response(JSON.stringify({ imageUrl }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (fetchError) {
+      console.error('Fetch error during image generation:', fetchError);
+      throw new Error(`Failed to communicate with OpenAI: ${fetchError.message}`);
     }
-    
-    const imageUrl = data.data[0].url;
-
-    return new Response(JSON.stringify({ imageUrl }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
     console.error('Error generating image:', error);
     return new Response(JSON.stringify({ error: error.message }), {

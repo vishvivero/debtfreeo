@@ -21,3 +21,6 @@ verify_jwt = true
 
 [run-scheduled-blogs]
 verify_jwt = false
+
+[generate-blog-image]
+verify_jwt = false
