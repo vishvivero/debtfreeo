@@ -75,7 +75,8 @@ export function PaymentDialog({ debt, open, onOpenChange }: PaymentDialogProps) 
       // Update the debt's balance and next payment date
       const updatedBalance = Math.max(0, debt.balance - (paymentAmount - (debt.interest_rate / 100 * debt.balance / 12)));
       
-      await updateDebt({
+      // Fixed: Use mutateAsync instead of calling updateDebt directly
+      await updateDebt.mutateAsync({
         ...debt,
         balance: updatedBalance,
         next_payment_date: nextPaymentDate.toISOString(),

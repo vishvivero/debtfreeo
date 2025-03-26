@@ -107,7 +107,7 @@ export function UpcomingPayments({ debts }: UpcomingPaymentsProps) {
                             </Badge>
                           )}
                           {status === "upcoming" && (
-                            <Badge variant="warning" className="flex items-center gap-1 bg-amber-500">
+                            <Badge variant="outline" className="flex items-center gap-1 bg-amber-500 text-white">
                               <AlertCircle className="h-3 w-3" />
                               Due Soon
                             </Badge>
