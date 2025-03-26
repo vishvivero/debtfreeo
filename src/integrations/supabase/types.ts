@@ -466,6 +466,41 @@ export type Database = {
           },
         ]
       }
+      payment_reminders: {
+        Row: {
+          debt_id: string
+          id: string
+          payment_date: string
+          reminder_type: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          debt_id: string
+          id?: string
+          payment_date: string
+          reminder_type: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          debt_id?: string
+          id?: string
+          payment_date?: string
+          reminder_type?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_debt_id_fkey"
+            columns: ["debt_id"]
+            isOneToOne: false
+            referencedRelation: "debts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -476,7 +511,9 @@ export type Database = {
           id: string
           is_admin: boolean | null
           monthly_payment: number | null
+          payment_reminders_enabled: boolean | null
           preferred_currency: string | null
+          reminder_days_before: number | null
           selected_strategy: string | null
           show_extra_payments: boolean | null
           show_lump_sum_payments: boolean | null
@@ -496,7 +533,9 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           monthly_payment?: number | null
+          payment_reminders_enabled?: boolean | null
           preferred_currency?: string | null
+          reminder_days_before?: number | null
           selected_strategy?: string | null
           show_extra_payments?: boolean | null
           show_lump_sum_payments?: boolean | null
@@ -516,7 +555,9 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           monthly_payment?: number | null
+          payment_reminders_enabled?: boolean | null
           preferred_currency?: string | null
+          reminder_days_before?: number | null
           selected_strategy?: string | null
           show_extra_payments?: boolean | null
           show_lump_sum_payments?: boolean | null
@@ -643,6 +684,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_payment_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       update_all_profiles_monthly_payments: {
         Args: Record<PropertyKey, never>
         Returns: undefined

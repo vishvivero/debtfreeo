@@ -1,8 +1,10 @@
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useProfile } from "@/hooks/use-profile";
 import { AccountInfoCard } from "@/components/profile/AccountInfoCard";
 import { DisplayPreferences } from "@/components/profile/DisplayPreferences";
 import { DangerZoneCard } from "@/components/profile/DangerZoneCard";
+import { ReminderSettings } from "@/components/profile/ReminderSettings";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +67,7 @@ export default function Profile() {
             profile={profile} 
             onLumpSumToggle={handleLumpSumToggle}
           />
+          <ReminderSettings profile={profile} />
           <DangerZoneCard showNotifications={true} />
         </div>
       </div>

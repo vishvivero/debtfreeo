@@ -24,3 +24,7 @@ verify_jwt = false
 
 [generate-blog-image]
 verify_jwt = false
+
+[send-payment-reminders]
+verify_jwt = false
+
