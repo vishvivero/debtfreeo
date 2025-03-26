@@ -28,3 +28,5 @@ verify_jwt = false
 [send-payment-reminders]
 verify_jwt = false
 
+[record-debt-payment]
+verify_jwt = true
