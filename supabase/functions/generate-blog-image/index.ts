@@ -58,6 +58,10 @@ serve(async (req) => {
     console.log(`Generating image with prompt: ${prompt}`);
 
     try {
+      // Add timeout for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: {
@@ -71,7 +75,10 @@ serve(async (req) => {
           size: "1024x1024",
           quality: "standard",
         }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -84,7 +91,19 @@ serve(async (req) => {
         throw new Error(`OpenAI API error: ${data.error.message}`);
       }
       
+      if (!data.data || !data.data[0] || !data.data[0].url) {
+        throw new Error('Invalid response format from OpenAI API');
+      }
+      
       const imageUrl = data.data[0].url;
+      console.log("Successfully generated image URL");
+
+      // Validate the URL
+      try {
+        new URL(imageUrl);
+      } catch (urlError) {
+        throw new Error(`Invalid image URL received: ${imageUrl}`);
+      }
 
       return new Response(JSON.stringify({ imageUrl }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -167,14 +167,24 @@ export const AIBlogGenerator = () => {
     setIsGeneratingImage(true);
 
     try {
+      // Show generating status to user
+      toast({
+        title: "Generating Image",
+        description: "Please wait while we create your image...",
+      });
+      
       // Make the request to the edge function
       const { data, error } = await supabase.functions.invoke("generate-blog-image", {
         body: { prompt: imagePrompt },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(`Edge function error: ${error.message}`);
+      }
 
       if (data.error) {
+        console.error("Image generation API error:", data.error);
         throw new Error(data.error);
       }
 
@@ -182,15 +192,30 @@ export const AIBlogGenerator = () => {
         throw new Error("No image URL returned from the service");
       }
 
+      console.log("Received image URL:", data.imageUrl);
+
       // Fetch the image from the provided URL
       try {
-        const response = await fetch(data.imageUrl);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        const response = await fetch(data.imageUrl, { 
+          signal: controller.signal,
+          credentials: 'omit', // Don't send cookies
+          mode: 'cors',        // Enable CORS
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
           throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
         }
         
         const blob = await response.blob();
+        if (blob.size === 0) {
+          throw new Error("Received empty image data");
+        }
+        
         const file = new File([blob], `generated-image-${Date.now()}.png`, { type: 'image/png' });
         
         setImage(file);
