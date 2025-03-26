@@ -6,6 +6,7 @@ import { DebtDetailsPage } from "@/components/debt/DebtDetailsPage";
 import Reports from "@/pages/Reports";
 import Strategy from "@/pages/Strategy";
 import Track from "@/pages/Track";
+import Reminders from "@/pages/Reminders";
 import Profile from "@/pages/Profile";
 import MyPlan from "@/pages/MyPlan";
 import Help from "@/pages/Help";
@@ -24,6 +25,7 @@ export const protectedRoutes = [
   <Route key="/strategy" path="/strategy" element={<Strategy />} />,
   <Route key="/results-history" path="/results-history" element={<ResultsHistory />} />,
   <Route key="/track" path="/track" element={<Track />} />,
+  <Route key="/reminders" path="/reminders" element={<Reminders />} />,
   <Route key="/profile" path="/profile" element={<Profile />} />,
   <Route key="/my-plan" path="/my-plan" element={<MyPlan />} />,
   <Route key="/help" path="/help" element={<Help />} />

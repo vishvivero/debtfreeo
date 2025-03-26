@@ -1,5 +1,5 @@
 
-import { Home, PiggyBank, BarChart2, LineChart, ChartBar, History } from "lucide-react";
+import { Home, PiggyBank, BarChart2, LineChart, ChartBar, History, Bell } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuBadge } from "@/components/ui/sidebar";
 
@@ -24,6 +24,10 @@ const menuItems = [{
   url: "/track",
   icon: LineChart,
   badge: "Coming Soon"
+}, {
+  title: "Reminders",
+  url: "/reminders",
+  icon: Bell
 }, {
   title: "Reports",
   url: "/overview/reports",
