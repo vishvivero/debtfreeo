@@ -10,4 +10,6 @@ export interface Profile {
   selected_strategy: string | null;
   show_extra_payments: boolean | null;
   show_lump_sum_payments: boolean | null;
+  payment_reminders_enabled?: boolean;
+  reminder_days_before?: number;
 }
