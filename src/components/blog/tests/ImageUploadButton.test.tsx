@@ -1,6 +1,7 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import '@testing-library/jest-dom'; // Add this import for the matchers
+import { vi, describe, it, expect } from 'vitest';
 import { ImageUploadButton } from '../ImageUploadButton';
 import { supabase } from '@/integrations/supabase/client';
 import { BrowserRouter } from 'react-router-dom';
