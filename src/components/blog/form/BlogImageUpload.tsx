@@ -41,7 +41,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
               setIsLoadingPreview(false);
             };
             img.onerror = () => {
-              console.error('Failed to load image from URL, falling back to direct path');
+              console.error('Failed to load image from URL, trying fallback');
               setPreviewError("Failed to load image preview, trying fallback...");
               
               // Try getting the public URL directly from Supabase as fallback
