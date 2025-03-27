@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { getStorageUrl } from "@/integrations/supabase/storageUtils";
+import { getStorageUrl, uploadImageToStorage } from "@/integrations/supabase/storageUtils";
 
 interface BlogImageUploadProps {
   setImage: (file: File) => void;
@@ -27,7 +27,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
       
       if (imagePreview && !imagePreview.startsWith('http') && !imagePreview.startsWith('data:')) {
         // It's likely a filename stored in Supabase Storage
-        const getImageUrl = async () => {
+        const fetchImageUrl = async () => {
           try {
             console.log('Getting public URL for file:', imagePreview);
             const publicUrl = getStorageUrl('blog-images', imagePreview);
@@ -60,7 +60,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             };
             img.src = publicUrl;
           } catch (error) {
-            console.error('Error in getImageUrl function:', error);
+            console.error('Error in fetchImageUrl function:', error);
             setPreviewError("Error retrieving image preview");
             
             // Try a direct URL as fallback
@@ -71,7 +71,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
           }
         };
         
-        getImageUrl();
+        fetchImageUrl();
       } else {
         // It's already a full URL or a data URL
         console.log('Using provided preview URL:', imagePreview);
@@ -81,7 +81,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
     }
   }, [imagePreview]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setPreviewError(null);

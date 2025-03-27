@@ -1,6 +1,8 @@
 
 // Utility functions for handling Supabase storage URLs
 
+import { supabase } from './client';
+
 /**
  * Creates a public URL for a file in Supabase storage
  * @param bucket The storage bucket name
@@ -39,8 +41,6 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
   }
   
   try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    
     // Generate file name if not provided
     const finalFileName = fileName || `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
     const contentType = file.type || `image/${file.name.split('.').pop()}`;
@@ -188,24 +188,12 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
     // Verify the upload was successful by checking if the file exists
     try {
       console.log("Verifying file exists in storage...");
-      const { data } = await supabase.storage
+      const { data } = supabase.storage
         .from(bucket)
         .getPublicUrl(finalFileName);
         
       if (data?.publicUrl) {
         console.log("File verified with public URL:", data.publicUrl);
-        
-        // Try to fetch the image to verify it's accessible
-        const imgResponse = await fetch(data.publicUrl, { 
-          method: 'HEAD',
-          cache: 'no-cache'
-        });
-        
-        if (imgResponse.ok) {
-          console.log("Image URL is accessible");
-        } else {
-          console.warn("Image URL returned status:", imgResponse.status);
-        }
       }
     } catch (verifyError) {
       console.error("Error during URL verification:", verifyError);

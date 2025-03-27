@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { Textarea } from "@/components/ui/textarea";
-import { getStorageUrl } from "@/integrations/supabase/storageUtils";
+import { getStorageUrl, uploadImageToStorage } from "@/integrations/supabase/storageUtils";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -178,43 +178,16 @@ const BlogPost = () => {
 
       if (image) {
         console.log("Processing image upload...");
-        const fileExt = image.name.split('.').pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
         try {
-          // Check if blog-images bucket exists before trying to upload
-          const { data: buckets } = await supabase.storage.listBuckets();
-          const bucketExists = buckets?.find(bucket => bucket.name === 'blog-images');
+          const fileName = await uploadImageToStorage('blog-images', image);
           
-          if (!bucketExists) {
-            console.log("Creating blog-images bucket...");
-            await supabase.functions.invoke('create-blog-images-bucket');
-            // Verify bucket was created
-            const { data: verifyBuckets } = await supabase.storage.listBuckets();
-            if (!verifyBuckets?.find(bucket => bucket.name === 'blog-images')) {
-              throw new Error('Failed to create blog-images bucket');
-            }
+          if (fileName) {
+            console.log("Image upload successful:", fileName);
+            imageUrl = fileName;
+          } else {
+            throw new Error("Failed to upload image");
           }
-          
-          // Explicitly set content type based on file extension
-          const contentType = image.type || `image/${fileExt}`;
-          console.log(`Uploading image with content type: ${contentType}`);
-          
-          const { error: uploadError, data } = await supabase.storage
-            .from('blog-images')
-            .upload(fileName, image, {
-              cacheControl: '3600',
-              upsert: false,
-              contentType: contentType
-            });
-
-          if (uploadError) {
-            console.error("Image upload error:", uploadError);
-            throw uploadError;
-          }
-
-          console.log("Image upload successful:", data);
-          imageUrl = fileName;
         } catch (uploadError) {
           console.error("Error during image upload process:", uploadError);
           toast({
@@ -603,7 +576,7 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
         console.log('Fetching image URL from storage for:', imageUrl);
         
         // First try with getPublicUrl
-        const { data } = await supabase.storage
+        const { data } = supabase.storage
           .from('blog-images')
           .getPublicUrl(imageUrl);
         
