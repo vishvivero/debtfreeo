@@ -46,7 +46,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
           )}
         </div>
       </div>
-      <Alert variant="info" className="bg-blue-50 text-blue-800 border-blue-200">
+      <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           For best results, use an image with dimensions of 1200×630 pixels (ratio 1.9:1).
