@@ -586,26 +586,56 @@ const BlogPost = () => {
 // Helper component to display the featured image from Supabase storage
 const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: string }) => {
   const [src, setSrc] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchImageUrl = async () => {
       try {
-        if (!imageUrl) return;
+        if (!imageUrl) {
+          console.log('No image URL provided');
+          return;
+        }
         
-        const { data } = await supabase.storage
+        console.log('Fetching image URL from storage for:', imageUrl);
+        const { data, error } = await supabase.storage
           .from('blog-images')
           .getPublicUrl(imageUrl);
         
+        if (error) {
+          console.error('Error fetching image URL from storage:', error);
+          setLoadError(true);
+          toast({
+            variant: "destructive",
+            title: "Image Loading Error",
+            description: "Could not load the blog image. Please try refreshing the page.",
+          });
+          return;
+        }
+        
         if (data?.publicUrl) {
+          console.log('Retrieved public URL:', data.publicUrl);
           setSrc(data.publicUrl);
+        } else {
+          console.error('No public URL returned for image');
+          setLoadError(true);
         }
       } catch (error) {
-        console.error('Error fetching image URL:', error);
+        console.error('Exception in fetchImageUrl:', error);
+        setLoadError(true);
       }
     };
 
     fetchImageUrl();
-  }, [imageUrl]);
+  }, [imageUrl, toast]);
+
+  if (loadError) {
+    return (
+      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
+        <span>Image could not be loaded</span>
+      </div>
+    );
+  }
 
   if (!src) {
     return <div className="w-full h-full bg-gray-200 animate-pulse"></div>;
@@ -616,6 +646,11 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
       src={src} 
       alt={altText}
       className="w-full h-full object-cover"
+      onError={(e) => {
+        console.error('Image loading error for URL:', src);
+        setLoadError(true);
+        (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YxZjFmMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
+      }}
     />
   );
 };

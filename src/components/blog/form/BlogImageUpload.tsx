@@ -24,15 +24,22 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         // It's likely a filename stored in Supabase Storage
         const getImageUrl = async () => {
           try {
-            const { data } = await supabase.storage
+            console.log('Getting public URL for file:', imagePreview);
+            const { data, error } = await supabase.storage
               .from('blog-images')
               .getPublicUrl(imagePreview);
             
+            if (error) {
+              console.error('Error getting image URL:', error);
+              return;
+            }
+            
             if (data?.publicUrl) {
+              console.log('Retrieved public URL:', data.publicUrl);
               setLocalPreview(data.publicUrl);
             }
           } catch (error) {
-            console.error('Error getting image URL:', error);
+            console.error('Error in getImageUrl function:', error);
           }
         };
         
@@ -47,6 +54,8 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('Selected file:', file.name, 'Type:', file.type, 'Size:', file.size);
+      
       // Validate that it's actually an image file
       if (!file.type.startsWith('image/')) {
         toast({
@@ -99,6 +108,10 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
               src={localPreview}
               alt="Preview"
               className="h-20 w-20 object-cover rounded"
+              onError={(e) => {
+                console.error('Image preview loading error:', e);
+                (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YxZjFmMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
+              }}
             />
           )}
         </div>
