@@ -19,7 +19,6 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
   // Initialize local preview state from props
   useEffect(() => {
     if (typeof imagePreview === 'string') {
-      // Check if the imagePreview is a filename or a full URL
       if (imagePreview && !imagePreview.startsWith('http') && !imagePreview.startsWith('data:')) {
         // It's likely a filename stored in Supabase Storage
         const getImageUrl = async () => {
@@ -32,9 +31,19 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             if (data?.publicUrl) {
               console.log('Retrieved public URL:', data.publicUrl);
               setLocalPreview(data.publicUrl);
+            } else {
+              console.error('No public URL returned for image');
+              // Use a fallback to try direct access
+              const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imagePreview}`;
+              console.log('Trying direct URL:', directUrl);
+              setLocalPreview(directUrl);
             }
           } catch (error) {
             console.error('Error in getImageUrl function:', error);
+            // Try a direct URL as fallback
+            const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imagePreview}`;
+            console.log('Error occurred, trying direct URL:', directUrl);
+            setLocalPreview(directUrl);
           }
         };
         

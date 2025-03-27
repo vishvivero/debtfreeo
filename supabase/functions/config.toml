@@ -1,35 +1,8 @@
 
-project_id = "cfbleqfvxyosenezksbc"
+# This configuration file is a TOML file that specifies authentication information required for
+# local development and testing purposes.
 
-[create-checkout-session]
-verify_jwt = true
-
-[check-subscription]
-verify_jwt = true
-
-[generate-blog-ideas]
-verify_jwt = false
-
-[generate-blog]
-verify_jwt = false
-
-[auto-generate-blog]
-verify_jwt = true
-
-[create-blog-automation-schedule]
-verify_jwt = true
-
-[run-scheduled-blogs]
-verify_jwt = false
-
-[generate-blog-image]
-verify_jwt = false
-
-[send-payment-reminders]
-verify_jwt = false
-
-[record-debt-payment]
-verify_jwt = true
-
-[create-blog-images-bucket]
-verify_jwt = false
+[global.env]
+SUPABASE_URL = "env"
+SUPABASE_SERVICE_ROLE_KEY = "env"
+OPENAI_API_KEY = "env"

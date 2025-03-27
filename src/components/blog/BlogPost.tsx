@@ -587,6 +587,7 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
   const [src, setSrc] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
   const { toast } = useToast();
+  const [loadAttempts, setLoadAttempts] = useState(0);
 
   useEffect(() => {
     const fetchImageUrl = async () => {
@@ -597,6 +598,8 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
         }
         
         console.log('Fetching image URL from storage for:', imageUrl);
+        
+        // First try with getPublicUrl
         const { data } = await supabase.storage
           .from('blog-images')
           .getPublicUrl(imageUrl);
@@ -606,6 +609,21 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
           setSrc(data.publicUrl);
         } else {
           console.error('No public URL returned for image');
+          
+          // Try direct URL as fallback
+          const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imageUrl}`;
+          console.log('Trying direct URL:', directUrl);
+          setSrc(directUrl);
+        }
+      } catch (error) {
+        console.error('Exception in fetchImageUrl:', error);
+        
+        // Try direct URL as another fallback approach
+        try {
+          const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imageUrl}`;
+          console.log('Error occurred, trying direct URL:', directUrl);
+          setSrc(directUrl);
+        } catch (directError) {
           setLoadError(true);
           toast({
             variant: "destructive",
@@ -613,19 +631,38 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
             description: "Could not load the blog image. Please try refreshing the page.",
           });
         }
-      } catch (error) {
-        console.error('Exception in fetchImageUrl:', error);
-        setLoadError(true);
-        toast({
-          variant: "destructive",
-          title: "Image Loading Error",
-          description: "Could not load the blog image. Please try refreshing the page.",
-        });
       }
     };
 
-    fetchImageUrl();
-  }, [imageUrl, toast]);
+    if (loadAttempts < 3) { // Limit retries
+      fetchImageUrl();
+    }
+  }, [imageUrl, toast, loadAttempts]);
+
+  const handleImageError = () => {
+    console.error('Image loading error for URL:', src);
+    
+    if (loadAttempts < 2) {
+      // Try again with a different approach
+      setLoadAttempts(prev => prev + 1);
+      
+      // On first error, try direct URL with a different format
+      if (loadAttempts === 0) {
+        const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imageUrl}`;
+        console.log('Image error, trying direct URL:', directUrl);
+        setSrc(directUrl);
+      } else {
+        setLoadError(true);
+      }
+    } else {
+      setLoadError(true);
+      toast({
+        variant: "destructive",
+        title: "Image Loading Error",
+        description: "Could not load the blog image. Please try refreshing the page.",
+      });
+    }
+  };
 
   if (loadError) {
     return (
@@ -644,11 +681,7 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
       src={src} 
       alt={altText}
       className="w-full h-full object-cover"
-      onError={(e) => {
-        console.error('Image loading error for URL:', src);
-        setLoadError(true);
-        (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YxZjFmMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
-      }}
+      onError={handleImageError}
     />
   );
 };

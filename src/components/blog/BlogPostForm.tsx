@@ -104,22 +104,53 @@ export const BlogPostForm = ({
         const contentType = image.type || `image/${fileExt}`;
         
         console.log("Uploading image to storage:", fileName, "with content type:", contentType);
-        const { error: uploadError, data } = await supabase.storage
-          .from('blog-images')
-          .upload(fileName, image, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: contentType
+        
+        try {
+          // First attempt a direct upsert approach
+          const { error: uploadError, data } = await supabase.storage
+            .from('blog-images')
+            .upload(fileName, image, {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: contentType
+            });
+
+          if (uploadError) {
+            console.error("Image upload error:", uploadError);
+            
+            // Try an alternate method if the first fails
+            const blobData = new Blob([await image.arrayBuffer()], { type: contentType });
+            console.log("Retrying upload with Blob data...");
+            
+            const { error: retryError, data: retryData } = await supabase.storage
+              .from('blog-images')
+              .upload(fileName, blobData, {
+                cacheControl: '3600',
+                upsert: true, // Force overwrite if exists
+                contentType: contentType
+              });
+              
+            if (retryError) {
+              console.error("Retry image upload error:", retryError);
+              throw retryError;
+            }
+            
+            console.log("Image retry upload successful:", retryData);
+          } else {
+            console.log("Image upload successful:", data);
+          }
+          
+          imageUrl = fileName;
+          console.log("Image URL saved:", imageUrl);
+        } catch (finalError) {
+          console.error("All image upload attempts failed:", finalError);
+          toast({
+            variant: "destructive",
+            title: "Image Upload Failed",
+            description: "Could not upload the image. Blog will be saved without an image.",
           });
-
-        if (uploadError) {
-          console.error("Image upload error:", uploadError);
-          throw uploadError;
+          // Continue without image
         }
-
-        console.log("Image upload successful:", data);
-        imageUrl = fileName;
-        console.log("Image URL saved:", imageUrl);
       }
 
       const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
