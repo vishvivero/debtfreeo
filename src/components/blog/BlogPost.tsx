@@ -178,37 +178,61 @@ const BlogPost = () => {
       let imageUrl = blog.image_url;
 
       if (image) {
+        console.log("Processing image upload...");
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
-        // Check if blog-images bucket exists, create if not
-        const { data: buckets } = await supabase.storage.listBuckets();
-        if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
-          // Call the edge function to create the bucket
-          const { error: bucketError } = await supabase.functions.invoke('create-blog-images-bucket');
-          if (bucketError) {
-            console.error('Error creating blog-images bucket:', bucketError);
-            throw bucketError;
+        try {
+          // Check if blog-images bucket exists before trying to upload
+          const { data: buckets } = await supabase.storage.listBuckets();
+          const bucketExists = buckets?.find(bucket => bucket.name === 'blog-images');
+          
+          if (!bucketExists) {
+            console.log("Creating blog-images bucket...");
+            await supabase.functions.invoke('create-blog-images-bucket');
+            // Verify bucket was created
+            const { data: verifyBuckets } = await supabase.storage.listBuckets();
+            if (!verifyBuckets?.find(bucket => bucket.name === 'blog-images')) {
+              throw new Error('Failed to create blog-images bucket');
+            }
           }
-        }
-        
-        // Explicitly set content type based on file extension
-        const contentType = image.type || `image/${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('blog-images')
-          .upload(fileName, image, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: contentType
-          });
+          
+          // Explicitly set content type based on file extension
+          const contentType = image.type || `image/${fileExt}`;
+          console.log(`Uploading image with content type: ${contentType}`);
+          
+          const { error: uploadError, data } = await supabase.storage
+            .from('blog-images')
+            .upload(fileName, image, {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: contentType
+            });
 
-        if (uploadError) {
-          throw uploadError;
+          if (uploadError) {
+            console.error("Image upload error:", uploadError);
+            throw uploadError;
+          }
+
+          console.log("Image upload successful:", data);
+          imageUrl = fileName;
+        } catch (uploadError) {
+          console.error("Error during image upload process:", uploadError);
+          toast({
+            variant: "destructive",
+            title: "Image Upload Failed",
+            description: "Could not upload the image. Please try again.",
+          });
+          // Continue with update even if image upload fails
         }
-        
-        imageUrl = fileName;
       }
+
+      console.log("Updating blog post with data:", {
+        title: editedTitle,
+        content: editedContent,
+        excerpt: editedExcerpt,
+        imageUrl
+      });
 
       const { error: updateError } = await supabase
         .from('blogs')
@@ -222,6 +246,7 @@ const BlogPost = () => {
         .eq('id', blog.id);
 
       if (updateError) {
+        console.error("Blog update error:", updateError);
         throw updateError;
       }
 

@@ -5,6 +5,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface BlogImageUploadProps {
   setImage: (file: File) => void;
@@ -13,6 +14,7 @@ interface BlogImageUploadProps {
 
 export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps) => {
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Initialize local preview state from props
   useEffect(() => {
@@ -47,7 +49,21 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
     if (file) {
       // Validate that it's actually an image file
       if (!file.type.startsWith('image/')) {
-        console.error('Not a valid image file:', file.type);
+        toast({
+          variant: "destructive",
+          title: "Invalid file type",
+          description: "Please select an image file (JPEG, PNG, GIF, etc.).",
+        });
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+        });
         return;
       }
       

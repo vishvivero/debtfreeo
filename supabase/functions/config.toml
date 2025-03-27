@@ -33,4 +33,3 @@ verify_jwt = true
 
 [create-blog-images-bucket]
 verify_jwt = false
-
