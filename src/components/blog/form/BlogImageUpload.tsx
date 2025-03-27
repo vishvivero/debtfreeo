@@ -15,11 +15,16 @@ interface BlogImageUploadProps {
 
 export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps) => {
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Initialize local preview state from props
   useEffect(() => {
     if (typeof imagePreview === 'string') {
+      setIsLoadingPreview(true);
+      setPreviewError(null);
+      
       if (imagePreview && !imagePreview.startsWith('http') && !imagePreview.startsWith('data:')) {
         // It's likely a filename stored in Supabase Storage
         const getImageUrl = async () => {
@@ -31,27 +36,38 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             
             // Verify the URL is accessible
             const img = new Image();
-            img.onload = () => console.log('Image loaded successfully from URL');
+            img.onload = () => {
+              console.log('Image loaded successfully from URL');
+              setIsLoadingPreview(false);
+            };
             img.onerror = () => {
               console.error('Failed to load image from URL, falling back to direct path');
+              setPreviewError("Failed to load image preview, trying fallback...");
+              
               // Try getting the public URL directly from Supabase as fallback
-              supabase.storage
+              const { data } = supabase.storage
                 .from('blog-images')
-                .getPublicUrl(imagePreview)
-                .then(({ data }) => {
-                  if (data?.publicUrl) {
-                    console.log('Fallback public URL:', data.publicUrl);
-                    setLocalPreview(data.publicUrl);
-                  }
-                });
+                .getPublicUrl(imagePreview);
+                
+              if (data?.publicUrl) {
+                console.log('Fallback public URL:', data.publicUrl);
+                setLocalPreview(data.publicUrl);
+                setPreviewError(null);
+              } else {
+                setPreviewError("Could not retrieve image preview");
+              }
+              setIsLoadingPreview(false);
             };
             img.src = publicUrl;
           } catch (error) {
             console.error('Error in getImageUrl function:', error);
+            setPreviewError("Error retrieving image preview");
+            
             // Try a direct URL as fallback
             const directUrl = getStorageUrl('blog-images', imagePreview);
             console.log('Error occurred, trying direct URL:', directUrl);
             setLocalPreview(directUrl);
+            setIsLoadingPreview(false);
           }
         };
         
@@ -60,6 +76,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         // It's already a full URL or a data URL
         console.log('Using provided preview URL:', imagePreview);
         setLocalPreview(imagePreview);
+        setIsLoadingPreview(false);
       }
     }
   }, [imagePreview]);
@@ -67,6 +84,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setPreviewError(null);
       console.log('Selected file:', file.name, 'Type:', file.type, 'Size:', file.size);
       
       // Validate that it's actually an image file
@@ -102,6 +120,14 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
           imagePreview(preview);
         }
       };
+      reader.onerror = () => {
+        setPreviewError("Failed to generate image preview");
+        toast({
+          variant: "destructive",
+          title: "Preview Error",
+          description: "Could not generate image preview. The file may be corrupted.",
+        });
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -118,19 +144,28 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             onChange={handleImageChange}
             className="flex-1"
           />
-          {localPreview && (
+          {isLoadingPreview && (
+            <div className="h-20 w-20 bg-gray-100 rounded flex items-center justify-center">
+              <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+            </div>
+          )}
+          {localPreview && !isLoadingPreview && (
             <img
               src={localPreview}
               alt="Preview"
               className="h-20 w-20 object-cover rounded"
               onError={(e) => {
                 console.error('Image preview loading error:', e);
+                setPreviewError("Image preview failed to load");
                 (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YxZjFmMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
               }}
             />
           )}
         </div>
-        {localPreview && (
+        {previewError && (
+          <p className="text-sm text-red-600 mt-1">{previewError}</p>
+        )}
+        {localPreview && !previewError && (
           <p className="text-sm text-green-600 mt-1">Image preview shown above will be uploaded when you save</p>
         )}
       </div>
