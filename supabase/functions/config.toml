@@ -30,3 +30,4 @@ verify_jwt = false
 
 [record-debt-payment]
 verify_jwt = true
+

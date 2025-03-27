@@ -71,10 +71,23 @@ export const BlogPostForm = ({
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
+        // Create blog-images bucket if it doesn't exist
+        const { data: buckets } = await supabase.storage.listBuckets();
+        if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
+          console.log("Creating blog-images bucket...");
+          await supabase.storage.createBucket('blog-images', {
+            public: true,
+            fileSizeLimit: 5242880, // 5MB
+          });
+        }
+        
         console.log("Uploading image to storage:", fileName);
         const { error: uploadError, data } = await supabase.storage
           .from('blog-images')
-          .upload(fileName, image);
+          .upload(fileName, image, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
         if (uploadError) {
           console.error("Image upload error:", uploadError);
