@@ -61,6 +61,22 @@ Deno.serve(async (req) => {
         console.error('Exception updating bucket:', updateError)
       }
       
+      // Set up CORS for the bucket
+      try {
+        await supabase.storage.from('blog-images').updateBucketCors([
+          {
+            origin: '*',
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            headers: ['authorization', 'x-client-info', 'apikey', 'content-type', 'cache-control', 'x-file-name'],
+            maxAgeSeconds: 86400,
+            credentials: true
+          }
+        ])
+        console.log('CORS configuration updated successfully')
+      } catch (corsError) {
+        console.error('Error setting CORS configuration:', corsError)
+      }
+      
       // Return success response
       return new Response(
         JSON.stringify({ message: 'Blog images bucket already exists and configuration updated' }),

@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { getStorageUrl } from "@/integrations/supabase/storageUtils";
 
 interface BlogImageUploadProps {
   setImage: (file: File) => void;
@@ -34,14 +35,14 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             } else {
               console.error('No public URL returned for image');
               // Use a fallback to try direct access
-              const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imagePreview}`;
+              const directUrl = getStorageUrl('blog-images', imagePreview);
               console.log('Trying direct URL:', directUrl);
               setLocalPreview(directUrl);
             }
           } catch (error) {
             console.error('Error in getImageUrl function:', error);
             // Try a direct URL as fallback
-            const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imagePreview}`;
+            const directUrl = getStorageUrl('blog-images', imagePreview);
             console.log('Error occurred, trying direct URL:', directUrl);
             setLocalPreview(directUrl);
           }

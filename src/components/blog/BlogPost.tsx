@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { Textarea } from "@/components/ui/textarea";
+import { getStorageUrl } from "@/integrations/supabase/storageUtils";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -588,7 +589,7 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
   const [loadError, setLoadError] = useState(false);
   const { toast } = useToast();
   const [loadAttempts, setLoadAttempts] = useState(0);
-
+  
   useEffect(() => {
     const fetchImageUrl = async () => {
       try {
@@ -610,8 +611,8 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
         } else {
           console.error('No public URL returned for image');
           
-          // Try direct URL as fallback
-          const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imageUrl}`;
+          // Try direct URL as fallback using our utility
+          const directUrl = getStorageUrl('blog-images', imageUrl);
           console.log('Trying direct URL:', directUrl);
           setSrc(directUrl);
         }
@@ -620,7 +621,7 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
         
         // Try direct URL as another fallback approach
         try {
-          const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imageUrl}`;
+          const directUrl = getStorageUrl('blog-images', imageUrl);
           console.log('Error occurred, trying direct URL:', directUrl);
           setSrc(directUrl);
         } catch (directError) {
@@ -648,7 +649,7 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
       
       // On first error, try direct URL with a different format
       if (loadAttempts === 0) {
-        const directUrl = `${supabase.supabaseUrl}/storage/v1/object/public/blog-images/${imageUrl}`;
+        const directUrl = getStorageUrl('blog-images', imageUrl);
         console.log('Image error, trying direct URL:', directUrl);
         setSrc(directUrl);
       } else {
