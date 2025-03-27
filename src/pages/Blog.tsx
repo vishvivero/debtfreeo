@@ -1,3 +1,4 @@
+
 import { BlogList } from "@/components/blog/BlogList";
 import { motion } from "framer-motion";
 import { CookieConsent } from "@/components/legal/CookieConsent";
@@ -9,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useState } from "react";
+import { getStorageUrl } from "@/integrations/supabase/storageUtils";
 
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -162,9 +164,13 @@ const Blog = () => {
                             {post.image_url && (
                               <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                                 <img 
-                                  src={post.image_url} 
+                                  src={getStorageUrl('blog-images', post.image_url)} 
                                   alt={post.title}
                                   className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/placeholder.svg';
+                                  }}
                                 />
                               </div>
                             )}

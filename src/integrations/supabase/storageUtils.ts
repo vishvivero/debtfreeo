@@ -8,6 +8,13 @@
  * @returns The full public URL to the file
  */
 export const getStorageUrl = (bucket: string, filePath: string): string => {
+  if (!filePath) return '';
+  
+  // Check if the URL is already a full URL (starts with http)
+  if (filePath.startsWith('http')) {
+    return filePath;
+  }
+  
   // Use the environment variable or fallback to the known Supabase URL
   const baseUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
   return `${baseUrl}/storage/v1/object/public/${bucket}/${filePath}`;

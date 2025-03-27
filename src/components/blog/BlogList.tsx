@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion } from "framer-motion";
+import { getStorageUrl } from "@/integrations/supabase/storageUtils";
 
 interface BlogListProps {
   searchQuery?: string;
@@ -142,9 +143,14 @@ export const BlogList = ({ searchQuery = "" }: BlogListProps) => {
                       {blog.image_url && (
                         <div className="md:w-48 h-48 overflow-hidden rounded-lg flex-shrink-0">
                           <img 
-                            src={blog.image_url} 
+                            src={getStorageUrl('blog-images', blog.image_url)} 
                             alt={blog.title}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              console.error(`Error loading image: ${blog.image_url}`);
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder.svg';
+                            }}
                           />
                         </div>
                       )}
