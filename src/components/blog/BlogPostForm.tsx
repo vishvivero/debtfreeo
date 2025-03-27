@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -41,11 +40,9 @@ export const BlogPostForm = ({
   const { user } = useAuth();
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   
-  // Check if we're in edit mode by looking at the URL
   const isEditMode = window.location.pathname.includes('/edit/');
   const blogId = isEditMode ? window.location.pathname.split('/').pop() : null;
   
-  // Fetch the existing image URL if in edit mode
   useEffect(() => {
     if (isEditMode && blogId) {
       const fetchExistingImage = async () => {
@@ -89,28 +86,30 @@ export const BlogPostForm = ({
     try {
       let imageUrl = existingImageUrl;
 
-      // Handle image upload if a new image is selected
       if (image) {
         console.log("Processing image upload...");
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
-        // Create blog-images bucket if it doesn't exist
         const { data: buckets } = await supabase.storage.listBuckets();
         if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
           console.log("Creating blog-images bucket...");
-          await supabase.storage.createBucket('blog-images', {
-            public: true,
-            fileSizeLimit: 5242880, // 5MB
-          });
+          const { error: bucketError } = await supabase.functions.invoke('create-blog-images-bucket');
+          if (bucketError) {
+            console.error('Error creating blog-images bucket:', bucketError);
+            throw bucketError;
+          }
         }
         
-        console.log("Uploading image to storage:", fileName);
+        const contentType = image.type || `image/${fileExt}`;
+        
+        console.log("Uploading image to storage:", fileName, "with content type:", contentType);
         const { error: uploadError, data } = await supabase.storage
           .from('blog-images')
           .upload(fileName, image, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
+            contentType: contentType
           });
 
         if (uploadError) {
@@ -119,19 +118,12 @@ export const BlogPostForm = ({
         }
 
         console.log("Image upload successful:", data);
-        
-        // Get the public URL for the uploaded image
-        const { data: { publicUrl } } = supabase.storage
-          .from('blog-images')
-          .getPublicUrl(fileName);
-
-        imageUrl = fileName; // Store only the filename in the database
+        imageUrl = fileName;
         console.log("Image URL saved:", imageUrl);
       }
 
       const keywordsArray = keywords?.length ? keywords : title.toLowerCase().split(' ');
       
-      // Determine if we're updating an existing post or creating a new one
       if (isEditMode && blogId) {
         console.log("Updating existing blog post...");
         const { error: updateError } = await supabase
@@ -162,7 +154,6 @@ export const BlogPostForm = ({
           description: isDraft ? "Draft updated successfully" : "Post updated and published successfully",
         });
       } else {
-        // Generate a unique slug by appending a timestamp
         const timestamp = new Date().getTime();
         const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
         

@@ -192,11 +192,15 @@ const BlogPost = () => {
           }
         }
         
+        // Explicitly set content type based on file extension
+        const contentType = image.type || `image/${fileExt}`;
+        
         const { error: uploadError } = await supabase.storage
           .from('blog-images')
           .upload(fileName, image, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
+            contentType: contentType
           });
 
         if (uploadError) {

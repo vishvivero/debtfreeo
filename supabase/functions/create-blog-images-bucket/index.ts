@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
       .storage
       .createBucket('blog-images', {
         public: true,
-        fileSizeLimit: 1024 * 1024 * 2, // 2MB
+        fileSizeLimit: 1024 * 1024 * 10, // 10MB
         allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
       })
 

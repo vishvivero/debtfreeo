@@ -45,7 +45,15 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate that it's actually an image file
+      if (!file.type.startsWith('image/')) {
+        console.error('Not a valid image file:', file.type);
+        return;
+      }
+      
       setImage(file);
+      
+      // Create a preview
       const reader = new FileReader();
       reader.onloadend = () => {
         const preview = reader.result as string;
