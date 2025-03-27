@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from "react";
 
 interface BlogImageUploadProps {
   setImage: (file: File) => void;
@@ -10,6 +11,15 @@ interface BlogImageUploadProps {
 }
 
 export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps) => {
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  
+  // Initialize local preview state from props
+  useEffect(() => {
+    if (typeof imagePreview === 'string') {
+      setLocalPreview(imagePreview);
+    }
+  }, [imagePreview]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -17,6 +27,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
       const reader = new FileReader();
       reader.onloadend = () => {
         const preview = reader.result as string;
+        setLocalPreview(preview);
         if (typeof imagePreview === 'function') {
           imagePreview(preview);
         }
@@ -37,9 +48,9 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             onChange={handleImageChange}
             className="flex-1"
           />
-          {typeof imagePreview === 'string' && imagePreview && (
+          {localPreview && (
             <img
-              src={imagePreview}
+              src={localPreview}
               alt="Preview"
               className="h-20 w-20 object-cover rounded"
             />
