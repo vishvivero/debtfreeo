@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
@@ -598,20 +597,9 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
         }
         
         console.log('Fetching image URL from storage for:', imageUrl);
-        const { data, error } = await supabase.storage
+        const { data } = await supabase.storage
           .from('blog-images')
           .getPublicUrl(imageUrl);
-        
-        if (error) {
-          console.error('Error fetching image URL from storage:', error);
-          setLoadError(true);
-          toast({
-            variant: "destructive",
-            title: "Image Loading Error",
-            description: "Could not load the blog image. Please try refreshing the page.",
-          });
-          return;
-        }
         
         if (data?.publicUrl) {
           console.log('Retrieved public URL:', data.publicUrl);
@@ -619,10 +607,20 @@ const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: strin
         } else {
           console.error('No public URL returned for image');
           setLoadError(true);
+          toast({
+            variant: "destructive",
+            title: "Image Loading Error",
+            description: "Could not load the blog image. Please try refreshing the page.",
+          });
         }
       } catch (error) {
         console.error('Exception in fetchImageUrl:', error);
         setLoadError(true);
+        toast({
+          variant: "destructive",
+          title: "Image Loading Error",
+          description: "Could not load the blog image. Please try refreshing the page.",
+        });
       }
     };
 

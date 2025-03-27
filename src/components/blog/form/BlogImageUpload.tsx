@@ -25,14 +25,9 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         const getImageUrl = async () => {
           try {
             console.log('Getting public URL for file:', imagePreview);
-            const { data, error } = await supabase.storage
+            const { data } = await supabase.storage
               .from('blog-images')
               .getPublicUrl(imagePreview);
-            
-            if (error) {
-              console.error('Error getting image URL:', error);
-              return;
-            }
             
             if (data?.publicUrl) {
               console.log('Retrieved public URL:', data.publicUrl);
