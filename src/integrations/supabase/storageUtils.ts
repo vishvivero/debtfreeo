@@ -28,6 +28,48 @@ export const getStorageUrl = (bucket: string, filePath: string): string => {
 };
 
 /**
+ * Checks if a bucket exists and creates it if needed, with proper configuration
+ * @param bucket The bucket name to verify
+ * @returns Promise resolving to true if bucket exists or was created
+ */
+const ensureBucketExists = async (bucket: string): Promise<boolean> => {
+  try {
+    console.log("Checking if bucket exists:", bucket);
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    
+    if (bucketsError) {
+      console.error("Error listing buckets:", bucketsError);
+      // Continue anyway, we'll try to create it
+    }
+    
+    const bucketExists = buckets?.find(b => b.name === bucket);
+    
+    if (!bucketExists) {
+      console.log(`Bucket ${bucket} doesn't exist. Creating via edge function...`);
+      
+      // Try to create the bucket via edge function
+      const { data: createResult, error: createError } = await supabase.functions.invoke('create-blog-images-bucket');
+      
+      if (createError) {
+        console.error("Error creating bucket via edge function:", createError);
+        throw new Error(`Failed to create ${bucket} bucket: ${createError.message}`);
+      }
+      
+      console.log("Bucket creation result:", createResult);
+      
+      // Wait a moment for the bucket to be available
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return true;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in ensureBucketExists:", error);
+    return false;
+  }
+};
+
+/**
  * Handles uploading an image to Supabase storage with multiple fallback attempts
  * @param bucket The storage bucket name
  * @param file The file to upload
@@ -48,37 +90,10 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
     console.log(`Uploading ${finalFileName} with content type ${contentType} to bucket ${bucket}`);
     
     // First check if bucket exists and create it if needed
-    try {
-      console.log("Checking if bucket exists:", bucket);
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error("Error listing buckets:", bucketsError);
-        // Continue anyway, we'll try to create it
-      }
-      
-      const bucketExists = buckets?.find(b => b.name === bucket);
-      
-      if (!bucketExists) {
-        console.log(`Bucket ${bucket} doesn't exist. Creating...`);
-        
-        // Try to create the bucket via edge function
-        console.log("Calling create-blog-images-bucket edge function");
-        const { data: createResult, error: createError } = await supabase.functions.invoke('create-blog-images-bucket');
-        
-        if (createError) {
-          console.error("Error creating bucket via edge function:", createError);
-          throw new Error(`Failed to create ${bucket} bucket: ${createError.message}`);
-        }
-        
-        console.log("Bucket creation result:", createResult);
-        
-        // Wait a moment for the bucket to be available
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-    } catch (error) {
-      console.error("Error checking/creating bucket:", error);
-      // Continue anyway, the upload might still work
+    const bucketReady = await ensureBucketExists(bucket);
+    if (!bucketReady) {
+      console.error(`Could not ensure bucket ${bucket} exists`);
+      return null;
     }
     
     // Try to upload the file

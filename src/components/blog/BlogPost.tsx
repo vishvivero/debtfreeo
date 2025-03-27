@@ -32,6 +32,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { BlogImageUpload } from "./form/BlogImageUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { getStorageUrl, uploadImageToStorage } from "@/integrations/supabase/storageUtils";
+import { ImageUploadButton } from "./ImageUploadButton";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -356,7 +357,12 @@ const BlogPost = () => {
         <div className="w-full bg-white py-12">
           <div className="max-w-7xl mx-auto px-4">
             {isAdmin && !isEditing && (
-              <div className="mb-6 flex justify-end">
+              <div className="mb-6 flex justify-end gap-2">
+                <ImageUploadButton 
+                  blogId={blog.id}
+                  isAdmin={isAdmin}
+                  refreshBlog={refetch}
+                />
                 <Button 
                   onClick={() => setIsEditing(true)}
                   className="flex items-center gap-2"
