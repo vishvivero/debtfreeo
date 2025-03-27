@@ -8,7 +8,7 @@
  * @returns The full public URL to the file
  */
 export const getStorageUrl = (bucket: string, filePath: string): string => {
-  // Use the known Supabase URL from client.ts
+  // Use the environment variable or fallback to the known Supabase URL
   const baseUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
   return `${baseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
 };

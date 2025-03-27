@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { uploadImageToStorage } from "@/integrations/supabase/storageUtils";
 
 export const BlogPostForm = ({
   title,
@@ -89,94 +90,17 @@ export const BlogPostForm = ({
       if (image) {
         console.log("Processing image upload...");
         
-        // Ensure bucket exists first
-        try {
-          const { data: buckets } = await supabase.storage.listBuckets();
-          if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
-            console.log("Creating blog-images bucket...");
-            await supabase.functions.invoke('create-blog-images-bucket');
-            // Wait a moment for bucket creation
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        } catch (bucketError) {
-          console.error('Error checking/creating buckets:', bucketError);
-        }
+        // Use the new utility function to handle image uploading
+        imageUrl = await uploadImageToStorage('blog-images', image);
         
-        const fileExt = image.name.split('.').pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const contentType = image.type || `image/${fileExt}`;
-        
-        console.log("Uploading image to storage:", fileName, "with content type:", contentType);
-        
-        // Try multiple upload approaches
-        try {
-          // First attempt - standard upload
-          const { error: uploadError } = await supabase.storage
-            .from('blog-images')
-            .upload(fileName, image, {
-              cacheControl: '3600',
-              upsert: true, // Use upsert instead of false
-              contentType: contentType
-            });
-
-          if (uploadError) {
-            console.error("Standard image upload error:", uploadError);
-            
-            // Second attempt - use blob approach
-            const blobData = new Blob([await image.arrayBuffer()], { type: contentType });
-            console.log("Retrying upload with Blob data...");
-            
-            const { error: retryError } = await supabase.storage
-              .from('blog-images')
-              .upload(fileName, blobData, {
-                cacheControl: '3600',
-                upsert: true,
-                contentType: contentType
-              });
-              
-            if (retryError) {
-              console.error("Blob upload retry error:", retryError);
-              
-              // Third attempt - using FormData if needed
-              const formData = new FormData();
-              formData.append('file', image);
-              
-              // Using the function invoke as a direct upload approach
-              const { error: functionError } = await supabase.functions.invoke('create-blog-images-bucket', {
-                body: { action: 'forceUpload', fileName, contentType }
-              });
-              
-              if (functionError) {
-                console.error("All upload attempts failed:", functionError);
-                throw new Error("Could not upload image after multiple attempts");
-              }
-            }
-          }
-          
-          // Set the image URL to the filename
-          imageUrl = fileName;
-          console.log("Image URL saved:", imageUrl);
-          
-          // Verify upload worked by trying to get the URL
-          try {
-            const { data } = await supabase.storage
-              .from('blog-images')
-              .getPublicUrl(fileName);
-            
-            if (data?.publicUrl) {
-              console.log("Verified upload successful with URL:", data.publicUrl);
-            }
-          } catch (verifyError) {
-            console.warn("Could not verify image upload, but continuing:", verifyError);
-          }
-        } catch (finalError) {
-          console.error("All image upload attempts failed:", finalError);
+        if (!imageUrl) {
           toast({
             variant: "destructive",
             title: "Image Upload Failed",
             description: "Could not upload the image. Blog will be saved without an image.",
           });
-          // Continue without image
+        } else {
+          console.log("Image uploaded successfully:", imageUrl);
         }
       }
 

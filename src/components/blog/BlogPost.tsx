@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { 
   AlertCircle, 
   Clock, 
@@ -491,6 +490,10 @@ const BlogPost = () => {
                           src={blog.image_url} 
                           alt={blog.title}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error('Image loading error:', blog.image_url);
+                            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YxZjFmMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
+                          }}
                         />
                       ) : (
                         <FeaturedImage imageUrl={blog.image_url} altText={blog.title} />
@@ -583,7 +586,6 @@ const BlogPost = () => {
   return null;
 };
 
-// Helper component to display the featured image from Supabase storage
 const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: string }) => {
   const [src, setSrc] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
