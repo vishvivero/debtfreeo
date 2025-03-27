@@ -25,22 +25,27 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         const getImageUrl = async () => {
           try {
             console.log('Getting public URL for file:', imagePreview);
+            const publicUrl = getStorageUrl('blog-images', imagePreview);
+            console.log('Generated storage URL:', publicUrl);
+            setLocalPreview(publicUrl);
             
-            // First try with getPublicUrl method
-            const { data } = await supabase.storage
-              .from('blog-images')
-              .getPublicUrl(imagePreview);
-            
-            if (data?.publicUrl) {
-              console.log('Retrieved public URL:', data.publicUrl);
-              setLocalPreview(data.publicUrl);
-            } else {
-              console.error('No public URL returned for image');
-              // Use a fallback to try direct access
-              const directUrl = getStorageUrl('blog-images', imagePreview);
-              console.log('Trying direct URL:', directUrl);
-              setLocalPreview(directUrl);
-            }
+            // Verify the URL is accessible
+            const img = new Image();
+            img.onload = () => console.log('Image loaded successfully from URL');
+            img.onerror = () => {
+              console.error('Failed to load image from URL, falling back to direct path');
+              // Try getting the public URL directly from Supabase as fallback
+              supabase.storage
+                .from('blog-images')
+                .getPublicUrl(imagePreview)
+                .then(({ data }) => {
+                  if (data?.publicUrl) {
+                    console.log('Fallback public URL:', data.publicUrl);
+                    setLocalPreview(data.publicUrl);
+                  }
+                });
+            };
+            img.src = publicUrl;
           } catch (error) {
             console.error('Error in getImageUrl function:', error);
             // Try a direct URL as fallback

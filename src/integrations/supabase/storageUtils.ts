@@ -15,6 +15,11 @@ export const getStorageUrl = (bucket: string, filePath: string): string => {
     return filePath;
   }
   
+  // Check if it's a data URL
+  if (filePath.startsWith('data:')) {
+    return filePath;
+  }
+  
   // Use the environment variable or fallback to the known Supabase URL
   const baseUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
   return `${baseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
@@ -42,13 +47,14 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
     
     console.log(`Uploading ${finalFileName} with content type ${contentType} to bucket ${bucket}`);
     
-    // First check if bucket exists
+    // First check if bucket exists and create it if needed
     try {
+      console.log("Checking if bucket exists:", bucket);
       const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
       
       if (bucketsError) {
         console.error("Error listing buckets:", bucketsError);
-        throw new Error(`Failed to list buckets: ${bucketsError.message}`);
+        // Continue anyway, we'll try to create it
       }
       
       const bucketExists = buckets?.find(b => b.name === bucket);
@@ -57,6 +63,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
         console.log(`Bucket ${bucket} doesn't exist. Creating...`);
         
         // Try to create the bucket via edge function
+        console.log("Calling create-blog-images-bucket edge function");
         const { data: createResult, error: createError } = await supabase.functions.invoke('create-blog-images-bucket');
         
         if (createError) {
@@ -67,7 +74,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
         console.log("Bucket creation result:", createResult);
         
         // Wait a moment for the bucket to be available
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     } catch (error) {
       console.error("Error checking/creating bucket:", error);
@@ -180,26 +187,28 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
     
     // Verify the upload was successful by checking if the file exists
     try {
-      const { data: fileList, error: fileListError } = await supabase.storage
+      console.log("Verifying file exists in storage...");
+      const { data } = await supabase.storage
         .from(bucket)
-        .list('', {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'name', order: 'asc' }
+        .getPublicUrl(finalFileName);
+        
+      if (data?.publicUrl) {
+        console.log("File verified with public URL:", data.publicUrl);
+        
+        // Try to fetch the image to verify it's accessible
+        const imgResponse = await fetch(data.publicUrl, { 
+          method: 'HEAD',
+          cache: 'no-cache'
         });
         
-      if (fileListError) {
-        console.error("Error verifying file upload:", fileListError);
-      } else {
-        const fileExists = fileList?.some(file => file.name === finalFileName);
-        console.log(`File verification: ${finalFileName} exists in bucket: ${fileExists}`);
-        
-        if (!fileExists) {
-          console.error("File was not found in the bucket after upload");
+        if (imgResponse.ok) {
+          console.log("Image URL is accessible");
+        } else {
+          console.warn("Image URL returned status:", imgResponse.status);
         }
       }
     } catch (verifyError) {
-      console.error("Error during upload verification:", verifyError);
+      console.error("Error during URL verification:", verifyError);
     }
     
     return finalFileName;

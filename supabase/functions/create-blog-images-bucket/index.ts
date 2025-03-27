@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     
     // If bucket already exists, check its configuration
     if (buckets?.find(bucket => bucket.name === bucketName)) {
-      console.log('Blog images bucket already exists, checking configuration');
+      console.log('Blog images bucket already exists, updating configuration');
       
       // Update bucket configuration to ensure it's public
       console.log("Updating bucket to ensure it's public");
@@ -56,16 +56,12 @@ Deno.serve(async (req) => {
       
       console.log('Bucket configuration updated successfully');
       
-      // Try to set CORS configuration
-      try {
-        // We're no longer trying to use the setCors method as it's not available
-        console.log("Note: CORS configuration should be managed through the Supabase dashboard");
-      } catch (corsError) {
-        console.error('Error handling CORS configuration:', corsError);
-      }
-      
       return new Response(
-        JSON.stringify({ success: true, message: 'Bucket configuration updated', bucketName }),
+        JSON.stringify({ 
+          success: true, 
+          message: 'Bucket configuration updated', 
+          bucketName 
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -84,36 +80,12 @@ Deno.serve(async (req) => {
     
     console.log(`Bucket ${bucketName} created successfully`);
     
-    // Create SQL that could be run to set storage policies (for documentation)
-    const policiesInfo = `
-    -- Public read access policy
-    CREATE POLICY "Public Access" 
-    ON storage.objects 
-    FOR SELECT USING (bucket_id = '${bucketName}');
-    
-    -- Authenticated users can upload/update policy
-    CREATE POLICY "Authenticated Users Upload Access"
-    ON storage.objects
-    FOR INSERT TO authenticated 
-    WITH CHECK (bucket_id = '${bucketName}');
-    
-    -- Authenticated users can update their files
-    CREATE POLICY "Authenticated Users Update Access"
-    ON storage.objects
-    FOR UPDATE TO authenticated
-    USING (bucket_id = '${bucketName}')
-    WITH CHECK (bucket_id = '${bucketName}');
-    `;
-    
-    console.log("Storage policies information:", policiesInfo);
-    
     // Return success response
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: `Created ${bucketName} bucket`, 
-        bucketName,
-        policies: policiesInfo
+        bucketName
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
