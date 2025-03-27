@@ -90,7 +90,6 @@ export const BlogPostForm = ({
       if (image) {
         console.log("Processing image upload...");
         
-        // Use the new utility function to handle image uploading
         imageUrl = await uploadImageToStorage('blog-images', image);
         
         if (!imageUrl) {

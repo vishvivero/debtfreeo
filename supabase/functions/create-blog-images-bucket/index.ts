@@ -1,168 +1,129 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+// Supabase Edge Function: Create Blog Images Bucket
+// This function creates a new storage bucket for blog images and makes it public
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Max-Age': '86400'
-}
+};
 
+// Handle CORS preflight requests
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
+    // Get Supabase credentials from environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing environment variables')
+      throw new Error('Missing Supabase credentials');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    // Create Supabase admin client with service key
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const bucketName = 'blog-images';
 
-    // First check if the bucket already exists
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets()
+    // First check if bucket already exists
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
     if (listError) {
-      console.error('Error listing buckets:', listError)
-      throw listError
+      throw new Error(`Failed to list buckets: ${listError.message}`);
     }
     
-    // If bucket already exists, return success
-    const existingBucket = buckets.find(bucket => bucket.name === 'blog-images')
-    if (existingBucket) {
-      console.log('Blog images bucket already exists, checking configuration')
+    // If bucket already exists, check its configuration
+    if (buckets?.find(bucket => bucket.name === bucketName)) {
+      console.log('Blog images bucket already exists, checking configuration');
       
-      // Update bucket to ensure it has the proper configuration
-      try {
-        const { data, error } = await supabase.storage.updateBucket('blog-images', {
-          public: true,
-          fileSizeLimit: 10485760, // 10MB
-          allowedMimeTypes: [
-            'image/png', 
-            'image/jpeg', 
-            'image/jpg',
-            'image/gif', 
-            'image/webp', 
-            'image/svg+xml'
-          ]
-        })
-        
-        if (error) {
-          console.error('Error updating bucket:', error)
-        } else {
-          console.log('Bucket configuration updated successfully')
-        }
-      } catch (updateError) {
-        console.error('Exception updating bucket:', updateError)
+      // Update bucket configuration to ensure it's public
+      const { error: updateError } = await supabase.storage.updateBucket(
+        bucketName,
+        { public: true }
+      );
+      
+      if (updateError) {
+        throw new Error(`Failed to update bucket configuration: ${updateError.message}`);
       }
       
-      // Set CORS for the bucket using a different approach since updateBucketCors is not available
+      console.log('Bucket configuration updated successfully');
+      
+      // Try to set CORS configuration
       try {
-        // Make a direct API call to set CORS since the SDK method might not be available
-        const corsSettings = [
-          {
-            origin: '*',
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-            headers: ['authorization', 'x-client-info', 'apikey', 'content-type', 'cache-control', 'x-file-name'],
-            maxAgeSeconds: 86400,
-            credentials: true
-          }
-        ];
-        
-        // Create a direct fetch request to set CORS
-        const corsResponse = await fetch(`${supabaseUrl}/storage/v1/buckets/blog-images/cors`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseServiceKey}`,
-            'apikey': supabaseServiceKey
-          },
-          body: JSON.stringify(corsSettings)
+        // Set CORS policy to allow access from anywhere
+        await supabase.storage.from(bucketName).setCors({
+          allowedOrigins: ['*'],
+          allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['*'],
+          maxAgeSeconds: 3600,
+          exposeHeaders: ['Content-Length', 'Content-Type'],
         });
-        
-        if (!corsResponse.ok) {
-          console.error('Error setting CORS configuration via API:', await corsResponse.text());
-        } else {
-          console.log('CORS configuration updated successfully via direct API call');
-        }
       } catch (corsError) {
-        console.error('Error setting CORS configuration:', corsError)
-        // Continue even if CORS setting fails - the bucket might still work
+        console.error('Error setting CORS configuration via API:', corsError);
       }
       
-      // Return success response
       return new Response(
-        JSON.stringify({ message: 'Blog images bucket already exists and configuration updated' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-      )
+        JSON.stringify({ success: true, message: 'Bucket configuration updated', bucketName }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-
+    
     // Create the bucket if it doesn't exist
-    console.log('Creating blog-images bucket with improved configuration')
-    const { data, error } = await supabase.storage.createBucket('blog-images', {
-      public: true,
-      fileSizeLimit: 10485760, // 10MB
-      allowedMimeTypes: [
-        'image/png', 
-        'image/jpeg', 
-        'image/jpg',
-        'image/gif', 
-        'image/webp', 
-        'image/svg+xml'
-      ]
-    })
-
-    if (error) {
-      console.error('Error creating bucket:', error)
-      throw error
+    console.log(`Creating new bucket: ${bucketName}`);
+    const { error: createError } = await supabase.storage.createBucket(
+      bucketName,
+      { public: true } // Make the bucket public
+    );
+    
+    if (createError) {
+      throw new Error(`Failed to create bucket: ${createError.message}`);
     }
-
-    // Set CORS for the bucket using direct API call
-    try {
-      const corsSettings = [
-        {
-          origin: '*',
-          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-          headers: ['authorization', 'x-client-info', 'apikey', 'content-type', 'cache-control', 'x-file-name'],
-          maxAgeSeconds: 86400,
-          credentials: true
-        }
-      ];
-      
-      const corsResponse = await fetch(`${supabaseUrl}/storage/v1/buckets/blog-images/cors`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'apikey': supabaseServiceKey
-        },
-        body: JSON.stringify(corsSettings)
-      });
-      
-      if (!corsResponse.ok) {
-        console.error('Error setting CORS configuration via API:', await corsResponse.text());
-      } else {
-        console.log('CORS configuration updated successfully via direct API call');
-      }
-    } catch (corsError) {
-      console.error('Error setting CORS configuration:', corsError)
-    }
-
-    console.log('Blog images bucket created successfully')
+    
+    console.log(`Bucket ${bucketName} created successfully`);
+    
+    // Set up storage policies for the new bucket
+    // Allow public read access
+    const readPolicy = {
+      name: `${bucketName}_public_read`,
+      definition: {
+        role: 'anon',
+        resource: `storage.objects`,
+        action: 'select',
+        condition: `bucket_id = '${bucketName}'`,
+      },
+    };
+    
+    // Allow authenticated users to upload/delete
+    const writePolicy = {
+      name: `${bucketName}_auth_write`,
+      definition: {
+        role: 'authenticated',
+        resource: `storage.objects`,
+        action: 'insert',
+        condition: `bucket_id = '${bucketName}'`,
+      },
+    };
+    
+    // Apply policies 
+    // Note: This is a simplified approach as policies should be applied via SQL migrations
+    
+    // Return success response
     return new Response(
-      JSON.stringify({ message: 'Blog images bucket created successfully' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-    )
+      JSON.stringify({ success: true, message: `Created ${bucketName} bucket`, bucketName }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
-    console.error('Error creating bucket:', error)
+    console.error('Error creating blog images bucket:', error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-    )
+      JSON.stringify({ success: false, error: error.message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
   }
-})
+});

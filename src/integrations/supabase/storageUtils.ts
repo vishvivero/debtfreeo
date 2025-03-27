@@ -33,53 +33,129 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
   try {
     const { supabase } = await import('@/integrations/supabase/client');
     
-    // Ensure the bucket exists
-    try {
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.find(b => b.name === bucket)) {
-        console.log(`Creating ${bucket} bucket first...`);
-        await supabase.functions.invoke('create-blog-images-bucket');
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay
-      }
-    } catch (error) {
-      console.error("Error checking/creating bucket:", error);
-    }
-    
     // Generate file name if not provided
     const finalFileName = fileName || `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
     const contentType = file.type || `image/${file.name.split('.').pop()}`;
     
     console.log(`Uploading ${finalFileName} with content type ${contentType}`);
     
-    // First attempt: standard upload
-    let result = await supabase.storage
-      .from(bucket)
-      .upload(finalFileName, file, {
-        cacheControl: '3600',
-        upsert: true,
-        contentType
-      });
-    
-    if (result.error) {
-      console.error("First upload attempt failed:", result.error);
+    // First check if bucket exists
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.find(b => b.name === bucket);
       
-      // Second attempt: try with Blob
-      const blob = new Blob([await file.arrayBuffer()], { type: contentType });
-      result = await supabase.storage
-        .from(bucket)
-        .upload(finalFileName, blob, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType
-        });
-      
-      if (result.error) {
-        console.error("Second upload attempt failed:", result.error);
-        return null;
+      if (!bucketExists) {
+        console.log(`Bucket ${bucket} doesn't exist. Creating...`);
+        
+        // Try to create the bucket via edge function
+        const { data: createResult, error: createError } = await supabase.functions.invoke('create-blog-images-bucket');
+        
+        if (createError) {
+          console.error("Error creating bucket via edge function:", createError);
+          throw new Error(`Failed to create ${bucket} bucket: ${createError.message}`);
+        }
+        
+        console.log("Bucket creation result:", createResult);
+        
+        // Wait a moment for the bucket to be available
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
+    } catch (error) {
+      console.error("Error checking/creating bucket:", error);
+      // Continue anyway, the upload might still work
     }
     
-    // Verify upload and return path
+    // Try to upload the file
+    let uploadAttempts = 0;
+    let uploadResult = null;
+    
+    while (uploadAttempts < 3) {
+      uploadAttempts++;
+      console.log(`Upload attempt ${uploadAttempts} for ${finalFileName}`);
+      
+      try {
+        if (uploadAttempts === 1) {
+          // First attempt: standard upload
+          const result = await supabase.storage
+            .from(bucket)
+            .upload(finalFileName, file, {
+              cacheControl: '3600',
+              upsert: true,
+              contentType
+            });
+            
+          if (!result.error) {
+            uploadResult = result;
+            break;
+          }
+          
+          console.error(`Attempt ${uploadAttempts} failed:`, result.error);
+        } else if (uploadAttempts === 2) {
+          // Second attempt: try with Blob
+          const blob = new Blob([await file.arrayBuffer()], { type: contentType });
+          const result = await supabase.storage
+            .from(bucket)
+            .upload(finalFileName, blob, {
+              cacheControl: '3600',
+              upsert: true,
+              contentType
+            });
+            
+          if (!result.error) {
+            uploadResult = result;
+            break;
+          }
+          
+          console.error(`Attempt ${uploadAttempts} failed:`, result.error);
+        } else {
+          // Third attempt: try with base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onload = () => {
+              const base64 = reader.result as string;
+              resolve(base64.split(',')[1]); // Remove the prefix
+            };
+          });
+          
+          reader.readAsDataURL(file);
+          const base64Data = await base64Promise;
+          
+          // Convert base64 to Uint8Array
+          const binaryData = atob(base64Data);
+          const uint8Array = new Uint8Array(binaryData.length);
+          for (let i = 0; i < binaryData.length; i++) {
+            uint8Array[i] = binaryData.charCodeAt(i);
+          }
+          
+          const result = await supabase.storage
+            .from(bucket)
+            .upload(finalFileName, uint8Array, {
+              cacheControl: '3600',
+              upsert: true,
+              contentType
+            });
+            
+          if (!result.error) {
+            uploadResult = result;
+            break;
+          }
+          
+          console.error(`Attempt ${uploadAttempts} failed:`, result.error);
+        }
+      } catch (uploadError) {
+        console.error(`Upload attempt ${uploadAttempts} exception:`, uploadError);
+      }
+      
+      // Wait before next attempt
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    if (!uploadResult) {
+      console.error("All upload attempts failed");
+      return null;
+    }
+    
+    console.log("Image uploaded successfully:", finalFileName);
     return finalFileName;
   } catch (error) {
     console.error("Fatal error during file upload:", error);
