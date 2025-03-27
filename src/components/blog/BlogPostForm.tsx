@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { uploadImageToStorage } from "@/integrations/supabase/storageUtils";
+import { uploadImageToStorage, getStorageUrl } from "@/integrations/supabase/storageUtils";
 
 export const BlogPostForm = ({
   title,
@@ -54,6 +55,7 @@ export const BlogPostForm = ({
           .single();
         
         if (data?.image_url) {
+          console.log('Found existing image URL:', data.image_url);
           setExistingImageUrl(data.image_url);
         }
       };
@@ -87,12 +89,15 @@ export const BlogPostForm = ({
     try {
       let imageUrl = existingImageUrl;
 
+      // Handle image upload if a new image is selected
       if (image) {
         console.log("Processing image upload...");
         
+        // Call our enhanced upload function
         imageUrl = await uploadImageToStorage('blog-images', image);
         
         if (!imageUrl) {
+          console.error("Image upload failed");
           toast({
             variant: "destructive",
             title: "Image Upload Failed",
@@ -100,6 +105,20 @@ export const BlogPostForm = ({
           });
         } else {
           console.log("Image uploaded successfully:", imageUrl);
+          
+          // Verify the image URL can be accessed
+          try {
+            const publicUrl = getStorageUrl('blog-images', imageUrl);
+            console.log("Generated public URL for verification:", publicUrl);
+            
+            // Try to fetch the image to verify it exists
+            const imgElement = new Image();
+            imgElement.onload = () => console.log("Image verified: it can be loaded");
+            imgElement.onerror = () => console.error("Image verification failed: cannot be loaded");
+            imgElement.src = publicUrl;
+          } catch (verifyError) {
+            console.error("Error during URL verification:", verifyError);
+          }
         }
       }
 
@@ -107,6 +126,8 @@ export const BlogPostForm = ({
       
       if (isEditMode && blogId) {
         console.log("Updating existing blog post...");
+        console.log("Image URL to be saved:", imageUrl);
+        
         const { error: updateError } = await supabase
           .from('blogs')
           .update({
@@ -129,6 +150,25 @@ export const BlogPostForm = ({
           throw updateError;
         }
 
+        // Verify the update was successful
+        const { data: verifyData, error: verifyError } = await supabase
+          .from('blogs')
+          .select('image_url')
+          .eq('id', blogId)
+          .single();
+          
+        if (verifyError) {
+          console.error("Verification error:", verifyError);
+        } else {
+          console.log("Update verification result:", verifyData);
+          if (verifyData.image_url !== imageUrl) {
+            console.warn("Warning: Saved image URL doesn't match what we expected", {
+              saved: verifyData.image_url,
+              expected: imageUrl
+            });
+          }
+        }
+
         console.log("Blog post updated successfully");
         toast({
           title: "Success",
@@ -139,7 +179,9 @@ export const BlogPostForm = ({
         const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${timestamp}`;
         
         console.log("Creating new blog post entry...");
-        const { error: postError } = await supabase
+        console.log("Image URL to be saved:", imageUrl);
+        
+        const { error: postError, data: newPost } = await supabase
           .from('blogs')
           .insert({
             title,
@@ -154,14 +196,16 @@ export const BlogPostForm = ({
             meta_description: metaDescription || excerpt,
             keywords: keywordsArray,
             key_takeaways: keyTakeaways || '',
-          });
+          })
+          .select();
 
         if (postError) {
           console.error("Blog post creation error:", postError);
           throw postError;
         }
+        
+        console.log("Blog post created successfully:", newPost);
 
-        console.log("Blog post created successfully");
         toast({
           title: "Success",
           description: isDraft ? "Draft saved successfully" : "Post published successfully",

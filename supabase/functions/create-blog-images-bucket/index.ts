@@ -24,14 +24,17 @@ Deno.serve(async (req) => {
       throw new Error('Missing Supabase credentials');
     }
 
+    console.log("Creating Supabase client with service role key");
     // Create Supabase admin client with service key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const bucketName = 'blog-images';
 
     // First check if bucket already exists
+    console.log("Checking if bucket exists:", bucketName);
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
     if (listError) {
+      console.error("Failed to list buckets:", listError);
       throw new Error(`Failed to list buckets: ${listError.message}`);
     }
     
@@ -40,12 +43,14 @@ Deno.serve(async (req) => {
       console.log('Blog images bucket already exists, checking configuration');
       
       // Update bucket configuration to ensure it's public
+      console.log("Updating bucket to ensure it's public");
       const { error: updateError } = await supabase.storage.updateBucket(
         bucketName,
         { public: true }
       );
       
       if (updateError) {
+        console.error("Failed to update bucket configuration:", updateError);
         throw new Error(`Failed to update bucket configuration: ${updateError.message}`);
       }
       
@@ -53,16 +58,10 @@ Deno.serve(async (req) => {
       
       // Try to set CORS configuration
       try {
-        // Set CORS policy to allow access from anywhere
-        await supabase.storage.from(bucketName).setCors({
-          allowedOrigins: ['*'],
-          allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-          allowedHeaders: ['*'],
-          maxAgeSeconds: 3600,
-          exposeHeaders: ['Content-Length', 'Content-Type'],
-        });
+        // We're no longer trying to use the setCors method as it's not available
+        console.log("Note: CORS configuration should be managed through the Supabase dashboard");
       } catch (corsError) {
-        console.error('Error setting CORS configuration via API:', corsError);
+        console.error('Error handling CORS configuration:', corsError);
       }
       
       return new Response(
@@ -79,40 +78,43 @@ Deno.serve(async (req) => {
     );
     
     if (createError) {
+      console.error("Failed to create bucket:", createError);
       throw new Error(`Failed to create bucket: ${createError.message}`);
     }
     
     console.log(`Bucket ${bucketName} created successfully`);
     
-    // Set up storage policies for the new bucket
-    // Allow public read access
-    const readPolicy = {
-      name: `${bucketName}_public_read`,
-      definition: {
-        role: 'anon',
-        resource: `storage.objects`,
-        action: 'select',
-        condition: `bucket_id = '${bucketName}'`,
-      },
-    };
+    // Create SQL that could be run to set storage policies (for documentation)
+    const policiesInfo = `
+    -- Public read access policy
+    CREATE POLICY "Public Access" 
+    ON storage.objects 
+    FOR SELECT USING (bucket_id = '${bucketName}');
     
-    // Allow authenticated users to upload/delete
-    const writePolicy = {
-      name: `${bucketName}_auth_write`,
-      definition: {
-        role: 'authenticated',
-        resource: `storage.objects`,
-        action: 'insert',
-        condition: `bucket_id = '${bucketName}'`,
-      },
-    };
+    -- Authenticated users can upload/update policy
+    CREATE POLICY "Authenticated Users Upload Access"
+    ON storage.objects
+    FOR INSERT TO authenticated 
+    WITH CHECK (bucket_id = '${bucketName}');
     
-    // Apply policies 
-    // Note: This is a simplified approach as policies should be applied via SQL migrations
+    -- Authenticated users can update their files
+    CREATE POLICY "Authenticated Users Update Access"
+    ON storage.objects
+    FOR UPDATE TO authenticated
+    USING (bucket_id = '${bucketName}')
+    WITH CHECK (bucket_id = '${bucketName}');
+    `;
+    
+    console.log("Storage policies information:", policiesInfo);
     
     // Return success response
     return new Response(
-      JSON.stringify({ success: true, message: `Created ${bucketName} bucket`, bucketName }),
+      JSON.stringify({ 
+        success: true, 
+        message: `Created ${bucketName} bucket`, 
+        bucketName,
+        policies: policiesInfo
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

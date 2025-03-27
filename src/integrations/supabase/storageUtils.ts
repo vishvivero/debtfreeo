@@ -28,7 +28,10 @@ export const getStorageUrl = (bucket: string, filePath: string): string => {
  * @returns Promise with the uploaded file path or null if failed
  */
 export const uploadImageToStorage = async (bucket: string, file: File, fileName?: string): Promise<string | null> => {
-  if (!file) return null;
+  if (!file) {
+    console.error('No file provided for upload');
+    return null;
+  }
   
   try {
     const { supabase } = await import('@/integrations/supabase/client');
@@ -37,11 +40,17 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
     const finalFileName = fileName || `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
     const contentType = file.type || `image/${file.name.split('.').pop()}`;
     
-    console.log(`Uploading ${finalFileName} with content type ${contentType}`);
+    console.log(`Uploading ${finalFileName} with content type ${contentType} to bucket ${bucket}`);
     
     // First check if bucket exists
     try {
-      const { data: buckets } = await supabase.storage.listBuckets();
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error("Error listing buckets:", bucketsError);
+        throw new Error(`Failed to list buckets: ${bucketsError.message}`);
+      }
+      
       const bucketExists = buckets?.find(b => b.name === bucket);
       
       if (!bucketExists) {
@@ -76,6 +85,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
       try {
         if (uploadAttempts === 1) {
           // First attempt: standard upload
+          console.log("Attempting standard upload with file");
           const result = await supabase.storage
             .from(bucket)
             .upload(finalFileName, file, {
@@ -85,6 +95,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
             });
             
           if (!result.error) {
+            console.log("Standard upload successful");
             uploadResult = result;
             break;
           }
@@ -92,7 +103,10 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
           console.error(`Attempt ${uploadAttempts} failed:`, result.error);
         } else if (uploadAttempts === 2) {
           // Second attempt: try with Blob
-          const blob = new Blob([await file.arrayBuffer()], { type: contentType });
+          console.log("Attempting upload with Blob conversion");
+          const fileBuffer = await file.arrayBuffer();
+          const blob = new Blob([fileBuffer], { type: contentType });
+          
           const result = await supabase.storage
             .from(bucket)
             .upload(finalFileName, blob, {
@@ -102,6 +116,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
             });
             
           if (!result.error) {
+            console.log("Blob upload successful");
             uploadResult = result;
             break;
           }
@@ -109,6 +124,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
           console.error(`Attempt ${uploadAttempts} failed:`, result.error);
         } else {
           // Third attempt: try with base64
+          console.log("Attempting upload with base64 conversion");
           const reader = new FileReader();
           const base64Promise = new Promise<string>((resolve) => {
             reader.onload = () => {
@@ -119,6 +135,10 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
           
           reader.readAsDataURL(file);
           const base64Data = await base64Promise;
+          
+          if (!base64Data) {
+            throw new Error("Failed to read file as base64");
+          }
           
           // Convert base64 to Uint8Array
           const binaryData = atob(base64Data);
@@ -136,6 +156,7 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
             });
             
           if (!result.error) {
+            console.log("Base64 upload successful");
             uploadResult = result;
             break;
           }
@@ -156,6 +177,31 @@ export const uploadImageToStorage = async (bucket: string, file: File, fileName?
     }
     
     console.log("Image uploaded successfully:", finalFileName);
+    
+    // Verify the upload was successful by checking if the file exists
+    try {
+      const { data: fileList, error: fileListError } = await supabase.storage
+        .from(bucket)
+        .list('', {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' }
+        });
+        
+      if (fileListError) {
+        console.error("Error verifying file upload:", fileListError);
+      } else {
+        const fileExists = fileList?.some(file => file.name === finalFileName);
+        console.log(`File verification: ${finalFileName} exists in bucket: ${fileExists}`);
+        
+        if (!fileExists) {
+          console.error("File was not found in the bucket after upload");
+        }
+      }
+    } catch (verifyError) {
+      console.error("Error during upload verification:", verifyError);
+    }
+    
     return finalFileName;
   } catch (error) {
     console.error("Fatal error during file upload:", error);

@@ -25,6 +25,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         const getImageUrl = async () => {
           try {
             console.log('Getting public URL for file:', imagePreview);
+            
             // First try with getPublicUrl method
             const { data } = await supabase.storage
               .from('blog-images')
@@ -52,6 +53,7 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
         getImageUrl();
       } else {
         // It's already a full URL or a data URL
+        console.log('Using provided preview URL:', imagePreview);
         setLocalPreview(imagePreview);
       }
     }
@@ -88,8 +90,10 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
       const reader = new FileReader();
       reader.onloadend = () => {
         const preview = reader.result as string;
+        console.log('Created local preview from selected file');
         setLocalPreview(preview);
         if (typeof imagePreview === 'function') {
+          console.log('Calling preview function with generated preview');
           imagePreview(preview);
         }
       };
@@ -121,6 +125,9 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
             />
           )}
         </div>
+        {localPreview && (
+          <p className="text-sm text-green-600 mt-1">Image preview shown above will be uploaded when you save</p>
+        )}
       </div>
       <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200">
         <AlertCircle className="h-4 w-4" />
