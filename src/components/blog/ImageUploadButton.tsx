@@ -55,12 +55,28 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         description: "Please wait while we upload your image."
       });
       
-      // Upload the image to Supabase Storage
-      const fileName = await uploadImageToStorage('blog-images', file);
+      // Direct upload to Supabase storage - bypassing the helper function temporarily
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
-      if (!fileName) {
-        throw new Error("Failed to upload image");
+      const { data, error } = await supabase.storage
+        .from('blog-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type // Explicitly set the content type based on the file
+        });
+      
+      if (error) {
+        console.error("Direct upload error:", error);
+        throw new Error("Failed to upload image: " + error.message);
       }
+      
+      if (!data?.path) {
+        throw new Error("No path returned from upload");
+      }
+      
+      console.log("Image uploaded successfully, path:", data.path);
       
       // Update the blog post with the new image URL
       const { error: updateError } = await supabase
@@ -89,7 +105,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
       toast({
         variant: "destructive",
         title: "Upload Failed",
-        description: "There was an error uploading the image. Please try again."
+        description: `There was an error uploading the image: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
     }
   };
