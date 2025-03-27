@@ -61,9 +61,10 @@ Deno.serve(async (req) => {
         console.error('Exception updating bucket:', updateError)
       }
       
-      // Set up CORS for the bucket
+      // Set CORS for the bucket using a different approach since updateBucketCors is not available
       try {
-        await supabase.storage.from('blog-images').updateBucketCors([
+        // Make a direct API call to set CORS since the SDK method might not be available
+        const corsSettings = [
           {
             origin: '*',
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -71,10 +72,27 @@ Deno.serve(async (req) => {
             maxAgeSeconds: 86400,
             credentials: true
           }
-        ])
-        console.log('CORS configuration updated successfully')
+        ];
+        
+        // Create a direct fetch request to set CORS
+        const corsResponse = await fetch(`${supabaseUrl}/storage/v1/buckets/blog-images/cors`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'apikey': supabaseServiceKey
+          },
+          body: JSON.stringify(corsSettings)
+        });
+        
+        if (!corsResponse.ok) {
+          console.error('Error setting CORS configuration via API:', await corsResponse.text());
+        } else {
+          console.log('CORS configuration updated successfully via direct API call');
+        }
       } catch (corsError) {
         console.error('Error setting CORS configuration:', corsError)
+        // Continue even if CORS setting fails - the bucket might still work
       }
       
       // Return success response
@@ -104,9 +122,9 @@ Deno.serve(async (req) => {
       throw error
     }
 
-    // Set up CORS for the bucket
+    // Set CORS for the bucket using direct API call
     try {
-      await supabase.storage.from('blog-images').updateBucketCors([
+      const corsSettings = [
         {
           origin: '*',
           methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -114,8 +132,23 @@ Deno.serve(async (req) => {
           maxAgeSeconds: 86400,
           credentials: true
         }
-      ])
-      console.log('CORS configuration updated successfully')
+      ];
+      
+      const corsResponse = await fetch(`${supabaseUrl}/storage/v1/buckets/blog-images/cors`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'apikey': supabaseServiceKey
+        },
+        body: JSON.stringify(corsSettings)
+      });
+      
+      if (!corsResponse.ok) {
+        console.error('Error setting CORS configuration via API:', await corsResponse.text());
+      } else {
+        console.log('CORS configuration updated successfully via direct API call');
+      }
     } catch (corsError) {
       console.error('Error setting CORS configuration:', corsError)
     }

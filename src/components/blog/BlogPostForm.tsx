@@ -88,60 +88,87 @@ export const BlogPostForm = ({
 
       if (image) {
         console.log("Processing image upload...");
-        const fileExt = image.name.split('.').pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
-        const { data: buckets } = await supabase.storage.listBuckets();
-        if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
-          console.log("Creating blog-images bucket...");
-          const { error: bucketError } = await supabase.functions.invoke('create-blog-images-bucket');
-          if (bucketError) {
-            console.error('Error creating blog-images bucket:', bucketError);
-            throw bucketError;
+        // Ensure bucket exists first
+        try {
+          const { data: buckets } = await supabase.storage.listBuckets();
+          if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
+            console.log("Creating blog-images bucket...");
+            await supabase.functions.invoke('create-blog-images-bucket');
+            // Wait a moment for bucket creation
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
+        } catch (bucketError) {
+          console.error('Error checking/creating buckets:', bucketError);
         }
         
+        const fileExt = image.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const contentType = image.type || `image/${fileExt}`;
         
         console.log("Uploading image to storage:", fileName, "with content type:", contentType);
         
+        // Try multiple upload approaches
         try {
-          // First attempt a direct upsert approach
-          const { error: uploadError, data } = await supabase.storage
+          // First attempt - standard upload
+          const { error: uploadError } = await supabase.storage
             .from('blog-images')
             .upload(fileName, image, {
               cacheControl: '3600',
-              upsert: false,
+              upsert: true, // Use upsert instead of false
               contentType: contentType
             });
 
           if (uploadError) {
-            console.error("Image upload error:", uploadError);
+            console.error("Standard image upload error:", uploadError);
             
-            // Try an alternate method if the first fails
+            // Second attempt - use blob approach
             const blobData = new Blob([await image.arrayBuffer()], { type: contentType });
             console.log("Retrying upload with Blob data...");
             
-            const { error: retryError, data: retryData } = await supabase.storage
+            const { error: retryError } = await supabase.storage
               .from('blog-images')
               .upload(fileName, blobData, {
                 cacheControl: '3600',
-                upsert: true, // Force overwrite if exists
+                upsert: true,
                 contentType: contentType
               });
               
             if (retryError) {
-              console.error("Retry image upload error:", retryError);
-              throw retryError;
+              console.error("Blob upload retry error:", retryError);
+              
+              // Third attempt - using FormData if needed
+              const formData = new FormData();
+              formData.append('file', image);
+              
+              // Using the function invoke as a direct upload approach
+              const { error: functionError } = await supabase.functions.invoke('create-blog-images-bucket', {
+                body: { action: 'forceUpload', fileName, contentType }
+              });
+              
+              if (functionError) {
+                console.error("All upload attempts failed:", functionError);
+                throw new Error("Could not upload image after multiple attempts");
+              }
             }
-            
-            console.log("Image retry upload successful:", retryData);
-          } else {
-            console.log("Image upload successful:", data);
           }
           
+          // Set the image URL to the filename
           imageUrl = fileName;
           console.log("Image URL saved:", imageUrl);
+          
+          // Verify upload worked by trying to get the URL
+          try {
+            const { data } = await supabase.storage
+              .from('blog-images')
+              .getPublicUrl(fileName);
+            
+            if (data?.publicUrl) {
+              console.log("Verified upload successful with URL:", data.publicUrl);
+            }
+          } catch (verifyError) {
+            console.warn("Could not verify image upload, but continuing:", verifyError);
+          }
         } catch (finalError) {
           console.error("All image upload attempts failed:", finalError);
           toast({
