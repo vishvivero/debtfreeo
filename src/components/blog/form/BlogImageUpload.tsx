@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BlogImageUploadProps {
   setImage: (file: File) => void;
@@ -16,7 +17,28 @@ export const BlogImageUpload = ({ setImage, imagePreview }: BlogImageUploadProps
   // Initialize local preview state from props
   useEffect(() => {
     if (typeof imagePreview === 'string') {
-      setLocalPreview(imagePreview);
+      // Check if the imagePreview is a filename or a full URL
+      if (imagePreview && !imagePreview.startsWith('http') && !imagePreview.startsWith('data:')) {
+        // It's likely a filename stored in Supabase Storage
+        const getImageUrl = async () => {
+          try {
+            const { data } = await supabase.storage
+              .from('blog-images')
+              .getPublicUrl(imagePreview);
+            
+            if (data?.publicUrl) {
+              setLocalPreview(data.publicUrl);
+            }
+          } catch (error) {
+            console.error('Error getting image URL:', error);
+          }
+        };
+        
+        getImageUrl();
+      } else {
+        // It's already a full URL or a data URL
+        setLocalPreview(imagePreview);
+      }
     }
   }, [imagePreview]);
 

@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link } from "react-router-dom";
@@ -180,12 +181,15 @@ const BlogPost = () => {
         const fileExt = image.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         
+        // Check if blog-images bucket exists, create if not
         const { data: buckets } = await supabase.storage.listBuckets();
         if (!buckets?.find(bucket => bucket.name === 'blog-images')) {
-          await supabase.storage.createBucket('blog-images', {
-            public: true,
-            fileSizeLimit: 5242880,
-          });
+          // Call the edge function to create the bucket
+          const { error: bucketError } = await supabase.functions.invoke('create-blog-images-bucket');
+          if (bucketError) {
+            console.error('Error creating blog-images bucket:', bucketError);
+            throw bucketError;
+          }
         }
         
         const { error: uploadError } = await supabase.storage
@@ -453,11 +457,15 @@ const BlogPost = () => {
                 {blog.image_url && (
                   <div className="lg:col-span-6">
                     <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gray-100">
-                      <img 
-                        src={blog.image_url} 
-                        alt={blog.title}
-                        className="w-full h-full object-cover"
-                      />
+                      {blog.image_url.startsWith('http') || blog.image_url.startsWith('data:') ? (
+                        <img 
+                          src={blog.image_url} 
+                          alt={blog.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FeaturedImage imageUrl={blog.image_url} altText={blog.title} />
+                      )}
                     </div>
                   </div>
                 )}
@@ -544,6 +552,43 @@ const BlogPost = () => {
   }
 
   return null;
+};
+
+// Helper component to display the featured image from Supabase storage
+const FeaturedImage = ({ imageUrl, altText }: { imageUrl: string, altText: string }) => {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchImageUrl = async () => {
+      try {
+        if (!imageUrl) return;
+        
+        const { data } = await supabase.storage
+          .from('blog-images')
+          .getPublicUrl(imageUrl);
+        
+        if (data?.publicUrl) {
+          setSrc(data.publicUrl);
+        }
+      } catch (error) {
+        console.error('Error fetching image URL:', error);
+      }
+    };
+
+    fetchImageUrl();
+  }, [imageUrl]);
+
+  if (!src) {
+    return <div className="w-full h-full bg-gray-200 animate-pulse"></div>;
+  }
+
+  return (
+    <img 
+      src={src} 
+      alt={altText}
+      className="w-full h-full object-cover"
+    />
+  );
 };
 
 export default BlogPost;

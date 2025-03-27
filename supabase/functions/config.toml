@@ -31,3 +31,6 @@ verify_jwt = false
 [record-debt-payment]
 verify_jwt = true
 
+[create-blog-images-bucket]
+verify_jwt = false
+
