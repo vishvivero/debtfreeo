@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { uploadImageToStorage } from '@/integrations/supabase/storageUtils';
 
 interface ImageUploadButtonProps {
   blogId: string;
@@ -31,11 +30,13 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
     if (!file) return;
     
     // Validate file type and size
-    if (!file.type.startsWith('image/')) {
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    
+    if (!validImageTypes.includes(file.type)) {
       toast({
         variant: "destructive",
         title: "Invalid file type",
-        description: "Please select an image file (JPEG, PNG, GIF, etc.)."
+        description: `File type "${file.type}" is not supported. Please select a valid image (JPEG, PNG, GIF, WebP, SVG).`
       });
       return;
     }
@@ -55,21 +56,29 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         description: "Please wait while we upload your image."
       });
       
-      // Direct upload to Supabase storage - bypassing the helper function temporarily
+      // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
+      console.log("Uploading file:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        fileName: fileName
+      });
+      
+      // Ensure we have the correct content type
       const { data, error } = await supabase.storage
         .from('blog-images')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true,
-          contentType: file.type // Explicitly set the content type based on the file
+          contentType: file.type
         });
       
       if (error) {
-        console.error("Direct upload error:", error);
-        throw new Error("Failed to upload image: " + error.message);
+        console.error("Upload error:", error);
+        throw new Error(`Failed to upload image: ${error.message}`);
       }
       
       if (!data?.path) {
