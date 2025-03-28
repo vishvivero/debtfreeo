@@ -56,10 +56,6 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         description: "Please wait while we upload your image."
       });
       
-      // Create a FormData object for file upload instead of direct binary upload
-      const formData = new FormData();
-      formData.append('file', file);
-
       // Log file information for debugging
       console.log("Attempting to upload file:", {
         name: file.name,
@@ -68,22 +64,23 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         lastModified: file.lastModified
       });
       
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
+      // Generate unique filename with proper extension
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
-      // Ensure we have the correct content type by using arrayBuffer approach
+      // Convert file to buffer for upload
       const arrayBuffer = await file.arrayBuffer();
       const fileBuffer = new Uint8Array(arrayBuffer);
       
-      console.log("Uploading to Supabase with filename:", fileName);
+      console.log("Uploading to Supabase storage with filename:", fileName, "and content type:", file.type);
       
+      // Try to directly upload the file to Supabase Storage
       const { data, error } = await supabase.storage
         .from('blog-images')
         .upload(fileName, fileBuffer, {
           cacheControl: '3600',
           upsert: true,
-          contentType: file.type // Explicitly set correct content type
+          contentType: file.type // Explicitly set content type
         });
       
       if (error) {
@@ -97,6 +94,13 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
       
       console.log("Image uploaded successfully, path:", data.path);
       
+      // Fetch the public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(fileName);
+        
+      console.log("Generated public URL:", publicUrlData);
+      
       // Update the blog post with the new image URL
       const { error: updateError } = await supabase
         .from('blogs')
@@ -104,8 +108,11 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         .eq('id', blogId);
       
       if (updateError) {
+        console.error("Error updating blog with image URL:", updateError);
         throw updateError;
       }
+      
+      console.log("Blog updated with new image URL:", fileName);
       
       // Refresh the blog post to show the new image
       refreshBlog();

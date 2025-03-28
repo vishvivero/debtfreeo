@@ -25,8 +25,15 @@ serve(async (req) => {
     const bucketName = 'blog-images';
     console.log("Checking if bucket exists:", bucketName);
     
-    const { data: buckets } = await supabase.storage.listBuckets();
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    
+    if (listError) {
+      console.error("Error listing buckets:", listError);
+      throw listError;
+    }
+    
     const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+    console.log("Bucket exists:", bucketExists);
     
     let result;
     if (bucketExists) {
@@ -36,7 +43,7 @@ serve(async (req) => {
       console.log("Updating bucket to ensure it's public");
       const { error: updateError } = await supabase.storage.updateBucket(bucketName, {
         public: true,
-        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'image/svg+xml'],
         fileSizeLimit: 5 * 1024 * 1024 // 5MB
       });
       
@@ -50,7 +57,7 @@ serve(async (req) => {
         success: true,
         message: "Bucket configuration updated",
         bucketName,
-        allowedTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
+        allowedTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'image/svg+xml']
       };
     } else {
       console.log("Creating new blog images bucket");
@@ -58,7 +65,7 @@ serve(async (req) => {
       // Create a new bucket
       const { error: createError } = await supabase.storage.createBucket(bucketName, {
         public: true,
-        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'image/svg+xml'],
         fileSizeLimit: 5 * 1024 * 1024 // 5MB
       });
       
@@ -72,7 +79,7 @@ serve(async (req) => {
         success: true,
         message: "Bucket created successfully",
         bucketName,
-        allowedTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
+        allowedTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'image/svg+xml']
       };
     }
     
