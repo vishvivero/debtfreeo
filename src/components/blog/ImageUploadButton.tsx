@@ -56,24 +56,34 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         description: "Please wait while we upload your image."
       });
       
+      // Create a FormData object for file upload instead of direct binary upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Log file information for debugging
+      console.log("Attempting to upload file:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      });
+      
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
-      console.log("Uploading file:", {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        fileName: fileName
-      });
+      // Ensure we have the correct content type by using arrayBuffer approach
+      const arrayBuffer = await file.arrayBuffer();
+      const fileBuffer = new Uint8Array(arrayBuffer);
       
-      // Ensure we have the correct content type
+      console.log("Uploading to Supabase with filename:", fileName);
+      
       const { data, error } = await supabase.storage
         .from('blog-images')
-        .upload(fileName, file, {
+        .upload(fileName, fileBuffer, {
           cacheControl: '3600',
           upsert: true,
-          contentType: file.type
+          contentType: file.type // Explicitly set correct content type
         });
       
       if (error) {
@@ -133,7 +143,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*"
+        accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
         className="hidden"
         data-testid="image-upload-input"
       />

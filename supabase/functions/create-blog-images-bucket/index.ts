@@ -41,6 +41,7 @@ serve(async (req) => {
       });
       
       if (updateError) {
+        console.error("Error updating bucket:", updateError);
         throw updateError;
       }
       
@@ -48,7 +49,8 @@ serve(async (req) => {
       result = {
         success: true,
         message: "Bucket configuration updated",
-        bucketName
+        bucketName,
+        allowedTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
       };
     } else {
       console.log("Creating new blog images bucket");
@@ -61,6 +63,7 @@ serve(async (req) => {
       });
       
       if (createError) {
+        console.error("Error creating bucket:", createError);
         throw createError;
       }
       
@@ -68,7 +71,8 @@ serve(async (req) => {
       result = {
         success: true,
         message: "Bucket created successfully",
-        bucketName
+        bucketName,
+        allowedTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml']
       };
     }
     
